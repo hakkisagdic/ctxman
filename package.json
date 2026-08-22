@@ -99,6 +99,10 @@
     "README.md",
     "LICENSE"
   ],
+  "overrides": {
+    "protobufjs": "^7.5.0",
+    "sharp": "^0.35.0"
+  },
   "devDependencies": {
     "@anthropic-ai/tokenizer": "^0.0.4",
     "@playwright/test": "^1.58.1",
