@@ -1,0 +1,9 @@
+{
+  "name": "Full Context",
+  "description": "Complete project context for comprehensive analysis",
+  "include": ["**/*"],
+  "exclude": ["node_modules/**", ".git/**", "coverage/**", "dist/**", "build/**"],
+  "methodInclude": ["*"],
+  "methodExclude": [],
+  "targetModel": "claude-sonnet-4.5"
+}

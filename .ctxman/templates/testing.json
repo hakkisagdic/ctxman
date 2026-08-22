@@ -1,0 +1,9 @@
+{
+  "name": "Testing Context",
+  "description": "Optimized for writing tests",
+  "include": ["src/**/*.js", "lib/**/*.js", "test/**/*.js"],
+  "exclude": ["docs/**", "*.md", "examples/**", "node_modules/**"],
+  "methodInclude": ["*"],
+  "methodExclude": ["_*", "console*"],
+  "targetModel": "claude-sonnet-4.5"
+}

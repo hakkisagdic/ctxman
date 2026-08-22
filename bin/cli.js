@@ -8,6 +8,7 @@ import APIServer from '../lib/api/rest/server.js';
 import FileWatcher from '../lib/watch/FileWatcher.js';
 import IncrementalAnalyzer from '../lib/watch/IncrementalAnalyzer.js';
 import DiffAnalyzer from '../lib/integrations/git/DiffAnalyzer.js';
+import TemplateManager from '../lib/utils/template-manager.js';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
@@ -31,6 +32,12 @@ async function main() {
     // Check for version flag
     if (args.includes('--version')) {
         console.log(`Ctxman v${pkg.version}`);
+        return;
+    }
+
+    // Check for template listing (FEAT-009)
+    if (args.includes('--list-templates')) {
+        listTemplates();
         return;
     }
 
@@ -118,7 +125,28 @@ async function main() {
     }
 
     // CLI Mode: Run traditional command-line analysis
-    const options = parseArguments(args);
+    let options = parseArguments(args);
+
+    // Apply template if specified (FEAT-009)
+    if (options.template) {
+        try {
+            const manager = new TemplateManager(process.cwd());
+            const templateConfig = manager.apply(options.template, {
+                targetModel: options.targetModel
+            });
+
+            // Merge template config with options (options take precedence)
+            options = {
+                ...options,
+                templateConfig,
+                // Use template's target model if not explicitly set
+                targetModel: options.targetModel || templateConfig.targetModel
+            };
+        } catch (error) {
+            console.error(`❌ Template error: ${error.message}`);
+            process.exit(1);
+        }
+    }
 
     // Git integration: Filter to changed files only (v3.0.0)
     if (options.changedOnly || options.changedSince) {
@@ -144,6 +172,9 @@ function parseArguments(args) {
         // Analysis options
         methodLevel: args.includes('--method-level') || args.includes('-m'),
         gitingest: args.includes('--gitingest') || args.includes('-g'),
+
+        // Template options (FEAT-009)
+        template: getTemplate(args),
 
         // Format options (v2.3.0)
         outputFormat: getOutputFormat(args),
@@ -255,6 +286,17 @@ function printStartupInfo(options) {
     console.log('🚀 Ctxman v3.0.0');
     console.log('='.repeat(50));
 
+    // Show template info if used
+    if (options.template) {
+        const manager = new TemplateManager(process.cwd());
+        const template = manager.get(options.template);
+        if (template) {
+            console.log(`📋 Using template: ${template.name}`);
+            console.log(`   Description: ${template.description}`);
+            console.log();
+        }
+    }
+
     // Only show active options if any are set
     const hasOptions = options.outputFormat || options.methodLevel || options.chunking?.enabled ||
         options.saveReport || options.verbose || options.contextExport ||
@@ -295,6 +337,10 @@ function printHelp() {
     console.log('Default Mode:');
     console.log('  ctxman          Launch interactive wizard (DEFAULT)');
     console.log('  --cli                    Use CLI mode instead of wizard');
+    console.log();
+    console.log('Template Options (FEAT-009):');
+    console.log('  -t, --template <name>    Use a pre-built context template');
+    console.log('  --list-templates         List available templates');
     console.log();
     console.log('Analysis Options:');
     console.log('  -s, --save-report        Save detailed JSON report');
@@ -341,11 +387,17 @@ function printHelp() {
     console.log('  -h, --help               Show this help');
     console.log('  --version                Show version number');
     console.log();
+    console.log('Template Examples:');
+    console.log('  ctxman --template bug-fix              Use bug-fix template');
+    console.log('  ctxman -t feature --cli                Feature template in CLI mode');
+    console.log('  ctxman --list-templates                Show all templates');
+    console.log();
     console.log('Configuration Files:');
     console.log('  .contextinclude          Include only specified files');
     console.log('  .contextignore           Exclude specified files');
     console.log('  .methodinclude           Include only specified methods');
-    console.log('  .methodignore            Exclude specified methods');
+    console.log('  .methodignore             Exclude specified methods');
+    console.log('  .ctxman/templates/*.json Custom template files');
     console.log();
     console.log('Format Conversion (v2.3.2):');
     console.log('  convert INPUT --from FORMAT --to FORMAT');
@@ -409,6 +461,19 @@ function getChangedSince(args) {
         return args[sinceIndex + 1];
     }
     return null;
+}
+
+function getTemplate(args) {
+    const templateIndex = args.findIndex(arg => arg === '--template' || arg === '-t');
+    if (templateIndex !== -1 && args[templateIndex + 1]) {
+        return args[templateIndex + 1];
+    }
+    return null;
+}
+
+function listTemplates() {
+    const manager = new TemplateManager(process.cwd());
+    console.log(manager.formatList());
 }
 
 async function runAPIServer(args) {
@@ -526,6 +591,15 @@ async function runWizard() {
 
                     console.log('\n✨ Wizard complete! Running analysis with your configuration...\n');
 
+                    // Show template info if profile is used
+                    if (answers.profile && answers.profile !== 'custom') {
+                        console.log(`📋 Using template: ${answers.profile}`);
+                        if (answers.profileMetadata) {
+                            console.log(`   Description: ${answers.profileMetadata.description}`);
+                        }
+                        console.log();
+                    }
+
                     // Run analyzer with wizard configuration
                     const options = {
                         outputFormat: answers.outputFormat,
@@ -533,7 +607,8 @@ async function runWizard() {
                         targetModel: answers.targetModel,
                         projectRoot: process.cwd(),
                         simple: true,      // No export menu
-                        contextExport: true // Auto-export to file
+                        contextExport: true, // Auto-export to file
+                        template: answers.profile !== 'custom' ? answers.profile : null
                     };
 
                     const analyzer = new TokenAnalyzer(options.projectRoot, options);

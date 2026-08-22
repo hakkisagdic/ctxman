@@ -1,0 +1,9 @@
+{
+  "name": "Code Review Context",
+  "description": "Optimized for reviewing code changes",
+  "include": ["src/**/*.js", "lib/**/*.js", "bin/**/*.js"],
+  "exclude": ["docs/**", "*.md", "*.json", "node_modules/**"],
+  "methodInclude": ["*Handler", "*Service", "*Controller", "*Manager", "*Parser", "*Analyzer"],
+  "methodExclude": ["*test*"],
+  "targetModel": "claude-sonnet-4.5"
+}
