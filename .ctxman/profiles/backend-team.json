@@ -1,0 +1,13 @@
+{
+  "name": "Backend Team Profile",
+  "description": "Configuration for backend developers",
+  "createdBy": "ctxman",
+  "createdAt": "2025-01-15T10:00:00Z",
+  "config": {
+    "exclude": ["frontend/**", "src/components/**", "pages/**", "**/*.test.js", "**/*.spec.js"],
+    "include": ["api/**", "server/**", "lib/**", "db/**", "services/**"],
+    "targetModel": "claude-sonnet-4.5",
+    "methodLevel": true,
+    "methodInclude": ["*Controller", "*Service", "*Repository", "*Handler", "*Middleware"]
+  }
+}

@@ -9,6 +9,7 @@ import FileWatcher from '../lib/watch/FileWatcher.js';
 import IncrementalAnalyzer from '../lib/watch/IncrementalAnalyzer.js';
 import DiffAnalyzer from '../lib/integrations/git/DiffAnalyzer.js';
 import TemplateManager from '../lib/utils/template-manager.js';
+import ProfileManager from '../lib/utils/profile-manager.js';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
@@ -32,6 +33,24 @@ async function main() {
     // Check for version flag
     if (args.includes('--version')) {
         console.log(`Ctxman v${pkg.version}`);
+        return;
+    }
+
+    // Check for profile listing (FEAT-004)
+    if (args.includes('--list-profiles')) {
+        listProfiles();
+        return;
+    }
+
+    // Check for profile creation (FEAT-004)
+    if (args.includes('--create-profile')) {
+        createProfile(args);
+        return;
+    }
+
+    // Check for profile export (FEAT-004)
+    if (args.includes('--export-profile')) {
+        exportProfile(args);
         return;
     }
 
@@ -148,6 +167,28 @@ async function main() {
         }
     }
 
+    // Apply profile if specified (FEAT-004)
+    if (options.profile) {
+        try {
+            const manager = new ProfileManager(process.cwd());
+            const profileConfig = manager.apply(options.profile, {
+                targetModel: options.targetModel
+            });
+
+            // Merge profile config with options (options take precedence)
+            options = {
+                ...options,
+                profileConfig,
+                // Use profile's target model if not explicitly set
+                targetModel: options.targetModel || profileConfig.targetModel,
+                methodLevel: options.methodLevel || profileConfig.methodLevel
+            };
+        } catch (error) {
+            console.error(`❌ Profile error: ${error.message}`);
+            process.exit(1);
+        }
+    }
+
     // Git integration: Filter to changed files only (v3.0.0)
     if (options.changedOnly || options.changedSince) {
         await runChangedFilesAnalysis(options);
@@ -172,6 +213,9 @@ function parseArguments(args) {
         // Analysis options
         methodLevel: args.includes('--method-level') || args.includes('-m'),
         gitingest: args.includes('--gitingest') || args.includes('-g'),
+
+        // Profile options (FEAT-004)
+        profile: getProfile(args),
 
         // Template options (FEAT-009)
         template: getTemplate(args),
@@ -286,6 +330,17 @@ function printStartupInfo(options) {
     console.log('🚀 Ctxman v3.0.0');
     console.log('='.repeat(50));
 
+    // Show profile info if used
+    if (options.profile) {
+        const manager = new ProfileManager(process.cwd());
+        const profile = manager.get(options.profile);
+        if (profile) {
+            console.log(`📋 Using profile: ${profile.name}`);
+            console.log(`   Description: ${profile.description}`);
+            console.log();
+        }
+    }
+
     // Show template info if used
     if (options.template) {
         const manager = new TemplateManager(process.cwd());
@@ -337,6 +392,12 @@ function printHelp() {
     console.log('Default Mode:');
     console.log('  ctxman          Launch interactive wizard (DEFAULT)');
     console.log('  --cli                    Use CLI mode instead of wizard');
+    console.log();
+    console.log('Profile Options (FEAT-004):');
+    console.log('  --profile <name>         Use a team configuration profile');
+    console.log('  --list-profiles          List available profiles');
+    console.log('  --create-profile <name>  Create a new custom profile');
+    console.log('  --export-profile <name>  Export a profile to JSON');
     console.log();
     console.log('Template Options (FEAT-009):');
     console.log('  -t, --template <name>    Use a pre-built context template');
@@ -398,6 +459,7 @@ function printHelp() {
     console.log('  .methodinclude           Include only specified methods');
     console.log('  .methodignore             Exclude specified methods');
     console.log('  .ctxman/templates/*.json Custom template files');
+    console.log('  .ctxman/profiles/*.json  Custom team profile files');
     console.log();
     console.log('Format Conversion (v2.3.2):');
     console.log('  convert INPUT --from FORMAT --to FORMAT');
@@ -471,9 +533,79 @@ function getTemplate(args) {
     return null;
 }
 
+function getProfile(args) {
+    const profileIndex = args.findIndex(arg => arg === '--profile');
+    if (profileIndex !== -1 && args[profileIndex + 1]) {
+        return args[profileIndex + 1];
+    }
+    return null;
+}
+
 function listTemplates() {
     const manager = new TemplateManager(process.cwd());
     console.log(manager.formatList());
+}
+
+function listProfiles() {
+    const manager = new ProfileManager(process.cwd());
+    console.log(manager.formatList());
+}
+
+function createProfile(args) {
+    const profileIndex = args.findIndex(arg => arg === '--create-profile');
+    const profileName = profileIndex !== -1 && args[profileIndex + 1] ? args[profileIndex + 1] : null;
+
+    if (!profileName) {
+        console.error('❌ Profile name required');
+        console.error('   Usage: ctxman --create-profile <name>');
+        process.exit(1);
+    }
+
+    const manager = new ProfileManager(process.cwd());
+
+    // Create a basic profile template
+    const profile = {
+        name: `${profileName} Profile`,
+        description: `Configuration for ${profileName}`,
+        createdBy: process.env.USER || 'unknown',
+        config: {
+            exclude: ['**/*.test.js', '**/*.spec.js', 'node_modules/**'],
+            include: ['src/**', 'lib/**'],
+            targetModel: 'claude-sonnet-4.5',
+            methodLevel: false
+        }
+    };
+
+    try {
+        const filePath = manager.createCustom(profileName, profile);
+        console.log(`\n✅ Created profile '${profileName}'`);
+        console.log(`   Location: ${filePath}\n`);
+        console.log('   Edit the file to customize your team configuration.\n');
+    } catch (error) {
+        console.error(`❌ Failed to create profile: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+function exportProfile(args) {
+    const profileIndex = args.findIndex(arg => arg === '--export-profile');
+    const profileName = profileIndex !== -1 && args[profileIndex + 1] ? args[profileIndex + 1] : null;
+
+    if (!profileName) {
+        console.error('❌ Profile name required');
+        console.error('   Usage: ctxman --export-profile <name>');
+        process.exit(1);
+    }
+
+    const manager = new ProfileManager(process.cwd());
+
+    try {
+        const profile = manager.export(profileName);
+        console.log(JSON.stringify(profile, null, 2));
+    } catch (error) {
+        console.error(`❌ Failed to export profile: ${error.message}`);
+        process.exit(1);
+    }
 }
 
 async function runAPIServer(args) {
