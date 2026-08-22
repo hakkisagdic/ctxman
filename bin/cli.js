@@ -11,6 +11,7 @@ import IncrementalAnalyzer from '../lib/watch/IncrementalAnalyzer.js';
 import DiffAnalyzer from '../lib/integrations/git/DiffAnalyzer.js';
 import TemplateManager from '../lib/utils/template-manager.js';
 import ProfileManager from '../lib/utils/profile-manager.js';
+import { AISuggester } from '../lib/analyzers/ai-suggester.js';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
@@ -76,6 +77,12 @@ async function main() {
     // Check for cost estimation (FEAT-010)
     if (args.includes('--estimate-cost')) {
         runCostEstimation(args);
+        return;
+    }
+
+    // Check for AI suggestions (FEAT-005)
+    if (args.includes('--ai-suggest')) {
+        await runAISuggest(args);
         return;
     }
 
@@ -226,6 +233,7 @@ function parseArguments(args) {
         // Analysis options
         methodLevel: args.includes('--method-level') || args.includes('-m'),
         gitingest: args.includes('--gitingest') || args.includes('-g'),
+        aiSuggest: args.includes('--ai-suggest'), // FEAT-005: AI suggestions
 
         // Profile options (FEAT-004)
         profile: getProfile(args),
@@ -427,6 +435,7 @@ function printHelp() {
     console.log('  -v, --verbose            Show all included files');
     console.log('  -m, --method-level       Enable method-level analysis');
     console.log('  -g, --gitingest          Generate GitIngest-style digest');
+    console.log('  --ai-suggest             Get AI-powered context optimization suggestions');
     console.log();
     console.log('Output Options (v2.3.0):');
     console.log('  -o, --output FORMAT      Output format (default: toon)');
@@ -943,6 +952,64 @@ function runCostEstimation(args) {
     
     // Display formatted output
     console.log(estimator.formatEstimates(comparisons, recommendation));
+}
+
+/**
+ * Run AI-powered context suggestions (FEAT-005)
+ * @param {string[]} args - Command line arguments
+ */
+async function runAISuggest(args) {
+    console.log('🤖 AI Context Suggestions');
+    console.log('═'.repeat(60));
+    console.log();
+    console.log('📊 Analyzing repository for optimization opportunities...');
+    console.log();
+
+    const verbose = args.includes('--verbose') || args.includes('-v');
+    const json = args.includes('--json');
+
+    // Run analyzer silently (no console output)
+    const originalLog = console.log;
+    const logs = [];
+    console.log = (...args) => logs.push(args); // Capture logs
+
+    const analyzer = new TokenAnalyzer(process.cwd(), {
+        simple: true,
+        verbose: false,
+        dashboard: true // Skip export handling
+    });
+    const stats = analyzer.run();
+
+    console.log = originalLog; // Restore console.log
+
+    if (!stats || !stats.totalTokens) {
+        console.error('❌ Failed to analyze repository');
+        process.exit(1);
+    }
+
+    // Get the files array from stats
+    const files = stats.largestFiles || [];
+
+    // Create AI suggester
+    const suggester = new AISuggester({
+        projectRoot: process.cwd(),
+        verbose,
+        json
+    });
+    
+    // Run analysis and get suggestions
+    const result = await suggester.analyze(stats, files);
+    
+    // Display formatted output
+    console.log(suggester.formatOutput(result));
+    
+    // Save report if requested
+    if (args.includes('--save-report') || args.includes('-s')) {
+        const reportPath = resolve(process.cwd(), 'ai-suggestions-report.json');
+        const fs = await import('fs');
+        fs.writeFileSync(reportPath, JSON.stringify(result, null, 2));
+        console.log(`💾 Report saved to: ai-suggestions-report.json`);
+    }
 }
 
 function runFormatConversion(args) {
