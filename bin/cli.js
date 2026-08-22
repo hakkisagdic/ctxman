@@ -12,6 +12,7 @@ import DiffAnalyzer from '../lib/integrations/git/DiffAnalyzer.js';
 import TemplateManager from '../lib/utils/template-manager.js';
 import ProfileManager from '../lib/utils/profile-manager.js';
 import { AISuggester } from '../lib/analyzers/ai-suggester.js';
+import MultiRepoManager from '../lib/utils/multi-repo-manager.js';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
@@ -77,6 +78,22 @@ async function main() {
     // Check for cost estimation (FEAT-010)
     if (args.includes('--estimate-cost')) {
         runCostEstimation(args);
+        return;
+    }
+
+    // Check for multi-repo commands (FEAT-006)
+    if (args.includes('--add-repo')) {
+        addRepo(args);
+        return;
+    }
+
+    if (args.includes('--remove-repo')) {
+        removeRepo(args);
+        return;
+    }
+
+    if (args.includes('--list-repos')) {
+        listRepos();
         return;
     }
 
@@ -215,6 +232,12 @@ async function main() {
         return;
     }
 
+    // Multi-repository analysis (FEAT-006)
+    if (options.multiRepo) {
+        await runMultiRepoAnalysis(options);
+        return;
+    }
+
     printStartupInfo(options);
 
     const analyzer = new TokenAnalyzer(options.projectRoot, options);
@@ -253,6 +276,9 @@ function parseArguments(args) {
         changedSince: getChangedSince(args),
         withAuthors: args.includes('--with-authors'),
         withHistory: args.includes('--with-history'),
+
+        // Multi-repo options (FEAT-006)
+        multiRepo: args.includes('--multi-repo'),
 
         // UI options (v2.3.0)
         simple: args.includes('--simple'),
@@ -461,6 +487,12 @@ function printHelp() {
     console.log();
     console.log('Cost Estimation (FEAT-010):');
     console.log('  --estimate-cost          Show cost estimates for all LLM providers');
+    console.log();
+    console.log('Multi-Repository (FEAT-006):');
+    console.log('  --multi-repo             Analyze all configured repositories');
+    console.log('  --add-repo <path>        Add a repository to configuration');
+    console.log('  --remove-repo <path>     Remove a repository from configuration');
+    console.log('  --list-repos             List all configured repositories');
     console.log();
     console.log('Git Integration (v3.0.0):');
     console.log('  --changed-only           Analyze only files with uncommitted changes');
@@ -952,6 +984,159 @@ function runCostEstimation(args) {
     
     // Display formatted output
     console.log(estimator.formatEstimates(comparisons, recommendation));
+}
+
+/**
+ * Add a repository to multi-repo configuration (FEAT-006)
+ * @param {string[]} args - Command line arguments
+ */
+function addRepo(args) {
+    const repoIndex = args.findIndex(arg => arg === '--add-repo');
+    const repoPath = repoIndex !== -1 && args[repoIndex + 1] ? args[repoIndex + 1] : null;
+
+    if (!repoPath) {
+        console.error('❌ Repository path required');
+        console.error('   Usage: ctxman --add-repo <path>');
+        console.error('   Example: ctxman --add-repo ../frontend-app');
+        process.exit(1);
+    }
+
+    const manager = new MultiRepoManager(process.cwd());
+
+    // Parse optional alias from --alias flag
+    const aliasIndex = args.findIndex(arg => arg === '--alias');
+    const alias = aliasIndex !== -1 && args[aliasIndex + 1] ? args[aliasIndex + 1] : null;
+
+    try {
+        const repo = manager.addRepo(repoPath, { alias });
+        console.log(`\n✅ Added repository: ${repo.alias}`);
+        console.log(`   Path: ${repo.path}`);
+        console.log(`   ID: ${repo.id}\n`);
+    } catch (error) {
+        console.error(`❌ Failed to add repository: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+/**
+ * Remove a repository from multi-repo configuration (FEAT-006)
+ * @param {string[]} args - Command line arguments
+ */
+function removeRepo(args) {
+    const repoIndex = args.findIndex(arg => arg === '--remove-repo');
+    const repoPath = repoIndex !== -1 && args[repoIndex + 1] ? args[repoIndex + 1] : null;
+
+    if (!repoPath) {
+        console.error('❌ Repository path required');
+        console.error('   Usage: ctxman --remove-repo <path>');
+        console.error('   Example: ctxman --remove-repo ../frontend-app');
+        process.exit(1);
+    }
+
+    const manager = new MultiRepoManager(process.cwd());
+
+    if (manager.removeRepo(repoPath)) {
+        console.log(`\n✅ Removed repository: ${repoPath}\n`);
+    } else {
+        console.error(`❌ Repository not found: ${repoPath}`);
+        console.error('   Use --list-repos to see configured repositories.');
+        process.exit(1);
+    }
+}
+
+/**
+ * List all configured repositories (FEAT-006)
+ */
+function listRepos() {
+    const manager = new MultiRepoManager(process.cwd());
+    console.log(manager.formatList());
+}
+
+/**
+ * Run multi-repository analysis (FEAT-006)
+ * @param {object} options - Analysis options
+ */
+async function runMultiRepoAnalysis(options) {
+    console.log('🔀 Multi-Repository Context Analysis');
+    console.log('═'.repeat(60));
+    console.log();
+
+    const manager = new MultiRepoManager(process.cwd());
+    const repos = manager.listRepos();
+
+    if (repos.length === 0) {
+        console.log('⚠️  No repositories configured.');
+        console.log();
+        console.log('   Add repositories with:');
+        console.log('   ctxman --add-repo <path>');
+        console.log();
+        console.log('   Example:');
+        console.log('   ctxman --add-repo ../frontend');
+        console.log('   ctxman --add-repo ../api --alias "API Service"');
+        console.log();
+        return;
+    }
+
+    console.log(`📊 Analyzing ${repos.length} repositories...\n`);
+
+    // Run analysis
+    const results = manager.analyzeAll(options);
+
+    // Display results
+    console.log(manager.formatResults(results));
+
+    // Generate GitIngest digest if requested
+    if (options.gitingest) {
+        console.log('\n📝 Generating GitIngest digest...\n');
+        await generateMultiRepoDigest(results, options);
+    }
+}
+
+/**
+ * Generate GitIngest digest for multi-repo results
+ * @param {object} results - Multi-repo analysis results
+ * @param {object} options - Generation options
+ */
+async function generateMultiRepoDigest(results, options) {
+    const fs = await import('fs');
+    const path = await import('path');
+
+    let digest = `# Multi-Repository Context\n\n`;
+    digest += `Generated: ${new Date().toISOString()}\n\n`;
+
+    // Repository summary
+    digest += `## Repository Summary\n\n`;
+    digest += `| Repository | Files | Tokens | % of Total |\n`;
+    digest += `|------------|-------|--------|------------|\n`;
+
+    for (const repo of results.repos) {
+        if (!repo.error) {
+            digest += `| ${repo.alias} | ${repo.files.toLocaleString()} | ${repo.tokens.toLocaleString()} | ${repo.percentage}% |\n`;
+        }
+    }
+
+    digest += `| **Total** | **${results.combined.totalFiles.toLocaleString()}** | **${results.combined.totalTokens.toLocaleString()}** | **100%** |\n\n`;
+
+    // File contents per repository
+    digest += `## Repository Contents\n\n`;
+
+    for (const repo of results.repos) {
+        if (repo.error) continue;
+
+        digest += `### ${repo.alias}\n\n`;
+
+        // Read and include file contents
+        const repoPath = repo.resolvedPath;
+        if (fs.existsSync(repoPath)) {
+            digest += `Path: ${repo.path}\n\n`;
+            digest += `Files: ${repo.files}, Tokens: ${repo.tokens.toLocaleString()}\n\n`;
+        }
+    }
+
+    // Write digest
+    const outputPath = path.join(process.cwd(), 'digest.txt');
+    fs.writeFileSync(outputPath, digest);
+    console.log(`📁 Generated digest: ${outputPath}\n`);
 }
 
 /**
