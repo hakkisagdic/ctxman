@@ -85,6 +85,12 @@ async function main() {
         return;
     }
 
+    // Check for init command (FEAT-001: Configuration Wizard)
+    if (args.includes('init')) {
+        await runInitWizard(args);
+        return;
+    }
+
     // Check for GitHub GitIngest mode (v2.3.6+)
     if (args.includes('github') || args.includes('git')) {
         const commandPath = resolve(__dirname, './cm-gitingest.js');
@@ -395,6 +401,12 @@ function printHelp() {
     console.log('Ctxman v3.0.0 - AI Development Platform with Plugin Architecture and Git Integration');
     console.log();
     console.log('Usage: ctxman [options]');
+    console.log();
+    console.log('Initialization (FEAT-001):');
+    console.log('  init                     Initialize ctxman configuration with interactive wizard');
+    console.log('    --force, -f            Overwrite existing configuration files');
+    console.log('    --minimal              Create minimal configuration only');
+    console.log('    --yes, -y              Skip prompts and use defaults');
     console.log();
     console.log('Default Mode:');
     console.log('  ctxman          Launch interactive wizard (DEFAULT)');
@@ -807,6 +819,88 @@ async function runDashboard() {
         );
     } catch (error) {
         throw error; // Re-throw to be caught by main()
+    }
+}
+
+/**
+ * Run init wizard for configuration setup (FEAT-001)
+ * @param {string[]} args - Command line arguments
+ */
+async function runInitWizard(args) {
+    try {
+        const options = {
+            force: args.includes('--force') || args.includes('-f'),
+            minimal: args.includes('--minimal'),
+            yes: args.includes('--yes') || args.includes('-y')
+        };
+
+        // Dynamic imports for ESM modules
+        const ReactModule = await import('react');
+        const React = ReactModule.default || ReactModule;
+        const { render } = await import('ink');
+        const InitWizard = (await import('../lib/ui/init-wizard-ui.js')).default;
+
+        // Clear screen for clean wizard display
+        console.clear();
+
+        // If --yes flag, skip interactive UI and use defaults
+        if (options.yes || options.minimal) {
+            console.log('🧙 Initializing ctxman configuration...\n');
+
+            const ProjectDetector = (await import('../lib/wizards/project-detector.js')).default;
+            const ConfigGenerator = (await import('../lib/wizards/config-generator.js')).default;
+
+            const detector = new ProjectDetector(process.cwd());
+            const generator = new ConfigGenerator(process.cwd());
+
+            // Detect project type
+            const projects = await detector.detect();
+
+            let config;
+            if (options.minimal) {
+                config = {
+                    contextignore: ['node_modules/', '.git/', 'dist/', 'build/', 'coverage/'],
+                    contextinclude: ['src/**', 'lib/**'],
+                    methodinclude: []
+                };
+            } else {
+                const types = projects.map(p => p.type);
+                config = detector.getMergedConfig(types);
+            }
+
+            // Generate config files
+            const result = generator.generate(config, {
+                force: options.force,
+                minimal: options.minimal
+            });
+
+            // Display results
+            console.log('Configuration generated:\n');
+            result.created.forEach(f => console.log(`  ✓ Created ${f.filename}`));
+            result.overwritten.forEach(f => console.log(`  ✓ Updated ${f.filename}`));
+            result.skipped.forEach(f => console.log(`  ⊘ Skipped ${f.filename} (${f.reason})`));
+
+            console.log('\n✅ Configuration complete! Try: ctxman --cli\n');
+            return;
+        }
+
+        // Interactive wizard
+        const instance = render(
+            React.createElement(InitWizard, {
+                options,
+                onComplete: (result) => {
+                    instance.unmount();
+
+                    if (result) {
+                        console.log('\n✅ Configuration complete!\n');
+                    }
+                }
+            })
+        );
+    } catch (error) {
+        console.error('❌ Init wizard failed:', error.message);
+        console.error(error.stack);
+        process.exit(1);
     }
 }
 
