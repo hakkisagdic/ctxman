@@ -188,11 +188,14 @@ describe('LLM Detector Coverage', () => {
                 fitsInOne: true,
                 chunksNeeded: 1,
                 utilizationActual: 41.7, // < 50%
+                percentageOfTotal: 25.0, // < 80% of total context
+                warningLevel: 'ok',
+                suggestions: [],
                 recommendation: 'Plenty of room'
             };
             const formatted = LLMDetector.formatAnalysis(analysis);
-            expect(formatted).toContain('EXCELLENT FIT');
-            expect(formatted).toContain('41.7%');
+            expect(formatted).toContain('Context usage is within safe limits');
+            expect(formatted).toContain('25.0%');
         });
 
         test('formatAnalysis shows good fit status', () => {
@@ -207,31 +210,62 @@ describe('LLM Detector Coverage', () => {
                 fitsInOne: true,
                 chunksNeeded: 1,
                 utilizationActual: 75, // 50-80%
+                percentageOfTotal: 45.0, // < 80% of total context
+                warningLevel: 'ok',
+                suggestions: [],
                 recommendation: 'Fits comfortably'
             };
             const formatted = LLMDetector.formatAnalysis(analysis);
-            expect(formatted).toContain('GOOD FIT');
+            expect(formatted).toContain('Context usage is within safe limits');
         });
 
-        test('formatAnalysis shows acceptable fit status', () => {
+        test('formatAnalysis shows acceptable fit status (warning)', () => {
             const analysis = {
                 modelName: 'Claude Sonnet 4.5',
                 contextWindow: 200000,
                 usableContext: 120000,
                 reservedForSystem: 80000,
                 utilizationPercentage: 60,
-                repoTokens: 110000,
+                repoTokens: 170000,
                 repoFiles: 200,
                 fitsInOne: true,
                 chunksNeeded: 1,
-                utilizationActual: 91.7, // > 80%
+                utilizationActual: 91.7, // > 80% usable
+                percentageOfTotal: 85.0, // 80-89% of total context
+                warningLevel: 'warning',
+                suggestions: [],
                 recommendation: 'Uses most of context'
             };
             const formatted = LLMDetector.formatAnalysis(analysis);
-            expect(formatted).toContain('ACCEPTABLE FIT');
+            expect(formatted).toContain('WARNING');
+            expect(formatted).toContain('80%+');
         });
 
-        test('formatAnalysis shows too large status', () => {
+        test('formatAnalysis shows critical status', () => {
+            const analysis = {
+                modelName: 'GPT-4o',
+                contextWindow: 128000,
+                usableContext: 76800,
+                reservedForSystem: 51200,
+                utilizationPercentage: 60,
+                repoTokens: 118000,
+                repoFiles: 300,
+                fitsInOne: false,
+                chunksNeeded: 2,
+                utilizationActual: 153.6,
+                percentageOfTotal: 92.0, // 90-99% of total context
+                warningLevel: 'critical',
+                suggestions: [
+                    { path: 'large-file.js', tokens: 50000, percentage: '42.4', reason: 'Large file' }
+                ],
+                recommendation: 'Enable chunking'
+            };
+            const formatted = LLMDetector.formatAnalysis(analysis);
+            expect(formatted).toContain('CRITICAL');
+            expect(formatted).toContain('90%+');
+        });
+
+        test('formatAnalysis shows overflow status', () => {
             const analysis = {
                 modelName: 'GPT-4o',
                 contextWindow: 128000,
@@ -243,12 +277,16 @@ describe('LLM Detector Coverage', () => {
                 fitsInOne: false,
                 chunksNeeded: 2,
                 utilizationActual: 195.3,
+                percentageOfTotal: 117.2, // 100%+ of total context
+                warningLevel: 'overflow',
+                suggestions: [
+                    { path: 'large-file.js', tokens: 50000, percentage: '33.3', reason: 'Large file' }
+                ],
                 recommendation: 'Enable chunking'
             };
             const formatted = LLMDetector.formatAnalysis(analysis);
-            expect(formatted).toContain('TOO LARGE');
-            expect(formatted).toContain('Chunks Needed: 2');
-            expect(formatted).toContain('Exceeds by');
+            expect(formatted).toContain('OVERFLOW');
+            expect(formatted).toContain('exceeded');
         });
     });
 
