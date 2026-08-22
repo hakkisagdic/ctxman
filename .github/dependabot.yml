@@ -1,0 +1,67 @@
+# Dependabot configuration for automated dependency updates
+# Keeps dependencies up-to-date and secure
+
+version: 2
+
+updates:
+  # npm dependencies
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: UTC
+    # Limit open PRs to avoid overwhelming maintainers
+    open-pull-requests-limit: 10
+    # Group minor and patch updates together
+    groups:
+      minor-and-patch-updates:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+    # Add labels to PRs
+    labels:
+      - dependencies
+      - automated
+    # Commit message configuration
+    commit-message:
+      prefix: deps
+      include: scope
+    # Reviewers for dependency updates
+    reviewers:
+      - hakkisagdic
+    # Ignore specific packages that need manual updates
+    ignore:
+      # Express 5.x is intentional (modern features)
+      - dependency-name: express
+        update-types: [version-update:semver-major]
+      # React 19 is intentional
+      - dependency-name: react
+        update-types: [version-update:semver-major]
+      # Zod 4 is intentional
+      - dependency-name: zod
+        update-types: [version-update:semver-major]
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: UTC
+    open-pull-requests-limit: 5
+    labels:
+      - github-actions
+      - dependencies
+      - automated
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      github-actions-updates:
+        patterns:
+          - '*'
