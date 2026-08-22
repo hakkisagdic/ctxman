@@ -4,6 +4,7 @@ import { TokenAnalyzer } from '../index.js';
 import FormatRegistry from '../lib/formatters/format-registry.js';
 import FormatConverter from '../lib/utils/format-converter.js';
 import { LLMDetector } from '../lib/utils/llm-detector.js';
+import { LLMCostEstimator } from '../lib/utils/llm-cost-estimator.js';
 import APIServer from '../lib/api/rest/server.js';
 import FileWatcher from '../lib/watch/FileWatcher.js';
 import IncrementalAnalyzer from '../lib/watch/IncrementalAnalyzer.js';
@@ -69,6 +70,12 @@ async function main() {
     // Check for LLM model listing (v2.3.7)
     if (args.includes('--list-llms')) {
         listLLMs();
+        return;
+    }
+
+    // Check for cost estimation (FEAT-010)
+    if (args.includes('--estimate-cost')) {
+        runCostEstimation(args);
         return;
     }
 
@@ -430,6 +437,9 @@ function printHelp() {
     console.log('  --target-model MODEL     Optimize for specific LLM (e.g., claude-sonnet-4.5)');
     console.log('  --auto-detect-llm        Auto-detect LLM from environment variables');
     console.log('  --list-llms              List all supported LLM models');
+    console.log();
+    console.log('Cost Estimation (FEAT-010):');
+    console.log('  --estimate-cost          Show cost estimates for all LLM providers');
     console.log();
     console.log('Git Integration (v3.0.0):');
     console.log('  --changed-only           Analyze only files with uncommitted changes');
@@ -798,6 +808,47 @@ async function runDashboard() {
     } catch (error) {
         throw error; // Re-throw to be caught by main()
     }
+}
+
+/**
+ * Run cost estimation for all LLM providers (FEAT-010)
+ * @param {string[]} args - Command line arguments
+ */
+function runCostEstimation(args) {
+    console.log('💰 LLM Cost Estimator');
+    console.log('═'.repeat(60));
+    console.log();
+    console.log('📊 Analyzing repository...');
+    console.log();
+
+    // Run analyzer silently (no console output)
+    const originalLog = console.log;
+    const logs = [];
+    console.log = (...args) => logs.push(args); // Capture logs
+
+    const analyzer = new TokenAnalyzer(process.cwd(), {
+        simple: true,
+        verbose: false,
+        dashboard: true // Skip export handling
+    });
+    const stats = analyzer.run();
+
+    console.log = originalLog; // Restore console.log
+
+    if (!stats || !stats.totalTokens) {
+        console.error('❌ Failed to analyze repository');
+        process.exit(1);
+    }
+
+    // Create cost estimator
+    const estimator = new LLMCostEstimator(stats.totalTokens);
+    
+    // Get comparisons and recommendation
+    const comparisons = estimator.compareAll();
+    const recommendation = estimator.getRecommendation(comparisons);
+    
+    // Display formatted output
+    console.log(estimator.formatEstimates(comparisons, recommendation));
 }
 
 function runFormatConversion(args) {
