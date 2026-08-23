@@ -154,9 +154,15 @@ body {
   border-radius: 50%;
 }
 
-.code-demo-dot.red { background: #ff5f56; }
-.code-demo-dot.yellow { background: #ffbd2e; }
-.code-demo-dot.green { background: #27c93f; }
+.code-demo-dot.red {
+  background: #ff5f56;
+}
+.code-demo-dot.yellow {
+  background: #ffbd2e;
+}
+.code-demo-dot.green {
+  background: #27c93f;
+}
 
 .code-demo-content {
   padding: var(--spacing-md);

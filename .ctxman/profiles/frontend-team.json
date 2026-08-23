@@ -5,7 +5,14 @@
   "createdAt": "2025-01-15T10:00:00Z",
   "config": {
     "exclude": ["backend/**", "server/**", "api/**", "**/*.test.js", "**/*.spec.js"],
-    "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx", "components/**", "pages/**"],
+    "include": [
+      "src/**/*.js",
+      "src/**/*.jsx",
+      "src/**/*.ts",
+      "src/**/*.tsx",
+      "components/**",
+      "pages/**"
+    ],
     "targetModel": "claude-sonnet-4.5",
     "methodLevel": true,
     "methodInclude": ["*Component", "*Hook", "*Context", "*Provider"]

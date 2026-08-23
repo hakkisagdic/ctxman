@@ -103,15 +103,15 @@ curl http://localhost:3000/api/v1/health
 
 #### Response Fields
 
-| Field          | Type   | Description                                    |
-| -------------- | ------ | ---------------------------------------------- |
-| `status`       | string | Overall health status ("healthy" or "unhealthy") |
-| `version`      | string | Current Ctxman version                         |
-| `uptime`       | number | Server uptime in seconds                       |
-| `timestamp`    | string | ISO 8601 timestamp of the health check         |
-| `checks`       | object | Individual component health checks             |
-| `checks.memory`| object | Memory usage information                       |
-| `checks.tiktoken`| object | tiktoken availability status                 |
+| Field             | Type   | Description                                      |
+| ----------------- | ------ | ------------------------------------------------ |
+| `status`          | string | Overall health status ("healthy" or "unhealthy") |
+| `version`         | string | Current Ctxman version                           |
+| `uptime`          | number | Server uptime in seconds                         |
+| `timestamp`       | string | ISO 8601 timestamp of the health check           |
+| `checks`          | object | Individual component health checks               |
+| `checks.memory`   | object | Memory usage information                         |
+| `checks.tiktoken` | object | tiktoken availability status                     |
 
 #### Use Cases
 

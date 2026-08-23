@@ -6,53 +6,53 @@ Complete reference for Ctxman CLI, REST API, and programmatic usage.
 
 ### Global Options
 
-| Option | Alias | Description | Default |
-|--------|-------|-------------|---------|
-| `--cli` | `-c` | Run in CLI mode (skip wizard) | `false` |
-| `--help` | `-h` | Show help | - |
-| `--version` | `-v` | Show version | - |
-| `--path` | `-p` | Directory to analyze | Current directory |
-| `--output` | `-o` | Output file path | `stdout` |
+| Option      | Alias | Description                   | Default           |
+| ----------- | ----- | ----------------------------- | ----------------- |
+| `--cli`     | `-c`  | Run in CLI mode (skip wizard) | `false`           |
+| `--help`    | `-h`  | Show help                     | -                 |
+| `--version` | `-v`  | Show version                  | -                 |
+| `--path`    | `-p`  | Directory to analyze          | Current directory |
+| `--output`  | `-o`  | Output file path              | `stdout`          |
 
 ### Analysis Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--method-level` | Enable method-level token analysis | `false` |
-| `--token-count` | Calculate exact token counts | `true` |
-| `--tiktoken` | Use tiktoken for exact counting | `true` |
-| `--include-comments` | Include comments in analysis | `false` |
+| Option               | Description                        | Default |
+| -------------------- | ---------------------------------- | ------- |
+| `--method-level`     | Enable method-level token analysis | `false` |
+| `--token-count`      | Calculate exact token counts       | `true`  |
+| `--tiktoken`         | Use tiktoken for exact counting    | `true`  |
+| `--include-comments` | Include comments in analysis       | `false` |
 
 ### Output Format Options
 
-| Option | Description |
-|--------|-------------|
-| `--toon` | Output in TOON format (40-50% reduction) |
-| `--gitingest` | Output in GitIngest format |
-| `--json` | Output as JSON |
-| `--markdown` | Output as Markdown |
+| Option        | Description                              |
+| ------------- | ---------------------------------------- |
+| `--toon`      | Output in TOON format (40-50% reduction) |
+| `--gitingest` | Output in GitIngest format               |
+| `--json`      | Output as JSON                           |
+| `--markdown`  | Output as Markdown                       |
 
 ### Git Integration Options
 
-| Option | Description |
-|--------|-------------|
-| `--git-diff <ref>` | Analyze files changed in diff |
-| `--git-diff --cached` | Analyze staged changes |
-| `--git-branch <branch>` | Compare with branch |
-| `--git-author <author>` | Filter by author |
+| Option                  | Description                   |
+| ----------------------- | ----------------------------- |
+| `--git-diff <ref>`      | Analyze files changed in diff |
+| `--git-diff --cached`   | Analyze staged changes        |
+| `--git-branch <branch>` | Compare with branch           |
+| `--git-author <author>` | Filter by author              |
 
 ### Watch Mode Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--interval <ms>` | Debounce interval | `1000` |
-| `--ignore <pattern>` | Patterns to ignore | - |
+| Option               | Description        | Default |
+| -------------------- | ------------------ | ------- |
+| `--interval <ms>`    | Debounce interval  | `1000`  |
+| `--ignore <pattern>` | Patterns to ignore | -       |
 
 ### Server Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--port <port>` | API server port | `3000` |
+| Option          | Description     | Default     |
+| --------------- | --------------- | ----------- |
+| `--port <port>` | API server port | `3000`      |
 | `--host <host>` | API server host | `localhost` |
 
 ## CLI Commands
@@ -256,7 +256,7 @@ const result = await ctxman.analyze({
   path: './src',
   methodLevel: true,
   outputFormat: 'json',
-  exclude: ['*.test.js']
+  exclude: ['*.test.js'],
 });
 
 console.log(result.totalTokens);
@@ -265,13 +265,13 @@ console.log(result.files);
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `path` | `string` | `'.'` | Directory to analyze |
-| `methodLevel` | `boolean` | `false` | Enable method-level analysis |
-| `outputFormat` | `string` | `'json'` | Output format |
-| `exclude` | `string[]` | `[]` | Patterns to exclude |
-| `include` | `string[]` | `[]` | Patterns to include |
+| Option         | Type       | Default  | Description                  |
+| -------------- | ---------- | -------- | ---------------------------- |
+| `path`         | `string`   | `'.'`    | Directory to analyze         |
+| `methodLevel`  | `boolean`  | `false`  | Enable method-level analysis |
+| `outputFormat` | `string`   | `'json'` | Output format                |
+| `exclude`      | `string[]` | `[]`     | Patterns to exclude          |
+| `include`      | `string[]` | `[]`     | Patterns to include          |
 
 **Returns:** `Promise<AnalysisResult>`
 
@@ -288,7 +288,7 @@ const watcher = ctxman.watch({
   },
   onError: (error) => {
     console.error('Watch error:', error);
-  }
+  },
 });
 
 // Stop watching
@@ -297,12 +297,12 @@ watcher.stop();
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `path` | `string` | `'.'` | Directory to watch |
-| `interval` | `number` | `1000` | Debounce interval (ms) |
-| `onChange` | `function` | - | Callback on change |
-| `onError` | `function` | - | Callback on error |
+| Option     | Type       | Default | Description            |
+| ---------- | ---------- | ------- | ---------------------- |
+| `path`     | `string`   | `'.'`   | Directory to watch     |
+| `interval` | `number`   | `1000`  | Debounce interval (ms) |
+| `onChange` | `function` | -       | Callback on change     |
+| `onError`  | `function` | -       | Callback on error      |
 
 **Returns:** `Watcher` object with `stop()` method.
 
@@ -313,7 +313,7 @@ Start REST API server.
 ```javascript
 const server = await ctxman.serve({
   port: 3000,
-  host: 'localhost'
+  host: 'localhost',
 });
 
 // Stop server
@@ -322,9 +322,9 @@ server.stop();
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `port` | `number` | `3000` | Server port |
+| Option | Type     | Default       | Description |
+| ------ | -------- | ------------- | ----------- |
+| `port` | `number` | `3000`        | Server port |
 | `host` | `string` | `'localhost'` | Server host |
 
 **Returns:** `Promise<Server>` object with `stop()` method.
@@ -336,7 +336,7 @@ Set global configuration.
 ```javascript
 ctxman.configure({
   defaultOutputFormat: 'toon',
-  defaultMethodLevel: true
+  defaultMethodLevel: true,
 });
 ```
 
@@ -377,14 +377,14 @@ interface Server {
 
 ## Exit Codes
 
-| Code | Description |
-|------|-------------|
-| 0 | Success |
-| 1 | General error |
-| 2 | Invalid arguments |
-| 3 | Configuration error |
-| 4 | Analysis error |
-| 5 | File system error |
+| Code | Description         |
+| ---- | ------------------- |
+| 0    | Success             |
+| 1    | General error       |
+| 2    | Invalid arguments   |
+| 3    | Configuration error |
+| 4    | Analysis error      |
+| 5    | File system error   |
 
 ## Error Handling
 
@@ -426,8 +426,8 @@ Override in configuration:
 ctxman.serve({
   rateLimit: {
     windowMs: 15 * 60 * 1000,
-    max: 100
-  }
+    max: 100,
+  },
 });
 ```
 
@@ -440,8 +440,8 @@ ctxman.configure({
   cache: {
     enabled: true,
     ttl: 3600000, // 1 hour
-    directory: '.ctxman/cache'
-  }
+    directory: '.ctxman/cache',
+  },
 });
 ```
 
@@ -471,12 +471,12 @@ console.log(`Total tokens: ${result.totalTokens}`);
 ```javascript
 const result = await ctxman.analyze({
   path: './src',
-  methodLevel: true
+  methodLevel: true,
 });
 
-result.files.forEach(file => {
+result.files.forEach((file) => {
   console.log(`\n${file.path}:`);
-  file.methods?.forEach(method => {
+  file.methods?.forEach((method) => {
     console.log(`  ${method.name}: ${method.tokens} tokens`);
   });
 });
@@ -495,7 +495,7 @@ const watcher = ctxman.watch({
   path: './src',
   onChange: (result) => {
     console.log(`Analysis updated: ${result.totalTokens} tokens`);
-  }
+  },
 });
 
 // Cleanup on exit

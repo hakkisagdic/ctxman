@@ -35,6 +35,7 @@ Ctxman, genişletilebilirlik ve performans için tasarlanmış modüler bir mima
 Dosya sistemi gezintisi ve keşfinden sorumludur.
 
 **Sorumluluklar:**
+
 - Dizinleri özyinelemeli tarama
 - `.gitignore` ve `.contextignore` kurallarına saygı
 - Binary dosyaları filtreleme
@@ -49,6 +50,7 @@ const dosyalar = scanner.scan();
 ```
 
 **Seçenekler:**
+
 - `respectGitignore` - `.gitignore` kurallarına uy (varsayılan: true)
 - `followSymlinks` - Sembolik linkleri takip et (varsayılan: false)
 - `maxDepth` - Maksimum dizin derinliği (varsayılan: Infinity)
@@ -58,6 +60,7 @@ const dosyalar = scanner.scan();
 Token ve method analiz motoru.
 
 **Sorumluluklar:**
+
 - tiktoken kullanarak token sayılarını hesaplama
 - Koddan method/fonksiyon çıkarma
 - Programlama dillerini tespit etme
@@ -72,6 +75,7 @@ const sonuc = await analyzer.analyze(dosyalar);
 ```
 
 **Analiz Sonucu:**
+
 ```javascript
 {
   path: string,
@@ -89,6 +93,7 @@ const sonuc = await analyzer.analyze(dosyalar);
 LLM tüketimi için akıllı bağlam oluşturma.
 
 **Sorumluluklar:**
+
 - Optimize edilmiş dosya listeleri oluşturma
 - LLM'ye özgü optimizasyonlar uygulama
 - Birden çok çıktı formatı oluşturma
@@ -99,7 +104,7 @@ LLM tüketimi için akıllı bağlam oluşturma.
 ```javascript
 const builder = new ContextBuilder({
   targetModel: 'claude-sonnet-4.5',
-  targetTokens: 50000
+  targetTokens: 50000,
 });
 const context = builder.build(analizSonucu);
 ```
@@ -109,6 +114,7 @@ const context = builder.build(analizSonucu);
 Çok formatlı rapor oluşturma.
 
 **Sorumluluklar:**
+
 - Birden çok formatta rapor oluşturma
 - JSON, YAML, CSV, XML, Markdown
 - GitIngest digest formatı
@@ -166,15 +172,15 @@ export class RustPlugin extends LanguagePlugin {
     const methodRegex = /(?:pub\s+)?(?:async\s+)?fn\s+(\w+)/g;
     const methods = [];
     let match;
-    
+
     while ((match = methodRegex.exec(icerik)) !== null) {
       methods.push({
         name: match[1],
         line: this.getLineNumber(icerik, match.index),
-        type: 'function'
+        type: 'function',
       });
     }
-    
+
     return methods;
   }
 
@@ -200,10 +206,10 @@ export class CustomPlugin extends ExporterPlugin {
     return {
       version: '1.0',
       generated: new Date().toISOString(),
-      files: analiz.files.map(f => ({
+      files: analiz.files.map((f) => ({
         name: f.name,
-        tokens: f.tokens
-      }))
+        tokens: f.tokens,
+      })),
     };
   }
 
@@ -354,6 +360,7 @@ ctxman/
 Token analizi için ana orkestratör.
 
 **Özellikler:**
+
 - tiktoken ile kesin token sayımı
 - Akıllı tahmin fallback'i (~%95 doğruluk)
 - Çoklu dil desteği (14+ dil)
@@ -364,6 +371,7 @@ Token analizi için ana orkestratör.
 Kod dosyalarından method/fonksiyon çıkarır.
 
 **Desteklenen Diller:**
+
 - JavaScript/TypeScript
 - Python
 - PHP
@@ -382,10 +390,12 @@ Kod dosyalarından method/fonksiyon çıkarır.
 Önbellekleme ile performans optimizasyonu.
 
 **Önbellek Türleri:**
+
 - **Bellek Önbelleği**: Hızlı, süreç içi önbellek
 - **Disk Önbelleği**: Oturumlar arasında kalıcı önbellek
 
 **Önbellek Anahtarları:**
+
 - Dosya yolu + değiştirilme zamanı
 - Analiz sonuçları
 - Token sayıları
@@ -393,15 +403,18 @@ Kod dosyalarından method/fonksiyon çıkarır.
 ### Git Entegrasyonu (`lib/integrations/git/`)
 
 **GitClient**: Git işlemleri sarmalayıcısı
+
 - Status, log, diff işlemleri
 - Branch ve commit bilgileri
 
 **DiffAnalyzer**: Değişiklik etkisi analizi
+
 - Değişen dosya tespiti
 - Etki skorlaması
 - Modül tanımlama
 
 **BlameTracker**: Yazar atıflaması
+
 - Son değiştiren bilgisi
 - Commit geçmişi analizi
 
@@ -470,13 +483,13 @@ export class CustomWizard extends Wizard {
 
 ## Performans Karakteristikleri
 
-| İşlem | Süre | Notlar |
-|-------|------|--------|
-| 1000 dosya tarama | ~100ms | Paralel gezinme |
-| Token analizi | ~30ms/dosya | Önbellek ile: ~5ms |
-| Method çıkarma | ~10ms/dosya | Dil bağımlı |
-| Bağlam oluşturma | ~50ms | 100 dosya için |
-| Rapor oluşturma | ~20ms | JSON formatı |
+| İşlem             | Süre        | Notlar             |
+| ----------------- | ----------- | ------------------ |
+| 1000 dosya tarama | ~100ms      | Paralel gezinme    |
+| Token analizi     | ~30ms/dosya | Önbellek ile: ~5ms |
+| Method çıkarma    | ~10ms/dosya | Dil bağımlı        |
+| Bağlam oluşturma  | ~50ms       | 100 dosya için     |
+| Rapor oluşturma   | ~20ms       | JSON formatı       |
 
 ## Bellek Kullanımı
 
@@ -496,6 +509,7 @@ test/
 ```
 
 **Test Komutları:**
+
 - `npm run test` - Tüm testler
 - `npm run test:coverage` - Coverage ile
 - `npm run test:v3` - Platform özellikleri
@@ -505,4 +519,4 @@ test/
 
 ---
 
-*Mimari Sürümü: 3.0.0 | Son Güncelleme: 2025-08-23*
+_Mimari Sürümü: 3.0.0 | Son Güncelleme: 2025-08-23_

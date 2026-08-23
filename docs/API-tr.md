@@ -103,15 +103,15 @@ curl http://localhost:3000/api/v1/health
 
 #### Yanıt Alanları
 
-| Alan            | Tür    | Açıklama                                       |
-| --------------- | ------ | ---------------------------------------------- |
-| `status`        | string | Genel sağlık durumu ("healthy" veya "unhealthy") |
-| `version`       | string | Mevcut Ctxman sürümü                           |
-| `uptime`        | number | Sunucu çalışma süresi (saniye)                 |
-| `timestamp`     | string | Sağlık kontrolünün ISO 8601 zaman damgası     |
-| `checks`        | object | Bireysel bileşen sağlık kontrolleri           |
-| `checks.memory` | object | Bellek kullanım bilgileri                     |
-| `checks.tiktoken`| object | tiktoken kullanılabilirlik durumu             |
+| Alan              | Tür    | Açıklama                                         |
+| ----------------- | ------ | ------------------------------------------------ |
+| `status`          | string | Genel sağlık durumu ("healthy" veya "unhealthy") |
+| `version`         | string | Mevcut Ctxman sürümü                             |
+| `uptime`          | number | Sunucu çalışma süresi (saniye)                   |
+| `timestamp`       | string | Sağlık kontrolünün ISO 8601 zaman damgası        |
+| `checks`          | object | Bireysel bileşen sağlık kontrolleri              |
+| `checks.memory`   | object | Bellek kullanım bilgileri                        |
+| `checks.tiktoken` | object | tiktoken kullanılabilirlik durumu                |
 
 #### Kullanım Senaryoları
 

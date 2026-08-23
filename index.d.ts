@@ -111,12 +111,12 @@ export interface LLMContext {
  */
 export class TokenCalculator {
   constructor(projectRoot: string, options?: TokenCalculatorOptions);
-  
+
   projectRoot: string;
   options: TokenCalculatorOptions;
   stats: AnalysisStats;
   methodStats: MethodStats;
-  
+
   calculateTokens(content: string, filePath: string): number;
   isTextFile(filePath: string): boolean;
   isCodeFile(filePath: string): boolean;
@@ -175,17 +175,13 @@ export interface GitIgnorePattern {
  * Parses .gitignore, .contextignore, and .contextinclude files
  */
 export class GitIgnoreParser {
-  constructor(
-    gitignorePath?: string,
-    contextIgnorePath?: string,
-    contextIncludePath?: string
-  );
-  
+  constructor(gitignorePath?: string, contextIgnorePath?: string, contextIncludePath?: string);
+
   patterns: GitIgnorePattern[];
   contextPatterns: GitIgnorePattern[];
   hasIncludeFile: boolean;
   _lastIgnoreReason: string | null;
-  
+
   loadPatterns(
     gitignorePath: string,
     contextIgnorePath?: string,
@@ -211,11 +207,11 @@ export interface MethodFilterPattern {
  */
 export class MethodFilterParser {
   constructor(methodIncludePath?: string, methodIgnorePath?: string);
-  
+
   includePatterns: MethodFilterPattern[];
   ignorePatterns: MethodFilterPattern[];
   hasIncludeFile: boolean;
-  
+
   parseMethodFile(filePath: string): MethodFilterPattern[];
   shouldIncludeMethod(methodName: string, fileName: string): boolean;
 }
@@ -265,7 +261,7 @@ export class GitIngestFormatter {
     analysisResults: FileInfo[],
     options?: GitIngestFormatterOptions
   );
-  
+
   projectRoot: string;
   stats: AnalysisStats;
   analysisResults: FileInfo[];
@@ -282,10 +278,15 @@ export class GitIngestFormatter {
   methodFilterEnabled: boolean;
   methodAnalyzer?: MethodAnalyzer;
   methodFilter?: MethodFilterParser | null;
-  
+
   generateDigest(): string;
   generateChunkedDigest(): ChunkData[];
-  createChunks(): Array<{ files: FileInfo[]; tokens: number; directories?: Set<string>; metadata?: Record<string, unknown> }>;
+  createChunks(): Array<{
+    files: FileInfo[];
+    tokens: number;
+    directories?: Set<string>;
+    metadata?: Record<string, unknown>;
+  }>;
   saveToFile(outputPath: string): number;
 }
 
@@ -304,14 +305,14 @@ export interface ToonFormatterOptions {
  */
 export class ToonFormatter {
   constructor(options?: ToonFormatterOptions);
-  
+
   options: ToonFormatterOptions & {
     indent: number;
     delimiter: string;
     lengthMarker: boolean;
   };
   indentChar: string;
-  
+
   encode(data: unknown, options?: ToonFormatterOptions): string;
   encodeAsync(data: unknown, options?: ToonFormatterOptions): Promise<string>;
   encodeSync(data: unknown, options?: ToonFormatterOptions): string;
@@ -331,7 +332,10 @@ export class ToonFormatter {
     toonTokens: number;
     jsonTokens: number;
   };
-  compareWithOfficial(data: unknown, options?: ToonFormatterOptions): Promise<{
+  compareWithOfficial(
+    data: unknown,
+    options?: ToonFormatterOptions
+  ): Promise<{
     custom: string;
     official: string;
     customSize: number;
@@ -373,9 +377,9 @@ export interface FormatRegistration {
  */
 export class FormatRegistry {
   constructor();
-  
+
   formatters: Map<string, FormatRegistration>;
-  
+
   register(name: string, formatter: FormatRegistration): void;
   get(name: string): FormatRegistration;
   has(name: string): boolean;
@@ -513,10 +517,10 @@ export interface BatchConversionResult {
  */
 export class FormatConverter {
   constructor();
-  
+
   registry: FormatRegistry;
   toonFormatter: ToonFormatter;
-  
+
   convert(input: string, fromFormat: string, toFormat: string): ConversionResult;
   parse(input: string, format: string): unknown;
   encode(data: unknown, format: string): string;
@@ -551,19 +555,16 @@ export interface ErrorHandlerOptions {
  */
 export class ErrorHandler {
   constructor(options?: ErrorHandlerOptions);
-  
+
   verbose: boolean;
   logFile: string | null;
-  
+
   handleFormatError(error: Error, format: string): void;
   handleFileError(error: Error & { code?: string }, filePath: string): void;
   handleParseError(error: Error, format: string, content?: string): void;
   handleValidationError(errors: string[], context: string): void;
   logError(message: string, error: Error | { errors?: string[] }): void;
-  wrapAsync<T extends (...args: unknown[]) => Promise<unknown>>(
-    fn: T,
-    context: string
-  ): T;
+  wrapAsync<T extends (...args: unknown[]) => Promise<unknown>>(fn: T, context: string): T;
   validateFormat(format: string, supportedFormats: string[]): void;
   createUserMessage(error: Error & { code?: string }, context?: string): string;
 }
@@ -585,7 +586,7 @@ export interface LoggerOptions {
  */
 export class Logger {
   constructor(options?: LoggerOptions);
-  
+
   level: string;
   logToFile: boolean;
   logDir: string;
@@ -594,12 +595,16 @@ export class Logger {
   levels: Record<string, number>;
   colors: Record<string, string>;
   icons: Record<string, string>;
-  
+
   initializeLogDirectory(): void;
   getDateString(): string;
   getTimestamp(): string;
   shouldLog(level: string): boolean;
-  formatMessage(level: string, message: string, meta?: Record<string, unknown>): {
+  formatMessage(
+    level: string,
+    message: string,
+    meta?: Record<string, unknown>
+  ): {
     consoleMessage: string;
     fileMessage: string;
   };
@@ -683,7 +688,7 @@ export interface RollbackResult {
  */
 export class Updater {
   constructor(options?: UpdaterOptions);
-  
+
   currentVersion: string;
   channel: 'stable' | 'insider';
   autoUpdate: boolean;
@@ -695,7 +700,7 @@ export class Updater {
     insider: string;
     version: string;
   };
-  
+
   getCurrentVersion(): string;
   fetchJSON(url: string): Promise<unknown>;
   compareVersions(v1: string, v2: string): -1 | 0 | 1;
@@ -790,11 +795,11 @@ export interface CachedRepo {
  */
 export class GitUtils {
   constructor(options?: GitUtilsOptions);
-  
+
   tempDir: string;
   outputDir: string;
   verbose: boolean;
-  
+
   parseGitHubURL(url: string): GitHubRepoInfo;
   isGitInstalled(): boolean;
   cloneRepository(

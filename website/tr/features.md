@@ -21,8 +21,8 @@ export default {
   extensions: ['.xyz'],
   analyze: async (content, filePath) => {
     // Özel analiz mantığı
-  }
-}
+  },
+};
 ```
 
 ### Git Entegrasyonu
@@ -111,21 +111,21 @@ LLM planlaması için doğru token sayımı:
 
 14+ programlama dilinde kod analizi:
 
-| Dil | Uzantılar | Özellikler |
-|-----|-----------|------------|
-| JavaScript | .js, .jsx, .mjs | Tam AST analizi |
-| TypeScript | .ts, .tsx | Tip farkındalıklı analiz |
-| Python | .py | Yöntem düzeyinde analiz |
-| PHP | .php | Sınıf ve fonksiyon analizi |
-| Ruby | .rb | Modül ve yöntem analizi |
-| Java | .java | Sınıf ve yöntem analizi |
-| Kotlin | .kt | Fonksiyon analizi |
-| C# | .cs | Sınıf ve yöntem analizi |
-| Go | .go | Fonksiyon analizi |
-| Rust | .rs | Fonksiyon ve struct analizi |
-| Swift | .swift | Fonksiyon analizi |
-| C/C++ | .c, .cpp, .h | Fonksiyon analizi |
-| Scala | .scala | Sınıf ve fonksiyon analizi |
+| Dil        | Uzantılar       | Özellikler                  |
+| ---------- | --------------- | --------------------------- |
+| JavaScript | .js, .jsx, .mjs | Tam AST analizi             |
+| TypeScript | .ts, .tsx       | Tip farkındalıklı analiz    |
+| Python     | .py             | Yöntem düzeyinde analiz     |
+| PHP        | .php            | Sınıf ve fonksiyon analizi  |
+| Ruby       | .rb             | Modül ve yöntem analizi     |
+| Java       | .java           | Sınıf ve yöntem analizi     |
+| Kotlin     | .kt             | Fonksiyon analizi           |
+| C#         | .cs             | Sınıf ve yöntem analizi     |
+| Go         | .go             | Fonksiyon analizi           |
+| Rust       | .rs             | Fonksiyon ve struct analizi |
+| Swift      | .swift          | Fonksiyon analizi           |
+| C/C++      | .c, .cpp, .h    | Fonksiyon analizi           |
+| Scala      | .scala          | Sınıf ve fonksiyon analizi  |
 
 ### Yöntem Düzeyinde Analiz
 
@@ -228,11 +228,7 @@ Büyük kod tabanlarını verimli yönetin:
     "methodLevel": true,
     "tokenCount": true
   },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "*.test.js"
-  ]
+  "exclude": ["node_modules", "dist", "*.test.js"]
 }
 ```
 

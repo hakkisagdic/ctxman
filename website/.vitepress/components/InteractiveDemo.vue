@@ -9,7 +9,7 @@ const languages = [
   { id: 'javascript', name: 'JavaScript', ext: '.js' },
   { id: 'typescript', name: 'TypeScript', ext: '.ts' },
   { id: 'python', name: 'Python', ext: '.py' },
-  { id: 'rust', name: 'Rust', ext: '.rs' }
+  { id: 'rust', name: 'Rust', ext: '.rs' },
 ];
 
 const sampleCode = computed(() => {
@@ -48,7 +48,7 @@ fn calculate_sum(arr: &[i32]) -> i32 {
 fn main() {
     let numbers = vec![1, 2, 3, 4, 5];
     println!("Sum: {}", calculate_sum(&numbers));
-}`
+}`,
   };
   return samples[selectedLanguage.value];
 });
@@ -57,7 +57,7 @@ const mockOutput = computed(() => {
   return `📊 Analysis Results
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📁 File: example${languages.find(l => l.id === selectedLanguage.value)?.ext}
+📁 File: example${languages.find((l) => l.id === selectedLanguage.value)?.ext}
 📝 Lines of Code: 8
 🎯 Tokens (GPT-4): ~245
 
@@ -100,13 +100,13 @@ const reset = () => {
         </button>
       </div>
     </div>
-    
+
     <div class="interactive-demo-content">
       <div class="code-section">
         <div class="code-label">Input Code:</div>
         <pre class="code-block"><code>{{ sampleCode }}</code></pre>
       </div>
-      
+
       <div v-if="showOutput" class="output-section">
         <div class="code-label">Output:</div>
         <pre class="output-block"><code>{{ mockOutput }}</code></pre>
@@ -176,7 +176,8 @@ const reset = () => {
   padding: 1rem;
 }
 
-.code-section, .output-section {
+.code-section,
+.output-section {
   margin-bottom: 1rem;
 }
 
@@ -186,7 +187,8 @@ const reset = () => {
   margin-bottom: 0.5rem;
 }
 
-.code-block, .output-block {
+.code-block,
+.output-block {
   background: var(--vp-code-block-bg);
   border-radius: 6px;
   padding: 1rem;
@@ -206,13 +208,14 @@ const reset = () => {
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .interactive-demo-controls {
     width: 100%;
     justify-content: stretch;
   }
-  
-  .language-select, .run-button {
+
+  .language-select,
+  .run-button {
     flex: 1;
   }
 }

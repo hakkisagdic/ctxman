@@ -6,53 +6,53 @@ Ctxman CLI, REST API ve programatik kullanım için tam referans.
 
 ### Global Seçenekler
 
-| Seçenek | Kısa | Açıklama | Varsayılan |
-|---------|------|----------|------------|
-| `--cli` | `-c` | CLI modunda çalıştır (sihirbazı atla) | `false` |
-| `--help` | `-h` | Yardımı göster | - |
-| `--version` | `-v` | Sürümü göster | - |
-| `--path` | `-p` | Analiz edilecek dizin | Geçerli dizin |
-| `--output` | `-o` | Çıktı dosya yolu | `stdout` |
+| Seçenek     | Kısa | Açıklama                              | Varsayılan    |
+| ----------- | ---- | ------------------------------------- | ------------- |
+| `--cli`     | `-c` | CLI modunda çalıştır (sihirbazı atla) | `false`       |
+| `--help`    | `-h` | Yardımı göster                        | -             |
+| `--version` | `-v` | Sürümü göster                         | -             |
+| `--path`    | `-p` | Analiz edilecek dizin                 | Geçerli dizin |
+| `--output`  | `-o` | Çıktı dosya yolu                      | `stdout`      |
 
 ### Analiz Seçenekleri
 
-| Seçenek | Açıklama | Varsayılan |
-|---------|----------|------------|
-| `--method-level` | Yöntem düzeyinde token analizini etkinleştir | `false` |
-| `--token-count` | Kesin token sayılarını hesapla | `true` |
-| `--tiktoken` | Kesin sayım için tiktoken kullan | `true` |
-| `--include-comments` | Analize yorumları dahil et | `false` |
+| Seçenek              | Açıklama                                     | Varsayılan |
+| -------------------- | -------------------------------------------- | ---------- |
+| `--method-level`     | Yöntem düzeyinde token analizini etkinleştir | `false`    |
+| `--token-count`      | Kesin token sayılarını hesapla               | `true`     |
+| `--tiktoken`         | Kesin sayım için tiktoken kullan             | `true`     |
+| `--include-comments` | Analize yorumları dahil et                   | `false`    |
 
 ### Çıktı Formatı Seçenekleri
 
-| Seçenek | Açıklama |
-|---------|----------|
-| `--toon` | TOON formatında çıktı (%40-50 azaltma) |
-| `--gitingest` | GitIngest formatında çıktı |
-| `--json` | JSON olarak çıktı |
-| `--markdown` | Markdown olarak çıktı |
+| Seçenek       | Açıklama                               |
+| ------------- | -------------------------------------- |
+| `--toon`      | TOON formatında çıktı (%40-50 azaltma) |
+| `--gitingest` | GitIngest formatında çıktı             |
+| `--json`      | JSON olarak çıktı                      |
+| `--markdown`  | Markdown olarak çıktı                  |
 
 ### Git Entegrasyonu Seçenekleri
 
-| Seçenek | Açıklama |
-|---------|----------|
-| `--git-diff <ref>` | Diff'te değişen dosyaları analiz et |
-| `--git-diff --cached` | Sahnelenmiş değişiklikleri analiz et |
-| `--git-branch <branch>` | Branch ile karşılaştır |
-| `--git-author <author>` | Yazara göre filtrele |
+| Seçenek                 | Açıklama                             |
+| ----------------------- | ------------------------------------ |
+| `--git-diff <ref>`      | Diff'te değişen dosyaları analiz et  |
+| `--git-diff --cached`   | Sahnelenmiş değişiklikleri analiz et |
+| `--git-branch <branch>` | Branch ile karşılaştır               |
+| `--git-author <author>` | Yazara göre filtrele                 |
 
 ### İzleme Modu Seçenekleri
 
-| Seçenek | Açıklama | Varsayılan |
-|---------|----------|------------|
-| `--interval <ms>` | Gecikme aralığı | `1000` |
-| `--ignore <pattern>` | Yoksayılacak kalıplar | - |
+| Seçenek              | Açıklama              | Varsayılan |
+| -------------------- | --------------------- | ---------- |
+| `--interval <ms>`    | Gecikme aralığı       | `1000`     |
+| `--ignore <pattern>` | Yoksayılacak kalıplar | -          |
 
 ### Sunucu Seçenekleri
 
-| Seçenek | Açıklama | Varsayılan |
-|---------|----------|------------|
-| `--port <port>` | API sunucu portu | `3000` |
+| Seçenek         | Açıklama          | Varsayılan  |
+| --------------- | ----------------- | ----------- |
+| `--port <port>` | API sunucu portu  | `3000`      |
 | `--host <host>` | API sunucu host'u | `localhost` |
 
 ## CLI Komutları
@@ -256,7 +256,7 @@ const result = await ctxman.analyze({
   path: './src',
   methodLevel: true,
   outputFormat: 'json',
-  exclude: ['*.test.js']
+  exclude: ['*.test.js'],
 });
 
 console.log(result.totalTokens);
@@ -265,13 +265,13 @@ console.log(result.files);
 
 **Seçenekler:**
 
-| Seçenek | Tip | Varsayılan | Açıklama |
-|---------|-----|------------|----------|
-| `path` | `string` | `'.'` | Analiz edilecek dizin |
-| `methodLevel` | `boolean` | `false` | Yöntem düzeyinde analiz etkinleştir |
-| `outputFormat` | `string` | `'json'` | Çıktı formatı |
-| `exclude` | `string[]` | `[]` | Hariç tutulacak kalıplar |
-| `include` | `string[]` | `[]` | Dahil edilecek kalıplar |
+| Seçenek        | Tip        | Varsayılan | Açıklama                            |
+| -------------- | ---------- | ---------- | ----------------------------------- |
+| `path`         | `string`   | `'.'`      | Analiz edilecek dizin               |
+| `methodLevel`  | `boolean`  | `false`    | Yöntem düzeyinde analiz etkinleştir |
+| `outputFormat` | `string`   | `'json'`   | Çıktı formatı                       |
+| `exclude`      | `string[]` | `[]`       | Hariç tutulacak kalıplar            |
+| `include`      | `string[]` | `[]`       | Dahil edilecek kalıplar             |
 
 **Döndürür:** `Promise<AnalysisResult>`
 
@@ -288,7 +288,7 @@ const watcher = ctxman.watch({
   },
   onError: (error) => {
     console.error('İzleme hatası:', error);
-  }
+  },
 });
 
 // İzlemeyi durdur
@@ -297,12 +297,12 @@ watcher.stop();
 
 **Seçenekler:**
 
-| Seçenek | Tip | Varsayılan | Açıklama |
-|---------|-----|------------|----------|
-| `path` | `string` | `'.'` | İzlenecek dizin |
-| `interval` | `number` | `1000` | Gecikme aralığı (ms) |
-| `onChange` | `function` | - | Değişiklikte geri çağrı |
-| `onError` | `function` | - | Hatada geri çağrı |
+| Seçenek    | Tip        | Varsayılan | Açıklama                |
+| ---------- | ---------- | ---------- | ----------------------- |
+| `path`     | `string`   | `'.'`      | İzlenecek dizin         |
+| `interval` | `number`   | `1000`     | Gecikme aralığı (ms)    |
+| `onChange` | `function` | -          | Değişiklikte geri çağrı |
+| `onError`  | `function` | -          | Hatada geri çağrı       |
 
 **Döndürür:** `stop()` yöntemi olan `Watcher` nesnesi.
 
@@ -313,7 +313,7 @@ REST API sunucusunu başlat.
 ```javascript
 const server = await ctxman.serve({
   port: 3000,
-  host: 'localhost'
+  host: 'localhost',
 });
 
 // Sunucuyu durdur
@@ -322,10 +322,10 @@ server.stop();
 
 **Seçenekler:**
 
-| Seçenek | Tip | Varsayılan | Açıklama |
-|---------|-----|------------|----------|
-| `port` | `number` | `3000` | Sunucu portu |
-| `host` | `string` | `'localhost'` | Sunucu host'u |
+| Seçenek | Tip      | Varsayılan    | Açıklama      |
+| ------- | -------- | ------------- | ------------- |
+| `port`  | `number` | `3000`        | Sunucu portu  |
+| `host`  | `string` | `'localhost'` | Sunucu host'u |
 
 **Döndürür:** `stop()` yöntemi olan `Promise<Server>` nesnesi.
 
@@ -336,7 +336,7 @@ Global yapılandırma ayarla.
 ```javascript
 ctxman.configure({
   defaultOutputFormat: 'toon',
-  defaultMethodLevel: true
+  defaultMethodLevel: true,
 });
 ```
 
@@ -377,14 +377,14 @@ interface Server {
 
 ## Çıkış Kodları
 
-| Kod | Açıklama |
-|-----|----------|
-| 0 | Başarılı |
-| 1 | Genel hata |
-| 2 | Geçersiz argümanlar |
-| 3 | Yapılandırma hatası |
-| 4 | Analiz hatası |
-| 5 | Dosya sistemi hatası |
+| Kod | Açıklama             |
+| --- | -------------------- |
+| 0   | Başarılı             |
+| 1   | Genel hata           |
+| 2   | Geçersiz argümanlar  |
+| 3   | Yapılandırma hatası  |
+| 4   | Analiz hatası        |
+| 5   | Dosya sistemi hatası |
 
 ## Hata İşleme
 
@@ -429,12 +429,12 @@ console.log(`Toplam token: ${result.totalTokens}`);
 ```javascript
 const result = await ctxman.analyze({
   path: './src',
-  methodLevel: true
+  methodLevel: true,
 });
 
-result.files.forEach(file => {
+result.files.forEach((file) => {
   console.log(`\n${file.path}:`);
-  file.methods?.forEach(method => {
+  file.methods?.forEach((method) => {
     console.log(`  ${method.name}: ${method.tokens} token`);
   });
 });
@@ -453,7 +453,7 @@ const watcher = ctxman.watch({
   path: './src',
   onChange: (result) => {
     console.log(`Analiz güncellendi: ${result.totalTokens} token`);
-  }
+  },
 });
 
 // Çıkışta temizle

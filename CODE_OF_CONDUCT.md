@@ -114,4 +114,4 @@ Tüm topluluk liderleri, herhangi bir olayı bildiren kişinin gizliliğine ve g
 
 ---
 
-*This Code of Conduct is based on the Contributor Covenant version 2.0.*
+_This Code of Conduct is based on the Contributor Covenant version 2.0._

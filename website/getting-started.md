@@ -197,14 +197,14 @@ ctxman serve --port 8080
 
 ### API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/analyze` | POST | Analyze code |
-| `/api/status` | GET | Server status |
-| `/api/config` | GET | Get configuration |
-| `/api/config` | POST | Update configuration |
-| `/api/cache/clear` | POST | Clear cache |
-| `/health` | GET | Health check |
+| Endpoint           | Method | Description          |
+| ------------------ | ------ | -------------------- |
+| `/api/analyze`     | POST   | Analyze code         |
+| `/api/status`      | GET    | Server status        |
+| `/api/config`      | GET    | Get configuration    |
+| `/api/config`      | POST   | Update configuration |
+| `/api/cache/clear` | POST   | Clear cache          |
+| `/health`          | GET    | Health check         |
 
 ### Example API Usage
 
@@ -288,7 +288,7 @@ import ctxman from 'ctxman';
 // Basic analysis
 const result = await ctxman.analyze({
   path: './src',
-  methodLevel: true
+  methodLevel: true,
 });
 
 console.log(result.totalTokens);
@@ -298,7 +298,7 @@ const watcher = ctxman.watch({
   path: './src',
   onChange: (result) => {
     console.log('Files changed:', result.files);
-  }
+  },
 });
 
 // Stop watching

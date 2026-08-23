@@ -189,17 +189,17 @@ Commitlint tarafından zorunlu tutulan [Conventional Commits](https://www.conven
 
 ### Tipler
 
-| Tip | Açıklama |
-|-----|----------|
-| `feat` | Yeni özellik |
-| `fix` | Hata düzeltmesi |
-| `docs` | Sadece dokümantasyon |
-| `style` | Kod stili (formatlama, noktalı virgüller) |
-| `refactor` | Kod yeniden düzenleme |
-| `perf` | Performans iyileştirmesi |
-| `test` | Test ekleme veya güncelleme |
-| `chore` | Bakım görevleri |
-| `ci` | CI/CD değişiklikleri |
+| Tip        | Açıklama                                  |
+| ---------- | ----------------------------------------- |
+| `feat`     | Yeni özellik                              |
+| `fix`      | Hata düzeltmesi                           |
+| `docs`     | Sadece dokümantasyon                      |
+| `style`    | Kod stili (formatlama, noktalı virgüller) |
+| `refactor` | Kod yeniden düzenleme                     |
+| `perf`     | Performans iyileştirmesi                  |
+| `test`     | Test ekleme veya güncelleme               |
+| `chore`    | Bakım görevleri                           |
+| `ci`       | CI/CD değişiklikleri                      |
 
 ### Örnekler
 
@@ -265,18 +265,22 @@ PR oluştururken şablonu doldurun:
 
 ```markdown
 ## Açıklama
+
 [Değişikliklerinizi açıklayın]
 
 ## Değişiklik Türü
+
 - [ ] Hata düzeltmesi
 - [ ] Yeni özellik
 - [ ] Breaking change
 - [ ] Dokümantasyon güncellemesi
 
 ## Test
+
 [Yapılan testleri açıklayın]
 
 ## Kontrol Listesi
+
 - [ ] Testler geçiyor
 - [ ] Linting geçiyor
 - [ ] Dokümantasyon güncellendi
@@ -343,14 +347,14 @@ test/
 
 ### Test Kategorileri
 
-| Kategori | Komut | Açıklama |
-|----------|-------|----------|
-| Tümü | `npm run test` | Tüm testleri çalıştır |
-| Coverage | `npm run test:coverage` | Coverage raporu oluştur |
-| V3 Özellikleri | `npm run test:v3` | Platform özellik testleri |
-| Git Entegrasyonu | `npm run test:git` | Git özellik testleri |
-| Plugin Sistemi | `npm run test:plugin` | Plugin testleri |
-| API Sunucusu | `npm run test:api` | REST API testleri |
+| Kategori         | Komut                   | Açıklama                  |
+| ---------------- | ----------------------- | ------------------------- |
+| Tümü             | `npm run test`          | Tüm testleri çalıştır     |
+| Coverage         | `npm run test:coverage` | Coverage raporu oluştur   |
+| V3 Özellikleri   | `npm run test:v3`       | Platform özellik testleri |
+| Git Entegrasyonu | `npm run test:git`      | Git özellik testleri      |
+| Plugin Sistemi   | `npm run test:plugin`   | Plugin testleri           |
+| API Sunucusu     | `npm run test:api`      | REST API testleri         |
 
 ## Dokümantasyon
 

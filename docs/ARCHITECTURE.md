@@ -35,6 +35,7 @@ Ctxman is built with a modular architecture designed for extensibility and perfo
 Responsible for file system traversal and discovery.
 
 **Responsibilities:**
+
 - Recursively scan directories
 - Respect `.gitignore` and `.contextignore` rules
 - Filter binary files
@@ -49,6 +50,7 @@ const files = scanner.scan();
 ```
 
 **Options:**
+
 - `respectGitignore` - Honor `.gitignore` rules (default: true)
 - `followSymlinks` - Follow symbolic links (default: false)
 - `maxDepth` - Maximum directory depth (default: Infinity)
@@ -58,6 +60,7 @@ const files = scanner.scan();
 Token and method analysis engine.
 
 **Responsibilities:**
+
 - Calculate token counts using tiktoken
 - Extract methods/functions from code
 - Detect programming languages
@@ -72,6 +75,7 @@ const result = await analyzer.analyze(files);
 ```
 
 **Analysis Result:**
+
 ```javascript
 {
   path: string,
@@ -89,6 +93,7 @@ const result = await analyzer.analyze(files);
 Smart context generation for LLM consumption.
 
 **Responsibilities:**
+
 - Build optimized file lists
 - Apply LLM-specific optimizations
 - Generate multiple output formats
@@ -99,7 +104,7 @@ Smart context generation for LLM consumption.
 ```javascript
 const builder = new ContextBuilder({
   targetModel: 'claude-sonnet-4.5',
-  targetTokens: 50000
+  targetTokens: 50000,
 });
 const context = builder.build(analysisResult);
 ```
@@ -109,6 +114,7 @@ const context = builder.build(analysisResult);
 Multi-format report generation.
 
 **Responsibilities:**
+
 - Generate reports in multiple formats
 - JSON, YAML, CSV, XML, Markdown
 - GitIngest digest format
@@ -166,15 +172,15 @@ export class RustPlugin extends LanguagePlugin {
     const methodRegex = /(?:pub\s+)?(?:async\s+)?fn\s+(\w+)/g;
     const methods = [];
     let match;
-    
+
     while ((match = methodRegex.exec(content)) !== null) {
       methods.push({
         name: match[1],
         line: this.getLineNumber(content, match.index),
-        type: 'function'
+        type: 'function',
       });
     }
-    
+
     return methods;
   }
 
@@ -200,10 +206,10 @@ export class CustomPlugin extends ExporterPlugin {
     return {
       version: '1.0',
       generated: new Date().toISOString(),
-      files: analysis.files.map(f => ({
+      files: analysis.files.map((f) => ({
         name: f.name,
-        tokens: f.tokens
-      }))
+        tokens: f.tokens,
+      })),
     };
   }
 
@@ -354,6 +360,7 @@ ctxman/
 Main orchestrator for token analysis.
 
 **Features:**
+
 - Exact token counting with tiktoken
 - Smart estimation fallback (~95% accuracy)
 - Multi-language support (14+ languages)
@@ -364,6 +371,7 @@ Main orchestrator for token analysis.
 Extracts methods/functions from code files.
 
 **Supported Languages:**
+
 - JavaScript/TypeScript
 - Python
 - PHP
@@ -382,10 +390,12 @@ Extracts methods/functions from code files.
 Performance optimization through caching.
 
 **Cache Types:**
+
 - **Memory Cache**: Fast, in-process cache
 - **Disk Cache**: Persistent cache across sessions
 
 **Cache Keys:**
+
 - File path + modification time
 - Analysis results
 - Token counts
@@ -393,15 +403,18 @@ Performance optimization through caching.
 ### Git Integration (`lib/integrations/git/`)
 
 **GitClient**: Git operations wrapper
+
 - Status, log, diff operations
 - Branch and commit information
 
 **DiffAnalyzer**: Change impact analysis
+
 - Changed file detection
 - Impact scoring
 - Module identification
 
 **BlameTracker**: Author attribution
+
 - Last modifier information
 - Commit history analysis
 
@@ -470,13 +483,13 @@ export class CustomWizard extends Wizard {
 
 ## Performance Characteristics
 
-| Operation | Time | Notes |
-|-----------|------|-------|
-| Scan 1000 files | ~100ms | Parallel traversal |
-| Token analysis | ~30ms/file | With cache: ~5ms |
-| Method extraction | ~10ms/file | Language dependent |
-| Context generation | ~50ms | For 100 files |
-| Report generation | ~20ms | JSON format |
+| Operation          | Time       | Notes              |
+| ------------------ | ---------- | ------------------ |
+| Scan 1000 files    | ~100ms     | Parallel traversal |
+| Token analysis     | ~30ms/file | With cache: ~5ms   |
+| Method extraction  | ~10ms/file | Language dependent |
+| Context generation | ~50ms      | For 100 files      |
+| Report generation  | ~20ms      | JSON format        |
 
 ## Memory Usage
 
@@ -496,6 +509,7 @@ test/
 ```
 
 **Test Commands:**
+
 - `npm run test` - All tests
 - `npm run test:coverage` - With coverage
 - `npm run test:v3` - Platform features
@@ -505,4 +519,4 @@ test/
 
 ---
 
-*Architecture Version: 3.0.0 | Last Updated: 2025-08-23*
+_Architecture Version: 3.0.0 | Last Updated: 2025-08-23_

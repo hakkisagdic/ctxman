@@ -19,6 +19,7 @@ This directory contains real-world repositories used for manual testing and vali
 **Version:** v5.1.0+
 
 **Stats:**
+
 - **Language**: JavaScript (Node.js)
 - **Size**: ~150-200 files
 - **History**: 2009-present (15+ years)
@@ -27,6 +28,7 @@ This directory contains real-world repositories used for manual testing and vali
 - **Stars**: 65,000+
 
 **Why Express?**
+
 - Industry-standard Node.js framework
 - Rich Git history for testing git integration
 - Multiple contributors for author tracking
@@ -35,6 +37,7 @@ This directory contains real-world repositories used for manual testing and vali
 - Method extraction works perfectly (JavaScript)
 
 **Test Scenarios:**
+
 ```bash
 # Navigate to Express
 cd test-repos/express
@@ -110,20 +113,24 @@ Good test repositories should have:
 ## Recommended Test Repos (Future)
 
 ### Small (<100 files)
+
 - **Hono** - Minimal web framework (~30 files, TypeScript)
 - **Nano Stores** - State management (~20 files, TypeScript)
 
 ### Medium (100-300 files)
+
 - **Fastify** - Fast web framework (~150 files, JavaScript)
 - **Vitest** - Modern test framework (~200 files, TypeScript)
 - **Vite** - Build tool (~250 files, TypeScript)
 
 ### Large (300-1000 files)
+
 - **Next.js** - React framework (~500 files, TypeScript)
 - **Astro** - Static site generator (~400 files, TypeScript)
 - **Prisma** - Database ORM (~600 files, TypeScript)
 
 ### Multi-Language
+
 - **Tauri** - Desktop framework (Rust + JS)
 - **Deno** - Runtime (Rust + TypeScript)
 
@@ -132,6 +139,7 @@ Good test repositories should have:
 ## Running Tests
 
 ### Quick Test (Current Repo)
+
 ```bash
 # From project root
 ctxman --cli
@@ -140,6 +148,7 @@ ctxman --cli
 ```
 
 ### Express Test
+
 ```bash
 # Navigate to Express
 cd test-repos/express
@@ -154,6 +163,7 @@ ctxman --cli -m
 ```
 
 ### Git Integration Test
+
 ```bash
 cd test-repos/express
 
@@ -164,6 +174,7 @@ ctxman --changed-since v5.0.0
 ```
 
 ### Watch Mode Test
+
 ```bash
 cd test-repos/express
 
@@ -177,6 +188,7 @@ echo "// test change" >> lib/router/index.js
 ```
 
 ### API Server Test
+
 ```bash
 # Start server (from project root)
 ctxman serve --port 3000
@@ -194,6 +206,7 @@ curl "http://localhost:3000/api/v1/analyze?path=./test-repos/express&methods=tru
 Use this checklist when testing new Ctxman versions:
 
 ### Basic Features
+
 - [ ] File scanning works
 - [ ] Token counting accurate
 - [ ] Method extraction works
@@ -201,6 +214,7 @@ Use this checklist when testing new Ctxman versions:
 - [ ] Filtering rules respected (.contextignore, .contextinclude)
 
 ### v2.3.0+ Features
+
 - [ ] TOON format (40-50% token reduction)
 - [ ] GitIngest chunking
 - [ ] Wizard mode
@@ -208,11 +222,13 @@ Use this checklist when testing new Ctxman versions:
 - [ ] Format conversion
 
 ### v2.3.7+ Features
+
 - [ ] LLM auto-detection
 - [ ] Context fit analysis
 - [ ] Model-specific optimization
 
 ### v3.0.0+ Features
+
 - [ ] Git integration (--changed-only, --changed-since)
 - [ ] Watch mode (real-time file monitoring)
 - [ ] API server (all 6 endpoints)
@@ -225,6 +241,7 @@ Use this checklist when testing new Ctxman versions:
 ## Maintenance
 
 ### Update Submodules
+
 ```bash
 # Update all submodules to latest
 git submodule update --remote
@@ -238,6 +255,7 @@ git commit -m "chore: Update Express test repo"
 ```
 
 ### Remove Submodule
+
 ```bash
 # Remove submodule
 git submodule deinit -f test-repos/<NAME>

@@ -86,13 +86,13 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
 
 ## Sürüm Geçmişi
 
-| Sürüm | Tarih | Öne Çıkanlar |
-|-------|-------|--------------|
+| Sürüm | Tarih      | Öne Çıkanlar                                             |
+| ----- | ---------- | -------------------------------------------------------- |
 | 3.0.0 | 2024-08-20 | Plugin mimarisi, Git entegrasyonu, REST API, İzleme modu |
-| 2.3.7 | 2024-07-15 | LLM optimizasyonu, token bütçeleme |
-| 2.3.0 | 2024-06-01 | Yöntem düzeyinde analiz, GitIngest formatı |
-| 2.0.0 | 2024-04-01 | Çoklu dil desteği, AST analizi |
-| 1.0.0 | 2024-01-01 | İlk sürüm |
+| 2.3.7 | 2024-07-15 | LLM optimizasyonu, token bütçeleme                       |
+| 2.3.0 | 2024-06-01 | Yöntem düzeyinde analiz, GitIngest formatı               |
+| 2.0.0 | 2024-04-01 | Çoklu dil desteği, AST analizi                           |
+| 1.0.0 | 2024-01-01 | İlk sürüm                                                |
 
 ## Yükseltme
 

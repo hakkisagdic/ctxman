@@ -2,7 +2,7 @@
   "id": "FEAT-007",
   "type": "feat",
   "description": "TypeScript Definition Files - Create index.d.ts TypeScript definition file for the public API, enabling better IDE support and TypeScript integration.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Analyze index.js to understand the public API exports",
     "Analyze ctxman.js to understand CLI exports (if any programmatic API)",

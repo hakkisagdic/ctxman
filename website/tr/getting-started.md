@@ -197,14 +197,14 @@ ctxman serve --port 8080
 
 ### API Uç Noktaları
 
-| Uç Nokta | Metot | Açıklama |
-|----------|-------|----------|
-| `/api/analyze` | POST | Kod analiz et |
-| `/api/status` | GET | Sunucu durumu |
-| `/api/config` | GET | Yapılandırmayı al |
-| `/api/config` | POST | Yapılandırmayı güncelle |
-| `/api/cache/clear` | POST | Önbelleği temizle |
-| `/health` | GET | Sağlık kontrolü |
+| Uç Nokta           | Metot | Açıklama                |
+| ------------------ | ----- | ----------------------- |
+| `/api/analyze`     | POST  | Kod analiz et           |
+| `/api/status`      | GET   | Sunucu durumu           |
+| `/api/config`      | GET   | Yapılandırmayı al       |
+| `/api/config`      | POST  | Yapılandırmayı güncelle |
+| `/api/cache/clear` | POST  | Önbelleği temizle       |
+| `/health`          | GET   | Sağlık kontrolü         |
 
 ### Örnek API Kullanımı
 
@@ -288,7 +288,7 @@ import ctxman from 'ctxman';
 // Temel analiz
 const result = await ctxman.analyze({
   path: './src',
-  methodLevel: true
+  methodLevel: true,
 });
 
 console.log(result.totalTokens);
@@ -298,7 +298,7 @@ const watcher = ctxman.watch({
   path: './src',
   onChange: (result) => {
     console.log('Dosyalar değişti:', result.files);
-  }
+  },
 });
 
 // İzlemeyi durdur

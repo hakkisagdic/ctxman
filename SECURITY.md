@@ -4,11 +4,11 @@
 
 We actively support the following versions of Ctxman with security updates:
 
-| Version | Supported | End of Support |
-|---------|-----------|----------------|
-| 3.0.x   | ✅ Active | Current release |
+| Version | Supported      | End of Support   |
+| ------- | -------------- | ---------------- |
+| 3.0.x   | ✅ Active      | Current release  |
 | 2.3.x   | ✅ Maintenance | Until 2025-12-31 |
-| < 2.3.0 | ❌ EOL | End of life |
+| < 2.3.0 | ❌ EOL         | End of life      |
 
 ### Version Definitions
 
@@ -50,21 +50,21 @@ Please provide:
 
 ### Response Timeline
 
-| Stage | Target Time |
-|-------|-------------|
-| Initial Response | Within 48 hours |
-| Vulnerability Assessment | Within 7 days |
-| Fix Development | Varies by severity |
+| Stage                       | Target Time          |
+| --------------------------- | -------------------- |
+| Initial Response            | Within 48 hours      |
+| Vulnerability Assessment    | Within 7 days        |
+| Fix Development             | Varies by severity   |
 | Security Advisory Published | With the fix release |
 
 ### Severity Levels
 
-| Severity | Description | Response Time |
-|----------|-------------|---------------|
-| **Critical** | Remote code execution, data breach | 24-48 hours |
-| **High** | Authentication bypass, privilege escalation | 3-7 days |
-| **Medium** | Information disclosure, DoS | 7-14 days |
-| **Low** | Minor issues, best practice violations | 14-30 days |
+| Severity     | Description                                 | Response Time |
+| ------------ | ------------------------------------------- | ------------- |
+| **Critical** | Remote code execution, data breach          | 24-48 hours   |
+| **High**     | Authentication bypass, privilege escalation | 3-7 days      |
+| **Medium**   | Information disclosure, DoS                 | 7-14 days     |
+| **Low**      | Minor issues, best practice violations      | 14-30 days    |
 
 ## Security Best Practices
 
@@ -133,6 +133,7 @@ We follow responsible disclosure:
 ### CVE Assignment
 
 For confirmed vulnerabilities, we will:
+
 - Request a CVE from GitHub
 - Credit the reporter (unless they wish to remain anonymous)
 - Document the vulnerability in the advisory
@@ -149,4 +150,4 @@ We thank all security researchers who responsibly report vulnerabilities. Your e
 
 ---
 
-*Last updated: 2025-08-23*
+_Last updated: 2025-08-23_

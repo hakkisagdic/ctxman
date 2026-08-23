@@ -21,5 +21,5 @@ export default {
     app.component('LanguageSwitcher', LanguageSwitcher);
     app.component('HeroSection', HeroSection);
     app.component('QuickStart', QuickStart);
-  }
+  },
 };

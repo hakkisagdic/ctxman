@@ -18,23 +18,23 @@ Bu belge, Ctxman v3.0.0 için kapsamlı performans kıyaslamaları sunar. Tüm �
 
 Tüm kıyaslamalar şu ortamda ölçülmüştür:
 
-| Bileşen         | Özellik                            |
-| --------------- | ---------------------------------- |
-| CPU             | 8 çekirdekli işlemci (Intel/AMD)   |
-| RAM             | 16 GB DDR4                         |
-| Depolama        | NVMe SSD                           |
-| Node.js         | v22.x (LTS)                        |
-| İşletim Sistemi | Linux/macOS/Windows                |
-| tiktoken        | Son sürüm (kesin sayım için)       |
+| Bileşen         | Özellik                          |
+| --------------- | -------------------------------- |
+| CPU             | 8 çekirdekli işlemci (Intel/AMD) |
+| RAM             | 16 GB DDR4                       |
+| Depolama        | NVMe SSD                         |
+| Node.js         | v22.x (LTS)                      |
+| İşletim Sistemi | Linux/macOS/Windows              |
+| tiktoken        | Son sürüm (kesin sayım için)     |
 
 ### Test Kod Tabanları
 
-| Proje Tipi      | Dosya | Kod Satırı | Token (yaklaşık) |
-| --------------- | ----- | ---------- | ---------------- |
-| Küçük Proje     | 50    | 5,000      | 25,000           |
-| Orta Proje      | 200   | 25,000     | 125,000          |
-| Büyük Proje     | 1,000 | 150,000    | 750,000          |
-| Kurumsal Suite  | 5,000 | 500,000    | 2,500,000        |
+| Proje Tipi     | Dosya | Kod Satırı | Token (yaklaşık) |
+| -------------- | ----- | ---------- | ---------------- |
+| Küçük Proje    | 50    | 5,000      | 25,000           |
+| Orta Proje     | 200   | 25,000     | 125,000          |
+| Büyük Proje    | 1,000 | 150,000    | 750,000          |
+| Kurumsal Suite | 5,000 | 500,000    | 2,500,000        |
 
 ## Token Analizi Performansı
 
@@ -57,16 +57,16 @@ Tüm kıyaslamalar şu ortamda ölçülmüştür:
 
 Farklı programlama dilleri değişen token yoğunluklarına ve ayrıştırma karmaşıklığına sahiptir:
 
-| Dil         | Dosya | Token   | Analiz Süresi | Token/Saniye |
-| ----------- | ----- | ------- | ------------- | ------------ |
-| JavaScript  | 100   | 50,000  | 75ms          | 666,666      |
-| TypeScript  | 100   | 55,000  | 82ms          | 670,731      |
-| Python      | 100   | 45,000  | 68ms          | 661,764      |
-| Go          | 100   | 40,000  | 60ms          | 666,666      |
-| Rust        | 100   | 48,000  | 92ms          | 521,739      |
-| Java        | 100   | 52,000  | 78ms          | 666,666      |
-| PHP         | 100   | 47,000  | 71ms          | 661,971      |
-| Ruby        | 100   | 43,000  | 65ms          | 661,538      |
+| Dil        | Dosya | Token  | Analiz Süresi | Token/Saniye |
+| ---------- | ----- | ------ | ------------- | ------------ |
+| JavaScript | 100   | 50,000 | 75ms          | 666,666      |
+| TypeScript | 100   | 55,000 | 82ms          | 670,731      |
+| Python     | 100   | 45,000 | 68ms          | 661,764      |
+| Go         | 100   | 40,000 | 60ms          | 666,666      |
+| Rust       | 100   | 48,000 | 92ms          | 521,739      |
+| Java       | 100   | 52,000 | 78ms          | 666,666      |
+| PHP        | 100   | 47,000 | 71ms          | 661,971      |
+| Ruby       | 100   | 43,000 | 65ms          | 661,538      |
 
 **Notlar:**
 
@@ -93,23 +93,23 @@ Farklı programlama dilleri değişen token yoğunluklarına ve ayrıştırma ka
 
 ### İşleme Göre Bellek Profili
 
-| İşlem              | Küçük Proje | Orta Proje | Büyük Proje |
-| ------------------ | ----------- | ---------- | ----------- |
-| Dosya Tarama       | 12 MB       | 18 MB      | 45 MB       |
-| Tokenize           | 35 MB       | 65 MB      | 120 MB      |
-| Method Çıkarma     | 42 MB       | 78 MB      | 156 MB      |
-| Rapor Oluşturma    | 38 MB       | 72 MB      | 140 MB      |
-| Bağlam Oluşturma   | 40 MB       | 75 MB      | 148 MB      |
+| İşlem            | Küçük Proje | Orta Proje | Büyük Proje |
+| ---------------- | ----------- | ---------- | ----------- |
+| Dosya Tarama     | 12 MB       | 18 MB      | 45 MB       |
+| Tokenize         | 35 MB       | 65 MB      | 120 MB      |
+| Method Çıkarma   | 42 MB       | 78 MB      | 156 MB      |
+| Rapor Oluşturma  | 38 MB       | 72 MB      | 140 MB      |
+| Bağlam Oluşturma | 40 MB       | 75 MB      | 148 MB      |
 
 ## Method-Seviyesi vs Dosya-Seviyesi Analiz
 
 ### Performans Karşılaştırması
 
-| Analiz Tipi        | Küçük (50 dosya) | Orta (200 dosya) | Büyük (1,000 dosya) |
-| ------------------ | ---------------- | ---------------- | ------------------- |
-| Dosya-Seviyesi     | 45ms             | 180ms            | 850ms               |
-| Method-Seviyesi    | 125ms            | 520ms            | 2.4s                |
-| Ek Yük             | 2.8x yavaş       | 2.9x yavaş       | 2.8x yavaş          |
+| Analiz Tipi     | Küçük (50 dosya) | Orta (200 dosya) | Büyük (1,000 dosya) |
+| --------------- | ---------------- | ---------------- | ------------------- |
+| Dosya-Seviyesi  | 45ms             | 180ms            | 850ms               |
+| Method-Seviyesi | 125ms            | 520ms            | 2.4s                |
+| Ek Yük          | 2.8x yavaş       | 2.9x yavaş       | 2.8x yavaş          |
 
 ### Method-Seviyesi Analiz Ne Zaman Kullanılmalı
 
@@ -129,24 +129,24 @@ Farklı programlama dilleri değişen token yoğunluklarına ve ayrıştırma ka
 
 ### Method Çıkarma Performansı
 
-| Dil         | Bulunan Method | Çıkarma Süresi | Method/Saniye |
-| ----------- | -------------- | -------------- | ------------- |
-| JavaScript  | 1,200          | 180ms          | 6,666         |
-| TypeScript  | 1,350          | 195ms          | 6,923         |
-| Python      | 980            | 145ms          | 6,758         |
-| Java        | 1,500          | 210ms          | 7,142         |
-| Go          | 850            | 125ms          | 6,800         |
+| Dil        | Bulunan Method | Çıkarma Süresi | Method/Saniye |
+| ---------- | -------------- | -------------- | ------------- |
+| JavaScript | 1,200          | 180ms          | 6,666         |
+| TypeScript | 1,350          | 195ms          | 6,923         |
+| Python     | 980            | 145ms          | 6,758         |
+| Java       | 1,500          | 210ms          | 7,142         |
+| Go         | 850            | 125ms          | 6,800         |
 
 ## Önbellekleme Performansı
 
 ### Önbellek İsabet Oranları
 
-| Önbellek Tipi        | İsabet Oranı (Aynı Proje) | İsabet Oranı (Benzer Projeler) |
-| -------------------- | ------------------------- | ------------------------------ |
-| Dosya İçeriği        | %95                       | %45                            |
-| Token Sayımları      | %92                       | %38                            |
-| Method Metadata      | %88                       | %25                            |
-| Git Diff Sonuçları   | %78                       | %15                            |
+| Önbellek Tipi      | İsabet Oranı (Aynı Proje) | İsabet Oranı (Benzer Projeler) |
+| ------------------ | ------------------------- | ------------------------------ |
+| Dosya İçeriği      | %95                       | %45                            |
+| Token Sayımları    | %92                       | %38                            |
+| Method Metadata    | %88                       | %25                            |
+| Git Diff Sonuçları | %78                       | %15                            |
 
 ### Önbellek-Aktif vs Önbellek-Devre Dışı
 
@@ -167,12 +167,12 @@ Farklı programlama dilleri değişen token yoğunluklarına ve ayrıştırma ka
 
 ### Paralel vs Sıralı Analiz
 
-| Depo Sayısı | Sıralı    | Paralel (4 worker) | Hız Artışı |
-| ----------- | --------- | ------------------ | ---------- |
-| 2 depo      | 1.8s      | 0.5s               | 3.6x       |
-| 4 depo      | 3.6s      | 1.0s               | 3.6x       |
-| 8 depo      | 7.2s      | 2.1s               | 3.4x       |
-| 16 depo     | 14.4s     | 4.5s               | 3.2x       |
+| Depo Sayısı | Sıralı | Paralel (4 worker) | Hız Artışı |
+| ----------- | ------ | ------------------ | ---------- |
+| 2 depo      | 1.8s   | 0.5s               | 3.6x       |
+| 4 depo      | 3.6s   | 1.0s               | 3.6x       |
+| 8 depo      | 7.2s   | 2.1s               | 3.4x       |
+| 16 depo     | 14.4s  | 4.5s               | 3.2x       |
 
 ### Çoklu-Depo Kullanım Senaryoları
 
@@ -202,32 +202,32 @@ Paylaşılan önbellekleme ve tekilleştirme sayesinde daha fazla depo ile belle
 
 ### İstek Gecikmesi
 
-| Uç Nokta                | Ort. Yanıt Süresi | P95 Yanıt Süresi | P99 Yanıt Süresi |
-| ----------------------- | ----------------- | ---------------- | ---------------- |
-| GET /api/v1/analyze     | 180ms             | 320ms            | 480ms            |
-| GET /api/v1/stats       | 95ms              | 165ms            | 245ms            |
-| GET /api/v1/methods     | 45ms              | 78ms             | 125ms            |
-| GET /api/v1/diff        | 125ms             | 210ms            | 340ms            |
-| POST /api/v1/context    | 220ms             | 380ms            | 520ms            |
-| GET /api/v1/docs        | 5ms               | 12ms             | 18ms             |
+| Uç Nokta             | Ort. Yanıt Süresi | P95 Yanıt Süresi | P99 Yanıt Süresi |
+| -------------------- | ----------------- | ---------------- | ---------------- |
+| GET /api/v1/analyze  | 180ms             | 320ms            | 480ms            |
+| GET /api/v1/stats    | 95ms              | 165ms            | 245ms            |
+| GET /api/v1/methods  | 45ms              | 78ms             | 125ms            |
+| GET /api/v1/diff     | 125ms             | 210ms            | 340ms            |
+| POST /api/v1/context | 220ms             | 380ms            | 520ms            |
+| GET /api/v1/docs     | 5ms               | 12ms             | 18ms             |
 
 ### Verim
 
-| Uç Nokta                | İstek/Saniye | Eşzamanlı Kullanıcı |
-| ----------------------- | ------------ | ------------------- |
-| GET /api/v1/analyze     | 45           | 10                  |
-| GET /api/v1/stats       | 95           | 15                  |
-| GET /api/v1/methods     | 180          | 20                  |
-| POST /api/v1/context    | 35           | 10                  |
+| Uç Nokta             | İstek/Saniye | Eşzamanlı Kullanıcı |
+| -------------------- | ------------ | ------------------- |
+| GET /api/v1/analyze  | 45           | 10                  |
+| GET /api/v1/stats    | 95           | 15                  |
+| GET /api/v1/methods  | 180          | 20                  |
+| POST /api/v1/context | 35           | 10                  |
 
 ### API Sunucu Kaynak Kullanımı
 
-| Metrik              | Boşta  | Hafif Yük | Ağır Yük |
-| ------------------- | ------ | --------- | -------- |
-| CPU Kullanımı       | %0.5   | %15       | %65      |
-| Bellek (Temel)      | 45 MB  | 85 MB     | 180 MB   |
-| Bellek (Tepe)       | 45 MB  | 145 MB    | 320 MB   |
-| Açık Bağlantılar   | 0      | 12        | 50       |
+| Metrik           | Boşta | Hafif Yük | Ağır Yük |
+| ---------------- | ----- | --------- | -------- |
+| CPU Kullanımı    | %0.5  | %15       | %65      |
+| Bellek (Temel)   | 45 MB | 85 MB     | 180 MB   |
+| Bellek (Tepe)    | 45 MB | 145 MB    | 320 MB   |
+| Açık Bağlantılar | 0     | 12        | 50       |
 
 ## Git Entegrasyonu Performansı
 
@@ -242,20 +242,20 @@ Paylaşılan önbellekleme ve tekilleştirme sayesinde daha fazla depo ile belle
 
 ### Branch Karşılaştırma Performansı
 
-| Branch Diff                | Değişen Dosya | Analiz Süresi |
-| -------------------------- | ------------- | ------------- |
-| feature → main             | 25            | 95ms          |
-| release/2.0 → main         | 150           | 520ms         |
-| Büyük feature branch       | 400           | 1.5s          |
+| Branch Diff          | Değişen Dosya | Analiz Süresi |
+| -------------------- | ------------- | ------------- |
+| feature → main       | 25            | 95ms          |
+| release/2.0 → main   | 150           | 520ms         |
+| Büyük feature branch | 400           | 1.5s          |
 
 ### Git İşlemleri Ek Yükü
 
-| İşlem                   | Süre   | Notlar                             |
-| ----------------------- | ------ | ---------------------------------- |
-| Durum kontrolü          | 5ms    | Taze depo                          |
-| Diff oluşturma          | 15ms   | 50 değişen dosya                   |
-| Yazar çıkarma           | 25ms   | 10 yazar, 100 commit               |
-| Commit analizi          | 35ms   | 100 commit                         |
+| İşlem          | Süre | Notlar               |
+| -------------- | ---- | -------------------- |
+| Durum kontrolü | 5ms  | Taze depo            |
+| Diff oluşturma | 15ms | 50 değişen dosya     |
+| Yazar çıkarma  | 25ms | 10 yazar, 100 commit |
+| Commit analizi | 35ms | 100 commit           |
 
 ## Performans Optimizasyon İpuçları
 

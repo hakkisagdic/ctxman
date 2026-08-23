@@ -5,12 +5,7 @@
       "id": ".-mt51f0ig",
       "path": ".",
       "alias": "Current Project",
-      "exclude": [
-        "node_modules/**",
-        "dist/**",
-        "build/**",
-        "coverage/**"
-      ],
+      "exclude": ["node_modules/**", "dist/**", "build/**", "coverage/**"],
       "weight": 1
     }
   ]

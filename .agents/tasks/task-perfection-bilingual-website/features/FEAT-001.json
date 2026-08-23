@@ -1,0 +1,38 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Create public website for ctxman with VitePress, featuring modern responsive design, bilingual support (English/Turkish), documentation integration, interactive demo page, and GitHub integration.",
+  "status": "completed",
+  "steps": [
+    "1. Initialize VitePress in website/ directory at project root with npm init and vitepress installation",
+    "2. Create VitePress config (website/.vitepress/config.js) with: navigation, sidebar, i18n for EN/TR, head meta, social links, GitHub integration",
+    "3. Create shared theme configuration with custom CSS for modern design, responsive layout, code highlighting, dark/light mode",
+    "4. Create English pages: index.md (hero landing page), features.md, getting-started.md, api-reference.md, demo.md (interactive playground), changelog.md",
+    "5. Create Turkish pages: tr/index.md, tr/features.md, tr/getting-started.md, tr/api-reference.md, tr/demo.md, tr/changelog.md",
+    "6. Create reusable Vue components: FeaturesGrid.vue, CodeDemo.vue, GitHubStars.vue, LanguageSwitcher.vue, InteractiveDemo.vue",
+    "7. Integrate existing documentation from docs/content-en/ and docs/content-tr/ into VitePress sidebar and pages",
+    "8. Add package.json scripts for website: docs:dev, docs:build, docs:preview",
+    "9. Create .github/workflows/website.yml for GitHub Pages deployment with proper permissions and concurrency",
+    "10. Add CNAME file and configure for custom domain support (optional placeholder)"
+  ],
+  "acceptance_criteria": [
+    "Running 'npm run docs:dev' starts VitePress dev server on port 5173",
+    "Running 'npm run docs:build' produces static site in website/.vitepress/dist/",
+    "All pages are accessible in both English and Turkish",
+    "Language switcher works correctly on all pages",
+    "Website is responsive on mobile, tablet, and desktop viewports",
+    "GitHub stars badge fetches and displays live count",
+    "Interactive demo page allows basic ctxman functionality simulation",
+    "Documentation pages render correctly with syntax highlighting",
+    "SEO meta tags present on all pages"
+  ],
+  "verification": [
+    "npm run docs:build should complete without errors",
+    "Open dist/index.html and verify landing page renders",
+    "Check that all internal links work correctly",
+    "Verify language switching between EN and TR",
+    "Test responsive design in browser dev tools (mobile/tablet/desktop)"
+  ],
+  "blocked_reason": null,
+  "findings": "VitePress website successfully created with all features. Build completed successfully. Minor warning about gitignore syntax highlighting (not critical - falls back to txt). All 1211 project tests still pass. GitHub Pages workflow configured for automatic deployment on pushes to main branch affecting website/ directory."
+}

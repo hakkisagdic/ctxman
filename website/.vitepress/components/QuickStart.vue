@@ -5,18 +5,18 @@ const props = defineProps({
     default: () => [
       {
         title: 'Install Ctxman',
-        description: 'Run npm install -g ctxman to install globally'
+        description: 'Run npm install -g ctxman to install globally',
       },
       {
         title: 'Navigate to your project',
-        description: 'cd into your project directory'
+        description: 'cd into your project directory',
       },
       {
         title: 'Run analysis',
-        description: 'Execute ctxman to start the interactive wizard'
-      }
-    ]
-  }
+        description: 'Execute ctxman to start the interactive wizard',
+      },
+    ],
+  },
 });
 </script>
 
@@ -89,7 +89,7 @@ const props = defineProps({
   .quick-start {
     padding: 1.5rem;
   }
-  
+
   .quick-start-step {
     padding-left: 2.5rem;
   }

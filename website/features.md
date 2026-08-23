@@ -21,8 +21,8 @@ export default {
   extensions: ['.xyz'],
   analyze: async (content, filePath) => {
     // Custom analysis logic
-  }
-}
+  },
+};
 ```
 
 ### Git Integration
@@ -111,21 +111,21 @@ Accurate token counting for LLM planning:
 
 Analyze code in 14+ programming languages:
 
-| Language | Extensions | Features |
-|----------|------------|----------|
-| JavaScript | .js, .jsx, .mjs | Full AST analysis |
-| TypeScript | .ts, .tsx | Type-aware analysis |
-| Python | .py | Method-level analysis |
-| PHP | .php | Class and function analysis |
-| Ruby | .rb | Module and method analysis |
-| Java | .java | Class and method analysis |
-| Kotlin | .kt | Function analysis |
-| C# | .cs | Class and method analysis |
-| Go | .go | Function analysis |
-| Rust | .rs | Function and struct analysis |
-| Swift | .swift | Function analysis |
-| C/C++ | .c, .cpp, .h | Function analysis |
-| Scala | .scala | Class and function analysis |
+| Language   | Extensions      | Features                     |
+| ---------- | --------------- | ---------------------------- |
+| JavaScript | .js, .jsx, .mjs | Full AST analysis            |
+| TypeScript | .ts, .tsx       | Type-aware analysis          |
+| Python     | .py             | Method-level analysis        |
+| PHP        | .php            | Class and function analysis  |
+| Ruby       | .rb             | Module and method analysis   |
+| Java       | .java           | Class and method analysis    |
+| Kotlin     | .kt             | Function analysis            |
+| C#         | .cs             | Class and method analysis    |
+| Go         | .go             | Function analysis            |
+| Rust       | .rs             | Function and struct analysis |
+| Swift      | .swift          | Function analysis            |
+| C/C++      | .c, .cpp, .h    | Function analysis            |
+| Scala      | .scala          | Class and function analysis  |
 
 ### Method-Level Analysis
 
@@ -228,11 +228,7 @@ Multiple configuration options:
     "methodLevel": true,
     "tokenCount": true
   },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "*.test.js"
-  ]
+  "exclude": ["node_modules", "dist", "*.test.js"]
 }
 ```
 

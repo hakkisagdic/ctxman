@@ -47,19 +47,19 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 
 ## Documentation
 
-| Document                                      | Description                                        |
-| --------------------------------------------- | -------------------------------------------------- |
-| [API Documentation](docs/API.md)              | REST API endpoints and usage                       |
-| [Architecture](docs/ARCHITECTURE.md)          | Plugin system, core modules, data flow             |
-| [Performance Benchmarks](docs/PERFORMANCE.md) | Performance metrics and optimization tips          |
-| [Changelog](CHANGELOG.md)                     | Version history and release notes                  |
-| [Contributing](CONTRIBUTING.md)               | Development setup and guidelines                   |
-| [Security Policy](SECURITY.md)                | Security policy and vulnerability reporting        |
-| [Code of Conduct](CODE_OF_CONDUCT.md)         | Community guidelines                               |
-| [API Dokümantasyonu](docs/API-tr.md)          | REST API dokümantasyonu (Türkçe)                   |
-| [Mimari](docs/ARCHITECTURE-tr.md)             | Plugin sistemi, çekirdek modüller (Türkçe)         |
+| Document                                           | Description                                             |
+| -------------------------------------------------- | ------------------------------------------------------- |
+| [API Documentation](docs/API.md)                   | REST API endpoints and usage                            |
+| [Architecture](docs/ARCHITECTURE.md)               | Plugin system, core modules, data flow                  |
+| [Performance Benchmarks](docs/PERFORMANCE.md)      | Performance metrics and optimization tips               |
+| [Changelog](CHANGELOG.md)                          | Version history and release notes                       |
+| [Contributing](CONTRIBUTING.md)                    | Development setup and guidelines                        |
+| [Security Policy](SECURITY.md)                     | Security policy and vulnerability reporting             |
+| [Code of Conduct](CODE_OF_CONDUCT.md)              | Community guidelines                                    |
+| [API Dokümantasyonu](docs/API-tr.md)               | REST API dokümantasyonu (Türkçe)                        |
+| [Mimari](docs/ARCHITECTURE-tr.md)                  | Plugin sistemi, çekirdek modüller (Türkçe)              |
 | [Performans Kıyaslamaları](docs/PERFORMANCE-tr.md) | Performans metrikleri ve optimizasyon ipuçları (Türkçe) |
-| [Katkı Rehberi](CONTRIBUTING-tr.md)           | Geliştirme kurulumu ve yönergeler (Türkçe)         |
+| [Katkı Rehberi](CONTRIBUTING-tr.md)                | Geliştirme kurulumu ve yönergeler (Türkçe)              |
 
 ## Files
 

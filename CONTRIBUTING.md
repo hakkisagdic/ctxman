@@ -189,17 +189,17 @@ We use [Conventional Commits](https://www.conventionalcommits.org/) enforced by 
 
 ### Types
 
-| Type | Description |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
-| `style` | Code style (formatting, semicolons) |
-| `refactor` | Code refactoring |
-| `perf` | Performance improvement |
-| `test` | Adding or updating tests |
-| `chore` | Maintenance tasks |
-| `ci` | CI/CD changes |
+| Type       | Description                         |
+| ---------- | ----------------------------------- |
+| `feat`     | New feature                         |
+| `fix`      | Bug fix                             |
+| `docs`     | Documentation only                  |
+| `style`    | Code style (formatting, semicolons) |
+| `refactor` | Code refactoring                    |
+| `perf`     | Performance improvement             |
+| `test`     | Adding or updating tests            |
+| `chore`    | Maintenance tasks                   |
+| `ci`       | CI/CD changes                       |
 
 ### Examples
 
@@ -265,18 +265,22 @@ When you create a PR, fill out the template:
 
 ```markdown
 ## Description
+
 [Describe your changes]
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Testing
+
 [Describe testing done]
 
 ## Checklist
+
 - [ ] Tests pass
 - [ ] Linting passes
 - [ ] Documentation updated
@@ -343,14 +347,14 @@ test/
 
 ### Test Categories
 
-| Category | Command | Description |
-|----------|---------|-------------|
-| All | `npm run test` | Run all tests |
-| Coverage | `npm run test:coverage` | Generate coverage report |
-| V3 Features | `npm run test:v3` | Platform features tests |
-| Git Integration | `npm run test:git` | Git features tests |
-| Plugin System | `npm run test:plugin` | Plugin tests |
-| API Server | `npm run test:api` | REST API tests |
+| Category        | Command                 | Description              |
+| --------------- | ----------------------- | ------------------------ |
+| All             | `npm run test`          | Run all tests            |
+| Coverage        | `npm run test:coverage` | Generate coverage report |
+| V3 Features     | `npm run test:v3`       | Platform features tests  |
+| Git Integration | `npm run test:git`      | Git features tests       |
+| Plugin System   | `npm run test:plugin`   | Plugin tests             |
+| API Server      | `npm run test:api`      | REST API tests           |
 
 ## Documentation
 

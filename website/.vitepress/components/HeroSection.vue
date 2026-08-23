@@ -4,16 +4,16 @@ import { ref } from 'vue';
 const props = defineProps({
   title: {
     type: String,
-    default: 'Ctxman'
+    default: 'Ctxman',
   },
   tagline: {
     type: String,
-    default: 'AI Development Platform'
+    default: 'AI Development Platform',
   },
   description: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 });
 </script>
 

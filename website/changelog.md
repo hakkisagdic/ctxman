@@ -86,13 +86,13 @@ For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ct
 
 ## Version History
 
-| Version | Date | Highlights |
-|---------|------|------------|
-| 3.0.0 | 2024-08-20 | Plugin architecture, Git integration, REST API, Watch mode |
-| 2.3.7 | 2024-07-15 | LLM optimization, token budgeting |
-| 2.3.0 | 2024-06-01 | Method-level analysis, GitIngest format |
-| 2.0.0 | 2024-04-01 | Multi-language support, AST analysis |
-| 1.0.0 | 2024-01-01 | Initial release |
+| Version | Date       | Highlights                                                 |
+| ------- | ---------- | ---------------------------------------------------------- |
+| 3.0.0   | 2024-08-20 | Plugin architecture, Git integration, REST API, Watch mode |
+| 2.3.7   | 2024-07-15 | LLM optimization, token budgeting                          |
+| 2.3.0   | 2024-06-01 | Method-level analysis, GitIngest format                    |
+| 2.0.0   | 2024-04-01 | Multi-language support, AST analysis                       |
+| 1.0.0   | 2024-01-01 | Initial release                                            |
 
 ## Upgrading
 

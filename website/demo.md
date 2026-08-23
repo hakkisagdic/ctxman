@@ -90,24 +90,30 @@ ctxman serve
 
 40-50% token reduction for LLM optimization:
 
-```markdown
+````markdown
 # src/index.js
 
 ## Functions
 
 ### calculateSum(arr)
+
 ```javascript
 return arr.reduce((sum, num) => sum + num, 0);
 ```
+````
+
 Tokens: 45
 
 ### main()
+
 ```javascript
 const numbers = [1, 2, 3, 4, 5];
 console.log(calculateSum(numbers));
 ```
+
 Tokens: 32
-```
+
+`````
 
 ### GitIngest Format
 
@@ -118,12 +124,14 @@ GitHub-ready markdown with syntax highlighting:
 
 ## File Tree
 
-```
+`````
+
 src/
 ├── index.js
 ├── utils.js
 └── parser.js
-```
+
+````
 
 ## Files
 
@@ -134,7 +142,8 @@ src/
 function calculateSum(arr) {
   return arr.reduce((sum, num) => sum + num, 0);
 }
-```
+````
+
 ````
 
 ### JSON Format
@@ -173,3 +182,4 @@ Ready to use Ctxman in your projects?
 <script setup>
 import InteractiveDemo from './.vitepress/components/InteractiveDemo.vue'
 </script>
+````

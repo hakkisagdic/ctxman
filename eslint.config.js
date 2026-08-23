@@ -12,6 +12,8 @@ export default [
       'coverage/**',
       'test-repos/**',
       'html/**', // Built desktop app assets
+      'website/.vitepress/dist/**', // Built website assets
+      'website/.vitepress/cache/**', // Website cache
     ],
   },
   {

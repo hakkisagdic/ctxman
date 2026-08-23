@@ -18,14 +18,14 @@ This document provides comprehensive performance benchmarks for Ctxman v3.0.0. A
 
 All benchmarks were measured on:
 
-| Component         | Specification                       |
-| ----------------- | ----------------------------------- |
-| CPU               | 8-core processor (Intel/AMD)        |
-| RAM               | 16 GB DDR4                          |
-| Storage           | NVMe SSD                            |
-| Node.js           | v22.x (LTS)                         |
-| Operating System  | Linux/macOS/Windows                 |
-| tiktoken          | Latest version (for exact counting) |
+| Component        | Specification                       |
+| ---------------- | ----------------------------------- |
+| CPU              | 8-core processor (Intel/AMD)        |
+| RAM              | 16 GB DDR4                          |
+| Storage          | NVMe SSD                            |
+| Node.js          | v22.x (LTS)                         |
+| Operating System | Linux/macOS/Windows                 |
+| tiktoken         | Latest version (for exact counting) |
 
 ### Test Codebases
 
@@ -43,9 +43,9 @@ All benchmarks were measured on:
 | Project Size | Files | Time (Exact) | Time (Estimated) | Tokens/Second |
 | ------------ | ----- | ------------ | ---------------- | ------------- |
 | Small        | 50    | 45ms         | 12ms             | 555,555       |
-| Medium       | 200   | 180ms       | 52ms             | 694,444       |
-| Large        | 1,000 | 850ms       | 245ms            | 882,352       |
-| Enterprise   | 5,000 | 4.2s        | 1.1s             | 595,238       |
+| Medium       | 200   | 180ms        | 52ms             | 694,444       |
+| Large        | 1,000 | 850ms        | 245ms            | 882,352       |
+| Enterprise   | 5,000 | 4.2s         | 1.1s             | 595,238       |
 
 **Key Findings:**
 
@@ -57,16 +57,16 @@ All benchmarks were measured on:
 
 Different programming languages have varying token densities and parsing complexity:
 
-| Language   | Files | Tokens  | Analysis Time | Tokens/Second |
-| ---------- | ----- | ------- | ------------- | ------------- |
-| JavaScript | 100   | 50,000  | 75ms          | 666,666       |
-| TypeScript | 100   | 55,000  | 82ms          | 670,731       |
-| Python     | 100   | 45,000  | 68ms          | 661,764       |
-| Go         | 100   | 40,000  | 60ms          | 666,666       |
-| Rust       | 100   | 48,000  | 92ms          | 521,739       |
-| Java       | 100   | 52,000  | 78ms          | 666,666       |
-| PHP        | 100   | 47,000  | 71ms          | 661,971       |
-| Ruby       | 100   | 43,000  | 65ms          | 661,538       |
+| Language   | Files | Tokens | Analysis Time | Tokens/Second |
+| ---------- | ----- | ------ | ------------- | ------------- |
+| JavaScript | 100   | 50,000 | 75ms          | 666,666       |
+| TypeScript | 100   | 55,000 | 82ms          | 670,731       |
+| Python     | 100   | 45,000 | 68ms          | 661,764       |
+| Go         | 100   | 40,000 | 60ms          | 666,666       |
+| Rust       | 100   | 48,000 | 92ms          | 521,739       |
+| Java       | 100   | 52,000 | 78ms          | 666,666       |
+| PHP        | 100   | 47,000 | 71ms          | 661,971       |
+| Ruby       | 100   | 43,000 | 65ms          | 661,538       |
 
 **Notes:**
 
@@ -93,13 +93,13 @@ Different programming languages have varying token densities and parsing complex
 
 ### Memory Profile by Operation
 
-| Operation         | Small Project | Medium Project | Large Project |
-| ----------------- | ------------- | -------------- | ------------- |
-| Scan Files        | 12 MB         | 18 MB          | 45 MB         |
-| Tokenize          | 35 MB         | 65 MB          | 120 MB        |
-| Method Extract    | 42 MB         | 78 MB          | 156 MB        |
-| Report Generate   | 38 MB         | 72 MB          | 140 MB        |
-| Context Build     | 40 MB         | 75 MB          | 148 MB        |
+| Operation       | Small Project | Medium Project | Large Project |
+| --------------- | ------------- | -------------- | ------------- |
+| Scan Files      | 12 MB         | 18 MB          | 45 MB         |
+| Tokenize        | 35 MB         | 65 MB          | 120 MB        |
+| Method Extract  | 42 MB         | 78 MB          | 156 MB        |
+| Report Generate | 38 MB         | 72 MB          | 140 MB        |
+| Context Build   | 40 MB         | 75 MB          | 148 MB        |
 
 ## Method-Level vs File-Level Analysis
 
@@ -222,12 +222,12 @@ Memory efficiency improves with more repos due to shared caching and deduplicati
 
 ### API Server Resource Usage
 
-| Metric            | Idle   | Light Load | Heavy Load |
-| ----------------- | ------ | ---------- | ---------- |
-| CPU Usage         | 0.5%   | 15%        | 65%        |
-| Memory (Base)     | 45 MB  | 85 MB      | 180 MB     |
-| Memory (Peak)     | 45 MB  | 145 MB     | 320 MB     |
-| Open Connections  | 0      | 12         | 50         |
+| Metric           | Idle  | Light Load | Heavy Load |
+| ---------------- | ----- | ---------- | ---------- |
+| CPU Usage        | 0.5%  | 15%        | 65%        |
+| Memory (Base)    | 45 MB | 85 MB      | 180 MB     |
+| Memory (Peak)    | 45 MB | 145 MB     | 320 MB     |
+| Open Connections | 0     | 12         | 50         |
 
 ## Git Integration Performance
 
@@ -242,20 +242,20 @@ Memory efficiency improves with more repos due to shared caching and deduplicati
 
 ### Branch Comparison Performance
 
-| Branch Diff             | Files Changed | Analysis Time |
-| ----------------------- | ------------- | ------------- |
-| feature → main          | 25            | 95ms          |
-| release/2.0 → main      | 150           | 520ms         |
-| Large feature branch    | 400           | 1.5s          |
+| Branch Diff          | Files Changed | Analysis Time |
+| -------------------- | ------------- | ------------- |
+| feature → main       | 25            | 95ms          |
+| release/2.0 → main   | 150           | 520ms         |
+| Large feature branch | 400           | 1.5s          |
 
 ### Git Operations Overhead
 
-| Operation               | Time    | Notes                        |
-| ----------------------- | ------- | ---------------------------- |
-| Status check            | 5ms     | Fresh repository             |
-| Diff generation         | 15ms    | 50 changed files             |
-| Author extraction       | 25ms    | 10 authors, 100 commits      |
-| Commit analysis         | 35ms    | 100 commits                  |
+| Operation         | Time | Notes                   |
+| ----------------- | ---- | ----------------------- |
+| Status check      | 5ms  | Fresh repository        |
+| Diff generation   | 15ms | 50 changed files        |
+| Author extraction | 25ms | 10 authors, 100 commits |
+| Commit analysis   | 35ms | 100 commits             |
 
 ## Performance Optimization Tips
 

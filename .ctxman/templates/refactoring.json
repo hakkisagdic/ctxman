@@ -3,7 +3,16 @@
   "description": "Optimized for code refactoring and restructuring",
   "include": ["src/**/*.js", "lib/**/*.js", "bin/**/*.js", "test/**/*.js"],
   "exclude": ["docs/**", "*.md", "node_modules/**"],
-  "methodInclude": ["*Handler", "*Service", "*Controller", "*Manager", "*Parser", "*Analyzer", "*Utils", "*Helper"],
+  "methodInclude": [
+    "*Handler",
+    "*Service",
+    "*Controller",
+    "*Manager",
+    "*Parser",
+    "*Analyzer",
+    "*Utils",
+    "*Helper"
+  ],
   "methodExclude": ["*test*"],
   "targetModel": "claude-sonnet-4.5"
 }

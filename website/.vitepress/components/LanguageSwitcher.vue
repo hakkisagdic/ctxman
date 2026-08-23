@@ -6,11 +6,11 @@ const currentLang = ref('en');
 
 const languages = [
   { code: 'en', name: 'English', path: '/' },
-  { code: 'tr', name: 'Türkçe', path: '/tr/' }
+  { code: 'tr', name: 'Türkçe', path: '/tr/' },
 ];
 
 const currentLanguage = computed(() => {
-  return languages.find(l => l.code === currentLang.value) || languages[0];
+  return languages.find((l) => l.code === currentLang.value) || languages[0];
 });
 
 const toggleDropdown = () => {
@@ -37,19 +37,41 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="language-switcher" v-click-outside="() => isOpen = false">
+  <div class="language-switcher" v-click-outside="() => (isOpen = false)">
     <button class="language-switcher-button" @click="toggleDropdown">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <circle cx="12" cy="12" r="10"></circle>
         <line x1="2" y1="12" x2="22" y2="12"></line>
-        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        <path
+          d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+        ></path>
       </svg>
       <span>{{ currentLanguage.name }}</span>
-      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="12"
+        height="12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <polyline :points="isOpen ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"></polyline>
       </svg>
     </button>
-    
+
     <div v-if="isOpen" class="language-switcher-dropdown">
       <button
         v-for="lang in languages"

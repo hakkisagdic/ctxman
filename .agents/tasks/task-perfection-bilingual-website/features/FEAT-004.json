@@ -1,0 +1,59 @@
+{
+  "id": "FEAT-004",
+  "type": "chore",
+  "description": "Fix CI/CD workflow issues (PR Labeler and CI tests mentioned as failing). Review and fix all GitHub Actions workflows for reliability.",
+  "status": "completed",
+  "steps": [
+    "1. Review .github/workflows/label.yml for potential issues - check permissions, token usage, and labeler action version compatibility",
+    "2. Review .github/workflows/ci.yml - verify concurrency groups, matrix strategy, coverage upload, all steps work correctly",
+    "3. Review .github/workflows/npm-publish.yml - verify OIDC trusted publishing is correctly configured",
+    "4. Review .github/workflows/release.yml - verify it doesn't duplicate npm publish (should trigger npm-publish.yml)",
+    "5. Review .github/workflows/codeql.yml - verify analysis runs correctly",
+    "6. Review .github/labeler.yml for correct file path patterns matching repository structure",
+    "7. Add workflow_dispatch triggers where missing for manual testing",
+    "8. Add workflow badges to README.md if missing (check current badges)",
+    "9. Ensure all workflows use persist-credentials: false for security",
+    "10. Test workflows by pushing to a test branch or using workflow_dispatch"
+  ],
+  "acceptance_criteria": [
+    "All workflow files pass YAML lint validation",
+    "CI workflow runs successfully on push and PR",
+    "PR Labeler workflow correctly labels new PRs",
+    "CodeQL workflow completes without errors",
+    "npm-publish workflow is ready for release",
+    "All workflows follow security best practices (persist-credentials: false)"
+  ],
+  "verification": [
+    "Push a test commit and verify CI workflow runs",
+    "Create a test PR and verify labeler adds labels",
+    "Check GitHub Actions tab for workflow run history"
+  ],
+  "blocked_reason": null,
+  "findings": {
+    "issues_fixed": [
+      "release.yml had duplicate npm publish job using NPM_TOKEN secret - removed and replaced with release-success summary job (npm-publish.yml handles publishing via OIDC)",
+      "Missing workflow_dispatch triggers in ci.yml and label.yml - added for manual testing",
+      "label.yml missing fetch-depth: 0 which could cause issues with file change detection",
+      "dependabot.yml referenced non-existent milestone: 1 - removed"
+    ],
+    "all_workflows_valid": true,
+    "yaml_lint_passed": true,
+    "local_tests_pass": "1211 tests passing",
+    "format_check_passed": true,
+    "lint_passed": true,
+    "security_best_practices": [
+      "All workflows use persist-credentials: false",
+      "OIDC trusted publishing for npm (no NPM_TOKEN secret needed)",
+      "Least privilege permissions configured",
+      "Concurrency groups prevent duplicate runs"
+    ],
+    "workflow_badges_present": [
+      "CI badge",
+      "CodeQL badge",
+      "npm version badge",
+      "License badge",
+      "Node.js version badge",
+      "Codecov badge"
+    ]
+  }
+}

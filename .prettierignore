@@ -11,6 +11,10 @@ coverage/
 # Test repositories
 test-repos/
 
+# Website build outputs
+website/.vitepress/dist/
+website/.vitepress/cache/
+
 # Generated files
 *.min.js
 *.bundle.js

@@ -2,11 +2,7 @@
   "task_id": "task-remaining-features",
   "task_description": "Complete remaining features for ctxman: Performance Dashboard (text-based ASCII charts), Dependency Scanner (node_modules token impact analysis), and update TypeScript migration spec with detailed implementation guide",
   "status": "completed",
-  "feature_order": [
-    "FEAT-001",
-    "FEAT-002",
-    "FEAT-003"
-  ],
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
   "verification": {
     "build": "pass",
     "tests": "pass",

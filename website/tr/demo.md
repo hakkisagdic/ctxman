@@ -90,24 +90,30 @@ ctxman serve
 
 LLM optimizasyonu için %40-50 token azaltma:
 
-```markdown
+````markdown
 # src/index.js
 
 ## Fonksiyonlar
 
 ### calculateSum(arr)
+
 ```javascript
 return arr.reduce((sum, num) => sum + num, 0);
 ```
+````
+
 Token: 45
 
 ### main()
+
 ```javascript
 const numbers = [1, 2, 3, 4, 5];
 console.log(calculateSum(numbers));
 ```
+
 Token: 32
-```
+
+`````
 
 ### GitIngest Formatı
 
@@ -118,12 +124,14 @@ Sözdizimi vurgulama ile GitHub hazır markdown:
 
 ## Dosya Ağacı
 
-```
+`````
+
 src/
 ├── index.js
 ├── utils.js
 └── parser.js
-```
+
+````
 
 ## Dosyalar
 
@@ -134,7 +142,8 @@ src/
 function calculateSum(arr) {
   return arr.reduce((sum, num) => sum + num, 0);
 }
-```
+````
+
 ````
 
 ### JSON Formatı
@@ -173,3 +182,4 @@ Ctxman'ı projelerinizde kullanmaya hazır mısınız?
 <script setup>
 import InteractiveDemo from '../.vitepress/components/InteractiveDemo.vue'
 </script>
+````
