@@ -1,0 +1,108 @@
+# PR Labeler Configuration
+# Maps file paths to labels for automatic PR labeling
+
+# Core library changes
+lib:
+  - changed-files:
+      - any-glob-to-any-file: 'lib/**/*'
+        labels: ['core', 'library']
+
+# CLI changes
+cli:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'bin/**/*'
+          - 'index.js'
+          - 'ctxman.js'
+        labels: ['cli']
+
+# Documentation
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'README.md'
+          - 'README-tr.md'
+          - 'docs/**/*'
+          - '*.md'
+        labels: ['documentation']
+
+# Testing
+testing:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'test/**/*'
+          - 'vitest.config.js'
+          - 'vitest.workspace.js'
+          - '**/*.test.js'
+          - '**/*.spec.js'
+        labels: ['testing']
+
+# CI/CD
+ci-cd:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/**/*'
+          - '.github/dependabot.yml'
+          - '.github/labeler.yml'
+        labels: ['ci-cd']
+
+# Configuration
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.contextignore'
+          - '.contextinclude'
+          - '.methodinclude'
+          - '.gitignore'
+          - 'package.json'
+          - 'eslint.config.js'
+          - '.prettierrc'
+          - 'commitlint.config.js'
+          - '.lintstagedrc.json'
+        labels: ['configuration']
+
+# Desktop app
+desktop:
+  - changed-files:
+      - any-glob-to-any-file: 'desktop-app/**/*'
+        labels: ['desktop', 'electron']
+
+# Dependencies
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'package-lock.json'
+        labels: ['dependencies']
+
+# Security-related files
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/codeql.yml'
+          - '.github/workflows/security*'
+        labels: ['security']
+
+# Scripts
+scripts:
+  - changed-files:
+      - any-glob-to-any-file: 'scripts/**/*'
+        labels: ['scripts']
+
+# Examples
+examples:
+  - changed-files:
+      - any-glob-to-any-file: 'examples/**/*'
+        labels: ['examples']
+
+# Git hooks
+git-hooks:
+  - changed-files:
+      - any-glob-to-any-file: '.husky/**/*'
+        labels: ['git-hooks']
+
+# API changes
+api:
+  - changed-files:
+      - any-glob-to-any-file: 'lib/api/**/*'
+        labels: ['api']

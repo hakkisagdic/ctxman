@@ -1,0 +1,119 @@
+# PR Labeler Workflow
+# Automatically labels PRs based on changed files and branch names
+
+name: PR Labeler
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# Concurrency: only one labeler run per PR
+concurrency:
+  group: labeler-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    name: Label PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # Label based on file paths
+      - name: Label based on changed files
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: true
+
+      # Add size label based on PR size
+      - name: Add size label
+        uses: pascalgn/size-label-action@v0.5.5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          sizes: >
+            {
+              "XS": 0,
+              "S": 10,
+              "M": 50,
+              "L": 200,
+              "XL": 500,
+              "XXL": 1000
+            }
+          ignore-pattern: "^(package-lock\\.json|.*\\.snap)$"
+
+      # Label based on branch name
+      - name: Label based on branch name
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const branchName = pr.head.ref.toLowerCase();
+            
+            const branchLabels = {
+              'feat': 'feature',
+              'feature': 'feature',
+              'fix': 'bug',
+              'bugfix': 'bug',
+              'hotfix': 'bug',
+              'docs': 'documentation',
+              'doc': 'documentation',
+              'chore': 'chore',
+              'refactor': 'refactor',
+              'test': 'testing',
+              'tests': 'testing',
+              'ci': 'ci-cd',
+              'perf': 'performance',
+              'style': 'style',
+              'deps': 'dependencies',
+              'dependabot': 'dependencies'
+            };
+            
+            const labelsToAdd = [];
+            for (const [prefix, label] of Object.entries(branchLabels)) {
+              if (branchName.startsWith(prefix + '/') || branchName.startsWith(prefix + '-')) {
+                labelsToAdd.push(label);
+              }
+            }
+            
+            if (labelsToAdd.length > 0) {
+              // Check if labels exist, create if not
+              const existingLabels = await github.rest.issues.listLabelsForRepo({ owner, repo });
+              const existingLabelNames = existingLabels.data.map(l => l.name);
+              
+              for (const label of labelsToAdd) {
+                if (!existingLabelNames.includes(label)) {
+                  try {
+                    await github.rest.issues.createLabel({
+                      owner,
+                      repo,
+                      name: label,
+                      color: 'ededed',
+                      description: `Auto-generated ${label} label`
+                    });
+                  } catch (e) {
+                    // Label might already exist, ignore error
+                  }
+                }
+              }
+              
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: pr.number,
+                labels: labelsToAdd
+              });
+            }

@@ -1,10 +1,16 @@
 # Dependabot configuration for automated dependency updates
 # Keeps dependencies up-to-date and secure
+# Documentation: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates
 
 version: 2
 
+registries:
+  npm-registry:
+    type: npm-registry
+    url: https://registry.npmjs.org
+
 updates:
-  # npm dependencies
+  # npm dependencies - Main package
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -14,25 +20,39 @@ updates:
       timezone: UTC
     # Limit open PRs to avoid overwhelming maintainers
     open-pull-requests-limit: 10
-    # Group minor and patch updates together
+    # Target production dependencies first
+    target-branch: main
+    # Group minor and patch updates together for cleaner history
     groups:
-      minor-and-patch-updates:
-        patterns:
-          - '*'
+      production-dependencies:
+        dependency-type: production
         update-types:
           - minor
           - patch
+        patterns:
+          - '*'
+      development-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+        patterns:
+          - '*'
     # Add labels to PRs
     labels:
       - dependencies
       - automated
-    # Commit message configuration
+    # Commit message configuration (semantic commits)
     commit-message:
       prefix: deps
       include: scope
     # Reviewers for dependency updates
     reviewers:
       - hakkisagdic
+    # PR branch naming
+    branch-name-separator: '-'
+    # Milestone for tracking
+    milestone: 1
     # Ignore specific packages that need manual updates
     ignore:
       # Express 5.x is intentional (modern features)
@@ -45,12 +65,42 @@ updates:
       - dependency-name: zod
         update-types: [version-update:semver-major]
 
+  # Desktop app dependencies (Electron + Vue)
+  - package-ecosystem: npm
+    directory: /desktop-app
+    schedule:
+      interval: weekly
+      day: tuesday
+      time: '06:00'
+      timezone: UTC
+    open-pull-requests-limit: 5
+    groups:
+      desktop-dependencies:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+    labels:
+      - dependencies
+      - desktop
+      - automated
+    commit-message:
+      prefix: deps(desktop)
+      include: scope
+    reviewers:
+      - hakkisagdic
+    ignore:
+      # Electron updates require careful testing
+      - dependency-name: electron
+        update-types: [version-update:semver-major]
+
   # GitHub Actions
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
-      day: monday
+      day: wednesday
       time: '06:00'
       timezone: UTC
     open-pull-requests-limit: 5
@@ -58,6 +108,7 @@ updates:
       - github-actions
       - dependencies
       - automated
+      - ci-cd
     commit-message:
       prefix: ci
       include: scope
@@ -65,3 +116,5 @@ updates:
       github-actions-updates:
         patterns:
           - '*'
+    reviewers:
+      - hakkisagdic

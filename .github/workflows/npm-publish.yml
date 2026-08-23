@@ -1,3 +1,4 @@
+# NPM Publish Workflow
 # Publishes ctxman to npm when a Release is created.
 #
 # Uses npm **Trusted Publishing (OIDC)** — no NPM_TOKEN secret. GitHub Actions
@@ -8,40 +9,86 @@
 #   Package ctxman → Settings → Trusted Publisher →
 #   GitHub Actions:  user hakkisagdic · repository ctxman ·
 #   workflow filename npm-publish.yml
-name: Node.js Package
+
+name: NPM Publish
 
 on:
   release:
     types: [created]
-  push:
-    tags: ['v*']   # git tag vX.Y.Z && git push --tags
-  workflow_dispatch:  # Manuel tetikleme için
+  workflow_dispatch:
+
+# Concurrency: prevent duplicate publishes
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   build:
+    name: Build & Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          node-version: 20
-      - run: npm ci
-      - run: npm test
+          persist-credentials: false
+
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Run tests
+        run: npm test
+        env:
+          NODE_OPTIONS: --experimental-vm-modules
+
+      - name: Run lint
+        run: npm run lint
 
   publish-npm:
+    name: Publish to npm
     needs: build
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write # npm Trusted Publishing (OIDC)
+    timeout-minutes: 10
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          node-version: 22
+          persist-credentials: false
+
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
           registry-url: https://registry.npmjs.org/
-      # OIDC publishing needs npm >= 11.5.1; the runner's bundled npm is older.
-      - run: npm install -g npm@latest
-      - run: npm ci
-      # No NODE_AUTH_TOKEN — authentication happens via OIDC.
-      - run: npm publish --provenance --access public
+
+      # OIDC publishing needs npm >= 11.5.1; the runner's bundled npm is older
+      - name: Install npm latest
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      # No NODE_AUTH_TOKEN — authentication happens via OIDC
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+
+      - name: Verify published version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Published ctxman@$VERSION to npm registry"
+          npm view ctxman@$VERSION
