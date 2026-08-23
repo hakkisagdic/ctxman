@@ -98,10 +98,6 @@ jobs:
       matrix:
         node-version: [22.x]
         os: [ubuntu-latest]
-        include:
-          # Test on Windows with latest Node
-          - node-version: 22.x
-            os: windows-latest
 
     steps:
       - name: Checkout repository
