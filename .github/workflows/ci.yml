@@ -84,7 +84,7 @@ jobs:
         run: npm run lint
 
       - name: Check formatting
-        run: npm run format -- --check
+        run: npm run format:check
 
   # Main test job with coverage and matrix strategy
   test:

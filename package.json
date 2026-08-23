@@ -17,6 +17,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "analyze": "node bin/cli.js",
     "analyze:cli": "node bin/cli.js --cli",
     "analyze:methods": "node bin/cli.js --cli --method-level",

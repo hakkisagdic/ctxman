@@ -50,8 +50,6 @@ jobs:
 
       - name: Run tests
         run: npm test
-        env:
-          NODE_OPTIONS: --experimental-vm-modules
 
       - name: Run lint
         run: npm run lint
