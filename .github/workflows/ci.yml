@@ -90,7 +90,7 @@ jobs:
   test:
     name: Test (Node ${{ matrix.node-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    timeout-minutes: 20
     needs: [security-audit, lint]
     strategy:
       fail-fast: true
@@ -120,8 +120,9 @@ jobs:
 
       - name: Run tests with coverage
         run: npm run test:coverage
+        timeout-minutes: 15
         env:
-          NODE_OPTIONS: --experimental-vm-modules
+          NODE_OPTIONS: --max-old-space-size=4096 --experimental-vm-modules
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4

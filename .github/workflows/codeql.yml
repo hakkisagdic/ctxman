@@ -55,9 +55,5 @@ jobs:
           category: "/language:${{ matrix.language }}"
           upload: true
 
-      - name: Upload CodeQL results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: results/javascript.sarif
-          retention-days: 90
+      # SARIF upload is handled automatically by the analyze action
+      # No need for separate upload-sarif step
