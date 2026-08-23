@@ -42,16 +42,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          sizes: >
-            {
-              "XS": 0,
-              "S": 10,
-              "M": 50,
-              "L": 200,
-              "XL": 500,
-              "XXL": 1000
-            }
-          ignore-pattern: "^(package-lock\\.json|.*\\.snap)$"
+          sizes: "XS:0 S:10 M:50 L:200 XL:500 XXL:1000"
 
       # Label based on branch name
       - name: Label based on branch name
