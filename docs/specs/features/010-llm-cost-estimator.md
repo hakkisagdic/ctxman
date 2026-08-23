@@ -15,12 +15,14 @@
 LLM API calls cost money, but users have no visibility into costs before sending context:
 
 **Cost Blind Spots**:
+
 - No estimate of API costs per analysis
 - Unexpected bills from large contexts
 - No comparison between providers
 - Budget planning impossible
 
 **Current Experience**:
+
 ```
 $ ctxman --cli
 Total tokens: 150,000
@@ -31,12 +33,14 @@ Total tokens: 150,000
 ```
 
 **User Impact**:
+
 - Unexpected API costs
 - Hesitation to use LLM assistance
 - No cost optimization awareness
 - Budget overruns for teams
 
 **Business Impact**:
+
 - Reduced tool usage due to cost concerns
 - Lack of enterprise budget planning
 - Missed optimization opportunities
@@ -101,40 +105,40 @@ An **LLM cost estimator** that:
 export const LLM_PRICING = {
   openai: {
     'gpt-4-turbo': {
-      input: 10.00 / 1_000_000,  // $10 per 1M tokens
-      output: 30.00 / 1_000_000,
+      input: 10.0 / 1_000_000, // $10 per 1M tokens
+      output: 30.0 / 1_000_000,
       context: 128000,
     },
     'gpt-4': {
-      input: 30.00 / 1_000_000,
-      output: 60.00 / 1_000_000,
+      input: 30.0 / 1_000_000,
+      output: 60.0 / 1_000_000,
       context: 8192,
     },
     'gpt-4o': {
-      input: 5.00 / 1_000_000,
-      output: 15.00 / 1_000_000,
+      input: 5.0 / 1_000_000,
+      output: 15.0 / 1_000_000,
       context: 128000,
     },
     'gpt-4o-mini': {
       input: 0.15 / 1_000_000,
-      output: 0.60 / 1_000_000,
+      output: 0.6 / 1_000_000,
       context: 128000,
     },
     'gpt-3.5-turbo': {
-      input: 0.50 / 1_000_000,
-      output: 1.50 / 1_000_000,
+      input: 0.5 / 1_000_000,
+      output: 1.5 / 1_000_000,
       context: 16385,
     },
   },
   anthropic: {
     'claude-opus-4': {
-      input: 15.00 / 1_000_000,
-      output: 75.00 / 1_000_000,
+      input: 15.0 / 1_000_000,
+      output: 75.0 / 1_000_000,
       context: 200000,
     },
     'claude-sonnet-4.5': {
-      input: 3.00 / 1_000_000,
-      output: 15.00 / 1_000_000,
+      input: 3.0 / 1_000_000,
+      output: 15.0 / 1_000_000,
       context: 200000,
     },
     'claude-haiku-3.5': {
@@ -145,13 +149,13 @@ export const LLM_PRICING = {
   },
   google: {
     'gemini-1.5-pro': {
-      input: 2.50 / 1_000_000,
-      output: 10.00 / 1_000_000,
+      input: 2.5 / 1_000_000,
+      output: 10.0 / 1_000_000,
       context: 1000000,
     },
     'gemini-2.0-flash': {
-      input: 0.00, // Free tier available
-      output: 0.00,
+      input: 0.0, // Free tier available
+      output: 0.0,
       context: 1000000,
     },
   },
@@ -232,8 +236,8 @@ export class CostCalculator {
 
   getRecommendation(comparisons) {
     // Find best value (lowest cost that fits)
-    const validOptions = comparisons.filter(c => c.fitsInContext);
-    
+    const validOptions = comparisons.filter((c) => c.fitsInContext);
+
     if (validOptions.length === 0) {
       return {
         type: 'warning',
@@ -242,9 +246,9 @@ export class CostCalculator {
     }
 
     const cheapest = validOptions[0];
-    const bestValue = validOptions.find(c => 
-      c.provider === 'openai' && c.model.includes('gpt-4o-mini')
-    ) || cheapest;
+    const bestValue =
+      validOptions.find((c) => c.provider === 'openai' && c.model.includes('gpt-4o-mini')) ||
+      cheapest;
 
     return {
       type: 'recommendation',
@@ -301,9 +305,7 @@ export class CostTracker {
 
   getSummary(period = '30d') {
     const cutoff = this.getCutoffDate(period);
-    const filtered = this.history.entries.filter(
-      e => new Date(e.timestamp) >= cutoff
-    );
+    const filtered = this.history.entries.filter((e) => new Date(e.timestamp) >= cutoff);
 
     const totalCost = filtered.reduce((sum, e) => sum + e.cost, 0);
     const totalTokens = filtered.reduce((sum, e) => sum + e.tokens, 0);
@@ -411,18 +413,21 @@ function displayCostSummary(summary) {
 ## Acceptance Criteria
 
 ### Must Have
+
 - [ ] `--estimate-cost` shows cost for all providers
 - [ ] Cost comparison table displayed
 - [ ] Model recommendation provided
 - [ ] Context fit warning when exceeded
 
 ### Should Have
+
 - [ ] `--cost-summary` shows historical costs
 - [ ] `--budget <amount>` enables alerts
 - [ ] Monthly cost projection
 - [ ] Cost tracking persistence
 
 ### Nice to Have
+
 - [ ] Real-time pricing from APIs
 - [ ] Team cost aggregation
 - [ ] Budget alerts via notifications
@@ -434,10 +439,10 @@ function displayCostSummary(summary) {
 
 ### Quantitative Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Cost estimator usage | 40% of analyses | Analytics |
-| Cost savings | 20% reduction | User tracking |
+| Metric                | Target             | Measurement    |
+| --------------------- | ------------------ | -------------- |
+| Cost estimator usage  | 40% of analyses    | Analytics      |
+| Cost savings          | 20% reduction      | User tracking  |
 | Budget alert triggers | < 5% exceed budget | Alert tracking |
 
 ### Qualitative Metrics
@@ -450,13 +455,13 @@ function displayCostSummary(summary) {
 
 ## Timeline
 
-| Task | Effort | Week |
-|------|--------|------|
-| Pricing data structure | 1 hour | Week 1 |
-| Cost calculator | 2 hours | Week 1 |
-| Cost tracker | 1 hour | Week 1 |
-| CLI integration | 1 hour | Week 1 |
-| Testing | 1 hour | Week 1 |
+| Task                   | Effort  | Week   |
+| ---------------------- | ------- | ------ |
+| Pricing data structure | 1 hour  | Week 1 |
+| Cost calculator        | 2 hours | Week 1 |
+| Cost tracker           | 1 hour  | Week 1 |
+| CLI integration        | 1 hour  | Week 1 |
+| Testing                | 1 hour  | Week 1 |
 
 **Total Estimated Effort**: 6 hours over 1 week
 
@@ -471,5 +476,5 @@ function displayCostSummary(summary) {
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q1 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q1 2025_

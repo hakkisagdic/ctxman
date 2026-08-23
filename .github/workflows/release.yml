@@ -67,7 +67,7 @@ jobs:
         run: |
           # Generate changelog from commits since last tag
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          
+
           if [ -n "$LAST_TAG" ]; then
             echo "## Changes since $LAST_TAG" > CHANGELOG.md
             echo "" >> CHANGELOG.md
@@ -77,7 +77,7 @@ jobs:
             echo "" >> CHANGELOG.md
             git log --pretty=format:"- %s (%h)" HEAD~10..HEAD >> CHANGELOG.md
           fi
-          
+
           # Store changelog for release notes
           {
             echo 'changelog<<EOF'

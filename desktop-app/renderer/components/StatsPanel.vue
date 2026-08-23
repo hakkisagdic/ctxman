@@ -3,9 +3,7 @@
   <div class="stats-panel">
     <div class="stats-header">
       <h3>Analysis Report</h3>
-      <button @click="exportReport" class="btn-export" :disabled="!stats">
-        💾 Export
-      </button>
+      <button @click="exportReport" class="btn-export" :disabled="!stats">💾 Export</button>
     </div>
 
     <div v-if="stats" class="stats-grid">
@@ -33,11 +31,7 @@
     <div v-if="stats?.byLanguage" class="language-breakdown">
       <h4>Languages</h4>
       <div class="language-list">
-        <div 
-          v-for="(data, lang) in stats.byLanguage" 
-          :key="lang"
-          class="language-item"
-        >
+        <div v-for="(data, lang) in stats.byLanguage" :key="lang" class="language-item">
           <span class="language-name">{{ lang }}</span>
           <span class="language-count">{{ data.files }} files</span>
         </div>
@@ -53,15 +47,15 @@
 
 <script setup>
 const props = defineProps({
-  stats: Object
+  stats: Object,
 });
 
 async function exportReport() {
   if (!props.stats) return;
-  
+
   const content = JSON.stringify(props.stats, null, 2);
   const result = await window.api.fs.saveFile(content, 'analysis-report.json');
-  
+
   if (result.success) {
     console.log('Report saved to:', result.filePath);
     // TODO: Show toast notification
@@ -73,7 +67,7 @@ function formatBytes(bytes) {
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 }
 </script>
 

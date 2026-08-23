@@ -12,6 +12,7 @@
 </cite>
 
 ## İçindekiler
+
 1. [Giriş](#giriş)
 2. [Method Çıkarma Süreci](#method-çıkarma-süreci)
 3. [Method Analiz Entegrasyonu](#method-analiz-entegrasyonu)
@@ -25,6 +26,7 @@
 ctxman aracı, JavaScript ve TypeScript codebase'lerinin granüler incelemesini sağlayan method seviyesi analiz yetenekleri sunar. Bu özellik, geliştiricilerin kaynak dosyalardan bireysel methodları çıkarmasına, analiz etmesine ve filtrelemesine olanak tanıyarak LLM context oluşturma için optimize edilmiş temsiller oluşturur. Method seviyesi analiz, `methodLevel` seçeneği aracılığıyla kontrol edilir ve method içeriğini işlemek ve ayrıntılı istatistikler oluşturmak için TokenCalculator ile entegre olur.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L234-L238)
 - [bin/cli.js](file://bin/cli.js#L17-L18)
 
@@ -52,10 +54,12 @@ NextPattern --> End([Method Dizisini Döndür])
 Bir methodun tam içeriğini almak için `extractMethodContent` fonksiyonu, iç içe süslü parantezler dahil olmak üzere tam method gövdesiyle eşleşen dinamik olarak oluşturulmuş regex kalıplarını kullanır. Bu, aracın yalnızca method imzasını değil, token hesaplaması için tüm implementasyonu çıkarmasına olanak tanır.
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L15-L45)
 - [ctxman.js](file://ctxman.js#L61-L72)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L14-L73)
 
 ## Method Analiz Entegrasyonu
@@ -98,10 +102,12 @@ Entegrasyon işlemi, method seviyesi analizin etkin olup olmadığını kontrol 
 Dahil edilen her method için sistem, method içeriğini çıkarır ve tüm dosyalar için kullanılan mekanizmanın aynısını kullanarak tokenleri hesaplar. Token hesaplaması, mevcut olduğunda GPT-4 uyumlu tam sayımlar için tiktoken kütüphanesini kullanır, tiktoken yüklü olmadığında dosya türü başına karakter sayısına dayalı tahmini hesaplamaya geçer.
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L323-L383)
 - [ctxman.js](file://ctxman.js#L234-L238)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L323-L383)
 
 ## Method Filtreleme Mekanizması
@@ -148,11 +154,13 @@ MethodFilterParser, `.methodinclude` ve `.methodignore` dosyalarından kalıplar
 Sistem, bu yapılandırma dosyalarını iki konumda arar: script dizini ve proje kökü, proje kökü öncelik alır. Bu, hem global hem de projeye özgü yapılandırmaya izin verir.
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L75-L115)
 - [ctxman.js](file://ctxman.js#L14-L73)
 - [ctxman.js](file://ctxman.js#L231-L800)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L75-L115)
 - [README.md](file://README.md#L481-L500)
 
@@ -180,6 +188,7 @@ ANALYSIS_RESULTS ||--o{ METHOD_STATS : "referans verir"
 ```
 
 methodStats nesnesi üç özellik içerir:
+
 - `totalMethods`: Tüm analiz edilen dosyalarda bulunan toplam method sayısı
 - `includedMethods`: Filtreleme kriterlerinden geçen method sayısı
 - `methodTokens`: Method tanımlayıcılarını (filename.methodname) token sayılarına eşleyen bir nesne
@@ -189,10 +198,12 @@ Bu istatistikler, method analiz süreci sırasında güncellenir. `totalMethods`
 İstatistikler, method seviyesi analiz etkinleştirildiğinde nihai LLM context'ine dahil edilir ve ayrıntılı method bilgilerinin yanı sıra method analiz sonuçlarının bir özetini sağlar.
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L239-L239)
 - [ctxman.js](file://ctxman.js#L491-L519)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L239-L239)
 - [ctxman.js](file://ctxman.js#L491-L519)
 
@@ -220,10 +231,12 @@ Context ayrıca, bulunan toplam methodlar, dahil edilen methodlar ve toplam meth
 Kompakt temsil, önemli yapısal bilgileri korurken context'in token sayısını önemli ölçüde azaltır ve context window boyutunun sınırlı olduğu LLM tüketimi için ideal hale getirir.
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L491-L519)
 - [ctxman.js](file://ctxman.js#L614-L643)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L491-L519)
 
 ## Yaygın Sorunlar ve En İyi Uygulamalar
@@ -231,12 +244,14 @@ Kompakt temsil, önemli yapısal bilgileri korurken context'in token sayısını
 ### Yaygın Sorunlar
 
 **Yanlış Method Çıkarımı**: Regex tabanlı çıkarım, aşağıdaki gibi karmaşık sözdiziminde başarısız olabilir:
+
 - Parametrelerde template literalleri olan methodlar
 - Karmaşık destructuring kalıpları olan methodlar
 - Minified veya obfuscated kod
 - Pattern matching'i bozan alışılmadık formatlama
 
 **Pattern Matching Sorunları**: Kullanıcılar, aşağıdaki nedenlerle filter kalıplarıyla ilgili sorunlarla karşılaşabilir:
+
 - Büyük/küçük harf duyarlılığı (kalıplar büyük/küçük harf duyarsızdır ancak tam eşleşme gerekli olabilir)
 - Method adlarındaki özel karakterler
 - Çakışan include/exclude kuralları
@@ -245,18 +260,21 @@ Kompakt temsil, önemli yapısal bilgileri korurken context'in token sayısını
 ### Method Filter Kalıpları için En İyi Uygulamalar
 
 **Etkili Include Kalıpları**:
+
 - Kritik business logic için spesifik method adları kullanın: `calculateTokens`, `handleRequest`
 - Method kategorileri için wildcardlar kullanın: `*Handler`, `*Validator`, `*Manager`
 - Class tabanlı kalıplar kullanın: Bir class'taki tüm methodları dahil etmek için `TokenCalculator.*`
 - İlgili işlevselliği yakalamak için `.methodinclude`'da birden fazla kalıbı birleştirin
 
 **Etkili Ignore Kalıpları**:
+
 - Test methodlarını hariç tutun: `*test*`, `*spec*`
 - Debug methodlarını hariç tutun: `*debug*`, `console`, `logger`
 - Utility methodlarını hariç tutun: `*helper*`, `*util*`
 - Gerekli değilse lifecycle methodlarını hariç tutun: `componentDidMount`, `ngOnInit`
 
 **Yapılandırma Yönetimi**:
+
 - Projeye özgü kurallar için `.methodinclude` ve `.methodignore`'ı proje kökünde yerleştirin
 - Pattern amaçlarını belgelemek için yorumları (# ile başlayan satırlar) kullanın
 - Büyük projelere uygulamadan önce küçük bir codebase ile kalıpları test edin
@@ -265,5 +283,6 @@ Kompakt temsil, önemli yapısal bilgileri korurken context'in token sayısını
 Method seviyesi analiz özelliği, LLM context oluşturmayı optimize etmek için güçlü yetenekler sağlar, ancak doğru ve yararlı sonuçlar elde etmek için dikkatli yapılandırma gerektirir. Bu en iyi uygulamaları izleyerek kullanıcılar, gürültü ve boilerplate kodu hariç tutarken en önemli methodları yakalayan etkili filter kalıpları oluşturabilir.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L481-L500)
 - [CLAUDE.md](file://CLAUDE.md#L101-L127)

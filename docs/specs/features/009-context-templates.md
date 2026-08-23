@@ -15,24 +15,28 @@
 Users must manually configure context for different development tasks:
 
 **Repeated Configuration Effort**:
+
 - Bug fixes need focused, minimal context
 - Features need broader context with interfaces
 - Refactoring needs comprehensive context
 - Code review needs change-focused context
 
 **Current Friction**:
+
 - Manual pattern tuning per task type
 - Inconsistent context quality
 - Learning curve for optimal configuration
 - Time wasted on trial and error
 
 **User Impact**:
+
 - Suboptimal LLM responses due to wrong context
 - 5-10 minutes per task configuring context
 - Frustration with tool complexity
 - Inconsistent results across team
 
 **Business Impact**:
+
 - Reduced tool adoption
 - Lower productivity gains
 - Increased support burden
@@ -132,13 +136,7 @@ export const BUILTIN_TEMPLATES = {
     category: 'bug-fix',
     tokenTarget: 10000,
     config: {
-      ignorePatterns: [
-        '**/*.test.js',
-        '**/*.spec.js',
-        'docs/**',
-        '**/*.md',
-        'examples/**',
-      ],
+      ignorePatterns: ['**/*.test.js', '**/*.spec.js', 'docs/**', '**/*.md', 'examples/**'],
       methodLevel: true,
       options: {
         compact: true,
@@ -153,17 +151,13 @@ export const BUILTIN_TEMPLATES = {
     ],
   },
 
-  'feature': {
+  feature: {
     name: 'Feature Development',
     description: 'Full interface context for new features',
     category: 'feature',
     tokenTarget: 30000,
     config: {
-      ignorePatterns: [
-        '**/*.test.js',
-        'docs/**',
-        'examples/**',
-      ],
+      ignorePatterns: ['**/*.test.js', 'docs/**', 'examples/**'],
       methodLevel: false,
       options: {
         compact: true,
@@ -177,16 +171,13 @@ export const BUILTIN_TEMPLATES = {
     ],
   },
 
-  'refactor': {
+  refactor: {
     name: 'Refactoring',
     description: 'Comprehensive context for restructuring',
     category: 'refactor',
     tokenTarget: 50000,
     config: {
-      ignorePatterns: [
-        'docs/**',
-        '**/*.md',
-      ],
+      ignorePatterns: ['docs/**', '**/*.md'],
       methodLevel: true,
       options: {
         compact: false,
@@ -213,17 +204,13 @@ export const BUILTIN_TEMPLATES = {
     },
   },
 
-  'documentation': {
+  documentation: {
     name: 'Documentation',
     description: 'Public API surface for docs',
     category: 'docs',
     tokenTarget: 15000,
     config: {
-      ignorePatterns: [
-        '**/*.test.js',
-        'test/**',
-        'examples/**',
-      ],
+      ignorePatterns: ['**/*.test.js', 'test/**', 'examples/**'],
       methodLevel: true,
       methodInclude: ['*'], // Public methods only (no underscore prefix)
       options: {
@@ -232,16 +219,13 @@ export const BUILTIN_TEMPLATES = {
     },
   },
 
-  'test': {
+  test: {
     name: 'Test Writing',
     description: 'Implementation context for tests',
     category: 'test',
     tokenTarget: 20000,
     config: {
-      ignorePatterns: [
-        'docs/**',
-        '**/*.md',
-      ],
+      ignorePatterns: ['docs/**', '**/*.md'],
       methodLevel: true,
       options: {
         includePrivate: true,
@@ -288,7 +272,7 @@ export class TemplateManager {
 
     // Check custom templates
     const custom = this.loadCustomTemplates();
-    return custom.find(t => t.id === templateId) || null;
+    return custom.find((t) => t.id === templateId) || null;
   }
 
   async apply(templateId, options = {}) {
@@ -308,14 +292,8 @@ export class TemplateManager {
     if (options.description) {
       const rules = this.matchRules(template, options.description);
       if (rules) {
-        config.includePatterns = [
-          ...(config.includePatterns || []),
-          ...(rules.include || []),
-        ];
-        config.ignorePatterns = [
-          ...(config.ignorePatterns || []),
-          ...(rules.exclude || []),
-        ];
+        config.includePatterns = [...(config.includePatterns || []), ...(rules.include || [])];
+        config.ignorePatterns = [...(config.ignorePatterns || []), ...(rules.exclude || [])];
       }
     }
 
@@ -342,12 +320,9 @@ export class TemplateManager {
     try {
       const files = fs.readdirSync(this.customTemplatesPath);
       return files
-        .filter(f => f.endsWith('.json'))
-        .map(f => {
-          const content = fs.readFileSync(
-            path.join(this.customTemplatesPath, f),
-            'utf-8'
-          );
+        .filter((f) => f.endsWith('.json'))
+        .map((f) => {
+          const content = fs.readFileSync(path.join(this.customTemplatesPath, f), 'utf-8');
           return {
             id: path.basename(f, '.json'),
             ...JSON.parse(content),
@@ -489,6 +464,7 @@ async function runWizard() {
 ## Acceptance Criteria
 
 ### Must Have
+
 - [ ] 6 built-in templates (bug-fix, feature, refactor, code-review, documentation, test)
 - [ ] `--template <name>` CLI flag
 - [ ] `--list-templates` shows available templates
@@ -496,12 +472,14 @@ async function runWizard() {
 - [ ] Template selection in interactive wizard
 
 ### Should Have
+
 - [ ] `--describe <text>` matches template rules
 - [ ] Custom template creation via CLI
 - [ ] Template inheritance (extend base template)
 - [ ] Team template sharing (.ctxman/templates/)
 
 ### Nice to Have
+
 - [ ] Community template registry
 - [ ] Template validation against schema
 - [ ] Template preview before applying
@@ -513,11 +491,11 @@ async function runWizard() {
 
 ### Quantitative Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Template usage | 70% of analyses | Analytics |
-| Time saved | 5 min per analysis | User testing |
-| Configuration errors | -50% reduction | Error tracking |
+| Metric               | Target             | Measurement    |
+| -------------------- | ------------------ | -------------- |
+| Template usage       | 70% of analyses    | Analytics      |
+| Time saved           | 5 min per analysis | User testing   |
+| Configuration errors | -50% reduction     | Error tracking |
 
 ### Qualitative Metrics
 
@@ -529,12 +507,12 @@ async function runWizard() {
 
 ## Timeline
 
-| Task | Effort | Week |
-|------|--------|------|
+| Task                        | Effort  | Week   |
+| --------------------------- | ------- | ------ |
 | Template schema & built-ins | 2 hours | Week 1 |
-| Template manager | 2 hours | Week 1 |
-| CLI integration | 1 hour | Week 1 |
-| Wizard integration | 1 hour | Week 1 |
+| Template manager            | 2 hours | Week 1 |
+| CLI integration             | 1 hour  | Week 1 |
+| Wizard integration          | 1 hour  | Week 1 |
 
 **Total Estimated Effort**: 6 hours over 1 week
 
@@ -582,5 +560,5 @@ async function runWizard() {
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q1 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q1 2025_

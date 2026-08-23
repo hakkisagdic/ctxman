@@ -8,6 +8,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Detailed JSON Report](#detailed-json-report)
 3. [LLM Context Formats](#llm-context-formats)
@@ -21,6 +22,7 @@
 The ctxman tool provides three primary output formats for different use cases in AI-assisted development workflows. These formats serve distinct purposes in code analysis, LLM context optimization, and project documentation. The tool generates a detailed JSON report for comprehensive analysis, creates LLM context files in both compact and detailed formats, and supports clipboard integration for quick sharing. All export formats maintain consistent structure between file and clipboard outputs, ensuring reliability across different usage scenarios.
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 
 ## Detailed JSON Report
@@ -28,6 +30,7 @@ The ctxman tool provides three primary output formats for different use cases in
 The detailed JSON report provides comprehensive analysis of the codebase with complete metadata, summary statistics, file-level details, and method-level data when applicable. This format is generated when using the `--save-report` flag or selecting the appropriate option in interactive mode.
 
 The report structure consists of three main sections:
+
 - **metadata**: Contains generation timestamp, project root path, and configuration rules from .gitignore and calculator configuration files
 - **summary**: Includes comprehensive statistics such as total files analyzed, token counts, file type distribution, and largest files/directories
 - **files**: Contains detailed information for each analyzed file including path, token count, size, lines, and extension
@@ -69,9 +72,11 @@ DetailedJSONReport --> File
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L784-L799)
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L784-L799)
 
@@ -82,6 +87,7 @@ The ctxman tool offers two distinct LLM context formats optimized for different 
 ### Compact Format (~2.3k characters)
 
 The default compact format provides a minimal yet structured representation of the codebase, containing approximately 2.3k characters in JSON format. This format includes:
+
 - Project metadata (root directory, total files, total tokens)
 - Organized file paths grouped by directory with common prefix compression
 - Removal of file extensions to save space
@@ -92,6 +98,7 @@ The compact format prioritizes efficiency and is ideal for frequent AI interacti
 ### Detailed Format (~8.6k characters)
 
 The detailed format, activated with `--detailed-context`, provides a more comprehensive context at approximately 8.6k characters. This format includes:
+
 - Full file paths with extensions
 - Importance scores based on token count and project structure
 - Directory statistics and file categorization
@@ -131,11 +138,13 @@ LLMContext --> MethodStats
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L482-L503)
 - [ctxman.js](file://ctxman.js#L521-L545)
 - [ctxman.js](file://ctxman.js#L505-L519)
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L482-L545)
 
@@ -144,6 +153,7 @@ LLMContext --> MethodStats
 The clipboard format in ctxman maintains identical structure to the file-based exports, ensuring consistency across different output methods. When using the `--context-clipboard` flag, the tool copies the same JSON structure that would be saved to llm-context.json directly to the system clipboard.
 
 The implementation handles cross-platform clipboard operations:
+
 - **macOS**: Uses `pbcopy` command
 - **Linux**: Attempts `xclip` first, falls back to `xsel` if unavailable
 - **Windows**: Uses `clip` command
@@ -171,9 +181,11 @@ end
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L547-L579)
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L547-L579)
 
@@ -184,6 +196,7 @@ The ctxman tool now supports a new output format: GitIngest-style digest files. 
 ### GitIngest Format Overview
 
 The GitIngest format provides a comprehensive, human-readable summary of the codebase with the following components:
+
 - Project summary and statistics
 - Visual directory tree structure
 - Complete file contents with clear separators
@@ -197,6 +210,7 @@ This format is inspired by [GitIngest](https://github.com/coderamp-labs/gitinges
 The GitIngest digest can be generated through multiple pathways:
 
 **Direct Generation**
+
 ```bash
 # Generate digest directly from codebase analysis
 ctxman --gitingest
@@ -204,6 +218,7 @@ ctxman -g
 ```
 
 **JSON-Based Generation**
+
 ```bash
 # Generate digest from existing JSON report (instant, no re-scan)
 ctxman --gitingest-from-report token-analysis-report.json
@@ -213,6 +228,7 @@ ctxman --gitingest-from-context llm-context.json
 ```
 
 **Two-Step Workflow**
+
 ```bash
 # Step 1: Create analysis report
 ctxman --save-report
@@ -286,6 +302,7 @@ function validateInput(data) {
 ### Implementation Details
 
 The GitIngest format is implemented through the `GitIngestFormatter` class in `lib/formatters/gitingest-formatter.js`. This class handles:
+
 - Project summary generation
 - Directory tree construction
 - File content extraction
@@ -315,9 +332,11 @@ class GitIngestFormatter --|> FileUtils
 ```
 
 **Diagram sources**
+
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L16-L127)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
@@ -327,18 +346,21 @@ class GitIngestFormatter --|> FileUtils
 The different output formats serve specific use cases in development workflows:
 
 **Compact Format Use Cases:**
+
 - **LLM Integration**: Structured data for AI assistants with complete project context
 - **Programmatic Processing**: JSON format for automated tools and scripts
 - **Context Sharing**: Identical format in clipboard and file exports
 - **Development Workflows**: Consistent structure for CI/CD and automation
 
 **Detailed Format Use Cases:**
+
 - **Architecture Planning**: Comprehensive project overview for major decisions
 - **New Team Member Onboarding**: Complete codebase understanding
 - **Documentation Generation**: Full project structure analysis
 - **Code Review Preparation**: Detailed file relationships and importance
 
 **GitIngest Format Use Cases:**
+
 - **LLM Context Windows**: Paste entire codebase as single context
 - **Code Reviews**: Share complete project snapshot
 - **Documentation**: Single-file project reference
@@ -347,6 +369,7 @@ The different output formats serve specific use cases in development workflows:
 - **Performance-Critical Workflows**: Instant digest generation from existing JSON
 
 **Performance Considerations:**
+
 - The compact format reduces context size by approximately 89% compared to the full codebase
 - Token counting uses tiktoken for GPT-4 compatibility when available, with estimation fallback
 - Directory grouping and common prefix compression optimize space usage
@@ -354,6 +377,7 @@ The different output formats serve specific use cases in development workflows:
 - JSON-based digest generation provides instant output without re-scanning the codebase
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 
 ## Parsing Strategies
@@ -361,24 +385,28 @@ The different output formats serve specific use cases in development workflows:
 Downstream processing of ctxman outputs can leverage the consistent JSON structure across formats:
 
 **For Detailed JSON Reports:**
+
 - Extract metadata for audit trails and version tracking
 - Analyze file-level statistics for codebase health monitoring
 - Process method-level data for focused analysis of critical functions
 - Generate visualizations from extension and directory statistics
 
 **For LLM Context Formats:**
+
 - Parse project metadata to understand scope and scale
 - Traverse path groups to reconstruct directory structure
 - Utilize method information for targeted code analysis
 - Integrate with AI tools that accept structured project context
 
 **For GitIngest Format:**
+
 - Parse directory tree to understand project structure
 - Extract file contents for code analysis
 - Process method-level content when filtering is applied
 - Use token estimates for context window management
 
 **General Parsing Recommendations:**
+
 - Validate JSON structure before processing
 - Handle optional fields (methods, methodStats) gracefully
 - Use streaming parsers for large reports
@@ -386,5 +414,6 @@ Downstream processing of ctxman outputs can leverage the consistent JSON structu
 - Implement error handling for malformed or incomplete data
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L482-L545)

@@ -1,7 +1,7 @@
 <!-- FileTreeNode.vue - Recursive file tree node -->
 <template>
   <div class="tree-node">
-    <div 
+    <div
       :class="['node-header', { selected: isSelected }]"
       :style="{ paddingLeft: `${depth * 1}rem` }"
       @click="toggle"
@@ -31,8 +31,8 @@ const props = defineProps({
   node: Object,
   depth: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 });
 
 const emit = defineEmits(['select']);

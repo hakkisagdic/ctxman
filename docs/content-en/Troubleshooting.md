@@ -10,6 +10,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Include/Exclude Mode Confusion](#includeexclude-mode-confusion)
 2. [Pattern Matching Issues](#pattern-matching-issues)
 3. [Token Counting Discrepancies](#token-counting-discrepancies)
@@ -30,6 +31,7 @@ When `.contextinclude` exists, the tool operates in INCLUDE mode, meaning only f
 The tool clearly indicates which mode is active during execution. In INCLUDE mode, it displays "📅 Found calculator config - using INCLUDE mode", while in EXCLUDE mode it shows "📅 Found calculator config - using EXCLUDE mode". This visual cue helps identify the current filtering mode.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L134-L157)
 - [ctxman.js](file://ctxman.js#L181-L217)
 - [README.md](file://README.md#L121-L150)
@@ -39,6 +41,7 @@ The tool clearly indicates which mode is active during execution. In INCLUDE mod
 Pattern matching in the ctxman tool follows specific syntax rules that users must understand to configure their `.contextignore` and `.methodinclude` files correctly. Common issues include incorrect syntax, missing negation patterns, and misunderstanding of wildcard behavior.
 
 The tool converts patterns to regular expressions for matching, with specific transformations:
+
 - `**` becomes `.*` (matches any number of directories)
 - `*` becomes `[^/]*` (matches any characters except directory separators)
 - `?` becomes `[^/]` (matches any single character except directory separators)
@@ -46,6 +49,7 @@ The tool converts patterns to regular expressions for matching, with specific tr
 Negation patterns (prefixed with `!`) work differently in INCLUDE versus EXCLUDE modes. In INCLUDE mode, negation patterns exclude files from the included set, while in EXCLUDE mode, they re-include files that would otherwise be excluded. A common mistake is placing negation patterns in the wrong order, as the tool processes patterns sequentially.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L159-L179)
 - [ctxman.js](file://ctxman.js#L219-L257)
 - [README.md](file://README.md#L544-L610)
@@ -55,6 +59,7 @@ Negation patterns (prefixed with `!`) work differently in INCLUDE versus EXCLUDE
 The ctxman tool provides both exact and estimated token counts, which can lead to discrepancies that users might find confusing. The tool first attempts to use the tiktoken library for exact GPT-4 compatible token counting. If tiktoken is not available, it falls back to an estimation algorithm.
 
 The estimation algorithm uses predefined characters-per-token ratios for different file types:
+
 - JavaScript/TypeScript: 3.2 characters per token
 - JSON: 2.5 characters per token
 - Markdown: 4.0 characters per token
@@ -64,6 +69,7 @@ The estimation algorithm uses predefined characters-per-token ratios for differe
 These estimates are typically around 95% accurate compared to exact counts. Users might notice differences between the estimated counts and what they expect from other tools. The tool clearly indicates which counting method is being used in the output: "🎯 Token calculation: ✅ Exact (using tiktoken)" for exact counts or "🎯 Token calculation: ⚠️ Estimated" for estimates.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L259-L292)
 - [ctxman.js](file://ctxman.js#L385-L400)
 - [README.md](file://README.md#L801-L879)
@@ -71,6 +77,7 @@ These estimates are typically around 95% accurate compared to exact counts. User
 ## Missing Files in Analysis
 
 Files may be missing from analysis due to the multi-layered filtering system. The tool respects three levels of configuration files in order of priority:
+
 1. `.gitignore` (always respected)
 2. `.contextinclude` (highest priority for inclusion)
 3. `.contextignore` (used when no include file exists)
@@ -80,6 +87,7 @@ A file might be missing from analysis if it's excluded by any of these mechanism
 Additionally, the tool only analyzes text files, determined by file extension and basename. Files with extensions not in the recognized text extensions list or basenames not in the text files list will be skipped entirely, even if they're not explicitly ignored.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L181-L217)
 - [ctxman.js](file://ctxman.js#L414-L453)
 - [README.md](file://README.md#L294-L356)
@@ -93,6 +101,7 @@ Another cause is the use of broad patterns like `**/*.js` without proper negatio
 The tool's verbose output can help identify why files are being included. When running with the `--verbose` flag, the tool shows which mode is active and can help trace the inclusion logic.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L134-L157)
 - [ctxman.js](file://ctxman.js#L181-L217)
 - [README.md](file://README.md#L544-L610)
@@ -106,6 +115,7 @@ The tool automatically skips certain directories like `node_modules`, `.git`, `d
 Method-level analysis (`--method-level` flag) significantly increases processing time as the tool needs to parse each file to extract method definitions and calculate tokens for each method individually. For very large codebases, this can result in noticeable delays.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L455-L485)
 - [ctxman.js](file://ctxman.js#L521-L545)
 - [bin/cli.js](file://bin/cli.js#L20-L35)
@@ -127,6 +137,7 @@ To diagnose issues with the ctxman tool, users should follow these steps:
 The tool provides clear visual indicators in its output that help with diagnosis, such as the number of files ignored due to `.gitignore` rules versus context rules, and whether exact or estimated token counting is being used.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L609-L643)
 - [ctxman.js](file://ctxman.js#L715-L743)
 - [bin/cli.js](file://bin/cli.js#L41-L66)
@@ -140,6 +151,7 @@ Permission errors can occur when the tool doesn't have read access to certain fi
 Another common issue is running the tool from the wrong directory. The tool analyzes the current working directory by default, so users must ensure they're in the correct project root when executing the command.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L259-L292)
 - [ctxman.js](file://ctxman.js#L825-L840)
 - [README.md](file://README.md#L294-L356)
@@ -149,6 +161,7 @@ Another common issue is running the tool from the wrong directory. The tool anal
 With the implementation of GitIngest-style digest formatting, new issues may arise related to digest generation. The `--gitingest` flag generates a single-file digest for LLM consumption, but users may encounter problems with this feature.
 
 Common issues include:
+
 - Missing digest.txt output when using `--gitingest` flag
 - Incorrect token estimates in the generated digest
 - Directory tree structure not reflecting actual project structure
@@ -159,6 +172,7 @@ The GitIngestFormatter automatically detects and applies method-level filtering 
 When generating digests from existing JSON reports using `--gitingest-from-report` or `--gitingest-from-context`, ensure the specified JSON file exists and has the correct structure. The tool will display an error message if the file is not found or has invalid format.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L294-L382)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L1-L269)
 - [README.md](file://README.md#L100-L150)
@@ -170,17 +184,20 @@ Method-level filtering allows users to include or exclude specific methods from 
 The MethodFilterParser processes these files and converts patterns to regular expressions. Patterns support wildcards (`*`) which are converted to `.*` in regex. Patterns are case-insensitive and can match method names or file.method combinations.
 
 Common problems include:
+
 - Patterns not matching expected methods due to incorrect syntax
 - Negation patterns not working as expected
 - Method filtering not being applied when expected
 
 The tool logs messages when method filter rules are loaded:
+
 - "🔧 Method include rules loaded: X patterns" when `.methodinclude` is detected
 - "🚫 Method ignore rules loaded: X patterns" when `.methodignore` is detected
 
 Method filtering is automatically detected and applied by the GitIngestFormatter when generating digests, ensuring consistent behavior between regular analysis and digest generation.
 
 **Section sources**
+
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L1-L51)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L15-L25)
 - [README.md](file://README.md#L200-L250)

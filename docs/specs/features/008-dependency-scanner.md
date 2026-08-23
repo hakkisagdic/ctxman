@@ -15,24 +15,28 @@
 Modern projects depend heavily on external packages, but these dependencies are often invisible in context analysis:
 
 **Dependency Blind Spots**:
+
 - No visibility into node_modules token impact
 - External dependency APIs not included in context
 - Version-specific behavior unknown
 - Security vulnerabilities in dependencies missed
 
 **Debugging Challenges**:
+
 - LLM lacks context about external libraries
 - Incorrect API usage suggestions
 - Missing type definitions from dependencies
 - Unclear error messages from dependency code
 
 **User Impact**:
+
 - Incomplete debugging context
 - LLM hallucinations about library APIs
 - Manual documentation lookup required
 - Longer troubleshooting cycles
 
 **Business Impact**:
+
 - Reduced developer productivity
 - Incorrect LLM-assisted code
 - Missed security considerations
@@ -123,7 +127,7 @@ export class DependencyAnalyzer {
 
     for (const [name, version] of Object.entries(dependencies)) {
       const depPath = this.findDependencyPath(name);
-      
+
       if (!depPath) {
         results.push({
           name,
@@ -181,11 +185,12 @@ export class DependencyAnalyzer {
   extractTypes(depPath) {
     const types = [];
     const typesPath = join(depPath, 'dist', '*.d.ts');
-    
+
     // Look for TypeScript definitions
     const dtsFiles = glob.sync(typesPath, { nodir: true });
-    
-    for (const file of dtsFiles.slice(0, 5)) { // Limit to 5 files
+
+    for (const file of dtsFiles.slice(0, 5)) {
+      // Limit to 5 files
       types.push({
         path: file,
         content: readFileSync(file, 'utf-8'),
@@ -246,14 +251,14 @@ export class ImportTracker {
 
   parseImports(content) {
     const imports = [];
-    
+
     // ES6 imports
     const es6Pattern = /import\s+(?:\{([^}]+)\}|\*\s+as\s+(\w+)|(\w+))\s+from\s+['"]([^'"]+)['"]/g;
     let match;
-    
+
     while ((match = es6Pattern.exec(content)) !== null) {
       const symbols = [];
-      if (match[1]) symbols.push(...match[1].split(',').map(s => s.trim()));
+      if (match[1]) symbols.push(...match[1].split(',').map((s) => s.trim()));
       if (match[2]) symbols.push(`* as ${match[2]}`);
       if (match[3]) symbols.push(match[3]);
 
@@ -286,16 +291,13 @@ export class SecurityChecker {
   async check(packageName, version) {
     try {
       // Use npm audit API
-      const response = await fetch(
-        `https://registry.npmjs.org/-/npm/v1/security/audits`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            [packageName]: [version],
-          }),
-        }
-      );
+      const response = await fetch(`https://registry.npmjs.org/-/npm/v1/security/audits`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          [packageName]: [version],
+        }),
+      });
 
       const data = await response.json();
       return this.formatSecurityReport(data);
@@ -327,7 +329,7 @@ export class SecurityChecker {
 
 ### Step 4: Create Context Generator
 
-```javascript
+````javascript
 // lib/generators/DependencyContextGenerator.js
 
 export class DependencyContextGenerator {
@@ -344,8 +346,8 @@ export class DependencyContextGenerator {
 
     // Focus on actively used packages
     for (const imp of activeImports) {
-      const dep = analysis.dependencies.find(d => d.name === imp.package);
-      
+      const dep = analysis.dependencies.find((d) => d.name === imp.package);
+
       if (!dep) continue;
 
       context.packages.push({
@@ -367,7 +369,7 @@ export class DependencyContextGenerator {
 
     for (const pkg of context.packages) {
       output += `## ${pkg.name}@${pkg.version}\n`;
-      
+
       if (pkg.types?.length > 0) {
         output += '### Types\n```typescript\n';
         for (const type of pkg.types) {
@@ -390,7 +392,7 @@ export class DependencyContextGenerator {
     return output;
   }
 }
-```
+````
 
 ### Step 5: Add CLI Flag
 
@@ -416,9 +418,8 @@ program
         // Include full type definitions
       }
 
-      await fs.writeFile('dependency-context.json', 
-        JSON.stringify(context, null, 2));
-      
+      await fs.writeFile('dependency-context.json', JSON.stringify(context, null, 2));
+
       console.log(`\n+dependency-context.json created`);
       console.log(`Active dependencies: ${imports.length}`);
       console.log(`Estimated tokens: ${context.summary.totalTokens}\n`);
@@ -431,18 +432,21 @@ program
 ## Acceptance Criteria
 
 ### Must Have
+
 - [ ] `--scan-dependencies` flag analyzes node_modules
 - [ ] Lists all dependencies with token counts
 - [ ] Identifies actively imported packages
 - [ ] Generates dependency-context.json
 
 ### Should Have
+
 - [ ] Security vulnerability checking
 - [ ] TypeScript definition extraction
 - [ ] Import usage tracking per file
 - [ ] Compact output format
 
 ### Nice to Have
+
 - [ ] Dependency graph visualization
 - [ ] License compliance checking
 - [ ] Outdated package detection
@@ -454,10 +458,10 @@ program
 
 ### Quantitative Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Dependency scan usage | 15% of users | Analytics |
-| Security issues found | 5+ per month | User reports |
+| Metric                       | Target                   | Measurement   |
+| ---------------------------- | ------------------------ | ------------- |
+| Dependency scan usage        | 15% of users             | Analytics     |
+| Security issues found        | 5+ per month             | User reports  |
 | Context accuracy improvement | 20% better LLM responses | User feedback |
 
 ### Qualitative Metrics
@@ -470,14 +474,14 @@ program
 
 ## Timeline
 
-| Task | Effort | Week |
-|------|--------|------|
+| Task                | Effort  | Week   |
+| ------------------- | ------- | ------ |
 | Dependency analyzer | 4 hours | Week 1 |
-| Import tracker | 3 hours | Week 1 |
-| Security checker | 2 hours | Week 1 |
-| Context generator | 3 hours | Week 1 |
-| CLI integration | 2 hours | Week 1 |
-| Testing & docs | 4 hours | Week 2 |
+| Import tracker      | 3 hours | Week 1 |
+| Security checker    | 2 hours | Week 1 |
+| Context generator   | 3 hours | Week 1 |
+| CLI integration     | 2 hours | Week 1 |
+| Testing & docs      | 4 hours | Week 2 |
 
 **Total Estimated Effort**: 18 hours over 2 weeks
 
@@ -491,5 +495,5 @@ program
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q3 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q3 2025_

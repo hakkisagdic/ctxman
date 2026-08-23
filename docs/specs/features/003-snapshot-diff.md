@@ -15,21 +15,25 @@
 Projects grow and change over time. Without visibility into token growth:
 
 **Codebase Bloat Goes Undetected**:
+
 - Token count creeps up unnoticed
 - Context generation slows down
 - LLM costs increase silently
 
 **No Historical Context**:
+
 - Can't track what changed
 - No baseline for comparison
 - Difficult to identify problematic additions
 
 **User Impact**:
+
 - Unexpected context overflow
 - Higher LLM API costs
 - Slower context generation
 
 **Business Impact**:
+
 - Reduced developer productivity
 - Increased operational costs
 - Difficulty planning architecture changes
@@ -98,16 +102,16 @@ export class SnapshotStore {
   constructor(projectRoot) {
     this.snapshotDir = path.join(projectRoot, SNAPSHOT_DIR);
   }
-  
+
   async init() {
     await fs.mkdir(this.snapshotDir, { recursive: true });
   }
-  
+
   async save(analysis) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `snapshot-${timestamp}.json`;
     const filepath = path.join(this.snapshotDir, filename);
-    
+
     const snapshot = {
       timestamp: new Date().toISOString(),
       version: '1.0',
@@ -117,7 +121,7 @@ export class SnapshotStore {
         fileCount: analysis.files.length,
         languages: analysis.languages,
       },
-      files: analysis.files.map(f => ({
+      files: analysis.files.map((f) => ({
         path: f.path,
         tokens: f.tokens,
         lines: f.lines,
@@ -125,30 +129,30 @@ export class SnapshotStore {
         hash: this.hashFile(f),
       })),
     };
-    
+
     await fs.writeFile(filepath, JSON.stringify(snapshot, null, 2));
     return { filename, snapshot };
   }
-  
+
   async list(options = {}) {
     const files = await fs.readdir(this.snapshotDir);
     const snapshots = files
-      .filter(f => f.startsWith('snapshot-') && f.endsWith('.json'))
+      .filter((f) => f.startsWith('snapshot-') && f.endsWith('.json'))
       .sort()
       .reverse();
-    
+
     if (options.limit) {
       return snapshots.slice(0, options.limit);
     }
     return snapshots;
   }
-  
+
   async load(filename) {
     const filepath = path.join(this.snapshotDir, filename);
     const content = await fs.readFile(filepath, 'utf-8');
     return JSON.parse(content);
   }
-  
+
   hashFile(file) {
     // Simple hash for change detection
     return `${file.path}:${file.tokens}:${file.lines}`;
@@ -163,14 +167,14 @@ export class SnapshotStore {
 
 export class SnapshotDiff {
   compare(oldSnapshot, newSnapshot) {
-    const oldFiles = new Map(oldSnapshot.files.map(f => [f.path, f]));
-    const newFiles = new Map(newSnapshot.files.map(f => [f.path, f]));
-    
+    const oldFiles = new Map(oldSnapshot.files.map((f) => [f.path, f]));
+    const newFiles = new Map(newSnapshot.files.map((f) => [f.path, f]));
+
     const added = [];
     const removed = [];
     const modified = [];
     const unchanged = [];
-    
+
     // Find added and modified files
     for (const [path, file] of newFiles) {
       if (!oldFiles.has(path)) {
@@ -192,16 +196,16 @@ export class SnapshotDiff {
         }
       }
     }
-    
+
     // Find removed files
     for (const [path, file] of oldFiles) {
       if (!newFiles.has(path)) {
         removed.push(file);
       }
     }
-    
+
     const totalTokenDiff = newSnapshot.summary.totalTokens - oldSnapshot.summary.totalTokens;
-    
+
     return {
       oldSnapshot: oldSnapshot.summary,
       newSnapshot: newSnapshot.summary,
@@ -213,10 +217,10 @@ export class SnapshotDiff {
       percentChange: (totalTokenDiff / oldSnapshot.summary.totalTokens) * 100,
     };
   }
-  
+
   analyzeTrend(snapshots) {
     if (snapshots.length < 2) return null;
-    
+
     const changes = [];
     for (let i = 1; i < snapshots.length; i++) {
       const diff = this.compare(snapshots[i - 1], snapshots[i]);
@@ -226,12 +230,12 @@ export class SnapshotDiff {
         percentChange: diff.percentChange,
       });
     }
-    
+
     // Calculate average daily growth
     const totalDays = (changes[changes.length - 1].date - changes[0].date) / (1000 * 60 * 60 * 24);
     const totalGrowth = changes.reduce((sum, c) => sum + c.tokenDiff, 0);
     const dailyGrowth = totalGrowth / totalDays;
-    
+
     return {
       changes,
       averageDailyGrowth: dailyGrowth,
@@ -257,7 +261,7 @@ program
   .action(async (options) => {
     const { SnapshotManager } = await import('../lib/snapshots/SnapshotManager.js');
     const manager = new SnapshotManager(process.cwd());
-    
+
     if (options.list) {
       await manager.listSnapshots();
     } else if (options.diff) {
@@ -281,47 +285,55 @@ export class SnapshotManager {
     this.store = new SnapshotStore(projectRoot);
     this.diff = new SnapshotDiff();
   }
-  
+
   async saveSnapshot() {
     await this.store.init();
-    
+
     // Run analysis
     const scanner = new Scanner({ root: process.cwd() });
     const analysis = await scanner.analyze();
-    
+
     const { filename, snapshot } = await this.store.save(analysis);
-    
+
     console.log(`\n📸 Snapshot saved: ${filename}`);
     console.log(`Total tokens: ${snapshot.summary.totalTokens.toLocaleString()}`);
     console.log(`Files: ${snapshot.summary.fileCount}\n`);
   }
-  
+
   async showDiff(snapshotName) {
     const snapshots = await this.store.list({ limit: 2 });
-    
+
     if (snapshots.length < 2) {
       console.log('Need at least 2 snapshots to compare');
       return;
     }
-    
+
     const newSnapshot = await this.store.load(snapshots[0]);
     const oldSnapshot = await this.store.load(snapshots[1]);
-    
+
     const diff = this.diff.compare(oldSnapshot, newSnapshot);
-    
+
     console.log('\n📊 Comparison: Last 2 snapshots\n');
     console.log('Token changes:');
-    console.log(`├── Total: ${diff.totalTokenDiff >= 0 ? '+' : ''}${diff.totalTokenDiff.toLocaleString()} tokens (${diff.percentChange >= 0 ? '+' : ''}${diff.percentChange.toFixed(1)}%)`);
-    console.log(`├── Added: ${diff.added.length} files (+${diff.added.reduce((s, f) => s + f.tokens, 0).toLocaleString()} tokens)`);
-    console.log(`├── Removed: ${diff.removed.length} files (-${diff.removed.reduce((s, f) => s + f.tokens, 0).toLocaleString()} tokens)`);
-    console.log(`└── Modified: ${diff.modified.length} files (${diff.modified.reduce((s, f) => s + f.tokenDiff, 0) >= 0 ? '+' : ''}${diff.modified.reduce((s, f) => s + f.tokenDiff, 0).toLocaleString()} tokens)\n`);
-    
+    console.log(
+      `├── Total: ${diff.totalTokenDiff >= 0 ? '+' : ''}${diff.totalTokenDiff.toLocaleString()} tokens (${diff.percentChange >= 0 ? '+' : ''}${diff.percentChange.toFixed(1)}%)`
+    );
+    console.log(
+      `├── Added: ${diff.added.length} files (+${diff.added.reduce((s, f) => s + f.tokens, 0).toLocaleString()} tokens)`
+    );
+    console.log(
+      `├── Removed: ${diff.removed.length} files (-${diff.removed.reduce((s, f) => s + f.tokens, 0).toLocaleString()} tokens)`
+    );
+    console.log(
+      `└── Modified: ${diff.modified.length} files (${diff.modified.reduce((s, f) => s + f.tokenDiff, 0) >= 0 ? '+' : ''}${diff.modified.reduce((s, f) => s + f.tokenDiff, 0).toLocaleString()} tokens)\n`
+    );
+
     if (diff.modified.length > 0) {
       const topGrowth = diff.modified
-        .filter(f => f.tokenDiff > 0)
+        .filter((f) => f.tokenDiff > 0)
         .sort((a, b) => b.tokenDiff - a.tokenDiff)
         .slice(0, 3);
-      
+
       if (topGrowth.length > 0) {
         console.log('📈 Top token growth:');
         topGrowth.forEach((f, i) => {
@@ -331,24 +343,26 @@ export class SnapshotManager {
       }
     }
   }
-  
+
   async showTrend() {
     const snapshots = await this.store.list();
-    const loaded = await Promise.all(
-      snapshots.slice(0, 10).map(s => this.store.load(s))
-    );
-    
+    const loaded = await Promise.all(snapshots.slice(0, 10).map((s) => this.store.load(s)));
+
     const trend = this.diff.analyzeTrend(loaded.reverse());
-    
+
     if (!trend) {
       console.log('Need at least 2 snapshots for trend analysis');
       return;
     }
-    
+
     console.log('\n📈 Token Growth Trend\n');
     console.log(`Average daily growth: ${trend.averageDailyGrowth.toFixed(0)} tokens`);
-    console.log(`Projected monthly: +${trend.projectedMonthlyGrowth.toFixed(0).toLocaleString()} tokens`);
-    console.log(`Projected 6 months: +${trend.projectedSixMonthGrowth.toFixed(0).toLocaleString()} tokens\n`);
+    console.log(
+      `Projected monthly: +${trend.projectedMonthlyGrowth.toFixed(0).toLocaleString()} tokens`
+    );
+    console.log(
+      `Projected 6 months: +${trend.projectedSixMonthGrowth.toFixed(0).toLocaleString()} tokens\n`
+    );
   }
 }
 ```
@@ -358,17 +372,20 @@ export class SnapshotManager {
 ## Acceptance Criteria
 
 ### Must Have
+
 - [ ] `ctxman snapshot` saves current analysis
 - [ ] `ctxman snapshot --diff` compares last two snapshots
 - [ ] `ctxman snapshot --list` shows saved snapshots
 - [ ] Snapshots stored in `.ctxman/snapshots/`
 
 ### Should Have
+
 - [ ] `ctxman snapshot --trend` shows growth trend
 - [ ] Compare specific snapshots by name
 - [ ] Export snapshot as JSON
 
 ### Nice to Have
+
 - [ ] Visual chart output (ASCII or SVG)
 - [ ] Git hook integration (snapshot on commit)
 - [ ] Team snapshot sharing
@@ -379,11 +396,11 @@ export class SnapshotManager {
 
 ### Quantitative Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Snapshot adoption | 30% of active users | Analytics |
-| Weekly snapshots per user | 2+ average | Storage stats |
-| Token growth awareness | 80% know their trend | User survey |
+| Metric                    | Target               | Measurement   |
+| ------------------------- | -------------------- | ------------- |
+| Snapshot adoption         | 30% of active users  | Analytics     |
+| Weekly snapshots per user | 2+ average           | Storage stats |
+| Token growth awareness    | 80% know their trend | User survey   |
 
 ### Qualitative Metrics
 
@@ -395,13 +412,13 @@ export class SnapshotManager {
 
 ## Timeline
 
-| Task | Effort | Week |
-|------|--------|------|
+| Task             | Effort  | Week   |
+| ---------------- | ------- | ------ |
 | Snapshot storage | 3 hours | Week 1 |
-| Diff engine | 3 hours | Week 1 |
-| CLI commands | 2 hours | Week 1 |
-| Trend analysis | 2 hours | Week 1 |
-| Testing & docs | 4 hours | Week 2 |
+| Diff engine      | 3 hours | Week 1 |
+| CLI commands     | 2 hours | Week 1 |
+| Trend analysis   | 2 hours | Week 1 |
+| Testing & docs   | 4 hours | Week 2 |
 
 **Total Estimated Effort**: 14 hours over 2 weeks
 
@@ -414,5 +431,5 @@ export class SnapshotManager {
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q2 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q2 2025_

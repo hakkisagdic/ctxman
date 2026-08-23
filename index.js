@@ -31,37 +31,37 @@ import GitUtils from './lib/utils/git-utils.js'; // v2.3.6+
 import { generateDigestFromReport, generateDigestFromContext } from './ctxman.js';
 
 export {
-    // Analyzers
-    TokenCalculator,
-    MethodAnalyzer,
+  // Analyzers
+  TokenCalculator,
+  MethodAnalyzer,
 
-    // Parsers
-    GitIgnoreParser,
-    MethodFilterParser,
+  // Parsers
+  GitIgnoreParser,
+  MethodFilterParser,
 
-    // Formatters
-    GitIngestFormatter,
-    ToonFormatter,
-    FormatRegistry,
+  // Formatters
+  GitIngestFormatter,
+  ToonFormatter,
+  FormatRegistry,
 
-    // Utils
-    TokenUtils,
-    FileUtils,
-    ClipboardUtils,
-    ConfigUtils,
-    FormatConverter,
-    ErrorHandler,
+  // Utils
+  TokenUtils,
+  FileUtils,
+  ClipboardUtils,
+  ConfigUtils,
+  FormatConverter,
+  ErrorHandler,
 
-    // v2.3.6+ Utils
-    Logger,
-    getLogger,
-    createLogger,
-    Updater,
-    GitUtils,
+  // v2.3.6+ Utils
+  Logger,
+  getLogger,
+  createLogger,
+  Updater,
+  GitUtils,
 
-    // Functions
-    generateDigestFromReport,
-    generateDigestFromContext
+  // Functions
+  generateDigestFromReport,
+  generateDigestFromContext,
 };
 
 // Alias for backward compatibility

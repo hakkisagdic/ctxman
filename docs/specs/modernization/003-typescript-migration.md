@@ -14,23 +14,27 @@
 Ctxman is currently a pure JavaScript codebase using ES6 modules. While this provides flexibility, it introduces several challenges:
 
 **Developer Experience Issues**:
+
 - No compile-time type checking
 - IDE autocompletion limited without JSDoc
 - Refactoring is error-prone
 - API contracts unclear without documentation
 
 **Code Quality Issues**:
+
 - Runtime type errors not caught early
 - Implicit `any` types proliferate
 - Interface contracts not enforced
 - Plugin API lacks type definitions
 
 **User Impact**:
+
 - Plugin developers struggle with API contracts
 - Contributors make type-related mistakes
 - Debugging takes longer without type information
 
 **Business Impact**:
+
 - Increased maintenance burden
 - Higher bug rate in edge cases
 - Contributor onboarding friction
@@ -43,6 +47,7 @@ Ctxman is currently a pure JavaScript codebase using ES6 modules. While this pro
 ### What We Will Do
 
 Implement an **incremental TypeScript migration** that:
+
 1. Preserves backward compatibility during transition
 2. Provides immediate value at each migration phase
 3. Enables gradual type strictness increase
@@ -124,6 +129,7 @@ Create `tsconfig.json` in the project root:
 ```
 
 **Important Notes for ES Modules (NodeNext)**:
+
 - `NodeNext` moduleResolution is required for ES modules (`"type": "module"` in package.json)
 - All local imports must include `.js` extension (TypeScript will resolve to `.ts`)
 - Import paths like `import { foo } from './lib/foo'` must become `import { foo } from './lib/foo.js'`
@@ -308,18 +314,18 @@ import path from 'path';
  * @description Centralized logging with multiple levels and file output
  */
 class Logger {
-    /**
-     * @param {LoggerOptions} [options={}]
-     */
-    constructor(options = {}) {
-        /** @type {'error'|'warn'|'info'|'debug'|'trace'} */
-        this.level = (options.level || process.env.LOG_LEVEL || 'info').toLowerCase();
-        /** @type {boolean} */
-        this.logToFile = options.logToFile !== false;
-        /** @type {string} */
-        this.logDir = options.logDir || path.join(process.cwd(), '.ctxman', 'logs');
-        // ... rest of implementation
-    }
+  /**
+   * @param {LoggerOptions} [options={}]
+   */
+  constructor(options = {}) {
+    /** @type {'error'|'warn'|'info'|'debug'|'trace'} */
+    this.level = (options.level || process.env.LOG_LEVEL || 'info').toLowerCase();
+    /** @type {boolean} */
+    this.logToFile = options.logToFile !== false;
+    /** @type {string} */
+    this.logDir = options.logDir || path.join(process.cwd(), '.ctxman', 'logs');
+    // ... rest of implementation
+  }
 }
 ```
 
@@ -359,7 +365,7 @@ export class Scanner {
       respectGitignore: true,
       followSymlinks: false,
       maxDepth: Infinity,
-      ...options
+      ...options,
     };
     // ... implementation
   }
@@ -519,14 +525,14 @@ export default Scanner;
 
 ```javascript
 class MethodAnalyzer {
-    constructor() {
-        this.goAnalyzer = new GoMethodAnalyzer();
-    }
+  constructor() {
+    this.goAnalyzer = new GoMethodAnalyzer();
+  }
 
-    extractMethods(content, filePath) {
-        const ext = path.extname(filePath).toLowerCase();
-        // ... implementation
-    }
+  extractMethods(content, filePath) {
+    const ext = path.extname(filePath).toLowerCase();
+    // ... implementation
+  }
 }
 ```
 
@@ -537,8 +543,16 @@ import path from 'path';
 import type { MethodInfo } from '../types/index.js';
 import GoMethodAnalyzer from './go-method-analyzer.js';
 
-type MethodType = 'function' | 'method' | 'arrow' | 'accessor' | 'shorthand' | 
-  'constructor' | 'property' | 'expression-bodied' | 'init';
+type MethodType =
+  | 'function'
+  | 'method'
+  | 'arrow'
+  | 'accessor'
+  | 'shorthand'
+  | 'constructor'
+  | 'property'
+  | 'expression-bodied'
+  | 'init';
 
 interface PatternConfig {
   regex: RegExp;
@@ -546,126 +560,153 @@ interface PatternConfig {
 }
 
 class MethodAnalyzer {
-    private goAnalyzer: GoMethodAnalyzer;
+  private goAnalyzer: GoMethodAnalyzer;
 
-    constructor() {
-        this.goAnalyzer = new GoMethodAnalyzer();
+  constructor() {
+    this.goAnalyzer = new GoMethodAnalyzer();
+  }
+
+  extractMethods(content: string, filePath: string): MethodInfo[] {
+    const ext = path.extname(filePath).toLowerCase();
+
+    if (ext === '.rs') {
+      return this.extractRustMethods(content, filePath);
+    } else if (ext === '.go') {
+      return this.goAnalyzer.extractMethods(content, filePath);
+    } else if (ext === '.java') {
+      return this.extractJavaMethods(content, filePath);
     }
+    // ... other language handlers
+    return this.extractJavaScriptMethods(content, filePath);
+  }
 
-    extractMethods(content: string, filePath: string): MethodInfo[] {
-        const ext = path.extname(filePath).toLowerCase();
+  private extractJavaScriptMethods(content: string, filePath: string): MethodInfo[] {
+    const namePattern = '[\\w$_]+';
 
-        if (ext === '.rs') {
-            return this.extractRustMethods(content, filePath);
-        } else if (ext === '.go') {
-            return this.goAnalyzer.extractMethods(content, filePath);
-        } else if (ext === '.java') {
-            return this.extractJavaMethods(content, filePath);
+    const patterns: PatternConfig[] = [
+      {
+        regex: new RegExp(`(?:export\\s+)?(?:async\\s+)?function\\s+(${namePattern})\\s*\\(`, 'g'),
+        type: 'function',
+      },
+      {
+        regex: new RegExp(`(${namePattern})\\s*:\\s*(?:async\\s+)?function\\s*\\(`, 'g'),
+        type: 'method',
+      },
+      {
+        regex: new RegExp(
+          `(?:const|let|var)\\s+(${namePattern})\\s*=\\s*(?:async\\s+)?\\([^)]*\\)\\s*=>`,
+          'g'
+        ),
+        type: 'arrow',
+      },
+    ];
+
+    return this.processPatterns(content, filePath, patterns);
+  }
+
+  private processPatterns(
+    content: string,
+    filePath: string,
+    patterns: PatternConfig[],
+    isJava: boolean = false,
+    isCSharp: boolean = false,
+    isPython: boolean = false,
+    isRuby: boolean = false,
+    isKotlin: boolean = false,
+    isSwift: boolean = false,
+    isScala: boolean = false
+  ): MethodInfo[] {
+    const methodsMap = new Map<string, MethodInfo>();
+    const processedLines = new Map<string, boolean>();
+
+    for (const { regex, type } of patterns) {
+      let match: RegExpExecArray | null;
+      while ((match = regex.exec(content)) !== null) {
+        const methodName = match[1];
+        const line = this.getLineNumber(content, match.index + match[0].indexOf(methodName));
+
+        const keywordCheck = this.shouldSkipKeyword(
+          methodName,
+          isJava,
+          isCSharp,
+          isPython,
+          isRuby,
+          isKotlin,
+          isSwift,
+          isScala
+        );
+
+        if (methodName && keywordCheck) {
+          const lineKey = `${methodName}:${line}`;
+          if (processedLines.has(lineKey)) {
+            continue;
+          }
+
+          const key = `${methodName}:${line}`;
+          if (!methodsMap.has(key)) {
+            methodsMap.set(key, {
+              name: methodName,
+              line: line,
+              file: path.relative(process.cwd(), filePath),
+              type: type,
+            });
+            processedLines.set(lineKey, true);
+          }
         }
-        // ... other language handlers
-        return this.extractJavaScriptMethods(content, filePath);
+      }
     }
 
-    private extractJavaScriptMethods(content: string, filePath: string): MethodInfo[] {
-        const namePattern = '[\\w$_]+';
+    return Array.from(methodsMap.values());
+  }
 
-        const patterns: PatternConfig[] = [
-            { regex: new RegExp(`(?:export\\s+)?(?:async\\s+)?function\\s+(${namePattern})\\s*\\(`, 'g'), type: 'function' },
-            { regex: new RegExp(`(${namePattern})\\s*:\\s*(?:async\\s+)?function\\s*\\(`, 'g'), type: 'method' },
-            { regex: new RegExp(`(?:const|let|var)\\s+(${namePattern})\\s*=\\s*(?:async\\s+)?\\([^)]*\\)\\s*=>`, 'g'), type: 'arrow' },
-        ];
+  private shouldSkipKeyword(
+    name: string,
+    isJava: boolean,
+    isCSharp: boolean,
+    isPython: boolean,
+    isRuby: boolean,
+    isKotlin: boolean,
+    isSwift: boolean,
+    isScala: boolean
+  ): boolean {
+    if (isCSharp) return !this.isCSharpKeyword(name);
+    if (isPython) return !this.isPythonKeyword(name);
+    if (isRuby) return !this.isRubyKeyword(name);
+    if (isKotlin) return !this.isKotlinKeyword(name);
+    if (isSwift) return !this.isSwiftKeyword(name);
+    if (isScala) return !this.isScalaKeyword(name);
+    return !this.isKeyword(name, isJava);
+  }
 
-        return this.processPatterns(content, filePath, patterns);
+  private getLineNumber(content: string, index: number): number {
+    return content.substring(0, index).split('\n').length;
+  }
+
+  private isKeyword(name: string, isJava: boolean = false): boolean {
+    // ... keyword sets
+    return false; // implementation
+  }
+
+  // Other keyword check methods...
+
+  extractMethodContent(content: string, methodName: string): string | null {
+    const patterns = [
+      new RegExp(
+        `(function\\s+${methodName}\\s*\\([^)]*\\)\\s*\\{[^}]*(?:\\{[^}]*\\}[^}]*)*\\})`,
+        'g'
+      ),
+      new RegExp(
+        `(${methodName}\\s*:\\s*function\\s*\\([^)]*\\)\\s*\\{[^}]*(?:\\{[^}]*\\}[^}]*)*\\})`,
+        'g'
+      ),
+    ];
+
+    for (const pattern of patterns) {
+      const match = pattern.exec(content);
+      if (match) return match[1];
     }
-
-    private processPatterns(
-        content: string, 
-        filePath: string, 
-        patterns: PatternConfig[],
-        isJava: boolean = false,
-        isCSharp: boolean = false,
-        isPython: boolean = false,
-        isRuby: boolean = false,
-        isKotlin: boolean = false,
-        isSwift: boolean = false,
-        isScala: boolean = false
-    ): MethodInfo[] {
-        const methodsMap = new Map<string, MethodInfo>();
-        const processedLines = new Map<string, boolean>();
-
-        for (const { regex, type } of patterns) {
-            let match: RegExpExecArray | null;
-            while ((match = regex.exec(content)) !== null) {
-                const methodName = match[1];
-                const line = this.getLineNumber(content, match.index + match[0].indexOf(methodName));
-
-                const keywordCheck = this.shouldSkipKeyword(methodName, isJava, isCSharp, isPython, isRuby, isKotlin, isSwift, isScala);
-
-                if (methodName && keywordCheck) {
-                    const lineKey = `${methodName}:${line}`;
-                    if (processedLines.has(lineKey)) {
-                        continue;
-                    }
-
-                    const key = `${methodName}:${line}`;
-                    if (!methodsMap.has(key)) {
-                        methodsMap.set(key, {
-                            name: methodName,
-                            line: line,
-                            file: path.relative(process.cwd(), filePath),
-                            type: type
-                        });
-                        processedLines.set(lineKey, true);
-                    }
-                }
-            }
-        }
-
-        return Array.from(methodsMap.values());
-    }
-
-    private shouldSkipKeyword(
-        name: string, 
-        isJava: boolean, 
-        isCSharp: boolean,
-        isPython: boolean,
-        isRuby: boolean,
-        isKotlin: boolean,
-        isSwift: boolean,
-        isScala: boolean
-    ): boolean {
-        if (isCSharp) return !this.isCSharpKeyword(name);
-        if (isPython) return !this.isPythonKeyword(name);
-        if (isRuby) return !this.isRubyKeyword(name);
-        if (isKotlin) return !this.isKotlinKeyword(name);
-        if (isSwift) return !this.isSwiftKeyword(name);
-        if (isScala) return !this.isScalaKeyword(name);
-        return !this.isKeyword(name, isJava);
-    }
-
-    private getLineNumber(content: string, index: number): number {
-        return content.substring(0, index).split('\n').length;
-    }
-
-    private isKeyword(name: string, isJava: boolean = false): boolean {
-        // ... keyword sets
-        return false; // implementation
-    }
-
-    // Other keyword check methods...
-
-    extractMethodContent(content: string, methodName: string): string | null {
-        const patterns = [
-            new RegExp(`(function\\s+${methodName}\\s*\\([^)]*\\)\\s*\\{[^}]*(?:\\{[^}]*\\}[^}]*)*\\})`, 'g'),
-            new RegExp(`(${methodName}\\s*:\\s*function\\s*\\([^)]*\\)\\s*\\{[^}]*(?:\\{[^}]*\\}[^}]*)*\\})`, 'g')
-        ];
-
-        for (const pattern of patterns) {
-            const match = pattern.exec(content);
-            if (match) return match[1];
-        }
-        return null;
-    }
+    return null;
+  }
 }
 
 export default MethodAnalyzer;
@@ -677,14 +718,14 @@ export default MethodAnalyzer;
 
 ```javascript
 class TokenCalculator {
-    constructor(projectRoot, options = {}) {
-        this.projectRoot = projectRoot;
-        this.options = { verbose: false, compactContext: true, methodLevel: false, ...options };
-        this.stats = this.initStats();
-        this.gitIgnore = this.initGitIgnore();
-        this.methodAnalyzer = new MethodAnalyzer();
-        // ...
-    }
+  constructor(projectRoot, options = {}) {
+    this.projectRoot = projectRoot;
+    this.options = { verbose: false, compactContext: true, methodLevel: false, ...options };
+    this.stats = this.initStats();
+    this.gitIgnore = this.initGitIgnore();
+    this.methodAnalyzer = new MethodAnalyzer();
+    // ...
+  }
 }
 ```
 
@@ -703,138 +744,138 @@ import MethodAnalyzer from './method-analyzer.js';
 import MethodFilterParser from '../parsers/method-filter-parser.js';
 import GitIngestFormatter from '../formatters/gitingest-formatter.js';
 import { LLMDetector } from '../utils/llm-detector.js';
-import type { 
-    TokenCalculatorOptions, 
-    TokenStats, 
-    FileInfo, 
-    MethodInfo,
-    LLMContext,
-    ExtensionStats,
-    DirectoryStats
+import type {
+  TokenCalculatorOptions,
+  TokenStats,
+  FileInfo,
+  MethodInfo,
+  LLMContext,
+  ExtensionStats,
+  DirectoryStats,
 } from '../types/index.js';
 
 interface ExtendedTokenStats extends TokenStats {
-    byExtension: Record<string, ExtensionStats>;
-    byDirectory: Record<string, DirectoryStats>;
+  byExtension: Record<string, ExtensionStats>;
+  byDirectory: Record<string, DirectoryStats>;
 }
 
 interface MethodStats {
-    totalMethods: number;
-    includedMethods: number;
-    methodTokens: Record<string, number>;
+  totalMethods: number;
+  includedMethods: number;
+  methodTokens: Record<string, number>;
 }
 
 class TokenCalculator {
-    private projectRoot: string;
-    private options: Required<TokenCalculatorOptions> & { targetModel?: string };
-    private stats: ExtendedTokenStats;
-    private gitIgnore: GitIgnoreParser;
-    private methodAnalyzer: MethodAnalyzer;
-    private methodFilter: MethodFilterParser | null;
-    private methodStats: MethodStats;
+  private projectRoot: string;
+  private options: Required<TokenCalculatorOptions> & { targetModel?: string };
+  private stats: ExtendedTokenStats;
+  private gitIgnore: GitIgnoreParser;
+  private methodAnalyzer: MethodAnalyzer;
+  private methodFilter: MethodFilterParser | null;
+  private methodStats: MethodStats;
 
-    constructor(projectRoot: string, options: TokenCalculatorOptions = {}) {
-        this.projectRoot = projectRoot;
-        this.options = { 
-            verbose: false, 
-            compactContext: true, 
-            methodLevel: false, 
-            ...options 
-        } as Required<TokenCalculatorOptions>;
-        this.stats = this.initStats();
-        this.gitIgnore = this.initGitIgnore();
-        this.methodAnalyzer = new MethodAnalyzer();
-        this.methodFilter = this.options.methodLevel ? this.initMethodFilter() : null;
-        this.methodStats = { totalMethods: 0, includedMethods: 0, methodTokens: {} };
+  constructor(projectRoot: string, options: TokenCalculatorOptions = {}) {
+    this.projectRoot = projectRoot;
+    this.options = {
+      verbose: false,
+      compactContext: true,
+      methodLevel: false,
+      ...options,
+    } as Required<TokenCalculatorOptions>;
+    this.stats = this.initStats();
+    this.gitIgnore = this.initGitIgnore();
+    this.methodAnalyzer = new MethodAnalyzer();
+    this.methodFilter = this.options.methodLevel ? this.initMethodFilter() : null;
+    this.methodStats = { totalMethods: 0, includedMethods: 0, methodTokens: {} };
+  }
+
+  private initStats(): ExtendedTokenStats {
+    return {
+      totalFiles: 0,
+      totalTokens: 0,
+      totalBytes: 0,
+      totalLines: 0,
+      ignoredFiles: 0,
+      calculatorIgnoredFiles: 0,
+      byExtension: {},
+      byDirectory: {},
+      largestFiles: [],
+    };
+  }
+
+  calculateTokens(content: string, filePath: string): number {
+    return TokenUtils.calculate(content, filePath);
+  }
+
+  isTextFile(filePath: string): boolean {
+    return FileUtils.isText(filePath);
+  }
+
+  analyzeFile(filePath: string): FileInfo {
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+      const stats = fs.statSync(filePath);
+
+      const fileInfo: FileInfo = {
+        path: filePath,
+        relativePath: path.relative(this.projectRoot, filePath),
+        size: stats.size,
+        tokens: this.calculateTokens(content, filePath),
+        lines: content.split('\n').length,
+        extension: path.extname(filePath).toLowerCase() || 'no-extension',
+        name: path.basename(filePath),
+        modified: stats.mtime,
+        created: stats.birthtime,
+      };
+
+      if (this.options.methodLevel && this.isCodeFile(filePath)) {
+        fileInfo.methods = this.analyzeFileMethods(content, filePath);
+      }
+
+      return fileInfo;
+    } catch (error) {
+      const err = error as Error;
+      return {
+        path: filePath,
+        relativePath: path.relative(this.projectRoot, filePath),
+        size: 0,
+        tokens: 0,
+        lines: 0,
+        extension: 'error',
+        name: path.basename(filePath),
+        error: err.message,
+      } as FileInfo;
+    }
+  }
+
+  run(): ExtendedTokenStats {
+    this.printHeader();
+
+    const allFiles = this.scanDirectory(this.projectRoot);
+    this.printScanResults(allFiles);
+
+    const analysisResults: FileInfo[] = [];
+    for (const file of allFiles) {
+      const fileInfo = this.analyzeFile(file);
+      this.updateStats(fileInfo);
+      analysisResults.push(fileInfo);
     }
 
-    private initStats(): ExtendedTokenStats {
-        return {
-            totalFiles: 0,
-            totalTokens: 0,
-            totalBytes: 0,
-            totalLines: 0,
-            ignoredFiles: 0,
-            calculatorIgnoredFiles: 0,
-            byExtension: {},
-            byDirectory: {},
-            largestFiles: []
-        };
+    this.stats.largestFiles.sort((a, b) => (b.tokens || 0) - (a.tokens || 0));
+    this.printReport();
+
+    if (this.options.targetModel && !this.options.dashboard) {
+      this.printContextFitAnalysis();
     }
 
-    calculateTokens(content: string, filePath: string): number {
-        return TokenUtils.calculate(content, filePath);
+    if (!this.options.dashboard) {
+      this.handleExports(analysisResults);
     }
 
-    isTextFile(filePath: string): boolean {
-        return FileUtils.isText(filePath);
-    }
+    return this.stats;
+  }
 
-    analyzeFile(filePath: string): FileInfo {
-        try {
-            const content = fs.readFileSync(filePath, 'utf8');
-            const stats = fs.statSync(filePath);
-
-            const fileInfo: FileInfo = {
-                path: filePath,
-                relativePath: path.relative(this.projectRoot, filePath),
-                size: stats.size,
-                tokens: this.calculateTokens(content, filePath),
-                lines: content.split('\n').length,
-                extension: path.extname(filePath).toLowerCase() || 'no-extension',
-                name: path.basename(filePath),
-                modified: stats.mtime,
-                created: stats.birthtime
-            };
-
-            if (this.options.methodLevel && this.isCodeFile(filePath)) {
-                fileInfo.methods = this.analyzeFileMethods(content, filePath);
-            }
-
-            return fileInfo;
-        } catch (error) {
-            const err = error as Error;
-            return {
-                path: filePath,
-                relativePath: path.relative(this.projectRoot, filePath),
-                size: 0,
-                tokens: 0,
-                lines: 0,
-                extension: 'error',
-                name: path.basename(filePath),
-                error: err.message
-            } as FileInfo;
-        }
-    }
-
-    run(): ExtendedTokenStats {
-        this.printHeader();
-
-        const allFiles = this.scanDirectory(this.projectRoot);
-        this.printScanResults(allFiles);
-
-        const analysisResults: FileInfo[] = [];
-        for (const file of allFiles) {
-            const fileInfo = this.analyzeFile(file);
-            this.updateStats(fileInfo);
-            analysisResults.push(fileInfo);
-        }
-
-        this.stats.largestFiles.sort((a, b) => (b.tokens || 0) - (a.tokens || 0));
-        this.printReport();
-
-        if (this.options.targetModel && !this.options.dashboard) {
-            this.printContextFitAnalysis();
-        }
-
-        if (!this.options.dashboard) {
-            this.handleExports(analysisResults);
-        }
-
-        return this.stats;
-    }
-
-    // ... remaining methods
+  // ... remaining methods
 }
 
 export default TokenCalculator;
@@ -847,6 +888,7 @@ export default TokenCalculator;
 #### Step 3.1: Migrate logger.js to logger.ts
 
 **Key changes:**
+
 - Add type annotations to all methods
 - Use union types for log levels
 - Add generic types for metadata
@@ -864,157 +906,157 @@ type ColorMap = Record<LogLevel, string>;
 type IconMap = Record<LogLevel, string>;
 
 class Logger {
-    private level: LogLevel;
-    private logToFile: boolean;
-    private logDir: string;
-    private logFile: string;
-    private silent: boolean;
-    private levels: LogLevelMap;
-    private colors: ColorMap;
-    private icons: IconMap;
+  private level: LogLevel;
+  private logToFile: boolean;
+  private logDir: string;
+  private logFile: string;
+  private silent: boolean;
+  private levels: LogLevelMap;
+  private colors: ColorMap;
+  private icons: IconMap;
 
-    constructor(options: LoggerOptions = {}) {
-        this.level = (options.level || process.env.LOG_LEVEL || 'info') as LogLevel;
-        this.logToFile = options.logToFile !== false;
-        this.logDir = options.logDir || path.join(process.cwd(), '.ctxman', 'logs');
-        this.logFile = options.logFile || `ctxman-${this.getDateString()}.log`;
-        this.silent = options.silent || false;
+  constructor(options: LoggerOptions = {}) {
+    this.level = (options.level || process.env.LOG_LEVEL || 'info') as LogLevel;
+    this.logToFile = options.logToFile !== false;
+    this.logDir = options.logDir || path.join(process.cwd(), '.ctxman', 'logs');
+    this.logFile = options.logFile || `ctxman-${this.getDateString()}.log`;
+    this.silent = options.silent || false;
 
-        this.levels = {
-            error: 0,
-            warn: 1,
-            info: 2,
-            debug: 3,
-            trace: 4
-        };
+    this.levels = {
+      error: 0,
+      warn: 1,
+      info: 2,
+      debug: 3,
+      trace: 4,
+    };
 
-        this.colors = {
-            error: '\x1b[31m',
-            warn: '\x1b[33m',
-            info: '\x1b[36m',
-            debug: '\x1b[35m',
-            trace: '\x1b[90m',
-        };
+    this.colors = {
+      error: '\x1b[31m',
+      warn: '\x1b[33m',
+      info: '\x1b[36m',
+      debug: '\x1b[35m',
+      trace: '\x1b[90m',
+    };
 
-        this.icons = {
-            error: '❌',
-            warn: '⚠️',
-            info: 'ℹ️',
-            debug: '🔍',
-            trace: '🔬'
-        };
+    this.icons = {
+      error: '❌',
+      warn: '⚠️',
+      info: 'ℹ️',
+      debug: '🔍',
+      trace: '🔬',
+    };
 
-        this.initializeLogDirectory();
+    this.initializeLogDirectory();
+  }
+
+  log(level: LogLevel, message: string, meta: Record<string, unknown> = {}): void {
+    if (!this.shouldLog(level)) return;
+
+    const { consoleMessage, fileMessage } = this.formatMessage(level, message, meta);
+
+    if (!this.silent) {
+      console.log(consoleMessage);
     }
 
-    log(level: LogLevel, message: string, meta: Record<string, unknown> = {}): void {
-        if (!this.shouldLog(level)) return;
+    this.writeToFile(fileMessage);
+  }
 
-        const { consoleMessage, fileMessage } = this.formatMessage(level, message, meta);
+  error(message: string, meta: Record<string, unknown> = {}): void {
+    this.log('error', message, meta);
+  }
 
-        if (!this.silent) {
-            console.log(consoleMessage);
-        }
+  warn(message: string, meta: Record<string, unknown> = {}): void {
+    this.log('warn', message, meta);
+  }
 
-        this.writeToFile(fileMessage);
+  info(message: string, meta: Record<string, unknown> = {}): void {
+    this.log('info', message, meta);
+  }
+
+  debug(message: string, meta: Record<string, unknown> = {}): void {
+    this.log('debug', message, meta);
+  }
+
+  trace(message: string, meta: Record<string, unknown> = {}): void {
+    this.log('trace', message, meta);
+  }
+
+  private shouldLog(level: LogLevel): boolean {
+    return this.levels[level] <= this.levels[this.level];
+  }
+
+  private formatMessage(
+    level: LogLevel,
+    message: string,
+    meta: Record<string, unknown>
+  ): { consoleMessage: string; fileMessage: string } {
+    const timestamp = this.getTimestamp();
+    const icon = this.icons[level];
+
+    const consoleMessage = `${this.colors[level]}${icon} [${level.toUpperCase()}]\x1b[0m ${message}`;
+
+    const metaString = Object.keys(meta).length > 0 ? ` | ${JSON.stringify(meta)}` : '';
+    const fileMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}${metaString}`;
+
+    return { consoleMessage, fileMessage };
+  }
+
+  private getTimestamp(): string {
+    return new Date().toISOString();
+  }
+
+  private getDateString(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  }
+
+  private initializeLogDirectory(): void {
+    if (this.logToFile) {
+      const fullLogDir = path.isAbsolute(this.logDir)
+        ? this.logDir
+        : path.join(process.cwd(), this.logDir);
+      if (!fs.existsSync(fullLogDir)) {
+        fs.mkdirSync(fullLogDir, { recursive: true });
+      }
     }
+  }
 
-    error(message: string, meta: Record<string, unknown> = {}): void {
-        this.log('error', message, meta);
+  private writeToFile(message: string): void {
+    if (!this.logToFile) return;
+
+    try {
+      const fullLogPath = path.isAbsolute(this.logDir)
+        ? path.join(this.logDir, this.logFile)
+        : path.join(process.cwd(), this.logDir, this.logFile);
+
+      fs.appendFileSync(fullLogPath, message + '\n', 'utf8');
+    } catch (error) {
+      const err = error as Error;
+      console.error('Failed to write to log file:', err.message);
     }
+  }
 
-    warn(message: string, meta: Record<string, unknown> = {}): void {
-        this.log('warn', message, meta);
-    }
+  clearOldLogs(daysToKeep: number = 7): void {
+    // ... implementation
+  }
 
-    info(message: string, meta: Record<string, unknown> = {}): void {
-        this.log('info', message, meta);
-    }
-
-    debug(message: string, meta: Record<string, unknown> = {}): void {
-        this.log('debug', message, meta);
-    }
-
-    trace(message: string, meta: Record<string, unknown> = {}): void {
-        this.log('trace', message, meta);
-    }
-
-    private shouldLog(level: LogLevel): boolean {
-        return this.levels[level] <= this.levels[this.level];
-    }
-
-    private formatMessage(
-        level: LogLevel, 
-        message: string, 
-        meta: Record<string, unknown>
-    ): { consoleMessage: string; fileMessage: string } {
-        const timestamp = this.getTimestamp();
-        const icon = this.icons[level];
-
-        const consoleMessage = `${this.colors[level]}${icon} [${level.toUpperCase()}]\x1b[0m ${message}`;
-
-        const metaString = Object.keys(meta).length > 0 ? ` | ${JSON.stringify(meta)}` : '';
-        const fileMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}${metaString}`;
-
-        return { consoleMessage, fileMessage };
-    }
-
-    private getTimestamp(): string {
-        return new Date().toISOString();
-    }
-
-    private getDateString(): string {
-        const now = new Date();
-        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    }
-
-    private initializeLogDirectory(): void {
-        if (this.logToFile) {
-            const fullLogDir = path.isAbsolute(this.logDir) 
-                ? this.logDir 
-                : path.join(process.cwd(), this.logDir);
-            if (!fs.existsSync(fullLogDir)) {
-                fs.mkdirSync(fullLogDir, { recursive: true });
-            }
-        }
-    }
-
-    private writeToFile(message: string): void {
-        if (!this.logToFile) return;
-
-        try {
-            const fullLogPath = path.isAbsolute(this.logDir)
-                ? path.join(this.logDir, this.logFile)
-                : path.join(process.cwd(), this.logDir, this.logFile);
-
-            fs.appendFileSync(fullLogPath, message + '\n', 'utf8');
-        } catch (error) {
-            const err = error as Error;
-            console.error('Failed to write to log file:', err.message);
-        }
-    }
-
-    clearOldLogs(daysToKeep: number = 7): void {
-        // ... implementation
-    }
-
-    getRecentLogs(lines: number = 100): string[] {
-        // ... implementation
-        return [];
-    }
+  getRecentLogs(lines: number = 100): string[] {
+    // ... implementation
+    return [];
+  }
 }
 
 let defaultLogger: Logger | null = null;
 
 function getLogger(options: LoggerOptions = {}): Logger {
-    if (!defaultLogger) {
-        defaultLogger = new Logger(options);
-    }
-    return defaultLogger;
+  if (!defaultLogger) {
+    defaultLogger = new Logger(options);
+  }
+  return defaultLogger;
 }
 
 function createLogger(options: LoggerOptions = {}): Logger {
-    return new Logger(options);
+  return new Logger(options);
 }
 
 export { Logger, getLogger, createLogger };
@@ -1115,12 +1157,14 @@ import { program } from 'commander';
 ### Phase 1 Verification
 
 1. **TypeScript Installation Check**
+
    ```bash
    npx tsc --version
    # Expected: Version 5.x.x
    ```
 
 2. **Initial Type Check**
+
    ```bash
    npm run typecheck
    # Expected: Some errors (we haven't fixed everything yet)
@@ -1128,6 +1172,7 @@ import { program } from 'commander';
    ```
 
 3. **JSDoc Type Checking**
+
    ```bash
    # Verify JSDoc types are recognized
    npm run typecheck 2>&1 | grep "lib/utils/logger.js"
@@ -1144,6 +1189,7 @@ import { program } from 'commander';
 ### Phase 2 Verification
 
 1. **Core Module Migration**
+
    ```bash
    # Run type check on migrated files
    npx tsc --noEmit lib/core/Scanner.ts
@@ -1153,12 +1199,14 @@ import { program } from 'commander';
    ```
 
 2. **Test Suite**
+
    ```bash
    npm test
    # Expected: All tests pass (1121+ tests)
    ```
 
 3. **CLI Functionality**
+
    ```bash
    node bin/cli.js --help
    node bin/cli.js --cli
@@ -1176,12 +1224,14 @@ import { program } from 'commander';
 ### Phase 3 Verification
 
 1. **Utility Migration**
+
    ```bash
    npm run typecheck
    # Expected: No errors for lib/utils/*.ts
    ```
 
 2. **Plugin System**
+
    ```bash
    # Test plugin loading
    node -e "import('./lib/plugins/index.js').then(m => console.log(m))"
@@ -1198,12 +1248,14 @@ import { program } from 'commander';
 ### Phase 4 Verification
 
 1. **Complete Type Check**
+
    ```bash
    npm run typecheck
    # Expected: 0 errors
    ```
 
 2. **Strict Mode**
+
    ```bash
    # Update tsconfig.json to enable strict mode
    npx tsc --noEmit --strict
@@ -1211,6 +1263,7 @@ import { program } from 'commander';
    ```
 
 3. **Type Exports**
+
    ```bash
    npm run build:types
    # Verify all types are exported
@@ -1350,14 +1403,20 @@ import { logger } from '../utils/logger.js';
 
 ```typescript
 // lib/types/index.ts
-export interface ScannerOptions { /* ... */ }
-export interface FileInfo { /* ... */ }
+export interface ScannerOptions {
+  /* ... */
+}
+export interface FileInfo {
+  /* ... */
+}
 
 // Usage
 import type { ScannerOptions, FileInfo } from '../types/index.js';
 
 // Default exports
-export default class Scanner { /* ... */ }
+export default class Scanner {
+  /* ... */
+}
 
 // Usage
 import Scanner from './Scanner.js';
@@ -1527,13 +1586,8 @@ Update `.husky/pre-commit` or lint-staged config:
 ```json
 {
   "lint-staged": {
-    "*.ts": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{js,ts}": [
-      "npm run typecheck -- --filter="
-    ]
+    "*.ts": ["eslint --fix", "prettier --write"],
+    "*.{js,ts}": ["npm run typecheck -- --filter="]
   }
 }
 ```
@@ -1614,13 +1668,13 @@ Add to README.md after Phase 1:
 
 ### Quantitative Metrics
 
-| Metric | Before | Target | Phase 1 | Phase 2 | Phase 4 |
-|--------|--------|--------|---------|---------|---------|
-| Files with types | 0% | 100% | 10% | 50% | 100% |
-| Type coverage | 0% | 90% | 20% | 60% | 90% |
-| `any` usage | N/A | <5% | <50% | <20% | <5% |
-| Build errors | N/A | 0 | <100 | <50 | 0 |
-| Type check time | N/A | <5s | <2s | <3s | <5s |
+| Metric           | Before | Target | Phase 1 | Phase 2 | Phase 4 |
+| ---------------- | ------ | ------ | ------- | ------- | ------- |
+| Files with types | 0%     | 100%   | 10%     | 50%     | 100%    |
+| Type coverage    | 0%     | 90%    | 20%     | 60%     | 90%     |
+| `any` usage      | N/A    | <5%    | <50%    | <20%    | <5%     |
+| Build errors     | N/A    | 0      | <100    | <50     | 0       |
+| Type check time  | N/A    | <5s    | <2s     | <3s     | <5s     |
 
 ### Qualitative Metrics
 
@@ -1633,12 +1687,12 @@ Add to README.md after Phase 1:
 
 ## Risk Assessment
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| Breaking changes during migration | Medium | High | Incremental migration, extensive testing |
-| Performance degradation | Low | Medium | Profile build times, optimize includes |
-| Contributor friction | Medium | Medium | Provide type documentation, training |
-| Dependency type conflicts | Medium | Low | Use `skipLibCheck`, report upstream |
+| Risk                              | Probability | Impact | Mitigation                               |
+| --------------------------------- | ----------- | ------ | ---------------------------------------- |
+| Breaking changes during migration | Medium      | High   | Incremental migration, extensive testing |
+| Performance degradation           | Low         | Medium | Profile build times, optimize includes   |
+| Contributor friction              | Medium      | Medium | Provide type documentation, training     |
+| Dependency type conflicts         | Medium      | Low    | Use `skipLibCheck`, report upstream      |
 
 ---
 
@@ -1660,9 +1714,9 @@ Add to README.md after Phase 1:
 2. **lib/utils/logger.js** - High utility, low complexity
 3. **lib/core/Scanner.js** - Core functionality
 4. **lib/core/Analyzer.js** - Core functionality
-5. **lib/analyzers/*.js** - Core features
-6. **lib/plugins/*.js** - Plugin architecture
-7. **lib/api/*.js** - API layer
+5. **lib/analyzers/\*.js** - Core features
+6. **lib/plugins/\*.js** - Plugin architecture
+7. **lib/api/\*.js** - API layer
 8. **bin/cli.js** - Entry point last
 
 ---
@@ -1670,16 +1724,19 @@ Add to README.md after Phase 1:
 ## Benefits Summary
 
 ### Immediate Benefits (Phase 1)
+
 - Type checking for JSDoc-annotated code
 - IDE improvements for core modules
 - Type definitions for plugin developers
 
 ### Medium-term Benefits (Phase 2-3)
+
 - Catch errors at compile time
 - Safer refactoring
 - Better API documentation
 
 ### Long-term Benefits (Phase 4)
+
 - Full type safety
 - Reduced bug rate
 - Improved contributor experience
@@ -1689,12 +1746,12 @@ Add to README.md after Phase 1:
 
 ## Timeline
 
-| Phase | Duration | Start | End |
-|-------|----------|-------|-----|
-| Foundation | 2 weeks | Q2 2025 | Q2 2025 |
-| Core Modules | 4 weeks | Q2 2025 | Q3 2025 |
-| Utilities | 4 weeks | Q3 2025 | Q3 2025 |
-| Full Migration | 2 weeks | Q3 2025 | Q3 2025 |
+| Phase          | Duration | Start   | End     |
+| -------------- | -------- | ------- | ------- |
+| Foundation     | 2 weeks  | Q2 2025 | Q2 2025 |
+| Core Modules   | 4 weeks  | Q2 2025 | Q3 2025 |
+| Utilities      | 4 weeks  | Q3 2025 | Q3 2025 |
+| Full Migration | 2 weeks  | Q3 2025 | Q3 2025 |
 
 **Total Estimated Effort**: 12 weeks
 
@@ -1710,5 +1767,5 @@ Add to README.md after Phase 1:
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q2-Q3 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q2-Q3 2025_

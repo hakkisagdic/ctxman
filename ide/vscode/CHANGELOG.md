@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-08-23
 
 ### Added
+
 - Initial release of Ctxman VS Code extension
 - Generate context for current file command
 - Generate context for selection command
@@ -21,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Budget alerts for token limits
 
 ### Technical
+
 - Extension stub implementation ready for future development
 - LSP server integration planned for future release
 - CodeLens support planned (currently experimental)

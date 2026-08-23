@@ -6,6 +6,7 @@
 </cite>
 
 ## İçindekiler
+
 1. [Dosya Seviyesi Analiz](#dosya-seviyesi-analiz)
 2. [Dizin Tarama ve Filtreleme](#dizin-tarama-ve-filtreleme)
 3. [GitIgnore İşleme](#gitignore-i̇şleme)
@@ -25,6 +26,7 @@ Ignore edilmeyen öğeler için sistem, öğenin bir dosya mı yoksa dizin mi ol
 Ignore kontrollerinden geçen metin dosyaları, dizindeki tüm öğeler işlendikten sonra döndürülen sonuç dizisine eklenir. Bu özyinelemeli yaklaşım, dizin hiyerarşisinin her seviyesinde verimli filtrelemeyi korurken dosya sisteminin kapsamlı kapsanmasını sağlar.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L385-L412)
 
 ## GitIgnore İşleme
@@ -38,6 +40,7 @@ Pattern işleme, verimli eşleştirme için glob tarzı kalıpları regular expr
 isIgnored methodu temel filtreleme mantığını uygular, önce .gitignore kurallarını kontrol eder, ardından include veya exclude modunun aktif olup olmadığına bağlı olarak calculator'a özgü kuralları uygular. Include modunda, bir dosya herhangi bir include kalıbıyla eşleşmiyorsa (negationlar hesaba katıldıktan sonra) ignore edilmiş olarak kabul edilirken, exclude modunda bir dosya herhangi bir exclude kalıbıyla eşleşirse ignore edilir. Bu iki katmanlı yaklaşım, gelişmiş filtreleme yetenekleri sağlarken mevcut .gitignore kurallarıyla uyumluluğu sağlar.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L124-L229)
 
 ## Metin Dosyası Algılama
@@ -51,6 +54,7 @@ Uzantı tabanlı algılamaya ek olarak, method geliştirme projelerinde yaygın 
 Bu çift kriterli yaklaşım, hem geleneksel adlandırma kalıplarını hem de geliştirme iş akışlarındaki yaygın istisnaları barındıran esnek dosya algılama sağlar. Uzantı ve basename analizini birleştirerek sistem, çeşitli proje yapıları ve adlandırma kurallarında metin dosyalarını doğru bir şekilde tanımlayabilir.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L306-L321)
 
 ## Dosya Filtreleme ve Token Sayma İlişkisi
@@ -62,6 +66,7 @@ Filtreleme işlemi belirli bir sırada gerçekleşir: önce .gitignore kurallar�
 Filtreleme ve token sayımı arasındaki ilişki, hem dahil edilen hem de hariç tutulan dosyalar hakkında ayrıntılı istatistikler sağlayan aracın çıktısında yansıtılır. Bu şeffaflık, kullanıcıların filtreleme kararlarının nihai token sayısını tam olarak nasıl etkilediğini anlamalarına ve yapılandırma dosyalarını buna göre ayarlamalarına olanak tanır. Sistem ayrıca .gitignore kuralları nedeniyle ignore edilen dosyalarla calculator kuralları tarafından filtrelenen dosyaları ayırt eder ve hangi yapılandırma dosyalarının analiz kapsamını şekillendirmede en etkili olduğuna dair fikir verir.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L385-L412)
 - [ctxman.js](file://ctxman.js#L124-L229)
 - [ctxman.js](file://ctxman.js#L306-L321)
@@ -77,6 +82,7 @@ Sistem, ignore edilen dosyaları ayrı olarak izler ve .gitignore kuralları tar
 Bu istatistikler, özet metrikler, uzantı ayrımları ve en büyük dosya ve dizinlerin sıralamasını içeren nihai analiz raporunu oluşturmak için kullanılır. Bu kapsamlı raporlama, kullanıcıların codebase yapıları ve filtreleme yapılandırmaları hakkında bilinçli kararlar almalarını sağlar.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L455-L489)
 - [ctxman.js](file://ctxman.js#L715-L743)
 - [ctxman.js](file://ctxman.js#L673-L696)
@@ -92,6 +98,7 @@ Performans darboğazları, çok büyük dizinler analiz edilirken veya filtrelem
 Ek optimizasyon stratejileri, mümkün olduğunda özyinelemeli wildcardlardan (**/) kaçınmayı içerir, çünkü bunlar daha kapsamlı dosya sistemi geçişi gerektirir ve en sık eşleşen kalıpların yapılandırma dosyalarında ilk sırada listelenmesini sağlayarak gereken pattern karşılaştırmalarının sayısını en aza indirir. Aracın istatistiklerine dayalı olarak filtreleme yapılandırmasını düzenli olarak gözden geçirmek ve iyileştirmek, optimal performans ve doğruluğu korumaya yardımcı olabilir.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L385-L412)
 - [ctxman.js](file://ctxman.js#L124-L229)
 - [ctxman.js](file://ctxman.js#L306-L321)

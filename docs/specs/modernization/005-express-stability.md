@@ -14,16 +14,19 @@
 Ctxman currently uses **Express 5.1.0**, which is a **release candidate** version. While Express 5.x has been in development for several years, it has not reached stable release status.
 
 **User Impact**:
+
 - Potential API changes in future releases
 - Unexpected breaking changes without notice
 - Production stability concerns
 
 **Business Impact**:
+
 - Enterprise users may hesitate to adopt ctxman
 - Support burden for Express-related issues
 - Compatibility questions from security teams
 
 **Technical Impact**:
+
 - API differences from Express 4.x
 - Middleware compatibility issues
 - Documentation may be incomplete
@@ -37,6 +40,7 @@ Ctxman currently uses **Express 5.1.0**, which is a **release candidate** versio
 **Approach**: Acknowledge Express 5.x RC status, document any differences, and monitor for stable release.
 
 **Rationale**:
+
 - Express 5.x has been relatively stable in RC form
 - ctxman's API usage is minimal and well-tested
 - Downgrading would require code changes
@@ -46,6 +50,7 @@ Ctxman currently uses **Express 5.1.0**, which is a **release candidate** versio
 **Approach**: Migrate back to Express 4.x LTS for guaranteed stability.
 
 **Rationale**:
+
 - Long-term support guaranteed
 - Extensive middleware ecosystem
 - Well-documented behavior
@@ -55,6 +60,7 @@ Ctxman currently uses **Express 5.1.0**, which is a **release candidate** versio
 **Approach**: Stay on current version and migrate when Express 5.x goes stable.
 
 **Rationale**:
+
 - Minimal immediate disruption
 - Can plan migration properly
 - Avoid RC-specific issues
@@ -83,12 +89,12 @@ app.get('/health', healthHandler);
 
 ### Express 5.x Specific Features Used
 
-| Feature | Express 4.x | Express 5.x | Used by ctxman |
-|---------|-------------|-------------|----------------|
-| Promise support | Manual try/catch | Automatic | ✅ Used |
-| Router improvements | Basic | Enhanced | Partial |
-| Body parser | Separate package | Built-in | ✅ Used |
-| Error handling | 4 params | Promise-aware | ✅ Used |
+| Feature             | Express 4.x      | Express 5.x   | Used by ctxman |
+| ------------------- | ---------------- | ------------- | -------------- |
+| Promise support     | Manual try/catch | Automatic     | ✅ Used        |
+| Router improvements | Basic            | Enhanced      | Partial        |
+| Body parser         | Separate package | Built-in      | ✅ Used        |
+| Error handling      | 4 params         | Promise-aware | ✅ Used        |
 
 ### Breaking Changes from Express 4.x
 
@@ -161,7 +167,7 @@ import bodyParser from 'body-parser';
 app.use(bodyParser.json());
 
 // Wrap async handlers
-const asyncHandler = fn => (req, res, next) => {
+const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
@@ -172,13 +178,13 @@ app.get('/api/analyze', asyncHandler(analyzeHandler));
 
 ## Decision Matrix
 
-| Criterion | Option A (Document) | Option B (Downgrade) | Option C (Monitor) |
-|-----------|---------------------|----------------------|---------------------|
-| Stability | Medium | High | Medium |
-| Effort | Low | Medium | Low |
-| Risk | Medium | Low | Low |
-| Future-proof | High | Low | High |
-| User trust | Medium | High | Medium |
+| Criterion    | Option A (Document) | Option B (Downgrade) | Option C (Monitor) |
+| ------------ | ------------------- | -------------------- | ------------------ |
+| Stability    | Medium              | High                 | Medium             |
+| Effort       | Low                 | Medium               | Low                |
+| Risk         | Medium              | Low                  | Low                |
+| Future-proof | High                | Low                  | High               |
+| User trust   | Medium              | High                 | Medium             |
 
 **Recommendation**: **Option A** with **Option C** fallback
 
@@ -190,12 +196,12 @@ Document current usage, add monitoring for Express 5.x stable release, and plan 
 
 ### Quantitative Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| API uptime | 99.9% | Health check monitoring |
-| Error rate | <0.1% | API error logs |
-| Response time | <100ms | Performance monitoring |
-| Express-related issues | 0 | Issue tracker |
+| Metric                 | Target | Measurement             |
+| ---------------------- | ------ | ----------------------- |
+| API uptime             | 99.9%  | Health check monitoring |
+| Error rate             | <0.1%  | API error logs          |
+| Response time          | <100ms | Performance monitoring  |
+| Express-related issues | 0      | Issue tracker           |
 
 ### Qualitative Metrics
 
@@ -222,7 +228,7 @@ name: Express Version Check
 
 on:
   schedule:
-    - cron: '0 6 * * 1'  # Weekly Monday check
+    - cron: '0 6 * * 1' # Weekly Monday check
 
 jobs:
   check:
@@ -276,11 +282,11 @@ differences from Express 4.x:
 
 ## Timeline
 
-| Task | Effort | Week |
-|------|--------|------|
-| Audit Express usage | 1 hour | Week 1 |
-| Document differences | 1 hour | Week 1 |
-| Add version monitoring | 1 hour | Week 1 |
+| Task                      | Effort | Week   |
+| ------------------------- | ------ | ------ |
+| Audit Express usage       | 1 hour | Week 1 |
+| Document differences      | 1 hour | Week 1 |
+| Add version monitoring    | 1 hour | Week 1 |
 | Update user documentation | 1 hour | Week 1 |
 
 **Total Estimated Effort**: 4 hours
@@ -296,5 +302,5 @@ differences from Express 4.x:
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q1 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q1 2025_

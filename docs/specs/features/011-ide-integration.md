@@ -15,24 +15,28 @@
 Developers live in their IDEs. Context generation requires CLI workflow:
 
 **Workflow Friction**:
+
 - Must switch to terminal for context generation
 - No IDE-native context generation
 - Manual file selection from editor
 - Copy-paste between IDE and CLI
 
 **Lost Productivity**:
+
 - Context switch overhead (2-5 min each time)
 - No integration with editor state
 - Cannot leverage IDE's file awareness
 - Missed opportunities for automation
 
 **User Impact**:
+
 - Disrupted development flow
 - Reluctance to generate context frequently
 - Less optimal context (not leveraging IDE selection)
 - Higher cognitive load
 
 **Business Impact**:
+
 - Reduced tool adoption
 - Lower productivity gains
 - Competitive disadvantage vs IDE-native tools
@@ -507,6 +511,7 @@ public class CtxmanPanel extends JPanel {
 ## Acceptance Criteria
 
 ### Must Have
+
 - [ ] VS Code extension available
 - [ ] Generate context for current file
 - [ ] Generate context for selection
@@ -515,6 +520,7 @@ public class CtxmanPanel extends JPanel {
 - [ ] Context panel in sidebar
 
 ### Should Have
+
 - [ ] JetBrains plugin (IntelliJ, PyCharm, WebStorm)
 - [ ] Template selection in UI
 - [ ] Recent contexts history
@@ -522,6 +528,7 @@ public class CtxmanPanel extends JPanel {
 - [ ] Settings/configuration UI
 
 ### Nice to Have
+
 - [ ] Inline token hints
 - [ ] Context preview editor
 - [ ] Multi-file selection
@@ -534,11 +541,11 @@ public class CtxmanPanel extends JPanel {
 
 ### Quantitative Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Extension installs | 10,000+ | Marketplace stats |
-| Daily active users | 30% of installs | Telemetry |
-| CLI vs Extension usage | 50% via extension | Usage tracking |
+| Metric                 | Target            | Measurement       |
+| ---------------------- | ----------------- | ----------------- |
+| Extension installs     | 10,000+           | Marketplace stats |
+| Daily active users     | 30% of installs   | Telemetry         |
+| CLI vs Extension usage | 50% via extension | Usage tracking    |
 
 ### Qualitative Metrics
 
@@ -550,14 +557,14 @@ public class CtxmanPanel extends JPanel {
 
 ## Timeline
 
-| Task | Effort | Week |
-|------|--------|------|
-| VS Code extension scaffold | 4 hours | Week 1 |
-| Core commands implementation | 8 hours | Week 1-2 |
-| UI components | 8 hours | Week 2 |
-| JetBrains plugin scaffold | 8 hours | Week 3 |
-| JetBrains implementation | 12 hours | Week 3-4 |
-| Testing & publishing | 8 hours | Week 4 |
+| Task                         | Effort   | Week     |
+| ---------------------------- | -------- | -------- |
+| VS Code extension scaffold   | 4 hours  | Week 1   |
+| Core commands implementation | 8 hours  | Week 1-2 |
+| UI components                | 8 hours  | Week 2   |
+| JetBrains plugin scaffold    | 8 hours  | Week 3   |
+| JetBrains implementation     | 12 hours | Week 3-4 |
+| Testing & publishing         | 8 hours  | Week 4   |
 
 **Total Estimated Effort**: 48 hours over 4 weeks
 
@@ -571,5 +578,5 @@ public class CtxmanPanel extends JPanel {
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q2 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q2 2025_

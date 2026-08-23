@@ -15,12 +15,14 @@
 LLM context windows have hard limits. When context exceeds these limits, several issues occur:
 
 **Token Overflow Issues**:
+
 - Incomplete context sent to LLM
 - Important files silently truncated
 - Confusing LLM responses
 - Debug time wasted on missing context
 
 **Current Experience**:
+
 ```
 $ ctxman --cli
 Total tokens: 185,000
@@ -29,11 +31,13 @@ Total tokens: 185,000
 ```
 
 **User Impact**:
+
 - LLM produces incorrect or incomplete responses
 - Users don't know what context was omitted
 - Trial and error to reduce context
 
 **Business Impact**:
+
 - User frustration and mistrust
 - Perceived tool unreliability
 - Support requests for LLM errors
@@ -96,17 +100,17 @@ export const MODEL_LIMITS = {
   'gpt-4-32k': { context: 32768, recommended: 26000 },
   'gpt-3.5-turbo': { context: 16385, recommended: 13000 },
   'gpt-3.5-turbo-16k': { context: 16385, recommended: 13000 },
-  
+
   // Anthropic models
   'claude-3-opus': { context: 200000, recommended: 160000 },
   'claude-3-sonnet': { context: 200000, recommended: 160000 },
   'claude-3-haiku': { context: 200000, recommended: 160000 },
   'claude-2': { context: 100000, recommended: 80000 },
-  
+
   // Google models
   'gemini-pro': { context: 32760, recommended: 26000 },
   'gemini-1.5-pro': { context: 1000000, recommended: 800000 },
-  
+
   // Open source models
   'llama-2-70b': { context: 4096, recommended: 3200 },
   'llama-3-70b': { context: 8192, recommended: 6500 },
@@ -118,11 +122,11 @@ export class ContextBudget {
     this.model = MODEL_LIMITS[modelKey] || { context: 100000, recommended: 80000 };
     this.modelKey = modelKey;
   }
-  
+
   check(totalTokens) {
     const exceeded = totalTokens > this.model.context;
     const warning = totalTokens > this.model.recommended;
-    
+
     return {
       total: totalTokens,
       limit: this.model.context,
@@ -143,31 +147,31 @@ export class ContextBudget {
 
 async analyze(options) {
   // ... existing analysis code ...
-  
+
   const result = {
     files,
     totalTokens,
     // ... other fields ...
   };
-  
+
   // Add budget check if model specified
   if (options.budget) {
     const budget = new ContextBudget(options.budget);
     result.budgetCheck = budget.check(totalTokens);
     result.suggestions = this.generateSuggestions(result);
   }
-  
+
   return result;
 }
 
 generateSuggestions(result) {
   const suggestions = [];
-  
+
   // Sort files by token count
   const sortedFiles = [...result.files].sort((a, b) => b.tokens - a.tokens);
-  
+
   // Suggest excluding large test files
-  const testFiles = sortedFiles.filter(f => 
+  const testFiles = sortedFiles.filter(f =>
     f.path.includes('.test.') || f.path.includes('.spec.')
   );
   const testTokens = testFiles.reduce((sum, f) => sum + f.tokens, 0);
@@ -179,9 +183,9 @@ generateSuggestions(result) {
       reason: 'Test files excluded by default in most contexts',
     });
   }
-  
+
   // Suggest excluding documentation
-  const docFiles = sortedFiles.filter(f => 
+  const docFiles = sortedFiles.filter(f =>
     f.path.endsWith('.md') || f.path.includes('docs/')
   );
   const docTokens = docFiles.reduce((sum, f) => sum + f.tokens, 0);
@@ -193,7 +197,7 @@ generateSuggestions(result) {
       reason: 'Documentation can be referenced separately',
     });
   }
-  
+
   // Suggest method-level analysis
   suggestions.push({
     action: 'flag',
@@ -201,7 +205,7 @@ generateSuggestions(result) {
     savings: Math.floor(result.totalTokens * 0.4),
     reason: 'Method-level analysis reduces context by ~40%',
   });
-  
+
   return suggestions;
 }
 ```
@@ -216,14 +220,14 @@ program
   .option('--budget-warn-only', 'Show warning but continue', false)
   .action(async (options) => {
     // ... existing code ...
-    
+
     if (options.budget) {
       const budget = new ContextBudget(options.budget);
       const check = budget.check(result.totalTokens);
-      
+
       if (check.exceeded) {
         displayBudgetWarning(check, result.suggestions);
-        
+
         if (!options.budgetWarnOnly) {
           process.exit(1);
         }
@@ -250,17 +254,21 @@ export function displayBudgetWarning(check, suggestions) {
   console.log('\n⚠️  Context Budget Warning\n');
   console.log(`Your project has ${check.total.toLocaleString()} tokens`);
   console.log(`${check.modelKey} limit: ${check.limit.toLocaleString()} tokens`);
-  console.log(`Exceeded by: ${check.overBy.toLocaleString()} tokens (${check.percentUsed.toFixed(1)}%)\n`);
-  
+  console.log(
+    `Exceeded by: ${check.overBy.toLocaleString()} tokens (${check.percentUsed.toFixed(1)}%)\n`
+  );
+
   if (suggestions && suggestions.length > 0) {
     console.log('💡 Suggestions:\n');
     suggestions.forEach((s, i) => {
-      console.log(`  ${i + 1}. ${s.action === 'exclude' ? `Add ${s.pattern} to .contextignore` : `Use ${s.flag}`}`);
+      console.log(
+        `  ${i + 1}. ${s.action === 'exclude' ? `Add ${s.pattern} to .contextignore` : `Use ${s.flag}`}`
+      );
       console.log(`     Savings: ~${s.savings.toLocaleString()} tokens`);
       console.log(`     ${s.reason}\n`);
     });
   }
-  
+
   console.log('Run with --budget-warn-only to continue anyway\n');
 }
 ```
@@ -270,6 +278,7 @@ export function displayBudgetWarning(check, suggestions) {
 ## Acceptance Criteria
 
 ### Must Have
+
 - [ ] `--budget` flag accepts model name
 - [ ] Validates model name against preset list
 - [ ] Shows warning when tokens exceed limit
@@ -277,11 +286,13 @@ export function displayBudgetWarning(check, suggestions) {
 - [ ] Exits with error code 1 when exceeded (unless `--budget-warn-only`)
 
 ### Should Have
+
 - [ ] Custom budget limit via `--budget-limit <number>`
 - [ ] Configuration file for custom model limits
 - [ ] Per-file token breakdown in warning
 
 ### Nice to Have
+
 - [ ] Auto-suggest optimal exclusion patterns
 - [ ] Integration with `.ctxmanrc` for default budget
 - [ ] Visual progress bar showing budget usage
@@ -292,11 +303,11 @@ export function displayBudgetWarning(check, suggestions) {
 
 ### Quantitative Metrics
 
-| Metric | Before | Target | Measurement |
-|--------|--------|--------|-------------|
-| Users hitting context limits | Unknown | < 5% | Analytics |
-| Support tickets for overflow | ~3/week | < 1/week | Support tracking |
-| Budget flag adoption | N/A | 40% of CLI users | Usage metrics |
+| Metric                       | Before  | Target           | Measurement      |
+| ---------------------------- | ------- | ---------------- | ---------------- |
+| Users hitting context limits | Unknown | < 5%             | Analytics        |
+| Support tickets for overflow | ~3/week | < 1/week         | Support tracking |
+| Budget flag adoption         | N/A     | 40% of CLI users | Usage metrics    |
 
 ### Qualitative Metrics
 
@@ -308,13 +319,13 @@ export function displayBudgetWarning(check, suggestions) {
 
 ## Timeline
 
-| Task | Effort | Week |
-|------|--------|------|
-| Model preset definitions | 1 hour | Week 1 |
-| Budget check logic | 2 hours | Week 1 |
-| CLI integration | 1 hour | Week 1 |
-| Suggestion engine | 2 hours | Week 1 |
-| Testing & documentation | 2 hours | Week 1 |
+| Task                     | Effort  | Week   |
+| ------------------------ | ------- | ------ |
+| Model preset definitions | 1 hour  | Week 1 |
+| Budget check logic       | 2 hours | Week 1 |
+| CLI integration          | 1 hour  | Week 1 |
+| Suggestion engine        | 2 hours | Week 1 |
+| Testing & documentation  | 2 hours | Week 1 |
 
 **Total Estimated Effort**: 8 hours over 1 week
 
@@ -322,9 +333,9 @@ export function displayBudgetWarning(check, suggestions) {
 
 ## Dependencies
 
-| Dependency | Type | Purpose |
-|------------|------|---------|
-| None | - | Uses existing token counting |
+| Dependency | Type | Purpose                      |
+| ---------- | ---- | ---------------------------- |
+| None       | -    | Uses existing token counting |
 
 ---
 
@@ -336,5 +347,5 @@ export function displayBudgetWarning(check, suggestions) {
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q1 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q1 2025_

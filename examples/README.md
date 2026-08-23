@@ -30,11 +30,13 @@ Wizard profiles are pre-configured analysis templates that optimize context gene
 ### Active vs Reference Profiles
 
 **Active Profiles:**
+
 - Location: `.ctxman/wizard-profiles/`
 - Used by the wizard during interactive setup
 - Can be modified or deleted by users
 
 **Reference Profiles (this directory):**
+
 - Location: `examples/wizard-profiles/`
 - Backup copies of default profiles
 - Use these to restore or create custom profiles
@@ -42,36 +44,42 @@ Wizard profiles are pre-configured analysis templates that optimize context gene
 ## 📋 Available Profiles
 
 ### 👀 Code Review
+
 **Purpose:** Reviewing code changes and PRs
 **Token Budget:** 20K-80K tokens
 **Includes:** Source code, tests, configurations
 **Best For:** Pull requests, architecture understanding
 
 ### 🔒 Security Audit
+
 **Purpose:** Security assessments and vulnerability analysis
 **Token Budget:** 15K-60K tokens
 **Includes:** Auth modules, API endpoints, database code
 **Best For:** Pre-deployment security reviews, compliance audits
 
 ### 💡 LLM Explain
+
 **Purpose:** Explaining code architecture to AI
 **Token Budget:** 25K-100K tokens
 **Includes:** Core source, entry points, documentation
 **Best For:** Understanding unfamiliar codebases, onboarding
 
 ### 📚 Documentation
+
 **Purpose:** Generating API docs and guides
 **Token Budget:** 18K-70K tokens
 **Includes:** Public APIs, type definitions, exports
 **Best For:** API documentation, user guides, README updates
 
 ### 🎯 Minimal
+
 **Purpose:** Quick queries with minimal token usage
 **Token Budget:** 5K-25K tokens
 **Includes:** Core source only
 **Best For:** Bug fixes, focused debugging, token-limited scenarios
 
 ### 📦 Full
+
 **Purpose:** Comprehensive codebase analysis
 **Token Budget:** 50K-500K+ tokens
 **Includes:** Everything (all source, tests, docs)
@@ -119,6 +127,7 @@ touch .ctxman/wizard-profiles/my-profile/.methodignore
 ```
 
 **profile.json structure:**
+
 ```json
 {
   "id": "my-profile",
@@ -138,10 +147,7 @@ touch .ctxman/wizard-profiles/my-profile/.methodignore
     "files": ["What files are excluded"],
     "methods": ["What methods are excluded"]
   },
-  "bestFor": [
-    "Use case 1",
-    "Use case 2"
-  ]
+  "bestFor": ["Use case 1", "Use case 2"]
 }
 ```
 
@@ -160,6 +166,7 @@ nano .ctxman/custom-profiles.json
 ```
 
 **Example custom LLM profile:**
+
 ```json
 {
   "models": [
@@ -215,6 +222,7 @@ init*                # Initialization methods
 When you select a profile in the wizard:
 
 1. **Profile files are copied** with profile name suffix:
+
    ```
    .contextinclude-code-review
    .contextignore-code-review
@@ -223,6 +231,7 @@ When you select a profile in the wizard:
    ```
 
 2. **Active configs are created** (copies for current analysis):
+
    ```
    .contextinclude  → copy of .contextinclude-code-review
    .contextignore   → copy of .contextignore-code-review
@@ -241,16 +250,19 @@ When you select a profile in the wizard:
 ## 🎯 Best Practices
 
 ### Profile Naming
+
 - Use lowercase with hyphens: `my-custom-profile`
 - Choose descriptive names: `react-component-review`, `api-security-audit`
 
 ### Token Budgets
+
 - **Minimal:** 5K-25K tokens
 - **Focused:** 20K-80K tokens (code-review, security-audit)
 - **Balanced:** 50K-100K tokens (llm-explain, documentation)
 - **Comprehensive:** 100K-500K+ tokens (full)
 
 ### Filter Design
+
 - **Include mode** (`.contextinclude` / `.methodinclude`): Best for focused analysis
 - **Exclude mode** (`.contextignore` / `.methodignore`): Best for broad analysis with exceptions
 - **Combined mode**: Use both for fine-grained control
@@ -264,16 +276,19 @@ When you select a profile in the wizard:
 ## 🆘 Troubleshooting
 
 **Profile not appearing in wizard?**
+
 - Ensure `profile.json` exists and is valid JSON
 - Check that profile directory is in `.ctxman/wizard-profiles/`
 - Profile ID must match directory name
 
 **Filters not working?**
+
 - Check `.gitignore` first (it always takes precedence)
 - Verify pattern syntax (use `**` for recursive matching)
 - Test patterns with `ctxman --analyze`
 
 **Need to reset everything?**
+
 ```bash
 # Remove all active profiles and configs
 rm -rf .ctxman/wizard-profiles

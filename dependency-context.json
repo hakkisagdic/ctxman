@@ -14,12 +14,8 @@
       "active": true,
       "tokens": 6698817,
       "security": "skipped",
-      "imports": [
-        "*"
-      ],
-      "usedIn": [
-        "lib/utils/tokenizer-adapter.js"
-      ]
+      "imports": ["*"],
+      "usedIn": ["lib/utils/tokenizer-adapter.js"]
     },
     {
       "name": "tiktoken",
@@ -27,10 +23,7 @@
       "active": true,
       "tokens": 4012229,
       "security": "skipped",
-      "imports": [
-        "*",
-        "tiktoken"
-      ],
+      "imports": ["*", "tiktoken"],
       "usedIn": [
         "lib/utils/token-utils.js",
         "lib/utils/tokenizer-adapter.js",
@@ -45,12 +38,8 @@
       "active": true,
       "tokens": 1156628,
       "security": "skipped",
-      "imports": [
-        "pipeline"
-      ],
-      "usedIn": [
-        "lib/rag/EmbeddingProvider.js"
-      ]
+      "imports": ["pipeline"],
+      "usedIn": ["lib/rag/EmbeddingProvider.js"]
     },
     {
       "name": "@anthropic-ai/tokenizer",
@@ -58,12 +47,8 @@
       "active": true,
       "tokens": 894533,
       "security": "skipped",
-      "imports": [
-        "*"
-      ],
-      "usedIn": [
-        "lib/utils/tokenizer-adapter.js"
-      ]
+      "imports": ["*"],
+      "usedIn": ["lib/utils/tokenizer-adapter.js"]
     },
     {
       "name": "vue",
@@ -71,12 +56,8 @@
       "active": true,
       "tokens": 697246,
       "security": "skipped",
-      "imports": [
-        "createApp"
-      ],
-      "usedIn": [
-        "desktop-app/renderer/main.js"
-      ]
+      "imports": ["createApp"],
+      "usedIn": ["desktop-app/renderer/main.js"]
     },
     {
       "name": "vitest",
@@ -111,13 +92,8 @@
       "active": true,
       "tokens": 289107,
       "security": "skipped",
-      "imports": [
-        "mount"
-      ],
-      "usedIn": [
-        "desktop-app/test/App.test.js",
-        "desktop-app/test/StatsPanel.test.js"
-      ]
+      "imports": ["mount"],
+      "usedIn": ["desktop-app/test/App.test.js", "desktop-app/test/StatsPanel.test.js"]
     },
     {
       "name": "zod",
@@ -125,12 +101,8 @@
       "active": true,
       "tokens": 226259,
       "security": "skipped",
-      "imports": [
-        "z"
-      ],
-      "usedIn": [
-        "lib/api/mcp/server.js"
-      ]
+      "imports": ["z"],
+      "usedIn": ["lib/api/mcp/server.js"]
     },
     {
       "name": "@modelcontextprotocol/sdk",
@@ -162,12 +134,8 @@
       "active": true,
       "tokens": 82758,
       "security": "skipped",
-      "imports": [
-        "* as lancedb"
-      ],
-      "usedIn": [
-        "lib/rag/stores/LanceDBStore.js"
-      ]
+      "imports": ["* as lancedb"],
+      "usedIn": ["lib/rag/stores/LanceDBStore.js"]
     },
     {
       "name": "ink",
@@ -175,13 +143,7 @@
       "active": true,
       "tokens": 38300,
       "security": "skipped",
-      "imports": [
-        "*",
-        "Box",
-        "Text",
-        "useInput",
-        "useStdin"
-      ],
+      "imports": ["*", "Box", "Text", "useInput", "useStdin"],
       "usedIn": [
         "bin/cli.js",
         "lib/ui/dashboard.js",
@@ -196,14 +158,7 @@
       "active": true,
       "tokens": 37736,
       "security": "skipped",
-      "imports": [
-        "*",
-        "React",
-        "useState",
-        "useCallback",
-        "useMemo",
-        "useEffect"
-      ],
+      "imports": ["*", "React", "useState", "useCallback", "useMemo", "useEffect"],
       "usedIn": [
         "bin/cli.js",
         "lib/ui/dashboard.js",
@@ -218,10 +173,7 @@
       "active": true,
       "tokens": 20111,
       "security": "skipped",
-      "imports": [
-        "express",
-        "Router"
-      ],
+      "imports": ["express", "Router"],
       "usedIn": [
         "lib/api/mcp/transports/HttpSseTransport.js",
         "test/import-tracker.test.js",
@@ -234,13 +186,8 @@
       "active": true,
       "tokens": 19519,
       "security": "skipped",
-      "imports": [
-        "*"
-      ],
-      "usedIn": [
-        "lib/formatters/toon-formatter.js",
-        "test/toon-formatter-advanced.test.js"
-      ]
+      "imports": ["*"],
+      "usedIn": ["lib/formatters/toon-formatter.js", "test/toon-formatter-advanced.test.js"]
     },
     {
       "name": "supertest",
@@ -248,14 +195,8 @@
       "active": true,
       "tokens": 11411,
       "security": "skipped",
-      "imports": [
-        "request",
-        "*"
-      ],
-      "usedIn": [
-        "test/mcp-transport.test.js",
-        "test/setup.js"
-      ]
+      "imports": ["request", "*"],
+      "usedIn": ["test/mcp-transport.test.js", "test/setup.js"]
     },
     {
       "name": "cors",
@@ -263,12 +204,8 @@
       "active": true,
       "tokens": 4792,
       "security": "skipped",
-      "imports": [
-        "cors"
-      ],
-      "usedIn": [
-        "lib/api/mcp/transports/HttpSseTransport.js"
-      ]
+      "imports": ["cors"],
+      "usedIn": ["lib/api/mcp/transports/HttpSseTransport.js"]
     },
     {
       "name": "ink-text-input",
@@ -276,14 +213,8 @@
       "active": true,
       "tokens": 2727,
       "security": "skipped",
-      "imports": [
-        "TextInput",
-        "*"
-      ],
-      "usedIn": [
-        "lib/ui/init-wizard-ui.js",
-        "test/test-ink-ui.js"
-      ]
+      "imports": ["TextInput", "*"],
+      "usedIn": ["lib/ui/init-wizard-ui.js", "test/test-ink-ui.js"]
     },
     {
       "name": "ink-spinner",
@@ -291,14 +222,8 @@
       "active": true,
       "tokens": 1324,
       "security": "skipped",
-      "imports": [
-        "Spinner",
-        "*"
-      ],
-      "usedIn": [
-        "lib/ui/init-wizard-ui.js",
-        "test/test-ink-ui.js"
-      ]
+      "imports": ["Spinner", "*"],
+      "usedIn": ["lib/ui/init-wizard-ui.js", "test/test-ink-ui.js"]
     },
     {
       "name": "prettier",

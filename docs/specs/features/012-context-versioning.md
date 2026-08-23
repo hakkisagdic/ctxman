@@ -15,24 +15,28 @@
 Generated context changes over time, but there's no way to track or revert:
 
 **Context Drift Issues**:
+
 - No history of what context was sent to LLM
 - Cannot reproduce previous LLM sessions
 - Lost context configurations from past work
 - No audit trail for team collaboration
 
 **Reproducibility Challenges**:
+
 - Cannot debug why LLM gave certain response
 - Team members can't share exact context state
 - No rollback for problematic configurations
 - Difficult to compare context over time
 
 **User Impact**:
+
 - Cannot reproduce debugging sessions
 - Lost work when configurations change
 - Difficult to collaborate on context
 - No accountability for context changes
 
 **Business Impact**:
+
 - Reduced debugging efficiency
 - Team collaboration friction
 - Compliance/audit concerns
@@ -125,7 +129,7 @@ export class ContextVersionStore {
 
   async init() {
     await fs.mkdir(this.versionDir, { recursive: true });
-    
+
     if (!fs.existsSync(this.indexFile)) {
       await this.saveIndex({ versions: [] });
     }
@@ -133,10 +137,10 @@ export class ContextVersionStore {
 
   async save(context, message = '') {
     const index = await this.loadIndex();
-    
+
     // Generate version number
     const version = this.generateVersion(index);
-    
+
     // Save context snapshot
     const snapshotPath = path.join(this.versionDir, `${version}.json`);
     const snapshot = {
@@ -145,7 +149,7 @@ export class ContextVersionStore {
       message,
       context: {
         totalTokens: context.totalTokens,
-        files: context.files.map(f => ({
+        files: context.files.map((f) => ({
           path: f.path,
           tokens: f.tokens,
           hash: this.hashFile(f),
@@ -154,9 +158,9 @@ export class ContextVersionStore {
       },
       full: context, // Optional: store full context
     };
-    
+
     await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2));
-    
+
     // Update index
     index.versions.push({
       version,
@@ -165,15 +169,15 @@ export class ContextVersionStore {
       totalTokens: context.totalTokens,
       fileCount: context.files.length,
     });
-    
+
     await this.saveIndex(index);
-    
+
     return version;
   }
 
   async load(version) {
     const snapshotPath = path.join(this.versionDir, `${version}.json`);
-    
+
     try {
       const content = await fs.readFile(snapshotPath, 'utf-8');
       return JSON.parse(content);
@@ -194,7 +198,7 @@ export class ContextVersionStore {
 
     const lastVersion = index.versions[index.versions.length - 1].version;
     const match = lastVersion.match(/v(\d+)\.(\d+)\.(\d+)/);
-    
+
     if (!match) {
       return `v${index.versions.length + 1}.0.0`;
     }
@@ -244,7 +248,7 @@ export class VersionManager {
 
   async restoreVersion(version) {
     const snapshot = await this.store.load(version);
-    
+
     // Generate restored context
     const restored = {
       ...snapshot.full,
@@ -264,13 +268,13 @@ export class VersionManager {
 
   async pruneVersions(keepCount = 10) {
     const versions = await this.store.list();
-    
+
     if (versions.length <= keepCount) {
       return [];
     }
 
     const toRemove = versions.slice(0, versions.length - keepCount);
-    
+
     for (const v of toRemove) {
       const snapshotPath = path.join(this.store.versionDir, `${v.version}.json`);
       await fs.unlink(snapshotPath);
@@ -293,12 +297,8 @@ export class VersionManager {
 
 export class VersionDiffEngine {
   compare(snapshot1, snapshot2) {
-    const files1 = new Map(
-      snapshot1.context.files.map(f => [f.path, f])
-    );
-    const files2 = new Map(
-      snapshot2.context.files.map(f => [f.path, f])
-    );
+    const files1 = new Map(snapshot1.context.files.map((f) => [f.path, f]));
+    const files2 = new Map(snapshot2.context.files.map((f) => [f.path, f]));
 
     const added = [];
     const removed = [];
@@ -367,7 +367,7 @@ program
   .option('--save-version [message]', 'Save context version after analysis')
   .hook('postAction', async (thisCommand) => {
     const options = thisCommand.opts();
-    
+
     if (options.saveVersion !== undefined) {
       const manager = new VersionManager(process.cwd());
       const version = await manager.saveVersion(
@@ -419,8 +419,7 @@ program
     console.log(`Files: ${restored.files.length}\n`);
 
     // Optionally write to output file
-    await fs.writeFile('restored-context.json', 
-      JSON.stringify(restored, null, 2));
+    await fs.writeFile('restored-context.json', JSON.stringify(restored, null, 2));
     console.log('Saved to: restored-context.json\n');
   });
 
@@ -433,7 +432,9 @@ program
     const diff = await manager.diffVersions(version1, version2);
 
     console.log(`\nComparing ${version1} vs ${version2}:\n`);
-    console.log(`Token change: ${diff.tokenDiff >= 0 ? '+' : ''}${diff.tokenDiff.toLocaleString()} (${diff.percentChange >= 0 ? '+' : ''}${diff.percentChange.toFixed(1)}%)\n`);
+    console.log(
+      `Token change: ${diff.tokenDiff >= 0 ? '+' : ''}${diff.tokenDiff.toLocaleString()} (${diff.percentChange >= 0 ? '+' : ''}${diff.percentChange.toFixed(1)}%)\n`
+    );
 
     if (diff.added.length > 0) {
       console.log('Files added:');
@@ -453,7 +454,8 @@ program
 
     if (diff.changed.length > 0) {
       console.log('Files changed:');
-      for (const f of diff.changed.slice(0, 10)) { // Limit output
+      for (const f of diff.changed.slice(0, 10)) {
+        // Limit output
         console.log(`  ~ ${f.path} (${f.diff >= 0 ? '+' : ''}${f.diff} tokens)`);
       }
       console.log('');
@@ -482,10 +484,7 @@ export class GitContextIntegration {
     }
 
     // Auto-create version
-    const version = await this.versionManager.saveVersion(
-      currentContext,
-      `Auto: ${commitMessage}`
-    );
+    const version = await this.versionManager.saveVersion(currentContext, `Auto: ${commitMessage}`);
 
     return version;
   }
@@ -512,6 +511,7 @@ export class GitContextIntegration {
 ## Acceptance Criteria
 
 ### Must Have
+
 - [ ] `--save-version [message]` saves context version
 - [ ] `ctxman version list` shows all versions
 - [ ] `ctxman version restore <version>` restores context
@@ -519,12 +519,14 @@ export class GitContextIntegration {
 - [ ] Versions stored in .ctxman/versions/
 
 ### Should Have
+
 - [ ] Automatic versioning on git commits
 - [ ] Version pruning (keep last N)
 - [ ] Version tagging (stable, release, etc.)
 - [ ] Team version sharing
 
 ### Nice to Have
+
 - [ ] Version branching (for experiments)
 - [ ] Merge versions (combine contexts)
 - [ ] Version export/import
@@ -536,11 +538,11 @@ export class GitContextIntegration {
 
 ### Quantitative Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Version adoption | 30% of users | Usage tracking |
-| Version restores | 2+ per user per month | Action tracking |
-| Reproducibility improvement | 50% fewer "can't reproduce" issues | User feedback |
+| Metric                      | Target                             | Measurement     |
+| --------------------------- | ---------------------------------- | --------------- |
+| Version adoption            | 30% of users                       | Usage tracking  |
+| Version restores            | 2+ per user per month              | Action tracking |
+| Reproducibility improvement | 50% fewer "can't reproduce" issues | User feedback   |
 
 ### Qualitative Metrics
 
@@ -552,14 +554,14 @@ export class GitContextIntegration {
 
 ## Timeline
 
-| Task | Effort | Week |
-|------|--------|------|
+| Task            | Effort  | Week   |
+| --------------- | ------- | ------ |
 | Version storage | 3 hours | Week 1 |
 | Version manager | 2 hours | Week 1 |
-| Diff engine | 2 hours | Week 1 |
-| CLI commands | 2 hours | Week 1 |
+| Diff engine     | 2 hours | Week 1 |
+| CLI commands    | 2 hours | Week 1 |
 | Git integration | 2 hours | Week 1 |
-| Testing | 2 hours | Week 2 |
+| Testing         | 2 hours | Week 2 |
 
 **Total Estimated Effort**: 13 hours over 2 weeks
 
@@ -573,5 +575,5 @@ export class GitContextIntegration {
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q2 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q2 2025_

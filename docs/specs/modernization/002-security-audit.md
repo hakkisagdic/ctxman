@@ -25,11 +25,13 @@ The project had **30 security vulnerabilities** (22 high, 4 critical, 4 moderate
 - **@protobufjs/utf8**: UTF8 encoding issues
 
 **User Impact**:
+
 - Security-conscious organizations cannot adopt ctxman
 - Potential for supply chain attacks
 - Compliance violations for regulated industries
 
 **Business Impact**:
+
 - npm audit fails in CI/CD
 - Security scanners flag the package
 - Trust and credibility concerns
@@ -62,17 +64,20 @@ The project had **30 security vulnerabilities** (22 high, 4 critical, 4 moderate
 ## Implementation Steps
 
 ### Step 1: Audit Current State
+
 ```bash
 npm audit
 # Found 30 vulnerabilities (22 high, 4 critical)
 ```
 
 ### Step 2: Apply Automatic Fixes
+
 ```bash
 npm audit fix
 ```
 
 ### Step 3: Manual Dependency Updates
+
 ```bash
 # Update packages with breaking changes carefully
 npm install express@latest
@@ -80,6 +85,7 @@ npm install hono@latest
 ```
 
 ### Step 4: Add Overrides for Transitive Dependencies
+
 ```json
 // package.json
 {
@@ -91,12 +97,14 @@ npm install hono@latest
 ```
 
 ### Step 5: Verify Resolution
+
 ```bash
 npm audit
 # Found 0 vulnerabilities
 ```
 
 ### Step 6: Run Full Test Suite
+
 ```bash
 npm test
 # All 952 tests passing
@@ -108,13 +116,13 @@ npm test
 
 ### Quantitative Metrics
 
-| Metric | Before | After | Status |
-|--------|--------|-------|--------|
-| Total vulnerabilities | 30 | 0 | ✅ |
-| Critical vulnerabilities | 4 | 0 | ✅ |
-| High vulnerabilities | 22 | 0 | ✅ |
-| Moderate vulnerabilities | 4 | 0 | ✅ |
-| Test pass rate | 952/952 | 952/952 | ✅ |
+| Metric                   | Before  | After   | Status |
+| ------------------------ | ------- | ------- | ------ |
+| Total vulnerabilities    | 30      | 0       | ✅     |
+| Critical vulnerabilities | 4       | 0       | ✅     |
+| High vulnerabilities     | 22      | 0       | ✅     |
+| Moderate vulnerabilities | 4       | 0       | ✅     |
+| Test pass rate           | 952/952 | 952/952 | ✅     |
 
 ### Qualitative Metrics
 
@@ -129,29 +137,29 @@ npm test
 
 ### Critical (4)
 
-| Package | Vulnerability | Resolution |
-|---------|--------------|------------|
-| hono | Various CVEs | Upgraded |
-| @hono/node-server | DoS vulnerabilities | Upgraded |
-| form-data | Prototype pollution | Upgraded via override |
-| brace-expansion | Regex DoS | Upgraded via override |
+| Package           | Vulnerability       | Resolution            |
+| ----------------- | ------------------- | --------------------- |
+| hono              | Various CVEs        | Upgraded              |
+| @hono/node-server | DoS vulnerabilities | Upgraded              |
+| form-data         | Prototype pollution | Upgraded via override |
+| brace-expansion   | Regex DoS           | Upgraded via override |
 
 ### High (22)
 
-| Category | Packages | Resolution |
-|----------|----------|------------|
-| Web Framework | hono, @hono/node-server | Upgraded |
-| Parsing | fast-uri, flatted | Upgraded |
-| SDK | @modelcontextprotocol/sdk | Upgraded |
-| Validation | ajv | Upgraded |
-| Encoding | @protobufjs/utf8 | Upgraded via override |
+| Category      | Packages                  | Resolution            |
+| ------------- | ------------------------- | --------------------- |
+| Web Framework | hono, @hono/node-server   | Upgraded              |
+| Parsing       | fast-uri, flatted         | Upgraded              |
+| SDK           | @modelcontextprotocol/sdk | Upgraded              |
+| Validation    | ajv                       | Upgraded              |
+| Encoding      | @protobufjs/utf8          | Upgraded via override |
 
 ### Moderate (4)
 
-| Package | Vulnerability | Resolution |
-|---------|--------------|------------|
-| body-parser | Express middleware | Upgraded |
-| misc | Transitive deps | Upgraded |
+| Package     | Vulnerability      | Resolution |
+| ----------- | ------------------ | ---------- |
+| body-parser | Express middleware | Upgraded   |
+| misc        | Transitive deps    | Upgraded   |
 
 ---
 
@@ -175,16 +183,19 @@ npm test
 ## Lessons Learned
 
 ### What Went Well
+
 - `overrides` field provided clean solution for transitive deps
 - Most vulnerabilities resolved with simple upgrades
 - No breaking changes required extensive refactoring
 
 ### Challenges
+
 - Some packages (Express 5.x) are pre-release, requiring careful evaluation
 - Transitive dependencies needed override approach
 - Test suite verification essential before declaring success
 
 ### Recommendations
+
 - Run `npm audit` regularly in CI
 - Configure Dependabot for automated PRs
 - Document security-sensitive dependency choices
@@ -199,5 +210,5 @@ npm test
 
 ---
 
-*Completed by: Ctxman Development Team*
-*Commit: e6f4a12 fix: resolve all 30 security vulnerabilities in dependencies*
+_Completed by: Ctxman Development Team_
+_Commit: e6f4a12 fix: resolve all 30 security vulnerabilities in dependencies_

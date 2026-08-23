@@ -4,98 +4,98 @@
 
 # Core library changes
 core:
-- changed-files:
-  - any-glob-to-any-file: 'lib/**/*'
+  - changed-files:
+      - any-glob-to-any-file: 'lib/**/*'
 
 # CLI changes
 cli:
-- changed-files:
-  - any-glob-to-any-file:
-    - 'bin/**/*'
-    - 'index.js'
-    - 'ctxman.js'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'bin/**/*'
+          - 'index.js'
+          - 'ctxman.js'
 
 # Documentation
 documentation:
-- changed-files:
-  - any-glob-to-any-file:
-    - 'README.md'
-    - 'README-tr.md'
-    - 'docs/**/*'
-    - '**/*.md'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'README.md'
+          - 'README-tr.md'
+          - 'docs/**/*'
+          - '**/*.md'
 
 # Testing
 testing:
-- changed-files:
-  - any-glob-to-any-file:
-    - 'test/**/*'
-    - 'vitest.config.js'
-    - 'vitest.workspace.js'
-    - '**/*.test.js'
-    - '**/*.spec.js'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'test/**/*'
+          - 'vitest.config.js'
+          - 'vitest.workspace.js'
+          - '**/*.test.js'
+          - '**/*.spec.js'
 
 # CI/CD
 ci-cd:
-- changed-files:
-  - any-glob-to-any-file:
-    - '.github/workflows/**/*'
-    - '.github/dependabot.yml'
-    - '.github/labeler.yml'
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/**/*'
+          - '.github/dependabot.yml'
+          - '.github/labeler.yml'
 
 # Configuration
 configuration:
-- changed-files:
-  - any-glob-to-any-file:
-    - '.contextignore'
-    - '.contextinclude'
-    - '.methodinclude'
-    - '.gitignore'
-    - 'package.json'
-    - 'eslint.config.js'
-    - '.prettierrc'
-    - 'commitlint.config.js'
-    - '.lintstagedrc.json'
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.contextignore'
+          - '.contextinclude'
+          - '.methodinclude'
+          - '.gitignore'
+          - 'package.json'
+          - 'eslint.config.js'
+          - '.prettierrc'
+          - 'commitlint.config.js'
+          - '.lintstagedrc.json'
 
 # Desktop app
 desktop:
-- changed-files:
-  - any-glob-to-any-file: 'desktop-app/**/*'
+  - changed-files:
+      - any-glob-to-any-file: 'desktop-app/**/*'
 
 # Electron (alternative label for desktop)
 electron:
-- changed-files:
-  - any-glob-to-any-file: 'desktop-app/**/*'
+  - changed-files:
+      - any-glob-to-any-file: 'desktop-app/**/*'
 
 # Dependencies
 dependencies:
-- changed-files:
-  - any-glob-to-any-file:
-    - 'package.json'
-    - 'package-lock.json'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'package-lock.json'
 
 # Security-related files
 security:
-- changed-files:
-  - any-glob-to-any-file:
-    - '.github/workflows/codeql.yml'
-    - '.github/workflows/security*'
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/codeql.yml'
+          - '.github/workflows/security*'
 
 # Scripts
 scripts:
-- changed-files:
-  - any-glob-to-any-file: 'scripts/**/*'
+  - changed-files:
+      - any-glob-to-any-file: 'scripts/**/*'
 
 # Examples
 examples:
-- changed-files:
-  - any-glob-to-any-file: 'examples/**/*'
+  - changed-files:
+      - any-glob-to-any-file: 'examples/**/*'
 
 # Git hooks
 git-hooks:
-- changed-files:
-  - any-glob-to-any-file: '.husky/**/*'
+  - changed-files:
+      - any-glob-to-any-file: '.husky/**/*'
 
 # API changes
 api:
-- changed-files:
-  - any-glob-to-any-file: 'lib/api/**/*'
+  - changed-files:
+      - any-glob-to-any-file: 'lib/api/**/*'

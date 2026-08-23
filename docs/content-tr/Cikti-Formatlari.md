@@ -8,6 +8,7 @@
 </cite>
 
 ## İçindekiler
+
 1. [Giriş](#giriş)
 2. [Detaylı JSON Raporu](#detaylı-json-raporu)
 3. [LLM Context Formatları](#llm-context-formatları)
@@ -21,6 +22,7 @@
 ctxman aracı, AI destekli geliştirme iş akışlarında farklı kullanım senaryoları için üç temel çıktı formatı sağlar. Bu formatlar kod analizi, LLM context optimizasyonu ve proje dokümantasyonunda farklı amaçlara hizmet eder. Araç kapsamlı analiz için detaylı bir JSON raporu oluşturur, hem compact hem de detailed formatlarda LLM context dosyaları oluşturur ve hızlı paylaşım için pano entegrasyonunu destekler. Tüm export formatları dosya ve pano çıktıları arasında tutarlı yapı korur, farklı kullanım senaryolarında güvenilirlik sağlar.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 
 ## Detaylı JSON Raporu
@@ -28,6 +30,7 @@ ctxman aracı, AI destekli geliştirme iş akışlarında farklı kullanım sena
 Detaylı JSON raporu, tam metadata, özet istatistikler, dosya seviyesinde detaylar ve uygulanabilir olduğunda method seviyesinde verilerle kod tabanının kapsamlı analizini sağlar. Bu format `--save-report` flag'i kullanıldığında veya interactive modda uygun seçenek seçildiğinde oluşturulur.
 
 Rapor yapısı üç ana bölümden oluşur:
+
 - **metadata**: Oluşturma zaman damgası, proje kök yolu ve .gitignore ve calculator konfigürasyon dosyalarından konfigürasyon kurallarını içerir
 - **summary**: Analiz edilen toplam dosyalar, token sayıları, dosya türü dağılımı ve en büyük dosyalar/dizinler gibi kapsamlı istatistikleri içerir
 - **files**: Yol, token sayısı, boyut, satırlar ve uzantı dahil her analiz edilen dosya için detaylı bilgileri içerir
@@ -69,9 +72,11 @@ DetailedJSONReport --> File
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L784-L799)
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L784-L799)
 
@@ -82,6 +87,7 @@ ctxman aracı farklı kullanım senaryoları için optimize edilmiş iki farklı
 ### Compact Format (~2.3k karakter)
 
 Varsayılan compact format, JSON formatında yaklaşık 2.3k karakter ile kod tabanının minimal ama yapılandırılmış bir temsilini sağlar. Bu format şunları içerir:
+
 - Proje metadata'sı (kök dizin, toplam dosyalar, toplam tokenlar)
 - Ortak önek sıkıştırmasıyla dizine göre gruplandırılmış organize dosya yolları
 - Yer tasarrufu için dosya uzantılarının kaldırılması
@@ -92,6 +98,7 @@ Compact format verimliliği önceliklendirir ve token ekonomisinin kritik olduğ
 ### Detailed Format (~8.6k karakter)
 
 `--detailed-context` ile etkinleştirilen detailed format, yaklaşık 8.6k karakterde daha kapsamlı bir context sağlar. Bu format şunları içerir:
+
 - Uzantılarla tam dosya yolları
 - Token sayısı ve proje yapısına dayalı önem skorları
 - Dizin istatistikleri ve dosya kategorilendirmesi
@@ -131,11 +138,13 @@ LLMContext --> MethodStats
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L482-L503)
 - [ctxman.js](file://ctxman.js#L521-L545)
 - [ctxman.js](file://ctxman.js#L505-L519)
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L482-L545)
 
@@ -144,6 +153,7 @@ LLMContext --> MethodStats
 ctxman'daki pano formatı, dosya tabanlı export'larla aynı yapıyı korur ve farklı çıktı methodları arasında tutarlılık sağlar. `--context-clipboard` flag'i kullanıldığında, araç llm-context.json'a kaydedilecek olan aynı JSON yapısını doğrudan sistem panosuna kopyalar.
 
 Uygulama platformlar arası pano işlemlerini yönetir:
+
 - **macOS**: `pbcopy` komutunu kullanır
 - **Linux**: Önce `xclip`'i dener, mevcut değilse `xsel`'e geri döner
 - **Windows**: `clip` komutunu kullanır
@@ -171,9 +181,11 @@ end
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L547-L579)
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L547-L579)
 
@@ -184,6 +196,7 @@ ctxman aracı artık yeni bir çıktı formatını desteklemektedir: GitIngest-s
 ### GitIngest Format Genel Bakışı
 
 GitIngest formatı, aşağıdaki bileşenlerle kod tabanının kapsamlı, insan tarafından okunabilir bir özetini sağlar:
+
 - Proje özeti ve istatistikler
 - Görsel dizin ağacı yapısı
 - Net ayırıcılarla tam dosya içerikleri
@@ -197,6 +210,7 @@ Bu format, [GitIngest](https://github.com/coderamp-labs/gitingest)'ten ilham al�
 GitIngest digest birden fazla yoldan oluşturulabilir:
 
 **Doğrudan Oluşturma**
+
 ```
 # Kod tabanı analizinden doğrudan digest oluştur
 ctxman --gitingest
@@ -204,6 +218,7 @@ ctxman -g
 ```
 
 **JSON Tabanlı Oluşturma**
+
 ```
 # Mevcut JSON raporundan digest oluştur (anında, yeniden tarama yok)
 ctxman --gitingest-from-report token-analysis-report.json
@@ -213,6 +228,7 @@ ctxman --gitingest-from-context llm-context.json
 ```
 
 **İki Adımlı İş Akışı**
+
 ```
 # Adım 1: Analiz raporu oluştur
 ctxman --save-report
@@ -286,6 +302,7 @@ function validateInput(data) {
 ### Uygulama Detayları
 
 GitIngest formatı, `lib/formatters/gitingest-formatter.js`'deki `GitIngestFormatter` sınıfı aracılığıyla uygulanır. Bu sınıf şunları yönetir:
+
 - Proje özet oluşturma
 - Dizin ağacı inşası
 - Dosya içeriği çıkarma
@@ -295,6 +312,7 @@ GitIngest formatı, `lib/formatters/gitingest-formatter.js`'deki `GitIngestForma
 Formatter, method filtreleme yapılandırmasını otomatik olarak algılar ve kod dosyalarını işlerken uygular.
 
 **Bölüm kaynakları**
+
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
 - [ctxman.js](file://ctxman.js#L332-L339)
 - [README.md](file://README.md#L600-L700)
@@ -304,24 +322,28 @@ Formatter, method filtreleme yapılandırmasını otomatik olarak algılar ve ko
 Farklı çıktı formatları geliştirme iş akışlarında belirli kullanım senaryolarına hizmet eder:
 
 **Compact Format Kullanım Senaryoları:**
+
 - **LLM Entegrasyonu**: Tam proje context'i ile AI asistanları için yapılandırılmış veri
 - **Programatik İşleme**: Otomatik araçlar ve scriptler için JSON formatı
 - **Context Paylaşımı**: Pano ve dosya export'larında özdeş format
 - **Geliştirme İş Akışları**: CI/CD ve otomasyon için tutarlı yapı
 
 **Detailed Format Kullanım Senaryoları:**
+
 - **Mimari Planlama**: Büyük kararlar için kapsamlı proje genel bakışı
 - **Yeni Takım Üyesi Adaptasyonu**: Tam kod tabanı anlayışı
 - **Dokümantasyon Oluşturma**: Tam proje yapısı analizi
 - **Kod İnceleme Hazırlığı**: Detaylı dosya ilişkileri ve önemi
 
 **Performans Değerlendirmeleri:**
+
 - Compact format, tam kod tabanına kıyasla context boyutunu yaklaşık %89 azaltır
 - Token sayımı, mevcut olduğunda GPT-4 uyumluluğu için tiktoken kullanır, tahmin fallback'i ile
 - Dizin gruplandırması ve ortak önek sıkıştırması alan kullanımını optimize eder
 - Method seviyesinde analiz ek yük ekler ancak odaklanmış hata ayıklama için granüler context sağlar
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 
 ## Parsing Stratejileri
@@ -329,18 +351,21 @@ Farklı çıktı formatları geliştirme iş akışlarında belirli kullanım se
 ctxman çıktılarının downstream işlemesi, formatlar arasında tutarlı JSON yapısından yararlanabilir:
 
 **Detaylı JSON Raporları İçin:**
+
 - Audit trail'leri ve versiyon takibi için metadata çıkarın
 - Kod tabanı sağlık izleme için dosya seviyesinde istatistikleri analiz edin
 - Kritik fonksiyonların odaklanmış analizi için method seviyesinde verileri işleyin
 - Uzantı ve dizin istatistiklerinden görselleştirmeler oluşturun
 
 **LLM Context Formatları İçin:**
+
 - Kapsam ve ölçeği anlamak için proje metadata'sını parse edin
 - Dizin yapısını yeniden oluşturmak için yol gruplarını gezin
 - Hedefli kod analizi için method bilgilerini kullanın
 - Yapılandırılmış proje context'ini kabul eden AI araçlarıyla entegre edin
 
 **Genel Parsing Önerileri:**
+
 - İşlemeden önce JSON yapısını doğrulayın
 - İsteğe bağlı alanları (methods, methodStats) zarif bir şekilde ele alın
 - Büyük raporlar için streaming parser'lar kullanın
@@ -348,5 +373,6 @@ ctxman çıktılarının downstream işlemesi, formatlar arasında tutarlı JSON
 - Hatalı veya eksik veriler için hata yönetimi uygulayın
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L482-L545)

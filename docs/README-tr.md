@@ -29,6 +29,7 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 ## Özellikler
 
 ### 🚀 Platform Özellikleri (v3.0.0)
+
 - 🔌 **Plugin Mimarisi** - Modüler, genişletilebilir dil ve exporter sistemi
 - 🔀 **Git Entegrasyonu** - Sadece değişen dosyaları analiz et, diff analizi, yazar takibi
 - 👁️ **Watch Modu** - Gerçek zamanlı dosya izleme ve otomatik analiz
@@ -37,6 +38,7 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 - 🏗️ **Modüler Çekirdek** - Scanner, Analyzer, ContextBuilder, Reporter
 
 ### 🔢 Token Analizi
+
 - ✅ **Kesin token sayımı** tiktoken kullanarak (GPT-4 uyumlu)
 - 🚫 **Çifte ignore sistemi** - hem `.gitignore` hem calculator ignore kurallarını dikkate alır
 - 📋 **Include/Exclude modları** - `.contextinclude` dosyası `.contextignore` üzerinde önceliğe sahip
@@ -55,6 +57,7 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 ## Hızlı Başlangıç
 
 ### Ana Uygulama Analizi (Varsayılan)
+
 ```bash
 # Sadece ana JavaScript uygulama dosyalarını analiz et (181k token)
 # Etkileşimli analiz ile dışa aktarım seçimi
@@ -77,6 +80,7 @@ ctxman --detailed-context --context-clipboard
 ```
 
 ### Sarmalayıcı Script Kullanımı
+
 ```bash
 # NPM paketi ile global kullanım
 ctxman
@@ -89,6 +93,7 @@ ctxman --context-clipboard
 Araç **sadece ana uygulama mantığına** odaklanacak şekilde yapılandırılmıştır:
 
 ### ✅ Dahil Edilenler (64 JS dosyası, ~181k token)
+
 - Ana MCP sunucu implementasyonu (`utility-mcp/src/`)
 - Kimlik doğrulama ve güvenlik katmanları
 - İstek işleyicileri ve yönlendirme
@@ -98,6 +103,7 @@ Araç **sadece ana uygulama mantığına** odaklanacak şekilde yapılandırılm
 - Hata işleme ve izleme
 
 ### 🚫 Context ignore kuralları ile Hariç Tutulanlar
+
 - Dokümantasyon dosyaları (`.md`, `.txt`)
 - Yapılandırma dosyaları (`.json`, `.yml`)
 - Altyapı ve dağıtım dosyaları
@@ -110,6 +116,7 @@ Araç **sadece ana uygulama mantığına** odaklanacak şekilde yapılandırılm
 ## Kullanım
 
 ### Temel Analiz
+
 ```bash
 # Etkileşimli analiz - sonuç sonrası dışa aktarım seçimi
 ctxman
@@ -142,7 +149,7 @@ node token-analysis/token-calculator.js
 # 2) LLM bağlam dosyası oluştur (llm-context.json)
 # 3) LLM bağlamını clipboard'a kopyala
 # 4) Dışa aktarım yok (geç)
-# 
+#
 # 🤔 Hangi dışa aktarım seçeneğini istiyorsunuz? (1-4):
 ```
 
@@ -153,22 +160,26 @@ Bu etkileşimli mod, analiz sonuçlarınızı ihtiyacınız olan formatta dışa
 Token calculator iki tamamlayıcı filtreleme modu destekler:
 
 ### EXCLUDE Modu (.contextignore)
+
 - Yalnızca `.contextignore` mevcut olduğunda **varsayılan mod**
 - Ignore desenlerine uyan dosyalar **hariç** tüm dosyaları dahil eder
 - Geleneksel gitignore tarzı hariç tutma mantığı
 
 ### INCLUDE Modu (.contextinclude)
+
 - **Öncelik modu** - `.contextinclude` mevcut olduğunda, `.contextignore` göz ardı edilir
 - **Yalnızca** include desenlerine uyan dosyaları dahil eder
 - Belirli dosya seçimi için daha kesin kontrol
 - Odaklanmış analiz setleri oluşturmak için mükemmel
 
 ### Mod Önceliği
+
 1. `.contextinclude` mevcutsa → **INCLUDE modu** (`.contextignore` göz ardı edilir)
 2. Yalnızca `.contextignore` mevcutsa → **EXCLUDE modu**
 3. Hiçbiri mevcut değilse → Tüm dosyaları dahil et (yalnızca `.gitignore` saygı göster)
 
 ### Kullanım Örneği
+
 ```bash
 # EXCLUDE modu: .contextignore'daki desenler hariç herşeyi dahil et
 rm token-analysis/.contextinclude  # Include dosyasını kaldır
@@ -180,11 +191,13 @@ node token-analysis/token-calculator.js
 ```
 
 ### Yardım ve Seçenekler
+
 ```bash
 node token-analysis/token-calculator.js --help
 ```
 
 ### Mevcut Seçenekler
+
 - `--save-report`, `-s` - Detaylı JSON raporu kaydet
 - `--no-verbose` - Dosya listesini devre dışı bırak (verbose varsayılan)
 - `--context-export` - LLM bağlam dosya listesi oluştur (llm-context.json olarak kaydeder)
@@ -197,6 +210,7 @@ node token-analysis/token-calculator.js --help
 Token calculator, iki format seçeneği ile LLM tüketimi için optimize edilmiş dosya listeleri oluşturabilir:
 
 ### Ultra-Kompakt Format (Varsayılan)
+
 - **Boyut**: ~2.3k karakter (yapılandırılmış JSON)
 - **İçerik**: Token sayısı olmadan proje metadata'sı ve organize edilmiş dosya yolları
 - **Format**: llm-context.json dosyası ile aynı - tam JSON yapısı
@@ -204,12 +218,14 @@ Token calculator, iki format seçeneği ile LLM tüketimi için optimize edilmi�
 - **Kullanım**: `--context-clipboard` veya `--context-export`
 
 ### Detaylı Format (Eski)
+
 - **Boyut**: ~8.6k karakter (kapsamlı)
 - **İçerik**: Tam yollar, kategoriler, önem puanları, dizin istatistikleri
 - **Mükemmel**: İlk proje analizi, kapsamlı dokümantasyon
 - **Kullanım**: `--detailed-context --context-clipboard`
 
 ### Özellikler
+
 - **Akıllı dosya seçimi** - Token sayısı ve öneme göre en üst dosyalar
 - **Dizin gruplama** - Ortak önek sıkıştırması yer tasarrufu sağlar
 - **Minimal formatlama** - LLM için optimize edilmiş, sıfır gereksiz karakter
@@ -236,6 +252,7 @@ ctxman --save-report --context-clipboard
 ### Çıktı Format Örnekleri
 
 **Kompakt Format (JSON - 2.3k karakter):**
+
 ```json
 {
   "project": {
@@ -244,54 +261,55 @@ ctxman --save-report --context-clipboard
     "totalTokens": 181480
   },
   "paths": {
-    "utility-mcp/src/server/": [
-      "CloudStackUtilityMCP.js"
-    ],
+    "utility-mcp/src/server/": ["CloudStackUtilityMCP.js"],
     "utility-mcp/src/handlers/": [
       "workflow-handlers.js",
       "tool-handlers.js",
       "analytics-handler.js"
     ],
-    "utility-mcp/src/utils/": [
-      "security.js",
-      "usage-tracker.js",
-      "cache-warming.js"
-    ]
+    "utility-mcp/src/utils/": ["security.js", "usage-tracker.js", "cache-warming.js"]
   }
 }
 ```
 
 **Detaylı Format (8.6k karakter):**
-```markdown
+
+````markdown
 # cloudstack-go-mcp-proxy Kod Tabanı Bağlamı
 
 **Proje:** 64 dosya, 181,480 token
 
 **Ana Dosyalar (En Büyük 20):**
+
 1. `utility-mcp/src/server/CloudStackUtilityMCP.js` (12,388 token, server)
 2. `utility-mcp/src/handlers/workflow-handlers.js` (11,007 token, handler)
-...
+   ...
 
 **Tüm Dosyalar:**
+
 ```json
-[{"path": "file.js", "t": 1234, "c": "core", "i": 85}]
+[{ "path": "file.js", "t": 1234, "c": "core", "i": 85 }]
 ```
+````
 
 ### Kullanım Durumları
 
 **Kompakt Format (2.3k karakter JSON):**
+
 1. **LLM Entegrasyonu** - Tam proje bağlamı ile AI asistanları için yapılandırılmış veri
 2. **Programatik İşleme** - Otomatik araçlar ve scriptler için JSON formatı
 3. **Bağlam Paylaşımı** - Clipboard ve dosya dışa aktarımlarında aynı format
 4. **Geliştirme İş Akışları** - CI/CD ve otomasyon için tutarlı yapı
 
 **Detaylı Format (8.6k karakter):**
+
 1. **Mimari Planlama** - Büyük kararlar için kapsamlı proje özeti
 2. **Yeni Takım Üyesi Alıştırma** - Tam kod tabanı anlayışı
 3. **Dokümantasyon Oluşturma** - Tam proje yapısı analizi
 4. **Kod İnceleme Hazırlığı** - Detaylı dosya ilişkileri ve önem
 
 **Genel Kullanım Durumları:**
+
 - Geliştirme iş akışı entegrasyonu
 - CI/CD pipeline bağlam oluşturma
 - Otomatik dokümantasyon güncellemeleri
@@ -340,6 +358,7 @@ utility-mcp/src/**/*.js
 ### Özel Yapılandırma Oluşturma
 
 **EXCLUDE modu için** (`.contextignore` düzenle):
+
 ```bash
 # Daha fazla dosya tipini dahil etmek için satırları kaldır
 # Belirli dosyaları hariç tutmak için desen ekle
@@ -353,6 +372,7 @@ specific-directory/**
 ```
 
 **INCLUDE modu için** (`.contextinclude` oluştur):
+
 ```bash
 # Belirli dosyaları veya desenleri dahil et
 src/**/*.js          # src'deki tüm JS dosyaları
@@ -413,6 +433,7 @@ Uzantı           Dosyalar      Tokenlar   Boyut (KB)    Satırlar
 ## Bağlam Yönetimi
 
 LLM bağlam penceresi optimizasyonu için mükemmel:
+
 - **181k token** = Sadece ana uygulama mantığı
 - **Temiz analiz** = Dokümantasyon, yapılandırma veya derleme dosyalarından gürültü yok
 - **Odaklanmış geliştirme** = AI destekli geliştirme için temel kod
@@ -424,6 +445,7 @@ LLM bağlam penceresi optimizasyonu için mükemmel:
 ## Entegrasyon
 
 Bu aracı şunlara entegre edebilirsiniz:
+
 - Kod boyutu izleme için CI/CD pipeline'ları
 - Token bütçesi kontrolleri için pre-commit hook'ları
 - Dokümantasyon oluşturma iş akışları
@@ -434,22 +456,26 @@ Bu aracı şunlara entegre edebilirsiniz:
 ## Sorun Giderme
 
 ### Include ve Exclude Mod Sorunları
+
 - **INCLUDE modu aktif**: EXCLUDE modunu kullanmak için `.contextinclude` dosyasını kaldırın
 - **Yanlış dosyalar dahil**: `.contextinclude` dosyasının var olup olmadığını kontrol edin (önceliğe sahip)
 - **Mod karışıklığı**: Hangi modun aktif olduğunu görmek için verbose modu kullanın
 
 ### Desenler Çalışmıyor
+
 - Ignore/include desen dosyalarında satır içi yorum olmadığından emin olun
 - Dizin desenleri (`docs/`) yerine dosya desenleri (`docs/**`) kullanın
 - Verbose mod ile belirli desenleri test edin
 - Desen sözdizimini kontrol edin: rekursif için `**`, tek seviye için `*`
 
 ### Token Sayısı Sorunları
+
 - **Çok yüksek**: Verbose mod ile dahil edilen dosyaları gözden geçirin, hariç tutma desenleri ekleyin
 - **Çok düşük**: Önemli dosyaların hariç tutulup tutulmadığını kontrol edin, desenleri gözden geçirin
 - **Tutarsız**: Hangi modun aktif olduğunu doğrulayın (include vs exclude)
 
 ### Beklenen Dosyalar Eksik
+
 - Dosyaların `.gitignore` tarafından hariç tutulup tutulmadığını kontrol edin (her zaman saygı görülür)
 - Context ignore/include desenlerini doğrulayın
 - Dosyaların metin dosyaları olarak tanındığından emin olun
@@ -484,4 +510,4 @@ node token-analysis/token-calculator.js --verbose --save-report
 
 ---
 
-*❤️ ile Hakkı Sağdıç tarafından oluşturulmuştur*
+_❤️ ile Hakkı Sağdıç tarafından oluşturulmuştur_

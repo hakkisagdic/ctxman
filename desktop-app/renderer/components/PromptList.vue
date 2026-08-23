@@ -8,13 +8,11 @@
       </button>
     </div>
 
-    <div v-if="loading && !prompts.length" class="loading">
-      Loading prompts...
-    </div>
+    <div v-if="loading && !prompts.length" class="loading">Loading prompts...</div>
 
     <div v-else-if="prompts.length" class="prompts">
-      <div 
-        v-for="prompt in prompts" 
+      <div
+        v-for="prompt in prompts"
         :key="prompt.name"
         class="prompt-card"
         @click="selectPrompt(prompt)"
@@ -24,13 +22,9 @@
           <span class="prompt-badge">{{ prompt.arguments.length }} args</span>
         </div>
         <p class="prompt-description">{{ prompt.description }}</p>
-        
+
         <div v-if="prompt.arguments.length" class="prompt-args">
-          <div 
-            v-for="arg in prompt.arguments.slice(0, 3)" 
-            :key="arg.name"
-            class="arg-tag"
-          >
+          <div v-for="arg in prompt.arguments.slice(0, 3)" :key="arg.name" class="arg-tag">
             <span class="arg-name">{{ arg.name }}</span>
             <span v-if="arg.required" class="arg-required">*</span>
           </div>

@@ -16,8 +16,8 @@ export default defineConfig({
         'test/',
         'scripts/',
         'coverage/',
-        'desktop-app/' // Excluded from root coverage, handled in workspace
-      ]
+        'desktop-app/', // Excluded from root coverage, handled in workspace
+      ],
     },
     include: ['test/**/*.test.js'],
     // Exclude desktop-app from root run (handled by workspace)

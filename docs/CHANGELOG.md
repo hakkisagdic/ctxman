@@ -11,11 +11,13 @@ This major release transforms Ctxman from a CLI tool into a comprehensive AI dev
 #### Breaking Changes
 
 **Architecture:**
+
 - Complete modular refactor with new `lib/core/` directory
 - Plugin-based system for extensibility
 - Event-driven architecture
 
 **No Breaking API Changes:**
+
 - All existing CLI commands work as before
 - Backward compatible with v2.3.x configurations
 - Existing scripts and integrations continue to work
@@ -23,39 +25,46 @@ This major release transforms Ctxman from a CLI tool into a comprehensive AI dev
 #### Added
 
 **🏗️ Modular Core (4 modules):**
+
 - `Scanner.js` - File system scanning (2491 files in 100ms)
 - `Analyzer.js` - Token & method analysis with parallel processing
 - `ContextBuilder.js` - Smart context generation
 - `Reporter.js` - Multi-format reports
 
 **🔌 Plugin System:**
+
 - `PluginManager.js` - Lazy-loading plugin management
 - `LanguagePlugin` & `ExporterPlugin` base classes
 - Auto-discovery from plugin directories
 - Event-driven communication
 
 **🔀 Git Integration (3 modules):**
+
 - `GitClient.js` - Git operations
 - `DiffAnalyzer.js` - Change impact analysis
 - `BlameTracker.js` - Author attribution
 - CLI: `--changed-only`, `--changed-since`, `--with-authors`
 
 **👁️ Watch Mode:**
+
 - `FileWatcher.js` - Real-time file watching with debounce
 - `IncrementalAnalyzer.js` - Smart re-analysis
 - CLI: `ctxman watch`
 
 **⚡ Performance:**
+
 - `CacheManager.js` - Disk/memory caching (>80% hit rate target)
 - Parallel processing (4 workers)
 - Lazy loading modules
 
 **🌐 REST API:**
+
 - `APIServer.js` - HTTP server (port 3000)
 - 6 endpoints: analyze, methods, stats, diff, context, docs
 - CLI: `ctxman serve`
 
 #### CLI Enhancements
+
 ```bash
 # Git Integration
 ctxman --changed-only
@@ -68,12 +77,14 @@ ctxman watch --debounce 1000
 ```
 
 #### Performance
+
 - Scan: 2491 files in ~100ms
 - Analysis: ~30ms/file with cache
 - Plugin load: <50ms
 - Tests: 12/12 passing ✅
 
 #### New npm Scripts
+
 - `npm run serve` - Start API server
 - `npm run watch` - Start watch mode
 - `npm run test:v3` - v3.0.0 tests
@@ -92,6 +103,7 @@ This release introduces a powerful wizard profiles system that enables multiple 
 #### Added
 
 **Wizard Profiles System:**
+
 - ✨ **6 pre-configured analysis profiles** with comprehensive filter sets:
   - 👀 **Code Review** - For reviewing code changes and PRs (~20K-80K tokens)
   - 🔒 **Security Audit** - For security assessments and vulnerability analysis (~15K-60K tokens)
@@ -101,6 +113,7 @@ This release introduces a powerful wizard profiles system that enables multiple 
   - 📦 **Full** - For comprehensive codebase analysis (~50K-500K+ tokens)
 
 **Each Profile Contains:**
+
 - `profile.json` - Metadata (name, description, icon, token budgets, best practices)
 - `.contextinclude` - File-level include filters
 - `.contextignore` - File-level exclude filters
@@ -108,18 +121,21 @@ This release introduces a powerful wizard profiles system that enables multiple 
 - `.methodignore` - Method-level exclude filters
 
 **Named Configuration System:**
+
 - 📋 **Profile-specific configs**: `.contextinclude-code-review`, `.methodinclude-security-audit`
 - 🔄 **Multiple profiles coexist**: Switch between profiles without losing configurations
 - ✅ **Active configs**: `.contextinclude` → active profile's configuration
 - 🎨 **Custom profiles**: Users can create their own profiles easily
 
 **Wizard Integration:**
+
 - 🧙 **Dynamic profile discovery** - Automatically detects profiles from `.ctxman/wizard-profiles/`
 - 📊 **Profile metadata display** - Shows token budgets, descriptions, and best practices
 - ⚙️ **Custom option** - Uses existing root config files for one-off analyses
 - ✅ **Visual feedback** - Shows copied and active configuration files
 
 **Directory Structure:**
+
 ```
 .ctxman/
   └── wizard-profiles/         # Active profiles (editable)
@@ -142,6 +158,7 @@ examples/
 ```
 
 **Profile Switching Workflow:**
+
 ```bash
 # Run wizard
 ctxman --wizard
@@ -165,6 +182,7 @@ ctxman --wizard
 ```
 
 **Manual Profile Management:**
+
 ```bash
 # Restore default profiles
 cp -r examples/wizard-profiles/* .ctxman/wizard-profiles/
@@ -177,19 +195,23 @@ cp -r .ctxman/wizard-profiles/code-review .ctxman/wizard-profiles/my-profile
 #### Technical Implementation
 
 **New Directories:**
+
 - `.ctxman/wizard-profiles/` - Active wizard profiles (6 profiles × 5 files = 30 files)
 - `examples/wizard-profiles/` - Reference backup profiles
 
 **New Files:**
+
 - `examples/custom-llm-profiles.example.json` - Moved from .ctxman/
 - `examples/README.md` - Comprehensive profile management guide
 
 **Enhanced Files:**
+
 - `lib/ui/wizard.js` - Profile discovery, metadata parsing, named config copying
 - `package.json` - Version bump to 2.3.8, includes .ctxman/ and examples/
-- `.gitignore` - Ignores named configs (.contextinclude-*, .methodinclude-*)
+- `.gitignore` - Ignores named configs (.contextinclude-_, .methodinclude-_)
 
 **New Functions:**
+
 - `discoverProfiles()` - Scans .ctxman/wizard-profiles/ for profiles
 - `copyProfileFiles(profilePath, profileId, projectRoot)` - Creates named configs
 - Profile metadata loading from profile.json
@@ -197,36 +219,40 @@ cp -r .ctxman/wizard-profiles/code-review .ctxman/wizard-profiles/my-profile
 #### Benefits
 
 **vs Simple File Copying:**
+
 - ✅ **Multiple profiles coexist** - Keep code-review AND security-audit configs simultaneously
 - ✅ **Easy switching** - Change profiles without losing previous configurations
 - ✅ **Named configs** - Clear which profile each config belongs to
 - ✅ **Full control** - Both include AND ignore filters for fine-grained control
 
 **vs Preset System:**
+
 - ✅ **No complex runtime** - Simple file copying, no preset engine needed
 - ✅ **Transparent** - Users see exactly what filters are active
 - ✅ **Customizable** - Profiles are just files, easy to modify
 - ✅ **Versionable** - Profiles can be committed to git for team sharing
 
 **vs Manual Configuration:**
+
 - ✅ **Faster setup** - Pre-configured best practices for common scenarios
 - ✅ **Educational** - profile.json documents why filters are chosen
 - ✅ **Restorable** - examples/ directory provides backup/reference
 
 #### Token Budget Guidelines
 
-| Profile | Small Project | Medium Project | Large Project |
-|---------|---------------|----------------|---------------|
-| Minimal | 5K-10K | 10K-25K | 25K-50K |
-| Code Review | 20K-40K | 40K-80K | 80K-150K |
-| Security Audit | 15K-30K | 30K-60K | 60K-120K |
-| Documentation | 18K-35K | 35K-70K | 70K-140K |
-| LLM Explain | 25K-50K | 50K-100K | 100K-200K |
-| Full | 50K-100K | 100K-250K | 250K-500K+ |
+| Profile        | Small Project | Medium Project | Large Project |
+| -------------- | ------------- | -------------- | ------------- |
+| Minimal        | 5K-10K        | 10K-25K        | 25K-50K       |
+| Code Review    | 20K-40K       | 40K-80K        | 80K-150K      |
+| Security Audit | 15K-30K       | 30K-60K        | 60K-120K      |
+| Documentation  | 18K-35K       | 35K-70K        | 70K-140K      |
+| LLM Explain    | 25K-50K       | 50K-100K       | 100K-200K     |
+| Full           | 50K-100K      | 100K-250K      | 250K-500K+    |
 
 #### Migration
 
 No migration needed. Existing workflows continue to work:
+
 - Existing `.contextinclude`/`.contextignore` files are respected
 - Wizard's "Custom" option uses existing root configurations
 - Profiles are optional, not required
@@ -243,6 +269,7 @@ This release introduces automatic LLM model detection and context window optimiz
 #### Added
 
 **LLM Auto-Detection:**
+
 - ✨ **Automatic model detection** from environment variables (ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_API_KEY)
 - 🎯 **9+ built-in LLM profiles** with context window specifications
   - Anthropic: Claude Sonnet 4.5, Claude Opus 4
@@ -254,16 +281,19 @@ This release introduces automatic LLM model detection and context window optimiz
 - 📋 **JSON-based profile system** stored in `.ctxman/llm-profiles.json`
 
 **CLI Enhancements:**
+
 - `--target-model MODEL` - Optimize for specific LLM model
 - `--auto-detect-llm` - Auto-detect from environment
 - `--list-llms` - List all supported models with details
 
 **Wizard Integration:**
+
 - 🧙 Dynamic LLM model selection in wizard
 - ✨ "Auto-detect from environment" option
 - Grouped by vendor (Anthropic, OpenAI, Google, etc.)
 
 **Context Fit Analysis Display:**
+
 ```
 📊 Context Window Analysis:
    Target Model: Claude Sonnet 4.5
@@ -277,18 +307,21 @@ This release introduces automatic LLM model detection and context window optimiz
 #### Technical Implementation
 
 **New Files:**
+
 - `.ctxman/llm-profiles.json` - Built-in LLM model profiles
 - `.ctxman/custom-profiles.example.json` - Template for custom models
 - `lib/utils/llm-detector.js` - LLM detection and optimization logic
 - `test/test-llm-detection.js` - Comprehensive test suite (12 tests)
 
 **Updated Files:**
+
 - `lib/ui/wizard.js` - Dynamic model list from JSON config
 - `bin/cli.js` - LLM flags and help text
 - `lib/analyzers/token-calculator.js` - Context fit analysis display
 - `package.json` - v2.3.7
 
 **Architecture:**
+
 - Lazy-loading profile cache for performance (<100ms)
 - Fallback to hardcoded profiles if JSON fails
 - Merge built-in + custom profiles (custom overrides built-in)
@@ -297,6 +330,7 @@ This release introduces automatic LLM model detection and context window optimiz
 #### Use Cases
 
 **Automatic Optimization:**
+
 ```bash
 # Set your API key
 export ANTHROPIC_API_KEY=sk-...
@@ -312,6 +346,7 @@ ctxman
 ```
 
 **Explicit Model Selection:**
+
 ```bash
 # Optimize for specific model
 ctxman --target-model claude-sonnet-4.5
@@ -320,6 +355,7 @@ ctxman --target-model gemini-2.0-flash
 ```
 
 **Custom Models:**
+
 ```json
 // .ctxman/custom-profiles.json
 {
@@ -345,11 +381,13 @@ ctxman --target-model gemini-2.0-flash
 #### Migration Notes
 
 **For Users:**
+
 - No breaking changes - all existing commands work as before
 - New `--target-model` flag is optional
 - Auto-detection is opt-in (requires API key in environment)
 
 **For Developers:**
+
 - LLM profiles stored in `.ctxman/llm-profiles.json`
 - Custom profiles: `.ctxman/custom-profiles.json`
 - Programmatic API: `LLMDetector.detect()`, `LLMDetector.getProfile()`
@@ -365,6 +403,7 @@ This patch release brings direct GitHub repository support and completes the mod
 #### Added
 
 **GitHub Integration:**
+
 - 🔗 **Direct GitHub Repository Support** - Generate GitIngest from GitHub URLs
   - Support for multiple URL formats (github.com, raw.githubusercontent.com)
   - Automatic shallow cloning for faster processing
@@ -376,6 +415,7 @@ This patch release brings direct GitHub repository support and completes the mod
 #### Enhanced
 
 **Modern Stack Migration:**
+
 - ⚛️ **React 19 Upgrade** - Upgraded from React 18.2.0 to React 19.2.0
   - Latest React features and performance improvements
   - Better TypeScript support
@@ -398,6 +438,7 @@ This patch release brings direct GitHub repository support and completes the mod
   - No external dependencies
 
 **User Experience:**
+
 - 🧙 **Wizard Mode as Default** - Interactive wizard is now the default interface
   - More user-friendly for new users
   - CLI mode available via `--cli` flag
@@ -413,6 +454,7 @@ This patch release brings direct GitHub repository support and completes the mod
 #### Fixed
 
 **UI/UX Fixes:**
+
 - 🐛 **Visual Artifacts Eliminated** - Removed terminal rendering glitches
   - No more duplicate option display
   - Clean component unmounting
@@ -425,11 +467,12 @@ This patch release brings direct GitHub repository support and completes the mod
   - Graceful fallbacks for limited terminals
 
 **Dependency Updates:**
+
 ```json
 {
-  "react": "^19.2.0",        // was: ^18.2.0
-  "ink": "^6.4.0",           // was: ^4.4.1
-  "ink-spinner": "^5.0.0",   // compatible with Ink 6
+  "react": "^19.2.0", // was: ^18.2.0
+  "ink": "^6.4.0", // was: ^4.4.1
+  "ink-spinner": "^5.0.0", // compatible with Ink 6
   "ink-text-input": "^6.0.0" // compatible with Ink 6
 }
 ```
@@ -437,11 +480,13 @@ This patch release brings direct GitHub repository support and completes the mod
 #### Migration Notes
 
 **For Users:**
+
 - No breaking changes - all commands work as before
 - Default mode is now wizard (use `--cli` for old behavior)
 - Better visual experience with modernized UI
 
 **For Developers:**
+
 - All files now use ESM (import/export)
 - React 19 and Ink 6 APIs available
 - Custom SelectInput component for UI consistency
@@ -449,12 +494,14 @@ This patch release brings direct GitHub repository support and completes the mod
 #### Technical Details
 
 **Files Modified (ESM Migration):**
+
 - 29 files converted to pure ESM
 - `lib/` directory: All utility, parser, formatter, analyzer files
 - `bin/` directory: All CLI tools
 - Test files remain compatible with both systems
 
 **Performance:**
+
 - No performance regression
 - UI rendering: <16ms per frame (maintained)
 - Startup time: Similar to v2.3.5
@@ -469,12 +516,14 @@ This patch release brings direct GitHub repository support and completes the mod
 Comprehensive improvements across TOON optimization, format conversion, chunking, error handling, and stability.
 
 **v2.3.1 - TOON Optimization:**
+
 - Added `validate()` method - Checks balanced braces/brackets
 - Added `estimateTokens()` - Token count estimation (~4 chars/token)
 - Added `optimize()` - Removes unnecessary whitespace
 - Added `minify()` - Ultra-compact output
 
 **v2.3.2 - Format Conversion:**
+
 - New `FormatConverter` class in `lib/utils/format-converter.js`
 - CLI: `ctxman convert input.json --from json --to toon`
 - Supports: JSON ↔ TOON, JSON ↔ YAML, JSON ↔ CSV, JSON ↔ XML, CSV → JSON
@@ -482,27 +531,32 @@ Comprehensive improvements across TOON optimization, format conversion, chunking
 - Conversion statistics (size, savings, percentage)
 
 **v2.3.3 - GitIngest Chunking:**
+
 - Chunk overlap (default 500 tokens) for context continuity
 - Enhanced metadata (languages, directories, cross-refs)
 - Shared directory detection between chunks
 - Improved context preservation (95%+)
 
 **v2.3.4 - Error Handling:**
+
 - New `ErrorHandler` class in `lib/utils/error-handler.js`
 - User-friendly error messages with suggestions
 - Optional error logging to file
 - Format validation, async error wrapping
 
 **v2.3.5 - Stability & Polish:**
+
 - Performance optimizations
 - Documentation updates
 - Edge case fixes
 
 #### 📦 New Files
+
 - `lib/utils/format-converter.js` (v2.3.2)
 - `lib/utils/error-handler.js` (v2.3.4)
 
 #### 🔄 Updated Files
+
 - `lib/formatters/toon-formatter.js` - Validation & optimization
 - `lib/formatters/gitingest-formatter.js` - Overlap & metadata
 - `bin/cli.js` - Format conversion command
@@ -521,6 +575,7 @@ This release introduces revolutionary output capabilities with the new TOON form
 #### ✨ New Features
 
 **1. TOON Format (Tabular Object Oriented Notation)**
+
 - 40-50% token reduction compared to JSON
 - Tabular format for arrays of objects
 - Compact field declarations
@@ -529,6 +584,7 @@ This release introduces revolutionary output capabilities with the new TOON form
 - Comparison tools to measure savings
 
 **2. Multi-Format Support (8 Formats)**
+
 - **TOON** - Ultra-efficient (40-50% reduction)
 - **JSON** - Standard format
 - **JSON Compact** - Minified JSON
@@ -539,6 +595,7 @@ This release introduces revolutionary output capabilities with the new TOON form
 - **GitIngest** - Single-file digest
 
 **3. FormatRegistry System**
+
 - Central registry for all output formatters
 - Easy format switching via `--output` flag
 - Custom formatter registration support
@@ -546,6 +603,7 @@ This release introduces revolutionary output capabilities with the new TOON form
 - `--list-formats` command to show all available formats
 
 **4. Smart GitIngest Chunking**
+
 - Multiple chunking strategies:
   - **Smart** - AI-based semantic grouping (directory-aware)
   - **Size** - Fixed token size chunks
@@ -558,6 +616,7 @@ This release introduces revolutionary output capabilities with the new TOON form
 - `--chunk`, `--chunk-strategy`, `--chunk-size` options
 
 **5. Ink-Based Terminal UI**
+
 - React-based interactive components
 - Modern, beautiful CLI experience
 - Real-time progress indicators
@@ -570,6 +629,7 @@ This release introduces revolutionary output capabilities with the new TOON form
   - `Dashboard` - Live statistics
 
 **6. Interactive Wizard Mode**
+
 - `--wizard` flag for guided setup
 - Use case selection (bug-fix, feature, code-review, etc.)
 - Target LLM selection (Claude, GPT-4, Gemini)
@@ -577,6 +637,7 @@ This release introduces revolutionary output capabilities with the new TOON form
 - Visual, step-by-step configuration
 
 **7. Enhanced CLI Options**
+
 ```bash
 # Format options
 -o, --output FORMAT      # Choose output format
@@ -604,6 +665,7 @@ This release introduces revolutionary output capabilities with the new TOON form
 #### 🏗️ Architecture Changes
 
 **New Modules:**
+
 ```
 lib/
 ├── formatters/
@@ -618,6 +680,7 @@ lib/
 ```
 
 **Updated Files:**
+
 - `bin/cli.js` - Complete rewrite with new options
 - `index.js` - Added ToonFormatter and FormatRegistry exports
 - `package.json` - Updated to v2.3.0, added Ink dependencies
@@ -652,10 +715,12 @@ lib/
 No breaking changes! All existing commands work as before.
 
 **New default behavior:**
+
 - Default output format is now TOON (was JSON)
 - To use JSON format: `ctxman --output json`
 
 **To take advantage of new features:**
+
 ```bash
 # Use TOON format (new default)
 ctxman
@@ -694,6 +759,7 @@ ctxman --output csv
 Complete architectural overhaul from monolithic (1340 lines) to modular design (236 lines orchestrator + focused modules).
 
 #### Breaking Changes
+
 - **NONE!** All existing APIs maintained for backward compatibility
 - `TokenAnalyzer` alias still works (points to `TokenCalculator`)
 - All CLI commands unchanged
@@ -702,6 +768,7 @@ Complete architectural overhaul from monolithic (1340 lines) to modular design (
 #### Architecture Changes
 
 **New Module Structure:**
+
 ```
 lib/
 ├── utils/          (4 modules, 337 lines)
@@ -720,12 +787,14 @@ lib/
 ```
 
 **Main Files:**
+
 - `ctxman.js` - Orchestrator (236 lines, **82.4% reduction**)
 - `index.js` - Enhanced public API (48 lines)
 
 #### Code Quality Improvements
 
 **1. Eliminated Duplication:**
+
 - `findConfigFile()` - Removed 2 duplicates → `ConfigUtils.findConfigFile()`
 - `initMethodFilter()` - Removed 2 duplicates → `ConfigUtils.initMethodFilter()`
 - Token counting - Unified in `TokenUtils.calculate()`
@@ -733,11 +802,13 @@ lib/
 - Clipboard - Extracted to `ClipboardUtils.copy()`
 
 **2. Single Responsibility:**
+
 - Each module has ONE clear purpose
 - Utils are independently reusable
 - Better separation of concerns
 
 **3. Better Testability:**
+
 - Utils can be unit tested in isolation
 - Dependencies can be mocked
 - Clearer test boundaries
@@ -745,55 +816,58 @@ lib/
 #### New Public APIs
 
 **Enhanced Exports:**
+
 ```javascript
 const {
-    // Analyzers
-    TokenCalculator,
-    TokenAnalyzer,        // Alias (backward compat)
-    MethodAnalyzer,
+  // Analyzers
+  TokenCalculator,
+  TokenAnalyzer, // Alias (backward compat)
+  MethodAnalyzer,
 
-    // Parsers
-    GitIgnoreParser,
-    MethodFilterParser,
+  // Parsers
+  GitIgnoreParser,
+  MethodFilterParser,
 
-    // Formatters
-    GitIngestFormatter,
+  // Formatters
+  GitIngestFormatter,
 
-    // Utils (NEW!)
-    TokenUtils,
-    FileUtils,
-    ClipboardUtils,
-    ConfigUtils,
+  // Utils (NEW!)
+  TokenUtils,
+  FileUtils,
+  ClipboardUtils,
+  ConfigUtils,
 
-    // Functions (NEW!)
-    generateDigestFromReport,
-    generateDigestFromContext
+  // Functions (NEW!)
+  generateDigestFromReport,
+  generateDigestFromContext,
 } = require('ctxman');
 ```
 
 **Utility Functions:**
+
 ```javascript
 // Token utilities
-TokenUtils.calculate(content, filePath)  // Calculate tokens
-TokenUtils.format(1500)                  // "1.5k"
-TokenUtils.hasExactCounting()            // Check tiktoken availability
+TokenUtils.calculate(content, filePath); // Calculate tokens
+TokenUtils.format(1500); // "1.5k"
+TokenUtils.hasExactCounting(); // Check tiktoken availability
 
 // File utilities
-FileUtils.isText(filePath)               // Is text file?
-FileUtils.isCode(filePath)               // Is code file?
-FileUtils.getType(filePath)              // Get category
+FileUtils.isText(filePath); // Is text file?
+FileUtils.isCode(filePath); // Is code file?
+FileUtils.getType(filePath); // Get category
 
 // Clipboard utilities
-ClipboardUtils.copy(text)                // Cross-platform copy
-ClipboardUtils.isAvailable()             // Check availability
+ClipboardUtils.copy(text); // Cross-platform copy
+ClipboardUtils.isAvailable(); // Check availability
 
 // Config utilities
-ConfigUtils.findConfigFile(root, name)   // Find config
-ConfigUtils.detectMethodFilters(root)    // Detect method filters
-ConfigUtils.getConfigPaths(root)         // Get all config paths
+ConfigUtils.findConfigFile(root, name); // Find config
+ConfigUtils.detectMethodFilters(root); // Detect method filters
+ConfigUtils.getConfigPaths(root); // Get all config paths
 ```
 
 #### Files Added
+
 - `lib/utils/token-utils.js` - Token counting and formatting
 - `lib/utils/file-utils.js` - File type detection
 - `lib/utils/clipboard-utils.js` - Clipboard operations
@@ -806,12 +880,14 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
 - `REFACTORING_REPORT.md` - Detailed refactoring documentation
 
 #### Performance
+
 - **No regression**: Cold start ~2.5s (unchanged)
 - **Memory savings**: 3MB reduction (45MB → 42MB)
 - **Test time**: +0.1s (8.2s → 8.3s, acceptable)
 - **Module loading**: Faster parsing (multiple small files vs 1 large)
 
 #### Test Results
+
 ```
 ✅ Basic tests: 25/25 passed (100%)
 ✅ Unit tests: 34/34 passed (100%)
@@ -824,10 +900,12 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
 #### Migration Notes
 
 **For Users:**
+
 - No changes required - all commands work as before
 - All features available
 
 **For Developers:**
+
 - More APIs available for programmatic use
 - Better module isolation for testing
 - Clearer dependency structure
@@ -835,6 +913,7 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
 ## [1.2.2] - 2025-10-13
 
 ### Added
+
 - 🎯 **Method-Aware GitIngest** - Automatic method-level filtering in digest generation
   - GitIngestFormatter now auto-detects `.methodinclude` and `.methodignore` files
   - If method filters exist, digest automatically shows only filtered methods
@@ -844,6 +923,7 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
   - Compatible with all GitIngest modes (live, from-report, from-context)
 
 ### Changed
+
 - 📄 **GitIngest Output** - Now respects method-level filters when present
   - Code files (.js, .ts, .jsx, .tsx) use method extraction
   - Non-code files (config, docs) use full content
@@ -851,6 +931,7 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
   - Method extraction with smart brace counting (up to 100 lines per method)
 
 ### Technical
+
 - Added `detectMethodFilters()` - Auto-detects method filter config
 - Added `generateFilteredFileContent()` - Extracts and filters methods
 - Added `extractMethodBlock()` - Smart method body extraction
@@ -859,6 +940,7 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
 ## [1.2.1] - 2025-10-13
 
 ### Added
+
 - ⚡ **JSON-Based Digest Generation** - Generate digest from existing JSON files
   - `--gitingest-from-report <file>` - Create digest from token-analysis-report.json
   - `--gitingest-from-context <file>` - Create digest from llm-context.json
@@ -875,6 +957,7 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
 - 📦 **New npm script**: `test:gitingest-json` - Run JSON-based digest tests
 
 ### Changed
+
 - 📚 **README.md** - Added JSON-based digest workflow documentation
   - Performance benefits explained
   - Two-step workflow examples
@@ -885,12 +968,14 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
 - 🧪 **Test Suite** - Updated `test:comprehensive` to include JSON-based tests
 
 ### Performance
+
 - ⚡ JSON-based digest generation: **~0.1 seconds** (vs ~2-3 seconds for live scan)
 - 🚀 **20-30x faster** than live file scanning
 
 ## [1.2.0] - 2025-10-13
 
 ### Added
+
 - 🎯 **GitIngest Format Export** - Generate single-file digest for LLM consumption
   - New `GitIngestFormatter` class for digest generation
   - `--gitingest` / `-g` CLI flag for digest export
@@ -924,23 +1009,27 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
   - Help messages updated with new flags
 
 ### Changed
+
 - 📤 **Interactive Export Menu** - Added GitIngest as option 4 (was 4 options, now 5)
 - 🔧 **Token Output** - Added `token-analysis-report.json` to `.gitignore`
 
 ## [1.1.2] - 2025-10-13
 
 ### Fixed
+
 - 🐛 **LLM Context Path Generation** - Fixed hardcoded `utility-mcp/src/` prefix in `generateCompactPaths` method
   - Paths now correctly use project-relative structure
   - Root directory files grouped under `/` instead of empty string
   - Eliminates incorrect path prefixes in LLM context exports
 
 ### Added
+
 - ✨ **GitHub Actions Manual Trigger** - Added `workflow_dispatch` to npm-publish workflow for manual testing
 
 ## [1.1.1] - 2025-10-09
 
 ### Fixed
+
 - 🐛 **Package.json bin path** - Fixed bin script path format for npm standards
 
 ## [1.1.0] - 2025-10-09
@@ -948,6 +1037,7 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
 ### 🎉 Major Quality & Feature Release
 
 #### Fixed (7 Critical Bugs)
+
 - 🐛 **Method duplication bug** - Fixed duplicate method extraction using Map-based deduplication with `name:line` keys
 - 🐛 **NaN in average calculation** - Added conditional check when totalFiles is 0, now shows "N/A"
 - 🐛 **Class method detection** - Added shorthand pattern to properly detect class methods
@@ -957,6 +1047,7 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
 - 🐛 **Test suite paths** - Corrected all test file paths from `token-analysis/` to root directory
 
 #### Added
+
 - ✨ **Comprehensive test suite** - 70+ tests with 100% success rate
   - `test/unit-tests.js` - 34 comprehensive unit tests
   - Enhanced `test/test.js` - 25 tests (improved from 3)
@@ -978,6 +1069,7 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
   - Sorun-Giderme.md, Gelismis-Yapilandirma.md, Programatik-API.md, Katki-Rehberi.md
 
 #### Changed
+
 - 🔧 **Method extraction patterns** - Enhanced regex patterns with better type tagging
   - Support for export functions: `export function name()`
   - Support for async functions: `async function name()`
@@ -990,12 +1082,14 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
 - 🎯 **Test coverage** - Increased from ~60% to ~95%
 
 #### Improved
+
 - 📊 **Test quality** - 100% success rate across all test suites
 - 🔍 **Method detection** - Now captures class methods, getters, setters correctly
 - 🎯 **Edge case handling** - Tests for empty code, nested functions, Unicode, special chars
 - 📈 **Code quality** - Better separation of concerns, clearer pattern definitions
 
 ### Technical Details
+
 - **Total Tests:** 70+ (25 basic + 34 unit + 17+ integration)
 - **Test Success Rate:** 100% across all suites
 - **Bug Fixes:** 7 critical issues resolved
@@ -1004,11 +1098,13 @@ ConfigUtils.getConfigPaths(root)         // Get all config paths
 - **Performance:** < 30 seconds for all tests
 
 ### Breaking Changes
+
 None - Fully backward compatible
 
 ## [1.0.3] - 2024-10-09
 
 ### Changed
+
 - 📝 **File naming consistency** - Renamed `token-calculator.js` to `ctxman.js` for better alignment with package identity
 - 🔧 **Help text update** - Updated direct usage examples to show `node ctxman.js`
 - 📋 **Package files** - Added `ctxman.js` to NPM package files list
@@ -1017,8 +1113,9 @@ None - Fully backward compatible
 ## [1.0.2] - 2024-10-09
 
 ### Fixed
+
 - 📝 **Documentation consistency** - Updated all command examples to use `ctxman` instead of old script paths
-- 🎯 **Title correction** - Changed from "Token Analysis Tools" to "Ctxman" 
+- 🎯 **Title correction** - Changed from "Token Analysis Tools" to "Ctxman"
 - 🔧 **Help text alignment** - CLI help now matches documentation examples
 - 🌍 **Turkish README** - Updated Turkish documentation with consistent command examples
 - ✨ **Branding consistency** - All documentation now properly reflects the Ctxman identity
@@ -1026,11 +1123,13 @@ None - Fully backward compatible
 ## [1.0.1] - 2024-10-09
 
 ### Fixed
+
 - 📝 **Documentation cleanup** - Removed references to deleted `analyze-tokens.js` wrapper script
-- 🔧 **Package branding** - Updated from "Code Analyzer" to "Ctxman" 
+- 🔧 **Package branding** - Updated from "Code Analyzer" to "Ctxman"
 - 📋 **NPM page accuracy** - Fixed documentation to reflect actual package structure
 
 ### Changed
+
 - 🎯 **Package name** - Rebranded to `ctxman` for better LLM focus
 - 📦 **CLI command** - Updated to `ctxman` for consistency
 - 📖 **Documentation** - Updated all references to use new package name
@@ -1038,6 +1137,7 @@ None - Fully backward compatible
 ## [1.0.0] - 2024-10-09
 
 ### Added
+
 - 🎉 **Initial release** of Ctxman
 - 📊 **File-level analysis** with gitignore support
 - 🔧 **Method-level analysis** for JavaScript/TypeScript files
@@ -1049,9 +1149,10 @@ None - Fully backward compatible
 - ⚡ **Performance optimization** (36% smaller codebase)
 - 📚 **Documentation** with examples
 
-*Created by Hakkı Sağdıç*
+_Created by Hakkı Sağdıç_
 
 ### Features
+
 - File-level token analysis with directory organization
 - Method-level granular analysis with line numbers
 - LLM context optimization (99.76% size reduction)
@@ -1064,6 +1165,7 @@ None - Fully backward compatible
 - Verbose mode for debugging
 
 ### CLI Options
+
 - `--save-report, -s` - Save detailed JSON report
 - `--verbose, -v` - Show included files and directories
 - `--context-export` - Generate LLM context file
@@ -1072,18 +1174,21 @@ None - Fully backward compatible
 - `--help, -h` - Show help message
 
 ### Configuration Files
+
 - `.contextinclude` - Include only specified files
 - `.contextignore` - Exclude specified files
 - `.methodinclude` - Include only specified methods
 - `.methodignore` - Exclude specified methods
 
 ### API Classes
+
 - `TokenAnalyzer` - Main analysis class
 - `MethodAnalyzer` - Method extraction and analysis
 - `MethodFilterParser` - Method filtering logic
 - `GitIgnoreParser` - File filtering logic
 
 ### Use Cases
+
 - LLM context optimization for AI assistants
 - Codebase complexity analysis
 - Method-level debugging and analysis
@@ -1091,6 +1196,7 @@ None - Fully backward compatible
 - Development workflow optimization
 
 ### Technical Details
+
 - Node.js >= 14.0.0 support
 - Optional tiktoken dependency for exact counts
 - Cross-platform compatibility (macOS, Linux, Windows)
@@ -1100,6 +1206,7 @@ None - Fully backward compatible
 - Error handling and validation
 
 ### Documentation
+
 - Comprehensive README with examples
 - API reference documentation
 - Configuration guide
@@ -1108,6 +1215,7 @@ None - Fully backward compatible
 - Test suite and validation
 
 ### Performance
+
 - Analyzes 64 files (181k tokens) in <2 seconds
 - Reduces context size by 99.76% for LLM use
 - Memory efficient processing
@@ -1115,6 +1223,7 @@ None - Fully backward compatible
 - Minimal dependencies
 
 ### Package Structure
+
 ```
 ctxman/
 ├── index.js              # Main entry point
@@ -1131,6 +1240,7 @@ ctxman/
 ## Development Notes
 
 ### Code Quality
+
 - 36% reduction in code size while adding major features
 - Best practices implementation
 - Comprehensive error handling
@@ -1138,6 +1248,7 @@ ctxman/
 - Modular architecture
 
 ### Testing
+
 - 15+ test scenarios covered
 - 100% success rate in validation
 - Method extraction accuracy verified
@@ -1145,6 +1256,7 @@ ctxman/
 - API completeness confirmed
 
 ### Future Enhancements
+
 - Support for additional languages (Python, Java, etc.)
 - Advanced method complexity analysis
 - Integration with popular IDEs

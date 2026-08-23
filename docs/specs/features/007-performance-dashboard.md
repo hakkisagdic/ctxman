@@ -15,24 +15,28 @@
 Users lack visibility into ctxman's performance and behavior over time:
 
 **Performance Blind Spots**:
+
 - No insight into analysis speed trends
 - Cache effectiveness unknown
 - Memory usage patterns invisible
 - Bottleneck identification requires manual profiling
 
 **Operational Challenges**:
+
 - Large project performance unpredictable
 - No baseline for performance regression
 - Difficult to optimize configuration
 - Team-wide performance metrics unavailable
 
 **User Impact**:
+
 - Unexpected slow analysis
 - Inefficient configuration choices
 - Unable to plan for scale
 - No feedback loop for improvements
 
 **Business Impact**:
+
 - Reduced user satisfaction
 - Support requests for "slow" performance
 - Missed optimization opportunities
@@ -138,15 +142,13 @@ export class MetricsCollector {
 
   getAggregatedMetrics(period = '7d') {
     const cutoff = this.getCutoffDate(period);
-    const filtered = this.metrics.filter(m => 
-      new Date(m.startedAt) >= cutoff
-    );
+    const filtered = this.metrics.filter((m) => new Date(m.startedAt) >= cutoff);
 
     return {
       totalAnalyses: filtered.length,
-      avgDuration: this.average(filtered.map(m => m.totalDuration)),
-      avgFiles: this.average(filtered.map(m => m.result.totalFiles)),
-      avgTokens: this.average(filtered.map(m => m.result.totalTokens)),
+      avgDuration: this.average(filtered.map((m) => m.totalDuration)),
+      avgFiles: this.average(filtered.map((m) => m.result.totalFiles)),
+      avgTokens: this.average(filtered.map((m) => m.result.totalTokens)),
       cacheHitRate: this.calculateCacheHitRate(filtered),
       phaseBreakdown: this.aggregatePhases(filtered),
     };
@@ -157,7 +159,7 @@ export class MetricsCollector {
     const data = JSON.stringify(this.metrics, null, 2);
     fs.writeFileSync(
       path.join(this.storagePath, 'metrics.jsonl'),
-      this.metrics.map(m => JSON.stringify(m)).join('\n'),
+      this.metrics.map((m) => JSON.stringify(m)).join('\n'),
       { flag: 'a' }
     );
   }
@@ -258,15 +260,15 @@ program
   .option('--no-open', 'Do not open browser automatically')
   .action(async (options) => {
     const { DashboardServer } = await import('../lib/dashboard/DashboardServer.js');
-    
+
     const server = new DashboardServer({ port: parseInt(options.port) });
     server.start();
-    
+
     if (options.open) {
       const open = (await import('open')).default;
       await open(`http://localhost:${options.port}`);
     }
-    
+
     console.log(`\n📊 Dashboard running at http://localhost:${options.port}`);
     console.log('Press Ctrl+C to stop\n');
   });
@@ -312,6 +314,7 @@ async scan(options = {}) {
 ## Acceptance Criteria
 
 ### Must Have
+
 - [ ] `ctxman dashboard` starts web dashboard
 - [ ] Shows total analyses count
 - [ ] Shows average analysis duration
@@ -319,12 +322,14 @@ async scan(options = {}) {
 - [ ] Displays performance trend chart
 
 ### Should Have
+
 - [ ] Phase breakdown (discovery, analysis, output)
 - [ ] Bottleneck identification
 - [ ] Optimization recommendations
 - [ ] Export metrics as JSON/CSV
 
 ### Nice to Have
+
 - [ ] Real-time updates during analysis
 - [ ] Multi-project comparison
 - [ ] Team-wide metrics aggregation
@@ -336,11 +341,11 @@ async scan(options = {}) {
 
 ### Quantitative Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Dashboard adoption | 20% of active users | Usage tracking |
+| Metric                   | Target                           | Measurement           |
+| ------------------------ | -------------------------------- | --------------------- |
+| Dashboard adoption       | 20% of active users              | Usage tracking        |
 | Performance improvements | 15% faster after using dashboard | Before/after analysis |
-| Cache optimization | 10% improvement in hit rate | Metrics data |
+| Cache optimization       | 10% improvement in hit rate      | Metrics data          |
 
 ### Qualitative Metrics
 
@@ -352,13 +357,13 @@ async scan(options = {}) {
 
 ## Timeline
 
-| Task | Effort | Week |
-|------|--------|------|
+| Task              | Effort  | Week   |
+| ----------------- | ------- | ------ |
 | Metrics collector | 6 hours | Week 1 |
-| Dashboard server | 6 hours | Week 1 |
+| Dashboard server  | 6 hours | Week 1 |
 | UI implementation | 8 hours | Week 2 |
-| CLI integration | 2 hours | Week 2 |
-| Testing & polish | 6 hours | Week 2 |
+| CLI integration   | 2 hours | Week 2 |
+| Testing & polish  | 6 hours | Week 2 |
 
 **Total Estimated Effort**: 28 hours over 2 weeks
 
@@ -372,5 +377,5 @@ async scan(options = {}) {
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q3 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q3 2025_

@@ -14,29 +14,34 @@
 The current CI/CD pipeline is functional but lacks several critical capabilities:
 
 **Security Gaps**:
+
 - No automated security scanning in CI
 - No dependency vulnerability alerts
 - No Dependabot for automated updates
 - No SAST (Static Application Security Testing)
 
 **Quality Assurance Gaps**:
+
 - Lint failures are ignored (`continue-on-error: true`)
 - No code coverage reporting
 - No visual regression tests for desktop app
 - No performance benchmarks
 
 **Developer Experience Issues**:
+
 - No automated release notes
 - No changelog generation
 - Manual version bumping required
 - No preview deployments
 
 **User Impact**:
+
 - Security issues may go undetected
 - Quality regressions can slip through
 - Slower release cycle
 
 **Business Impact**:
+
 - Increased security risk
 - Higher maintenance overhead
 - Delayed feature releases
@@ -96,34 +101,34 @@ Create `.github/dependabot.yml`:
 version: 2
 updates:
   # Enable version updates for npm
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:00"
+      interval: 'weekly'
+      day: 'monday'
+      time: '06:00'
     open-pull-requests-limit: 10
     reviewers:
-      - "hakkisagdic"
+      - 'hakkisagdic'
     labels:
-      - "dependencies"
+      - 'dependencies'
     commit-message:
-      prefix: "chore"
-      include: "scope"
+      prefix: 'chore'
+      include: 'scope'
     groups:
       production-dependencies:
-        dependency-type: "production"
+        dependency-type: 'production'
       development-dependencies:
-        dependency-type: "development"
+        dependency-type: 'development'
 
   # GitHub Actions updates
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "monthly"
+      interval: 'monthly'
     labels:
-      - "github-actions"
-      - "dependencies"
+      - 'github-actions'
+      - 'dependencies'
 ```
 
 ### Step 2: Enhance CI Workflow
@@ -135,9 +140,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   lint:
@@ -211,9 +216,9 @@ name: Security
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
     # Weekly security scan
     - cron: '0 6 * * 1'
@@ -338,13 +343,13 @@ commit_parsers = [
 
 ### Quantitative Metrics
 
-| Metric | Before | Target | Measurement |
-|--------|--------|--------|-------------|
-| CI pipeline time | ~3 min | <5 min | GitHub Actions timing |
-| Security scans per week | 0 | 1+ | Security workflow runs |
-| Dependency update PRs | Manual | Weekly | Dependabot PR count |
-| Coverage reporting | None | 80%+ | Codecov badge |
-| Lint enforcement | Skipped | Required | CI failure on lint error |
+| Metric                  | Before  | Target   | Measurement              |
+| ----------------------- | ------- | -------- | ------------------------ |
+| CI pipeline time        | ~3 min  | <5 min   | GitHub Actions timing    |
+| Security scans per week | 0       | 1+       | Security workflow runs   |
+| Dependency update PRs   | Manual  | Weekly   | Dependabot PR count      |
+| Coverage reporting      | None    | 80%+     | Codecov badge            |
+| Lint enforcement        | Skipped | Required | CI failure on lint error |
 
 ### Qualitative Metrics
 
@@ -358,14 +363,14 @@ commit_parsers = [
 
 ## Timeline
 
-| Task | Effort | Week |
-|------|--------|------|
-| Dependabot configuration | 1 hour | Week 1 |
+| Task                     | Effort  | Week   |
+| ------------------------ | ------- | ------ |
+| Dependabot configuration | 1 hour  | Week 1 |
 | CI workflow enhancements | 2 hours | Week 1 |
-| Security workflow setup | 2 hours | Week 1 |
-| Release automation | 2 hours | Week 2 |
-| Changelog configuration | 1 hour | Week 2 |
-| Testing & verification | 4 hours | Week 2 |
+| Security workflow setup  | 2 hours | Week 1 |
+| Release automation       | 2 hours | Week 2 |
+| Changelog configuration  | 1 hour  | Week 2 |
+| Testing & verification   | 4 hours | Week 2 |
 
 **Total Estimated Effort**: 12 hours over 2 weeks
 
@@ -373,12 +378,12 @@ commit_parsers = [
 
 ## Risk Assessment
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| Breaking existing CI | Low | High | Test in feature branch first |
-| Dependabot noise | Medium | Low | Group dependencies, set limits |
-| False positive security alerts | Medium | Medium | Configure ignore rules |
-| Release automation failures | Low | High | Manual fallback, test thoroughly |
+| Risk                           | Probability | Impact | Mitigation                       |
+| ------------------------------ | ----------- | ------ | -------------------------------- |
+| Breaking existing CI           | Low         | High   | Test in feature branch first     |
+| Dependabot noise               | Medium      | Low    | Group dependencies, set limits   |
+| False positive security alerts | Medium      | Medium | Configure ignore rules           |
+| Release automation failures    | Low         | High   | Manual fallback, test thoroughly |
 
 ---
 
@@ -403,5 +408,5 @@ commit_parsers = [
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q1 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q1 2025_

@@ -40,7 +40,7 @@ describe('RAG System', () => {
   it('should store and retrieve documents', async () => {
     await store.addDocument('hello world', { type: 'greeting' });
     const results = await store.search('hello');
-    
+
     expect(results.length).toBeGreaterThan(0);
     expect(results[0].text).toBe('hello world');
     expect(results[0].metadata.type).toBe('greeting');
@@ -49,10 +49,10 @@ describe('RAG System', () => {
   it('should batch insert documents', async () => {
     const docs = [
       { text: 'alpha', metadata: { id: 1 } },
-      { text: 'beta', metadata: { id: 2 } }
+      { text: 'beta', metadata: { id: 2 } },
     ];
     await store.addDocuments(docs);
-    
+
     const results = await store.search('alpha');
     expect(results[0].text).toBe('alpha');
   });
@@ -67,7 +67,7 @@ describe('RAG System', () => {
     const results = await store.search('Doc 1');
     expect(results.length).toBeGreaterThan(0);
     // Depending on vector math, "Doc 1" should be closest to "Doc 1"
-    const match = results.find(r => r.text === 'Doc 1');
+    const match = results.find((r) => r.text === 'Doc 1');
     expect(match).toBeDefined();
     expect(match.metadata.source).toBe('mock-source');
   });

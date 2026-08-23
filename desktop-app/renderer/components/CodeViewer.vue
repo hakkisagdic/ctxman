@@ -4,12 +4,8 @@
     <div class="viewer-header">
       <span class="file-path">{{ filePath }}</span>
       <div class="actions">
-        <button @click="copyCode" class="btn-icon" title="Copy">
-          📋
-        </button>
-        <button @click="$emit('close')" class="btn-icon" title="Close">
-          ✕
-        </button>
+        <button @click="copyCode" class="btn-icon" title="Copy">📋</button>
+        <button @click="$emit('close')" class="btn-icon" title="Close">✕</button>
       </div>
     </div>
 
@@ -24,7 +20,7 @@ import { ref } from 'vue';
 
 const props = defineProps({
   filePath: String,
-  code: String
+  code: String,
 });
 
 const emit = defineEmits(['close']);

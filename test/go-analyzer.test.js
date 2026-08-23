@@ -2,10 +2,10 @@ import { describe, test, expect } from 'vitest';
 import GoMethodAnalyzer from '../lib/analyzers/go-method-analyzer.js';
 
 describe('Go Method Analyzer', () => {
-    describe('Function Extraction', () => {
-        test('extracts standard functions', () => {
-            const analyzer = new GoMethodAnalyzer();
-            const goCode = `
+  describe('Function Extraction', () => {
+    test('extracts standard functions', () => {
+      const analyzer = new GoMethodAnalyzer();
+      const goCode = `
 package main
 
 import "fmt"
@@ -28,19 +28,19 @@ func Divide(a, b float64) (float64, error) {
     return a / b, nil
 }
 `;
-            const methods = analyzer.extractMethods(goCode, '/test/sample.go');
+      const methods = analyzer.extractMethods(goCode, '/test/sample.go');
 
-            expect(methods.length).toBe(3);
-            expect(methods.some(m => m.name === 'HelloWorld')).toBe(true);
-            expect(methods.some(m => m.name === 'Add')).toBe(true);
-            expect(methods.some(m => m.name === 'Divide')).toBe(true);
-        });
+      expect(methods.length).toBe(3);
+      expect(methods.some((m) => m.name === 'HelloWorld')).toBe(true);
+      expect(methods.some((m) => m.name === 'Add')).toBe(true);
+      expect(methods.some((m) => m.name === 'Divide')).toBe(true);
     });
+  });
 
-    describe('Method Extraction', () => {
-        test('extracts methods with receivers', () => {
-            const analyzer = new GoMethodAnalyzer();
-            const goCode = `
+  describe('Method Extraction', () => {
+    test('extracts methods with receivers', () => {
+      const analyzer = new GoMethodAnalyzer();
+      const goCode = `
 package main
 
 type Calculator struct {
@@ -62,19 +62,19 @@ func (c *Calculator) Multiply(a, b int) int {
     return a * b
 }
 `;
-            const methods = analyzer.extractMethods(goCode, '/test/calculator.go');
+      const methods = analyzer.extractMethods(goCode, '/test/calculator.go');
 
-            expect(methods.length).toBe(3);
-            expect(methods.some(m => m.name === 'Add')).toBe(true);
-            expect(methods.some(m => m.name === 'GetValue')).toBe(true);
-            expect(methods.some(m => m.name === 'Multiply')).toBe(true);
-        });
+      expect(methods.length).toBe(3);
+      expect(methods.some((m) => m.name === 'Add')).toBe(true);
+      expect(methods.some((m) => m.name === 'GetValue')).toBe(true);
+      expect(methods.some((m) => m.name === 'Multiply')).toBe(true);
     });
+  });
 
-    describe('Interface Extraction', () => {
-        test('extracts interface methods', () => {
-            const analyzer = new GoMethodAnalyzer();
-            const goCode = `
+  describe('Interface Extraction', () => {
+    test('extracts interface methods', () => {
+      const analyzer = new GoMethodAnalyzer();
+      const goCode = `
 package main
 
 type Reader interface {
@@ -87,20 +87,20 @@ type Writer interface {
     Flush() error
 }
 `;
-            const methods = analyzer.extractMethods(goCode, '/test/interfaces.go');
+      const methods = analyzer.extractMethods(goCode, '/test/interfaces.go');
 
-            expect(methods.length).toBeGreaterThanOrEqual(4);
-            expect(methods.some(m => m.name === 'Read')).toBe(true);
-            expect(methods.some(m => m.name === 'Close')).toBe(true);
-            expect(methods.some(m => m.name === 'Write')).toBe(true);
-            expect(methods.some(m => m.name === 'Flush')).toBe(true);
-        });
+      expect(methods.length).toBeGreaterThanOrEqual(4);
+      expect(methods.some((m) => m.name === 'Read')).toBe(true);
+      expect(methods.some((m) => m.name === 'Close')).toBe(true);
+      expect(methods.some((m) => m.name === 'Write')).toBe(true);
+      expect(methods.some((m) => m.name === 'Flush')).toBe(true);
     });
+  });
 
-    describe('Comment Filtering', () => {
-        test('ignores functions inside comments', () => {
-            const analyzer = new GoMethodAnalyzer();
-            const goCode = `
+  describe('Comment Filtering', () => {
+    test('ignores functions inside comments', () => {
+      const analyzer = new GoMethodAnalyzer();
+      const goCode = `
 package main
 
 // This is a comment with func FakeFunction() syntax
@@ -115,21 +115,21 @@ func RealFunction() {
     println("real")
 }
 `;
-            const methods = analyzer.extractMethods(goCode, '/test/comments.go');
+      const methods = analyzer.extractMethods(goCode, '/test/comments.go');
 
-            expect(methods.length).toBe(1);
-            expect(methods[0].name).toBe('RealFunction');
-        });
+      expect(methods.length).toBe(1);
+      expect(methods[0].name).toBe('RealFunction');
     });
+  });
 
-    describe('Keyword Filtering', () => {
-        test('filters Go keywords', () => {
-            const analyzer = new GoMethodAnalyzer();
-            const keywords = ['func', 'var', 'const', 'type', 'struct', 'interface'];
+  describe('Keyword Filtering', () => {
+    test('filters Go keywords', () => {
+      const analyzer = new GoMethodAnalyzer();
+      const keywords = ['func', 'var', 'const', 'type', 'struct', 'interface'];
 
-            keywords.forEach(keyword => {
-                expect(analyzer.isKeyword(keyword)).toBe(true);
-            });
-        });
+      keywords.forEach((keyword) => {
+        expect(analyzer.isKeyword(keyword)).toBe(true);
+      });
     });
+  });
 });

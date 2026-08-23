@@ -45,7 +45,7 @@ jobs:
             const { owner, repo } = context.repo;
             const pr = context.payload.pull_request;
             const branchName = pr.head.ref.toLowerCase();
-            
+
             const branchLabels = {
               'feat': 'feature',
               'feature': 'feature',
@@ -64,14 +64,14 @@ jobs:
               'deps': 'dependencies',
               'dependabot': 'dependencies'
             };
-            
+
             const labelsToAdd = [];
             for (const [prefix, label] of Object.entries(branchLabels)) {
               if (branchName.startsWith(prefix + '/') || branchName.startsWith(prefix + '-')) {
                 labelsToAdd.push(label);
               }
             }
-            
+
             if (labelsToAdd.length > 0) {
               // Check if labels exist, create if not
               const existingLabels = await github.rest.issues.listLabelsForRepo({ owner, repo });

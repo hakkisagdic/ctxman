@@ -10,7 +10,9 @@
 </cite>
 
 ## Update Summary
-**Changes Made**   
+
+**Changes Made**
+
 - Updated token counting implementation to use new TokenUtils class
 - Added documentation for exact token counting with tiktoken library
 - Enhanced estimated token counting section with updated ratios and implementation
@@ -19,6 +21,7 @@
 - Added troubleshooting guidance for tiktoken installation issues
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Token Calculation Methods](#token-calculation-methods)
 3. [Exact Token Counting with tiktoken](#exact-token-counting-with-tiktoken)
@@ -35,6 +38,7 @@
 The ctxman tool provides sophisticated token counting functionality to support LLM context management and code analysis. The system implements a dual approach to token counting, combining exact GPT-4 compatible calculations with intelligent estimation methods. This documentation details the implementation, usage, and integration of the token counting system within the ctxman tool.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L7-L8)
 - [README.md](file://README.md#L294-L356)
 
@@ -56,9 +60,11 @@ ReturnEstimate --> End
 ```
 
 **Diagram sources**
+
 - [lib/utils/token-utils.js](file://lib/utils/token-utils.js#L20-L32)
 
 **Section sources**
+
 - [lib/utils/token-utils.js](file://lib/utils/token-utils.js#L20-L32)
 - [ctxman.js](file://ctxman.js#L280-L292)
 
@@ -88,10 +94,12 @@ end
 ```
 
 **Diagram sources**
+
 - [lib/utils/token-utils.js](file://lib/utils/token-utils.js#L20-L32)
 - [package.json](file://package.json#L35-L38)
 
 **Section sources**
+
 - [lib/utils/token-utils.js](file:///Users/hakki.sagdiс/Documents/GitHub/ctxman/lib/utils/token-utils.js#L20-L32)
 - [package.json](file://package.json#L35-L38)
 
@@ -100,6 +108,7 @@ end
 When the tiktoken library is unavailable, the ctxman tool falls back to an estimation method that uses extension-specific character-per-token ratios. This approach provides reasonably accurate estimates (~95% accuracy) while maintaining performance and reducing dependencies.
 
 The estimation algorithm follows these steps:
+
 1. Determine the file extension from the filePath parameter
 2. Look up the appropriate characters-per-token ratio based on the extension
 3. Clean the text by normalizing whitespace
@@ -115,16 +124,19 @@ Calculate --> Return["Return estimated token count"]
 ```
 
 The implementation includes specific character-per-token ratios for common file types:
+
 - JavaScript/TypeScript: 3.2 characters per token
-- JSON: 2.5 characters per token  
+- JSON: 2.5 characters per token
 - Markdown/Text: 4.0 characters per token
 - YAML: 3.5 characters per token
 - HTML/XML: 2.8 characters per token
 
 **Diagram sources**
+
 - [lib/utils/token-utils.js](file://lib/utils/token-utils.js#L45-L65)
 
 **Section sources**
+
 - [lib/utils/token-utils.js](file://lib/utils/token-utils.js#L45-L65)
 
 ## File Type Specific Examples
@@ -138,6 +150,7 @@ Configuration files like JSON, YAML, and XML have their own specific ratios that
 The system determines if a file should be analyzed as a text file through the `isTextFile` method, which checks both file extensions and common text file names like "readme", "license", and "changelog".
 
 **Section sources**
+
 - [lib/utils/token-utils.js](file://lib/utils/token-utils.js#L45-L65)
 - [ctxman.js](file://ctxman.js#L306-L321)
 
@@ -146,6 +159,7 @@ The system determines if a file should be analyzed as a text file through the `i
 Token counts are integrated throughout the file and project statistics system, providing comprehensive analysis of codebase size and complexity. The `analyzeFile` method calls `calculateTokens` for each file and incorporates the results into detailed statistics.
 
 The system maintains multiple levels of statistical aggregation:
+
 - Per-file statistics including token count, size in bytes, and line count
 - Extension-level statistics aggregating counts across all files of the same type
 - Directory-level statistics showing token distribution by top-level directory
@@ -198,10 +212,12 @@ StatsObject --> DirStats : "contains"
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L323-L351)
 - [ctxman.js](file://ctxman.js#L455-L480)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L323-L351)
 - [ctxman.js](file://ctxman.js#L455-L480)
 
@@ -212,12 +228,14 @@ Token counts directly influence LLM context generation through the `generateLLMC
 When method-level analysis is enabled, the system generates detailed method context including token counts for individual methods. This allows for fine-grained control over which code elements are included in the LLM context.
 
 The context generation supports two formats:
+
 - Compact format: Organized file paths without token counts (~2.3k characters)
 - Detailed format: Full method-level information with token counts (~8.6k characters)
 
 The choice of format affects how token counts are presented in the output, with the compact format focusing on file organization and the detailed format providing comprehensive token information for each method.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L482-L503)
 
 ## Performance Implications
@@ -225,6 +243,7 @@ The choice of format affects how token counts are presented in the output, with 
 The token counting system balances accuracy and performance through its dual-method approach. Exact counting with tiktoken provides precise GPT-4 compatible results but incurs additional overhead from library loading and encoding operations. Estimated counting is faster and has no external dependencies but provides approximate results.
 
 The performance implications of each method are:
+
 - **Exact counting**: Higher accuracy (100%), slower performance, requires tiktoken dependency
 - **Estimated counting**: Lower accuracy (~95%), faster performance, no external dependencies
 
@@ -233,6 +252,7 @@ The system is designed to prefer exact counting when available, as indicated by 
 For large codebases, the performance difference becomes more significant, making estimated counting preferable when absolute precision is not required. The estimation method's O(n) complexity for text cleaning and simple division makes it highly efficient even for large files.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L659-L659)
 - [README.md](file://README.md#L294-L356)
 
@@ -251,6 +271,7 @@ Common issues with token counting in the ctxman tool typically relate to inaccur
 To troubleshoot token counting issues, users should first verify tiktoken installation and check the startup message to confirm whether exact or estimated counting is being used.
 
 **Section sources**
+
 - [package.json](file://package.json#L35-L38)
 - [README.md](file://README.md#L294-L356)
 
@@ -259,6 +280,7 @@ To troubleshoot token counting issues, users should first verify tiktoken instal
 To ensure exact token counting, the tiktoken library must be properly installed. The ctxman tool lists tiktoken as both a dependency and optionalDependency in package.json, allowing the tool to function without it while encouraging installation for exact counting.
 
 Installation is performed via npm:
+
 ```bash
 npm install tiktoken
 ```
@@ -267,12 +289,15 @@ The implementation uses a try-catch block to load tiktoken, allowing graceful de
 
 ```javascript
 let tiktoken = null;
-try { tiktoken = require('tiktoken'); } catch {}
+try {
+  tiktoken = require('tiktoken');
+} catch {}
 ```
 
 This pattern ensures that the tool remains functional even if tiktoken installation fails or is not performed, while still providing the option for exact counting when desired. The startup sequence displays the token calculation method being used, helping users verify their installation status.
 
 **Section sources**
+
 - [lib/utils/token-utils.js](file://lib/utils/token-utils.js#L7-L9)
 - [package.json](file://package.json#L35-L38)
 - [README.md](file://README.md#L294-L356)

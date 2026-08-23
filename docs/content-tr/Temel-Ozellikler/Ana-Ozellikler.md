@@ -9,6 +9,7 @@
 </cite>
 
 ## İçindekiler
+
 1. [Dosya Seviyesi Analiz](#dosya-seviyesi-analiz)
 2. [Method Seviyesi Analiz](#method-seviyesi-analiz)
 3. [Token Sayma](#token-sayma)
@@ -24,6 +25,7 @@ Dosya tarama işlemi, `TokenCalculator` sınıfının `scanDirectory` methodunda
 Filtreleme sistemi, yapılandırma dosyalarını belirli bir sırayla önceliklendirir: `.gitignore` kurallarına her zaman saygı gösterilir, ardından `.contextinclude` gelir (INCLUDE modunda önceliğe sahiptir) ve sonra `.contextignore` gelir (include dosyası olmadığında EXCLUDE modunda kullanılır). Bu çok katmanlı yaklaşım, geliştiricilerin hangi dosyaların analiz edileceğini hassas bir şekilde kontrol etmelerini sağlayarak, dokümantasyon, yapılandırma ve test dosyalarını hariç tutarken temel uygulama mantığının odaklanmış incelemesine olanak tanır.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L376-L406)
 - [ctxman.js](file://ctxman.js#L288-L315)
 - [README.md](file://README.md#L294-L356)
@@ -37,6 +39,7 @@ ctxman aracı, JavaScript ve TypeScript dosyalarında kod dosyalarındaki bireys
 Method filtreleme, `.methodinclude` ve `.methodignore` yapılandırma dosyaları tarafından kontrol edilir ve geliştiricilerin pattern matching kullanarak belirli methodları dahil etmelerine veya hariç tutmalarına olanak tanır. `MethodFilterParser` sınıfı bu dosyaları işler ve glob kalıplarını verimli eşleştirme için regular expressionlara dönüştürür. Bir include dosyası mevcut olduğunda, yalnızca belirtilen kalıplarla eşleşen methodlar dahil edilir; aksi takdirde araç, ignore dosyasındaki kalıplarla eşleşen methodları hariç tutar. Bu sistem, tam eşleşmeler, wildcardlar, sınıfa özgü methodlar (`Class.*` sözdizimini kullanarak) ve dosyaya özgü methodlar (`file.method` sözdizimini kullanarak) dahil olmak üzere çeşitli pattern türlerini destekler.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L14-L67)
 - [ctxman.js](file://ctxman.js#L69-L109)
 - [ctxman.js](file://ctxman.js#L357-L377)
@@ -51,6 +54,7 @@ Token sayma işlemi, `TokenCalculator` sınıfının `calculateTokens` methodund
 Araç ayrıca dosya başına, uzantı başına ve dizin başına sayımlar dahil olmak üzere birden fazla seviyede token istatistiklerini izleyerek codebase bileşimi hakkında ayrıntılı bilgiler sağlar. Method seviyesi analiz etkinleştirildiğinde, araç ayrıca bireysel methodlar için tokenleri sayarak, geliştiricilerin yeniden düzenleme gerektirebilecek özellikle büyük veya karmaşık functionları belirlemelerine olanak tanır.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L253-L286)
 - [ctxman.js](file://ctxman.js#L288-L315)
 - [README.md](file://README.md#L356)
@@ -64,6 +68,7 @@ Entegrasyon, çeşitli bileşenlerin başlatılmasıyla başlar: dosya filtrelem
 Sonuçlar, çeşitli ayrıntı düzeylerinde dosyaları, tokenleri, byte'ları ve satırları izleyen kapsamlı istatistiklerde toplanır. Araç, kullanım durumuna bağlı olarak farklı çıktı formatları oluşturabilir: LLM context optimizasyonu için kompakt format, istendiğinde ayrıntılı method seviyesi context veya analiz ve izleme için kapsamlı bir JSON raporu. `generateLLMContext` methodu, bir dosyaya dışa aktarılabilen veya panoya kopyalanabilen yapılandırılmış çıktı oluşturarak codebase context'ini AI asistanlarıyla paylaşmayı kolaylaştırır.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L213-L251)
 - [ctxman.js](file://ctxman.js#L498-L539)
 - [ctxman.js](file://ctxman.js#L774-L813)
@@ -77,6 +82,7 @@ Büyük codebase'ler için performans, birkaç mekanizma aracılığıyla optimi
 Yanlış token sayımları, `tiktoken` kütüphanesi yüklü olmadığında, aracı tahmini hesaplamaya güvenmeye zorladığında ortaya çıkabilir. Tahmin genellikle doğru olsa da (~%95 tam sayımlara kıyasla), kodun belirli özelliklerine bağlı olarak değişebilir. Sıkı token limitleriyle çalışan geliştiriciler, hassas sayım için `tiktoken` yüklemelidir. Araç ayrıca, token kullanımını dosya türüne ve dizine göre ayıran ayrıntılı raporlama sağlar ve genel sayımı çarpıtabilecek beklenmedik büyük dosyaları veya dizinleri belirlemeye yardımcı olur.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L253-L286)
 - [ctxman.js](file://ctxman.js#L376-L406)
 - [README.md](file://README.md#L544-L610)

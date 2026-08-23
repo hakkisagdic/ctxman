@@ -44,6 +44,7 @@ cd ide/jetbrains
 ```
 
 Then install the generated plugin from `build/distributions/Ctxman-1.0.0.zip`:
+
 1. Settings → Plugins → ⚙️ → Install Plugin from Disk
 2. Select the ZIP file
 3. Restart IDE
@@ -53,20 +54,22 @@ Then install the generated plugin from `build/distributions/Ctxman-1.0.0.zip`:
 ### Commands
 
 All commands are available via:
+
 - **Tools Menu**: Tools → Ctxman
 - **Editor Context Menu**: Right-click → Ctxman
 - **Keyboard Shortcuts**: Ctrl+Alt+C (generate context)
 
-| Command | Shortcut | Description |
-|---------|----------|-------------|
-| Generate Context for Selection | - | Generate context for selected code |
-| Generate Context for File | - | Generate context for current file |
-| Generate Context for Project | Ctrl+Alt+C | Generate context for entire project |
-| Show Token Count | - | Display token count statistics |
+| Command                        | Shortcut   | Description                         |
+| ------------------------------ | ---------- | ----------------------------------- |
+| Generate Context for Selection | -          | Generate context for selected code  |
+| Generate Context for File      | -          | Generate context for current file   |
+| Generate Context for Project   | Ctrl+Alt+C | Generate context for entire project |
+| Show Token Count               | -          | Display token count statistics      |
 
 ### Intentions
 
 Press Alt+Enter on any code element to see Ctxman intentions:
+
 - Add to Context
 - Generate LLM Context
 - Show Token Breakdown
@@ -78,6 +81,7 @@ The plugin displays the token count for the current file in the status bar. Clic
 ### Tool Window
 
 Open the Ctxman tool window (View → Tool Windows → Ctxman) for:
+
 - Project analysis overview
 - Quick actions
 - Template selection
@@ -87,14 +91,14 @@ Open the Ctxman tool window (View → Tool Windows → Ctxman) for:
 
 Configure the plugin in Settings → Tools → Ctxman:
 
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| Target Model | string | GPT-4 | Target LLM model for token estimation |
-| Token Budget | number | 100000 | Token budget for alerts |
-| Default Template | string | feature | Default context template |
-| Exclude Patterns | list | [node_modules, .git, ...] | File patterns to exclude |
-| Output Format | string | JSON | Output format (JSON, Markdown, GitIngest, TOON) |
-| Show Status Bar | boolean | true | Show token count in status bar |
+| Setting          | Type    | Default                   | Description                                     |
+| ---------------- | ------- | ------------------------- | ----------------------------------------------- |
+| Target Model     | string  | GPT-4                     | Target LLM model for token estimation           |
+| Token Budget     | number  | 100000                    | Token budget for alerts                         |
+| Default Template | string  | feature                   | Default context template                        |
+| Exclude Patterns | list    | [node_modules, .git, ...] | File patterns to exclude                        |
+| Output Format    | string  | JSON                      | Output format (JSON, Markdown, GitIngest, TOON) |
+| Show Status Bar  | boolean | true                      | Show token count in status bar                  |
 
 ### Supported Models
 

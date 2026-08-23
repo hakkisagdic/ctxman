@@ -22,6 +22,7 @@ Ctxman can automatically generate GitIngest digests from any GitHub repository U
 ### Replace gitingest.com Workflow
 
 **Before (Manual):**
+
 ```bash
 # 1. Go to gitingest.com
 # 2. Paste GitHub URL
@@ -31,6 +32,7 @@ Ctxman can automatically generate GitIngest digests from any GitHub repository U
 ```
 
 **Now (Automated):**
+
 ```bash
 ctxman github facebook/react
 # ✅ Done! Digest saved to docs/
@@ -76,14 +78,14 @@ ctxman github rust-lang/rust --keep-clone
 
 ## 📋 Supported URL Formats
 
-| Format | Example | Supported |
-|--------|---------|-----------|
-| HTTPS | `https://github.com/owner/repo` | ✅ |
-| HTTPS with .git | `https://github.com/owner/repo.git` | ✅ |
-| SSH | `git@github.com:owner/repo.git` | ✅ |
-| Short | `github.com/owner/repo` | ✅ |
-| Owner/Repo | `owner/repo` | ✅ |
-| With branch | `https://github.com/owner/repo/tree/branch` | ✅ |
+| Format          | Example                                     | Supported |
+| --------------- | ------------------------------------------- | --------- |
+| HTTPS           | `https://github.com/owner/repo`             | ✅        |
+| HTTPS with .git | `https://github.com/owner/repo.git`         | ✅        |
+| SSH             | `git@github.com:owner/repo.git`             | ✅        |
+| Short           | `github.com/owner/repo`                     | ✅        |
+| Owner/Repo      | `owner/repo`                                | ✅        |
+| With branch     | `https://github.com/owner/repo/tree/branch` | ✅        |
 
 ### URL Examples
 
@@ -102,21 +104,21 @@ ctxman github github.com/facebook/react
 
 ### Required
 
-| Option | Description |
-|--------|-------------|
-| `url` | GitHub repository URL (any supported format) |
+| Option | Description                                  |
+| ------ | -------------------------------------------- |
+| `url`  | GitHub repository URL (any supported format) |
 
 ### Optional
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `-o, --output FILE` | Auto-generated | Custom output file path |
-| `-b, --branch BRANCH` | `main` | Branch to analyze |
-| `-v, --verbose` | `false` | Show detailed progress |
-| `--keep-clone` | `false` | Keep cloned repo in temp |
-| `--full-clone` | `false` | Full clone (vs shallow) |
-| `--chunk-size TOKENS` | None | Enable chunking |
-| `-h, --help` | - | Show help message |
+| Option                | Default        | Description              |
+| --------------------- | -------------- | ------------------------ |
+| `-o, --output FILE`   | Auto-generated | Custom output file path  |
+| `-b, --branch BRANCH` | `main`         | Branch to analyze        |
+| `-v, --verbose`       | `false`        | Show detailed progress   |
+| `--keep-clone`        | `false`        | Keep cloned repo in temp |
+| `--full-clone`        | `false`        | Full clone (vs shallow)  |
+| `--chunk-size TOKENS` | None           | Enable chunking          |
+| `-h, --help`          | -              | Show help message        |
 
 ---
 
@@ -129,6 +131,7 @@ ctxman github facebook/react
 ```
 
 **Output:**
+
 ```
 ╔════════════════════════════════════════════════════════╗
 ║        GitHub GitIngest Generator v2.3.6              ║
@@ -181,6 +184,7 @@ ctxman github microsoft/vscode --chunk-size 100000 --verbose
 ```
 
 **Output:**
+
 - Multiple chunk files: `vscode-chunk-1.txt`, `vscode-chunk-2.txt`, etc.
 - Chunk metadata with cross-references
 - Navigation between chunks
@@ -211,21 +215,21 @@ ctxman github angular/angular -o ~/projects/angular-context.txt
 const { GitUtils } = require('ctxman');
 
 const gitUtils = new GitUtils({
-    verbose: true,
-    outputDir: './digests'
+  verbose: true,
+  outputDir: './digests',
 });
 
 // Generate from GitHub URL
 const stats = await gitUtils.generateFromGitHub('facebook/react', {
-    outputFile: 'react-digest.txt',
-    cleanup: true,
-    shallow: true,
-    formatterOptions: {
-        chunking: {
-            enabled: true,
-            maxTokensPerChunk: 50000
-        }
-    }
+  outputFile: 'react-digest.txt',
+  cleanup: true,
+  shallow: true,
+  formatterOptions: {
+    chunking: {
+      enabled: true,
+      maxTokensPerChunk: 50000,
+    },
+  },
 });
 
 console.log(`Generated: ${stats.outputFile}`);
@@ -238,10 +242,10 @@ console.log(`Files: ${stats.files}, Tokens: ${stats.tokens}`);
 const gitUtils = new GitUtils();
 
 const repoInfo = gitUtils.parseGitHubURL('facebook/react');
-console.log(repoInfo.owner);      // 'facebook'
-console.log(repoInfo.repo);       // 'react'
-console.log(repoInfo.cloneUrl);   // 'https://github.com/facebook/react.git'
-console.log(repoInfo.apiUrl);     // 'https://api.github.com/repos/facebook/react'
+console.log(repoInfo.owner); // 'facebook'
+console.log(repoInfo.repo); // 'react'
+console.log(repoInfo.cloneUrl); // 'https://github.com/facebook/react.git'
+console.log(repoInfo.apiUrl); // 'https://api.github.com/repos/facebook/react'
 ```
 
 ### Get Repository Info
@@ -309,11 +313,13 @@ ctxman github chromium/chromium \
 ### File Naming
 
 **Auto-generated:**
+
 ```
 docs/{owner}-{repo}-gitingest-{timestamp}.txt
 ```
 
 **Examples:**
+
 - `docs/facebook-react-gitingest-abc123.txt`
 - `docs/vercel-next.js-gitingest-def456.txt`
 
@@ -344,6 +350,7 @@ Generated: 2025-11-03T02:00:00Z
 ### Temporary Files
 
 Cloned repos are stored in:
+
 ```
 .ctxman/temp/{owner}-{repo}/
 ```
@@ -351,6 +358,7 @@ Cloned repos are stored in:
 **Auto-cleanup:** Default (unless `--keep-clone`)
 
 **Manual cleanup:**
+
 ```bash
 # Remove all temp repos
 rm -rf .ctxman/temp/
@@ -365,8 +373,8 @@ rm -rf .ctxman/temp/facebook-react/
 const gitUtils = new GitUtils();
 const cached = gitUtils.listCachedRepos();
 
-cached.forEach(repo => {
-    console.log(`${repo.name}: ${(repo.size / 1024 / 1024).toFixed(2)} MB`);
+cached.forEach((repo) => {
+  console.log(`${repo.name}: ${(repo.size / 1024 / 1024).toFixed(2)} MB`);
 });
 ```
 
@@ -381,6 +389,7 @@ cached.forEach(repo => {
 ```
 
 **Solution:**
+
 ```bash
 # macOS
 brew install git
@@ -402,6 +411,7 @@ sudo yum install git
 ```
 
 **Solutions:**
+
 1. Check repository is public
 2. For private repos: set up SSH keys or GitHub token
 3. Check network/firewall settings
@@ -413,6 +423,7 @@ sudo yum install git
 ```
 
 **Solution:**
+
 ```bash
 # Set GitHub token (increases rate limit)
 export GITHUB_TOKEN=your_token_here
@@ -426,6 +437,7 @@ ctxman github owner/repo
 ```
 
 **Solution:**
+
 ```bash
 # Check default branch first
 ctxman github owner/repo --verbose
@@ -461,11 +473,13 @@ Disk Usage: ~500 MB (full history)
 ### Chunking
 
 For repos > 100k tokens:
+
 ```bash
 ctxman github large/repo --chunk-size 50000
 ```
 
 **Benefits:**
+
 - Multiple digestable chunks
 - Each chunk < LLM context limit
 - Cross-chunk references preserved
@@ -526,24 +540,31 @@ const gitUtils = new GitUtils(options)
 ### Methods
 
 #### `parseGitHubURL(url)`
+
 Parse GitHub URL to extract owner, repo, branch
 
 #### `isGitInstalled()`
+
 Check if git command is available
 
 #### `cloneRepository(repoInfo, options)`
+
 Clone repository to temp directory
 
 #### `generateFromGitHub(url, options)`
+
 Generate GitIngest digest from GitHub URL (main method)
 
 #### `getRepositoryInfo(repoInfo)`
+
 Fetch repository metadata from GitHub API
 
 #### `cleanupTemp()`
+
 Remove all temporary clones
 
 #### `listCachedRepos()`
+
 List all cached repository clones
 
 ---
@@ -552,16 +573,17 @@ List all cached repository clones
 
 Ctxman provides an **offline, scriptable alternative** to gitingest.com:
 
-| Feature | gitingest.com | Ctxman |
-|---------|---------------|-----------------|
-| **Web UI** | ✅ | ❌ |
-| **Automation** | ❌ | ✅ |
-| **Offline** | ❌ | ✅ |
-| **Customization** | ❌ | ✅ (chunking, filters) |
-| **Batch Processing** | ❌ | ✅ |
-| **API Access** | ❌ | ✅ |
+| Feature              | gitingest.com | Ctxman                 |
+| -------------------- | ------------- | ---------------------- |
+| **Web UI**           | ✅            | ❌                     |
+| **Automation**       | ❌            | ✅                     |
+| **Offline**          | ❌            | ✅                     |
+| **Customization**    | ❌            | ✅ (chunking, filters) |
+| **Batch Processing** | ❌            | ✅                     |
+| **API Access**       | ❌            | ✅                     |
 
 **Best of both worlds:**
+
 - Use gitingest.com for quick one-off digests
 - Use Ctxman for automation and workflows
 

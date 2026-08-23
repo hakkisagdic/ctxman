@@ -12,6 +12,7 @@
 </cite>
 
 ## İçindekiler
+
 1. [Giriş](#giriş)
 2. [Geliştirme İş Akışı](#geliştirme-iş-akışı)
 3. [Kod Yapısı ve Mimari](#kod-yapısı-ve-mimari)
@@ -22,14 +23,17 @@
 8. [Sonuç](#sonuç)
 
 ## Giriş
+
 ctxman projesi, method seviyesinde filtreleme ve token analiz yeteneklerine sahip bir LLM context optimizasyon aracıdır. Bu rehber, katkıda bulunanlara geliştirme iş akışını, kod yapısını, test stratejisini ve katkı rehberlerini anlamaları için kapsamlı bilgi sağlar. Araç, geliştiricilerin kod tabanlarını analiz etmelerine ve tiktoken (GPT-4 uyumlu) kullanarak kesin token sayıları hesaplayarak AI asistanları için optimize edilmiş context oluşturmalarına yardımcı olmak üzere tasarlanmıştır.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L0-L891)
 
 ## Geliştirme İş Akışı
 
 ### Yerel Ortamı Kurma
+
 ctxman için yerel geliştirme ortamını kurmak için şu adımları izleyin:
 
 1. Repoyu GitHub'dan klonlayın
@@ -39,6 +43,7 @@ ctxman için yerel geliştirme ortamını kurmak için şu adımları izleyin:
 Araç hem global CLI aracı hem de programatik olarak kullanılabilir. Paket, Node.js sürüm 14.0.0 veya üstü ile çalışacak şekilde yapılandırılmıştır.
 
 ### Testleri Çalıştırma
+
 Proje, npm scriptleri kullanılarak çalıştırılabilen kapsamlı bir test paketi içerir:
 
 ```bash
@@ -49,7 +54,9 @@ npm run test:all   # Kapsamlı test paketini çalıştır
 Test paketi, dosya seviyesinde analiz, method seviyesinde analiz, dosya ve panoya context export'u, detaylı rapor oluşturma ve çeşitli CLI seçenekleri dahil olmak üzere core fonksiyonelliği doğrular.
 
 ### Pull Request Gönderme
+
 Pull request gönderirken, şunlardan emin olun:
+
 - Tüm testler başarıyla geçer
 - Kod, belirlenen kodlama standartlarına uyar
 - Yeni özellikler uygun testlerle birlikte gelir
@@ -57,6 +64,7 @@ Pull request gönderirken, şunlardan emin olun:
 - prepublishOnly scripti başarıyla çalışır, bu yayınlamadan önce testleri çalıştırır
 
 **Bölüm kaynakları**
+
 - [package.json](file://package.json#L0-L55)
 - [test/test.js](file://test/test.js#L0-L61)
 - [test/test-suite.js](file://test/test-suite.js#L0-L280)
@@ -64,6 +72,7 @@ Pull request gönderirken, şunlardan emin olun:
 ## Kod Yapısı ve Mimari
 
 ### Modüler, Sınıf Tabanlı Tasarım
+
 ctxman projesi, net sorumluluk ayrımı ile modüler, sınıf tabanlı bir tasarım desenini takip eder. Mimari, aracın fonksiyonelliğini sağlamak için birlikte çalışan birkaç core bileşenden oluşur.
 
 ```mermaid
@@ -106,12 +115,14 @@ MethodAnalyzer --> MethodFilterParser : "filtreleme için methodlar sağlar"
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L231-L800)
 - [ctxman.js](file://ctxman.js#L124-L229)
 - [ctxman.js](file://ctxman.js#L14-L73)
 - [ctxman.js](file://ctxman.js#L75-L115)
 
 ### Core Bileşenler
+
 Sistemin ana bileşenleri şunlardır:
 
 - **TokenCalculator**: Analiz sürecini yöneten, dosya taramayı, token sayımını ve rapor oluşturmayı koordine eden birincil orkestratör
@@ -122,18 +133,21 @@ Sistemin ana bileşenleri şunlardır:
 Bu bileşenler, modül giriş noktası olarak hizmet eden ve programatik kullanım için tüm core sınıfları export eden index.js dosyası aracılığıyla açığa çıkarılır.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L14-L864)
 - [index.js](file://index.js#L0-L7)
 
 ## Test Stratejisi
 
 ### Test Dizin Yapısı
+
 Test dizini iki birincil test dosyası içerir:
 
 - **test.js**: Core bileşenlerin örneklenebileceğini ve temel işlemlerin doğru çalıştığını doğrulayan temel fonksiyonellik testleri
 - **test-suite.js**: Entegrasyon testleri aracılığıyla aracın fonksiyonelliğinin çeşitli yönlerini doğrulayan kapsamlı test paketi
 
 ### Test Kapsamı
+
 Test stratejisi birkaç temel alana odaklanır:
 
 1. **Temel fonksiyonellik**: Core sınıfların örneklenebileceğini ve temel işlemlerin çalıştığını doğrular
@@ -164,17 +178,21 @@ Results --> End([Test Tamamlandı])
 ```
 
 **Diyagram kaynakları**
+
 - [test/test.js](file://test/test.js#L0-L61)
 - [test/test-suite.js](file://test/test-suite.js#L0-L280)
 
 **Bölüm kaynakları**
+
 - [test/test.js](file://test/test.js#L0-L61)
 - [test/test-suite.js](file://test/test-suite.js#L0-L280)
 
 ## Katkı Rehberleri
 
 ### Hata Raporları
+
 Hata bildirirken lütfen şunları dahil edin:
+
 - Sorunun net bir açıklaması
 - Sorunu yeniden oluşturma adımları
 - Beklenen davranış vs. gerçek davranış
@@ -183,7 +201,9 @@ Hata bildirirken lütfen şunları dahil edin:
 - Uygulanabilirse ekran görüntüleri
 
 ### Özellik İstekleri
+
 Özellik istekleri için şunları sağlayın:
+
 - İstenen fonksiyonelliğin detaylı açıklaması
 - Özelliğin faydalı olacağı kullanım senaryoları ve senaryolar
 - İlgili örnekler veya referanslar
@@ -191,7 +211,9 @@ Hata bildirirken lütfen şunları dahil edin:
 - Kullanıcılar için beklenen faydalar
 
 ### Kod Katkıları
+
 Kod katkısında bulunurken:
+
 1. Repoyu fork edin ve bir özellik branch'i oluşturun
 2. Kodunuzun belirlenen kodlama standartlarına uyduğundan emin olun
 3. Yeni fonksiyonellik için uygun testler yazın
@@ -202,13 +224,16 @@ Kod katkısında bulunurken:
 Proje, güvenilirliği sağlamak ve regresyonları önlemek için yüksek test kapsamını korur. Tüm katkılar bu kapsamı korumalı veya geliştirmelidir.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L0-L891)
 - [package.json](file://package.json#L0-L55)
 
 ## Kodlama Standartları
 
 ### Kod Stili
+
 Proje şu kodlama standartlarını takip eder:
+
 - Core bileşenler için ES6 sınıf sözdizimi
 - Regex tabanlı parsing (AST bağımlılıkları yok)
 - Zarif fallback'ler (tiktoken opsiyonel, pano için dosyaya fallback)
@@ -219,7 +244,9 @@ Proje şu kodlama standartlarını takip eder:
 - Uygun fallback'ler ile hata yönetimi
 
 ### Commit Mesaj Kuralları
+
 Proje geleneksel commit mesaj formatlamasını takip eder:
+
 - Emir kipi kullanın ("fix", "add", "remove", "update")
 - İlk satırı 72 karakterle sınırlayın
 - Konu ile gövde arasına boş satır ekleyin
@@ -227,7 +254,9 @@ Proje geleneksel commit mesaj formatlamasını takip eder:
 - Uygulanabilir olduğunda issue'lara ve pull request'lere referans verin
 
 ### Kod İnceleme Süreci
+
 Kod inceleme süreci şunları içerir:
+
 1. prepublishOnly scripti aracılığıyla otomatik test
 2. Kod kalitesinin ve standartlara uygunluğun manuel incelemesi
 3. Test kapsamının doğrulanması
@@ -236,13 +265,16 @@ Kod inceleme süreci şunları içerir:
 6. Potansiyel güvenlik açıkları için güvenlik incelemesi
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L14-L864)
 - [package.json](file://package.json#L0-L55)
 
 ## Aracı Genişletme
 
 ### Yeni Özellikler Ekleme
+
 Aracı yeni özelliklerle genişletmek için:
+
 1. Yeni fonksiyonellik için uygun bileşeni belirleyin
 2. Mevcut tasarım desenlerini ve kodlama standartlarını takip edin
 3. Kapsamlı testlerle özelliği uygulayın
@@ -250,7 +282,9 @@ Aracı yeni özelliklerle genişletmek için:
 5. Mümkün olduğunda geriye dönük uyumluluğu sağlayın
 
 ### Yeni Çıktı Formatları Ekleme
+
 Yeni çıktı formatları eklemek için:
+
 1. TokenCalculator sınıfındaki generateLLMContext methodunu genişletin
 2. Belirli format için yeni bir method oluşturun
 3. Yeni formatı etkinleştirmek için uygun CLI seçenekleri ekleyin
@@ -260,8 +294,10 @@ Yeni çıktı formatları eklemek için:
 Araç şu anda detaylı JSON raporları, LLM context dosyaları ve pano entegrasyonu dahil olmak üzere birden fazla çıktı formatını desteklemektedir. Yeni formatlar, AI asistanları için yararlı olan yapılandırılmış, makine tarafından okunabilir çıktı sağlamanın aynı prensiplerini takip etmelidir.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L231-L800)
 - [bin/cli.js](file://bin/cli.js#L0-L66)
 
 ## Sonuç
+
 ctxman projesi, kod tabanlarını analiz etmek ve AI asistanları için optimize edilmiş context oluşturmak için sağlam bir temel sağlar. Bu dokümanda özetlenen rehberleri takip ederek, katkıda bulunanlar aracın geliştirilmesine etkili bir şekilde katılabilir, projenin mimarisi ve hedefleriyle uyumlu yüksek kaliteli katkılar sağlayabilirler. Modüler, sınıf tabanlı tasarım, kod kalitesini ve test kapsamını korurken aracı yeni özellikler veya çıktı formatları ile genişletmeyi nispeten basit hale getirir.

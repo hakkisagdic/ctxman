@@ -10,7 +10,9 @@
 </cite>
 
 ## Güncelleme Özeti
+
 **Yapılan Değişiklikler**
+
 - Yeni GitIngest formatı digest üretici özelliği için kapsamlı dokümantasyon eklendi
 - Mimari bölümü yeni GitIngestFormatter bileşeni ile güncellendi
 - CLI arayüzü bölümü yeni GitIngest export seçenekleri ile geliştirildi
@@ -19,6 +21,7 @@
 - Yeni formatter ve parser dosyalarını içerecek şekilde sequence diyagramı eklendi
 
 ## İçindekiler
+
 1. [Araç Genel Bakış ve Temel Değer](#arac-genel-bakis-ve-temel-deger)
 2. [Mimari ve Bileşen İlişkileri](#mimari-ve-bilesen-iliskileri)
 3. [CLI Arayüzü ve İş Akışı Düzenlemesi](#cli-arayuzu-ve-is-akisi-duzenlemesi)
@@ -35,6 +38,7 @@ ctxman CLI aracı, hassas token sayımı, metod seviyesi filtreleme ve compact c
 Aracın temel değeri, temel bilgileri LLM tüketimi için korurken tam kod tabanlarından %89 daha küçük ultra-compact context temsilleri oluşturma yeteneğinde yatmaktadır. Bunu metod seviyesi analiz, akıllı dosya seçimi ve ortak önek sıkıştırması ile dizin gruplandırması yoluyla başarır. ctxman, geliştiricilerin belirli iş mantığı metodlarına odaklanmalarına veya tüm kod tabanlarını analiz etmelerine olanak tanıyan hem dosya seviyesi hem de metod seviyesi analizini destekler.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L1-L855)
 
@@ -43,6 +47,7 @@ Aracın temel değeri, temel bilgileri LLM tüketimi için korurken tam kod taba
 ctxman, modüler, sınıf tabanlı bir JavaScript uygulaması olarak uygulanmıştır ve temel bileşenleri arasında net bir endişe ayrımı vardır. Mimari, özelleşmiş sınıfların analiz iş akışının belirli yönlerini ele aldığı ve merkezi bir orkestratörün etkileşimlerini koordine ettiği temiz bir bağımlılık hiyerarşisini takip eder.
 
 Ana bileşenler şunları içerir:
+
 - **TokenCalculator**: Analiz iş akışını yöneten merkezi orkestratör
 - **GitIgnoreParser**: .gitignore ve özel ignore/include kurallarına dayalı dosya seviyesi filtrelemeyi yönetir
 - **MethodAnalyzer**: Regex desenleri kullanarak JavaScript/TypeScript dosyalarından metodları çıkarır
@@ -94,11 +99,13 @@ TokenCalculator --> TokenCalculator : "coordinates workflow"
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L14-L109)
 - [ctxman.js](file://ctxman.js#L118-L223)
 - [ctxman.js](file://ctxman.js#L225-L790)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L14-L109)
 - [ctxman.js](file://ctxman.js#L118-L223)
 - [ctxman.js](file://ctxman.js#L225-L790)
@@ -108,6 +115,7 @@ TokenCalculator --> TokenCalculator : "coordinates workflow"
 ctxman aracının CLI arayüzü, kullanıcılar için birincil giriş noktası olarak hizmet eder ve tüm analiz iş akışını düzenler. bin/cli.js dosyasında uygulanan CLI, analiz sürecini kontrol etmek için çeşitli seçenekler sunan kullanıcı dostu bir arayüz sağlar. Arayüz net bir yürütme akışını takip eder: komut satırı argümanlarını ayrıştırma, TokenAnalyzer'ı uygun seçeneklerle başlatma ve analizini yürütme.
 
 CLI, analiz davranışını kontrol eden çeşitli önemli seçenekleri destekler:
+
 - `--save-report` veya `-s`: Analizin detaylı bir JSON raporunu kaydeder
 - `--verbose` veya `-v`: Analiz sırasında dahil edilen dosyaları ve dizinleri gösterir
 - `--context-export`: Bir LLM context dosya listesi oluşturur
@@ -137,10 +145,12 @@ CLI->>User : Display completion message
 ```
 
 **Diagram kaynakları**
+
 - [bin/cli.js](file://bin/cli.js#L1-L67)
 - [ctxman.js](file://ctxman.js#L225-L790)
 
 **Bölüm kaynakları**
+
 - [bin/cli.js](file://bin/cli.js#L1-L67)
 - [ctxman.js](file://ctxman.js#L225-L790)
 
@@ -149,6 +159,7 @@ CLI->>User : Display completion message
 ctxman aracı artık GitIngest-style digest dosyaları oluşturmayı desteklemektedir - LLM tüketimi için mükemmel olan tek, prompt-dostu metin dosyası. Bu özellik, tüm kod tabanını net bir dizin ağacı yapısı ve tam dosya içerikleriyle tek bir dosyada birleştiren alternatif bir format sağlamak için uygulanmıştır.
 
 GitIngestFormatter sınıfı bu digest dosyalarını oluşturmaktan sorumludur. TokenCalculator'dan gelen analiz sonuçlarını alır ve bunları şunları içeren yapılandırılmış bir metin dosyasına biçimlendirir:
+
 - Proje özeti ve istatistikleri
 - ASCII art kullanarak görsel dizin ağacı yapısı
 - Net ayırıcılarla tam dosya içerikleri
@@ -157,6 +168,7 @@ GitIngestFormatter sınıfı bu digest dosyalarını oluşturmaktan sorumludur. 
 Digest oluşturma süreci, .gitignore ve calculator ignore/include kuralları dahil tüm filtreleme kurallarına uyar. Metod seviyesi analiz etkinleştirildiğinde, formatter her dosyada yalnızca belirtilen metodları dahil etmek için metod filtreleme uygular, bu da digest'i daha da odaklı ve alakalı hale getirir.
 
 GitIngest digest çeşitli şekillerde oluşturulabilir:
+
 1. Doğrudan tam bir analizden: `ctxman --gitingest`
 2. Mevcut bir JSON raporundan: `ctxman --gitingest-from-report token-analysis-report.json`
 3. Mevcut bir LLM context dosyasından: `ctxman --gitingest-from-context llm-context.json`
@@ -183,10 +195,12 @@ CLI->>User : Display success message with digest size
 ```
 
 **Diagram kaynakları**
+
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
 - [ctxman.js](file://ctxman.js#L332-L339)
 
 **Bölüm kaynakları**
+
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
 - [ctxman.js](file://ctxman.js#L332-L339)
 - [README.md](file://README.md#L600-L700)
@@ -197,7 +211,7 @@ ctxman aracı, geliştiricilerin kod tabanlarındaki belirli metodlara odaklanma
 
 Metod seviyesi analiz, `--method-level` bayrağı tarafından kontrol edilir ve iki ana bileşen aracılığıyla uygulanır: MethodAnalyzer ve MethodFilterParser sınıfları. MethodAnalyzer, fonksiyon bildirimleri, nesne metodları, arrow fonksiyonlar ve sınıf metodları dahil olmak üzere çeşitli sözdizimi desenlerini destekleyerek JavaScript/TypeScript dosyalarındaki metodları tanımlamak için bir dizi düzenli ifade kullanır. Metod adlarını, satır numaralarını ve dosya yollarını çıkararak kod tabanındaki metodların kapsamlı bir envanterini oluşturur.
 
-MethodFilterParser, yapılandırma dosyalarına (.methodinclude ve .methodignore) dayalı metodları filtrelemek için include/exclude kuralları uygular. Bu dosyalar, tam eşleşmeleri, joker karakterleri (*pattern*), sınıfa özgü metodları (Class.*) ve dosyaya özgü metodları (file.method) destekleyen desen eşleştirme sözdizimini kullanır. Filtreleme sistemi hem include modunu (yalnızca belirtilen metodlar dahil edilir) hem de exclude modunu (belirtilen metodlar hariç tutulur) destekler; her iki yapılandırma dosyası da mevcut olduğunda include modu önceliklidir.
+MethodFilterParser, yapılandırma dosyalarına (.methodinclude ve .methodignore) dayalı metodları filtrelemek için include/exclude kuralları uygular. Bu dosyalar, tam eşleşmeleri, joker karakterleri (_pattern_), sınıfa özgü metodları (Class.*) ve dosyaya özgü metodları (file.method) destekleyen desen eşleştirme sözdizimini kullanır. Filtreleme sistemi hem include modunu (yalnızca belirtilen metodlar dahil edilir) hem de exclude modunu (belirtilen metodlar hariç tutulur) destekler; her iki yapılandırma dosyası da mevcut olduğunda include modu önceliklidir.
 
 ```mermaid
 flowchart TD
@@ -225,10 +239,12 @@ GenerateContext --> End([End Analysis])
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L14-L67)
 - [ctxman.js](file://ctxman.js#L69-L109)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L14-L67)
 - [ctxman.js](file://ctxman.js#L69-L109)
 - [README.md](file://README.md#L499-L542)
@@ -263,10 +279,12 @@ O --> P[Export to Clipboard or File]
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L253-L286)
 - [ctxman.js](file://ctxman.js#L639-L665)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L253-L286)
 - [ctxman.js](file://ctxman.js#L639-L665)
 - [README.md](file://README.md#L499-L542)
@@ -276,13 +294,14 @@ O --> P[Export to Clipboard or File]
 ctxman aracı, hangi dosya ve metodların analize dahil edileceği üzerinde hassas kontrol sağlayan dual filtreleme modları (include/exclude) ile esnek bir yapılandırma sistemini destekler. Bu sistem, geliştiricilerin yalnızca temel uygulama mantığını analiz etmek veya belirli dosya ve dizinleri dahil etmek istemeleri olsun, özel ihtiyaçlarına göre uyarlanmış odaklanmış analiz setleri oluşturmalarına olanak tanır.
 
 Dosya seviyesi filtreleme sistemi, net bir öncelik hiyerarşisi ile üç yapılandırma dosyası kullanır:
+
 1. `.gitignore` (proje kök dizini) - Standart git hariç tutmaları (her zaman geçerlidir)
 2. `.contextinclude` - INCLUDE modu (dosyalar için en yüksek öncelik)
 3. `.contextignore` - EXCLUDE modu (include dosyası yokken kullanılır)
 
 `.contextinclude` mevcut olduğunda, araç INCLUDE modunda çalışır, yalnızca bu dosyadaki desenlere uyan dosyaları dahil eder ve `.contextignore`'u göz ardı eder. Yalnızca `.contextignore` mevcut olduğunda, araç EXCLUDE modunda çalışır ve ignore desenlerine uyan dosyalar hariç tüm dosyaları dahil eder. Bu dual-mod sistemi, kapsamlı kod tabanı analizinden belirli bileşenlerin odaklanmış incelemesine kadar farklı kullanım durumları için esneklik sağlar.
 
-Metod seviyesi filtreleme, analize hangi metodların dahil edileceğini kontrol eden `.methodinclude` ve `.methodignore` dosyalarıyla benzer bir deseni takip eder. Bu dosyalar, tam eşleşmeler, joker karakterler (*pattern*), sınıfa özgü metodlar (Class.*) ve dosyaya özgü metodlar (file.method) dahil olmak üzere desen eşleştirme sözdizimini destekler. Desen sözdizimi ayrıca geniş desenlerden belirli öğeleri hariç tutmak için olumsuzlama (!pattern) destekler.
+Metod seviyesi filtreleme, analize hangi metodların dahil edileceğini kontrol eden `.methodinclude` ve `.methodignore` dosyalarıyla benzer bir deseni takip eder. Bu dosyalar, tam eşleşmeler, joker karakterler (_pattern_), sınıfa özgü metodlar (Class.*) ve dosyaya özgü metodlar (file.method) dahil olmak üzere desen eşleştirme sözdizimini destekler. Desen sözdizimi ayrıca geniş desenlerden belirli öğeleri hariç tutmak için olumsuzlama (!pattern) destekler.
 
 ```mermaid
 graph TD
@@ -312,10 +331,12 @@ T --> U[Export Results]
 ```
 
 **Diagram kaynakları**
+
 - [README.md](file://README.md#L294-L356)
 - [ctxman.js](file://ctxman.js#L253-L286)
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L294-L356)
 - [ctxman.js](file://ctxman.js#L253-L286)
 
@@ -379,11 +400,13 @@ OUTPUT_FORMAT {
 ```
 
 **Diagram kaynakları**
+
 - [README.md](file://README.md#L499-L542)
 - [README.md](file://README.md#L801-L879)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L499-L542)
 - [README.md](file://README.md#L801-L879)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)

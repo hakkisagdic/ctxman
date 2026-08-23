@@ -9,6 +9,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [LLM Context Optimization](#llm-context-optimization)
 2. [Codebase Analysis](#codebase-analysis)
 3. [CI/CD Integration](#cicd-integration)
@@ -24,6 +25,7 @@ For LLM context export, the tool provides two formats: an ultra-compact format (
 Method-level filtering further enhances context optimization through `.methodinclude` and `.methodignore` configuration files. These allow developers to include or exclude specific methods based on naming patterns, enabling highly targeted analysis. For example, specifying `*Handler`, `*Validator`, or `TokenCalculator.*` in `.methodinclude` focuses the context on critical business logic components.
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L1-L865)
 
@@ -32,6 +34,7 @@ Method-level filtering further enhances context optimization through `.methodinc
 The ctxman tool provides comprehensive insights into token distribution across the codebase, identifying large files and methods while tracking complexity over time. Using exact token counting via tiktoken (GPT-4 compatible), it delivers accurate metrics that help maintain optimal code health. In the absence of tiktoken, the tool falls back to smart estimation with ~95% accuracy.
 
 Key analytical features include:
+
 - **Token distribution by file type**: Detailed breakdown of tokens per extension
 - **Largest files identification**: Top 5 largest files ranked by token count
 - **Directory-level statistics**: Token usage aggregated by top-level directories
@@ -40,6 +43,7 @@ Key analytical features include:
 The tool generates a detailed report showing total files analyzed, total tokens, average tokens per file, and files ignored due to `.gitignore` or context rules. This information is crucial for understanding project complexity and identifying potential refactoring opportunities. The `--save-report` option exports this data to `token-analysis-report.json`, enabling historical tracking and trend analysis.
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L1-L865)
 
@@ -48,6 +52,7 @@ The tool generates a detailed report showing total files analyzed, total tokens,
 The ctxman tool can be seamlessly integrated into CI/CD pipelines for automated code size monitoring, quality gates, and documentation generation. Its command-line interface supports non-interactive execution, making it suitable for use in pre-commit hooks, daily monitoring scripts, and continuous integration workflows.
 
 Common integration patterns include:
+
 - **Pre-commit hooks**: Running `ctxman --context-clipboard` before commits to ensure only essential code is considered for AI review
 - **Daily monitoring scripts**: Executing `ctxman --save-report` to generate daily analysis reports for trend tracking
 - **Quality gates**: Implementing token budget checks in pipelines using scriptable output (e.g., parsing JSON output to enforce maximum token limits)
@@ -56,6 +61,7 @@ Common integration patterns include:
 The interactive export selection feature prompts users to choose between saving a detailed JSON report, generating an LLM context file, copying context to clipboard, or skipping export—ensuring flexibility in different usage scenarios.
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 - [bin/cli.js](file://bin/cli.js#L1-L67)
 
@@ -74,6 +80,7 @@ Several common challenges arise when using the ctxman tool, particularly around 
 **Clipboard Functionality Failures**: On Linux systems, ensure either `xclip` or `xsel` is installed for clipboard operations. The tool automatically attempts both utilities if one fails.
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L1-L865)
 
@@ -94,5 +101,6 @@ To maximize effectiveness when using the ctxman tool, follow these best practice
 **Method-Level Filtering**: Use `.methodinclude` and `.methodignore` files to focus on core business logic during debugging or code reviews, reducing cognitive load and improving analysis relevance.
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L1-L865)

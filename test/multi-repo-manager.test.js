@@ -18,16 +18,16 @@ describe('MultiRepoManager', () => {
     uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     testConfigDir = path.join(process.cwd(), `.ctxman-test-${uniqueId}`);
     testConfigPath = path.join(testConfigDir, 'repos.json');
-    
+
     // Ensure directory exists
     fs.mkdirSync(testConfigDir, { recursive: true });
-    
+
     // Create manager and explicitly initialize empty config
-    manager = new MultiRepoManager(process.cwd(), { 
+    manager = new MultiRepoManager(process.cwd(), {
       configPath: testConfigPath,
-      autoSave: true 
+      autoSave: true,
     });
-    
+
     // Start with a fresh empty config
     manager.config = { version: '1.0', repos: [] };
   });
@@ -69,7 +69,7 @@ describe('MultiRepoManager', () => {
     it('should load existing config file', () => {
       const existingConfig = {
         version: '1.0',
-        repos: [{ id: 'test', path: '../test', alias: 'Test' }]
+        repos: [{ id: 'test', path: '../test', alias: 'Test' }],
       };
       fs.writeFileSync(testConfigPath, JSON.stringify(existingConfig));
 
@@ -84,10 +84,10 @@ describe('MultiRepoManager', () => {
     it('should create config directory if it does not exist', () => {
       // Remove the directory
       fs.rmSync(testConfigDir, { recursive: true, force: true });
-      
+
       manager.config = { version: '1.0', repos: [] };
       manager.save();
-      
+
       expect(fs.existsSync(testConfigDir)).toBe(true);
       expect(fs.existsSync(testConfigPath)).toBe(true);
     });
@@ -115,8 +115,8 @@ describe('MultiRepoManager', () => {
     });
 
     it('should add repository with custom exclude patterns', () => {
-      const repo = manager.addRepo('../test-repo', { 
-        exclude: ['node_modules/**', 'dist/**'] 
+      const repo = manager.addRepo('../test-repo', {
+        exclude: ['node_modules/**', 'dist/**'],
       });
       expect(repo.exclude).toEqual(['node_modules/**', 'dist/**']);
     });
@@ -129,7 +129,7 @@ describe('MultiRepoManager', () => {
 
     it('should auto-save when autoSave is true', () => {
       manager.addRepo('../test-repo');
-      
+
       const saved = JSON.parse(fs.readFileSync(testConfigPath, 'utf-8'));
       expect(saved.repos.length).toBe(1);
     });
@@ -151,7 +151,7 @@ describe('MultiRepoManager', () => {
     it('should auto-save after removal', () => {
       manager.addRepo('../test-repo');
       manager.removeRepo('../test-repo');
-      
+
       const saved = JSON.parse(fs.readFileSync(testConfigPath, 'utf-8'));
       expect(saved.repos.length).toBe(0);
     });
@@ -176,7 +176,7 @@ describe('MultiRepoManager', () => {
       const result = manager.analyzeRepo({
         id: 'test',
         path: '../non-existing-repo',
-        alias: 'Test'
+        alias: 'Test',
       });
 
       expect(result.error).toBeDefined();
@@ -188,7 +188,7 @@ describe('MultiRepoManager', () => {
         id: 'current',
         path: '.',
         alias: 'Current Project',
-        exclude: ['node_modules/**', 'coverage/**', 'dist/**', 'build/**']
+        exclude: ['node_modules/**', 'coverage/**', 'dist/**', 'build/**'],
       });
 
       expect(result.files).toBeGreaterThanOrEqual(0);
@@ -231,9 +231,9 @@ describe('MultiRepoManager', () => {
       const results = {
         repos: [
           { alias: 'Frontend', path: '../frontend', files: 100, tokens: 50000, percentage: '50.0' },
-          { alias: 'API', path: '../api', files: 80, tokens: 50000, percentage: '50.0' }
+          { alias: 'API', path: '../api', files: 80, tokens: 50000, percentage: '50.0' },
         ],
-        combined: { totalFiles: 180, totalTokens: 100000 }
+        combined: { totalFiles: 180, totalTokens: 100000 },
       };
 
       const output = manager.formatResults(results);
@@ -276,7 +276,7 @@ describe('MultiRepoManager', () => {
     it('should generate unique IDs', async () => {
       const id1 = manager.generateRepoId('../test-repo');
       // Add a small delay to ensure different timestamp
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       const id2 = manager.generateRepoId('../test-repo');
       // IDs should be different due to timestamp
       expect(id1).not.toBe(id2);

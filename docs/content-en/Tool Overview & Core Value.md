@@ -10,7 +10,9 @@
 </cite>
 
 ## Update Summary
-**Changes Made**   
+
+**Changes Made**
+
 - Added comprehensive documentation for the new GitIngest-style digest formatter feature
 - Updated architecture section to include the new GitIngestFormatter component
 - Enhanced CLI interface section with new GitIngest export options
@@ -19,6 +21,7 @@
 - Added new sequence diagram showing GitIngest digest generation
 
 ## Table of Contents
+
 1. [Tool Overview & Core Value](#tool-overview--core-value)
 2. [Architecture and Component Relationships](#architecture-and-component-relationships)
 3. [CLI Interface and Workflow Orchestration](#cli-interface-and-workflow-orchestration)
@@ -35,6 +38,7 @@ The ctxman CLI tool is a specialized utility designed for optimizing code contex
 The tool's core value lies in its ability to generate ultra-compact context representations that are 89% smaller than full codebases, while maintaining essential information for LLM consumption. It achieves this through method-level analysis, smart file selection, and directory grouping with common prefix compression. The ctxman supports both file-level and method-level analysis, allowing developers to focus on specific business logic methods or analyze entire codebases.
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L1-L855)
 
@@ -43,6 +47,7 @@ The tool's core value lies in its ability to generate ultra-compact context repr
 The ctxman is implemented as a modular, class-based JavaScript application with clear separation of concerns between its core components. The architecture follows a clean dependency hierarchy where specialized classes handle specific aspects of the analysis workflow, and a central orchestrator coordinates their interactions.
 
 The main components include:
+
 - **TokenCalculator**: The central orchestrator that manages the analysis workflow
 - **GitIgnoreParser**: Handles file-level filtering based on .gitignore and custom ignore/include rules
 - **MethodAnalyzer**: Extracts methods from JavaScript/TypeScript files using regex patterns
@@ -106,12 +111,14 @@ TokenCalculator --> GitIngestFormatter : "creates and uses"
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L14-L109)
 - [ctxman.js](file://ctxman.js#L118-L223)
 - [ctxman.js](file://ctxman.js#L225-L790)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L14-L109)
 - [ctxman.js](file://ctxman.js#L118-L223)
 - [ctxman.js](file://ctxman.js#L225-L790)
@@ -122,6 +129,7 @@ TokenCalculator --> GitIngestFormatter : "creates and uses"
 The CLI interface of the ctxman tool serves as the primary entry point for users and orchestrates the entire analysis workflow. Implemented in the bin/cli.js file, the CLI provides a user-friendly interface with various options for controlling the analysis process. The interface follows a clear execution flow: parsing command-line arguments, initializing the TokenAnalyzer with appropriate options, and executing the analysis.
 
 The CLI supports several key options that control the analysis behavior:
+
 - `--save-report` or `-s`: Saves a detailed JSON report of the analysis
 - `--verbose` or `-v`: Shows included files and directories during analysis
 - `--context-export`: Generates an LLM context file list
@@ -151,10 +159,12 @@ CLI->>User : Display completion message
 ```
 
 **Diagram sources**
+
 - [bin/cli.js](file://bin/cli.js#L1-L67)
 - [ctxman.js](file://ctxman.js#L225-L790)
 
 **Section sources**
+
 - [bin/cli.js](file://bin/cli.js#L1-L67)
 - [ctxman.js](file://ctxman.js#L225-L790)
 
@@ -163,6 +173,7 @@ CLI->>User : Display completion message
 The ctxman tool now supports generating GitIngest-style digest files - a single, prompt-friendly text file perfect for LLM consumption. This feature was implemented to provide an alternative format that consolidates the entire codebase into a single file with a clear directory tree structure and complete file contents.
 
 The GitIngestFormatter class is responsible for creating these digest files. It takes the analysis results from the TokenCalculator and formats them into a structured text file that includes:
+
 - Project summary and statistics
 - Visual directory tree structure using ASCII art
 - Complete file contents with clear separators
@@ -171,6 +182,7 @@ The GitIngestFormatter class is responsible for creating these digest files. It 
 The digest generation process respects all filtering rules, including .gitignore and calculator ignore/include rules. When method-level analysis is enabled, the formatter applies method filtering to include only the specified methods in each file, making the digest even more focused and relevant.
 
 The GitIngest digest can be generated in several ways:
+
 1. Directly from a full analysis: `ctxman --gitingest`
 2. From an existing JSON report: `ctxman --gitingest-from-report token-analysis-report.json`
 3. From an existing LLM context file: `ctxman --gitingest-from-context llm-context.json`
@@ -197,10 +209,12 @@ CLI->>User : Display success message with digest size
 ```
 
 **Diagram sources**
+
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
 - [ctxman.js](file://ctxman.js#L332-L339)
 
 **Section sources**
+
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
 - [ctxman.js](file://ctxman.js#L332-L339)
 - [README.md](file://README.md#L600-L700)
@@ -211,7 +225,7 @@ The ctxman tool provides sophisticated method-level analysis capabilities that a
 
 Method-level analysis is controlled by the `--method-level` flag and is implemented through two key components: the MethodAnalyzer and MethodFilterParser classes. The MethodAnalyzer uses a series of regular expressions to identify methods in JavaScript/TypeScript files, supporting various syntax patterns including function declarations, object methods, arrow functions, and class methods. It extracts method names, line numbers, and file paths, creating a comprehensive inventory of methods in the codebase.
 
-The MethodFilterParser applies include/exclude rules to filter methods based on configuration files (.methodinclude and .methodignore). These files use pattern matching syntax that supports exact matches, wildcards (*pattern*), class-specific methods (Class.*), and file-specific methods (file.method). The filtering system supports both include mode (only specified methods are included) and exclude mode (specified methods are excluded), with include mode taking priority when both configuration files exist.
+The MethodFilterParser applies include/exclude rules to filter methods based on configuration files (.methodinclude and .methodignore). These files use pattern matching syntax that supports exact matches, wildcards (_pattern_), class-specific methods (Class.*), and file-specific methods (file.method). The filtering system supports both include mode (only specified methods are included) and exclude mode (specified methods are excluded), with include mode taking priority when both configuration files exist.
 
 ```mermaid
 flowchart TD
@@ -239,10 +253,12 @@ GenerateContext --> End([End Analysis])
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L14-L67)
 - [ctxman.js](file://ctxman.js#L69-L109)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L14-L67)
 - [ctxman.js](file://ctxman.js#L69-L109)
 - [README.md](file://README.md#L499-L542)
@@ -277,10 +293,12 @@ O --> P[Export to Clipboard or File]
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L253-L286)
 - [ctxman.js](file://ctxman.js#L639-L665)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L253-L286)
 - [ctxman.js](file://ctxman.js#L639-L665)
 - [README.md](file://README.md#L499-L542)
@@ -290,13 +308,14 @@ O --> P[Export to Clipboard or File]
 The ctxman tool supports a flexible configuration system with dual filtering modes (include/exclude) that provide precise control over which files and methods are included in the analysis. This system allows developers to create focused analysis sets tailored to their specific needs, whether they want to analyze only core application logic or include specific files and directories.
 
 The file-level filtering system uses three configuration files with a clear priority hierarchy:
+
 1. `.gitignore` (project root) - Standard git exclusions (always respected)
 2. `.contextinclude` - INCLUDE mode (highest priority for files)
 3. `.contextignore` - EXCLUDE mode (used when no include file exists)
 
 When `.contextinclude` exists, the tool operates in INCLUDE mode, including only files that match the patterns in this file and ignoring `.contextignore`. When only `.contextignore` exists, the tool operates in EXCLUDE mode, including all files except those matching the ignore patterns. This dual-mode system provides flexibility for different use cases, from comprehensive codebase analysis to focused examination of specific components.
 
-Method-level filtering follows a similar pattern with `.methodinclude` and `.methodignore` files that control which methods are included in the analysis. These files support pattern matching syntax including exact matches, wildcards (*pattern*), class-specific methods (Class.*), and file-specific methods (file.method). The pattern syntax also supports negation (!pattern) to exclude specific items from broad patterns.
+Method-level filtering follows a similar pattern with `.methodinclude` and `.methodignore` files that control which methods are included in the analysis. These files support pattern matching syntax including exact matches, wildcards (_pattern_), class-specific methods (Class.*), and file-specific methods (file.method). The pattern syntax also supports negation (!pattern) to exclude specific items from broad patterns.
 
 ```mermaid
 graph TD
@@ -326,10 +345,12 @@ T --> U[Export Results]
 ```
 
 **Diagram sources**
+
 - [README.md](file://README.md#L294-L356)
 - [ctxman.js](file://ctxman.js#L253-L286)
 
 **Section sources**
+
 - [README.md](file://README.md#L294-L356)
 - [ctxman.js](file://ctxman.js#L253-L286)
 
@@ -393,11 +414,13 @@ OUTPUT_FORMAT {
 ```
 
 **Diagram sources**
+
 - [README.md](file://README.md#L499-L542)
 - [README.md](file://README.md#L801-L879)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
 
 **Section sources**
+
 - [README.md](file://README.md#L499-L542)
 - [README.md](file://README.md#L801-L879)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)

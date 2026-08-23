@@ -15,23 +15,27 @@
 Modern development often spans multiple repositories:
 
 **Multi-Repo Scenarios**:
+
 - Monorepo with multiple packages
 - Microservices architecture
 - Frontend + Backend + Shared libraries
 - Organization-wide context needs
 
 **Current Limitations**:
+
 - Can only analyze one repository at a time
 - No cross-repository dependency tracking
 - Manual context combination required
 - Duplicate code detection missing
 
 **User Impact**:
+
 - Incomplete context for cross-repo changes
 - Manual copy-paste between repos
 - Missed dependencies between services
 
 **Business Impact**:
+
 - Reduced effectiveness for enterprise users
 - Lost productivity in monorepo teams
 - Competitive disadvantage
@@ -120,7 +124,7 @@ export class WorkspaceConfig {
   constructor(workspacePath) {
     this.configPath = workspacePath;
   }
-  
+
   async load() {
     try {
       const content = await fs.readFile(this.configPath, 'utf-8');
@@ -129,14 +133,14 @@ export class WorkspaceConfig {
       return null;
     }
   }
-  
+
   async save(config) {
     await fs.writeFile(this.configPath, JSON.stringify(config, null, 2));
   }
-  
+
   async createInteractive() {
     const inquirer = (await import('inquirer')).default;
-    
+
     const answers = await inquirer.prompt([
       {
         type: 'input',
@@ -151,9 +155,9 @@ export class WorkspaceConfig {
         default: true,
       },
     ]);
-    
+
     const repositories = [];
-    
+
     while (answers.addRepo) {
       const repoAnswers = await inquirer.prompt([
         {
@@ -174,9 +178,9 @@ export class WorkspaceConfig {
           choices: ['frontend', 'backend', 'library', 'service', 'other'],
         },
       ]);
-      
+
       repositories.push(repoAnswers);
-      
+
       const { more } = await inquirer.prompt([
         {
           type: 'confirm',
@@ -185,10 +189,10 @@ export class WorkspaceConfig {
           default: false,
         },
       ]);
-      
+
       answers.addRepo = more;
     }
-    
+
     const config = {
       version: '1.0',
       name: answers.name,
@@ -199,7 +203,7 @@ export class WorkspaceConfig {
         includeCrossRefs: true,
       },
     };
-    
+
     await this.save(config);
     return config;
   }
@@ -216,7 +220,7 @@ export class MultiRepoScanner {
     this.config = workspaceConfig;
     this.scanners = new Map();
   }
-  
+
   async init() {
     for (const repo of this.config.repositories) {
       const scanner = new Scanner({
@@ -226,54 +230,54 @@ export class MultiRepoScanner {
       this.scanners.set(repo.name, scanner);
     }
   }
-  
+
   async scanAll() {
     const results = new Map();
-    
+
     // Scan all repositories in parallel
     const scanPromises = [];
     for (const [name, scanner] of this.scanners) {
       scanPromises.push(
-        scanner.scan().then(result => {
+        scanner.scan().then((result) => {
           results.set(name, result);
           return { name, result };
         })
       );
     }
-    
+
     await Promise.all(scanPromises);
-    
+
     // Calculate cross-repository dependencies
     const crossRefs = await this.analyzeCrossRefs(results);
-    
+
     // Combine results
     const combined = this.combineResults(results, crossRefs);
-    
+
     return {
       repositories: Object.fromEntries(results),
       crossRefs,
       combined,
     };
   }
-  
+
   async analyzeCrossRefs(results) {
     const crossRefs = [];
-    
+
     for (const [sourceName, sourceResult] of results) {
       for (const [targetName, targetResult] of results) {
         if (sourceName === targetName) continue;
-        
+
         const imports = this.findCrossRepoImports(
           sourceResult.files,
           targetResult.files,
           targetName
         );
-        
+
         if (imports.length > 0) {
           crossRefs.push({
             source: sourceName,
             target: targetName,
-            imports: imports.map(i => ({
+            imports: imports.map((i) => ({
               file: i.file,
               target: i.target,
               symbol: i.symbol,
@@ -282,21 +286,18 @@ export class MultiRepoScanner {
         }
       }
     }
-    
+
     return crossRefs;
   }
-  
+
   findCrossRepoImports(sourceFiles, targetFiles, targetName) {
     const imports = [];
-    const targetPaths = new Set(targetFiles.map(f => f.path));
-    
+    const targetPaths = new Set(targetFiles.map((f) => f.path));
+
     for (const file of sourceFiles) {
       // Look for import statements referencing target repo
-      const importPattern = new RegExp(
-        `from ['"](\.\.\/)*${targetName}\/([^'"]+)['"]`,
-        'g'
-      );
-      
+      const importPattern = new RegExp(`from ['"](\.\.\/)*${targetName}\/([^'"]+)['"]`, 'g');
+
       const content = fs.readFileSync(file.path, 'utf-8');
       let match;
       while ((match = importPattern.exec(content)) !== null) {
@@ -307,10 +308,10 @@ export class MultiRepoScanner {
         });
       }
     }
-    
+
     return imports;
   }
-  
+
   combineResults(results, crossRefs) {
     const combined = {
       files: [],
@@ -319,28 +320,30 @@ export class MultiRepoScanner {
       languages: {},
       repositories: [],
     };
-    
+
     for (const [name, result] of results) {
-      combined.files.push(...result.files.map(f => ({
-        ...f,
-        repository: name,
-      })));
-      
+      combined.files.push(
+        ...result.files.map((f) => ({
+          ...f,
+          repository: name,
+        }))
+      );
+
       combined.totalTokens += result.totalTokens;
       combined.totalLines += result.totalLines;
-      
+
       combined.repositories.push({
         name,
         fileCount: result.files.length,
         tokens: result.totalTokens,
         lines: result.totalLines,
       });
-      
+
       for (const [lang, count] of Object.entries(result.languages || {})) {
         combined.languages[lang] = (combined.languages[lang] || 0) + count;
       }
     }
-    
+
     return combined;
   }
 }
@@ -348,26 +351,26 @@ export class MultiRepoScanner {
 
 ### Step 3: Create Workspace Output Formatter
 
-```javascript
+````javascript
 // lib/workspace/WorkspaceFormatter.js
 
 export class WorkspaceFormatter {
   formatMarkdown(analysis) {
     let output = '# Multi-Repository Context\n\n';
     output += `Generated: ${new Date().toISOString()}\n\n`;
-    
+
     // Repository summary
     output += '## Repository Summary\n\n';
     output += '| Repository | Files | Tokens | % of Total |\n';
     output += '|------------|-------|--------|------------|\n';
-    
+
     for (const repo of analysis.combined.repositories) {
       const percent = ((repo.tokens / analysis.combined.totalTokens) * 100).toFixed(1);
       output += `| ${repo.name} | ${repo.fileCount} | ${repo.tokens.toLocaleString()} | ${percent}% |\n`;
     }
-    
+
     output += `| **Total** | **${analysis.combined.files.length}** | **${analysis.combined.totalTokens.toLocaleString()}** | **100%** |\n\n`;
-    
+
     // Cross-references
     if (analysis.crossRefs.length > 0) {
       output += '## Cross-Repository Dependencies\n\n';
@@ -376,13 +379,13 @@ export class WorkspaceFormatter {
       }
       output += '\n';
     }
-    
+
     // File contents
     output += '## Repository Contents\n\n';
-    
+
     for (const [name, result] of Object.entries(analysis.repositories)) {
       output += `### ${name}\n\n`;
-      
+
       for (const file of result.files) {
         output += `#### ${file.path}\n\n`;
         output += '```\n';
@@ -390,25 +393,29 @@ export class WorkspaceFormatter {
         output += '\n```\n\n';
       }
     }
-    
+
     return output;
   }
-  
+
   formatJSON(analysis) {
-    return JSON.stringify({
-      generated: new Date().toISOString(),
-      repositories: analysis.combined.repositories,
-      crossRefs: analysis.crossRefs,
-      files: analysis.combined.files,
-      summary: {
-        totalTokens: analysis.combined.totalTokens,
-        totalLines: analysis.combined.totalLines,
-        fileCount: analysis.combined.files.length,
+    return JSON.stringify(
+      {
+        generated: new Date().toISOString(),
+        repositories: analysis.combined.repositories,
+        crossRefs: analysis.crossRefs,
+        files: analysis.combined.files,
+        summary: {
+          totalTokens: analysis.combined.totalTokens,
+          totalLines: analysis.combined.totalLines,
+          fileCount: analysis.combined.files.length,
+        },
       },
-    }, null, 2);
+      null,
+      2
+    );
   }
 }
-```
+````
 
 ### Step 4: Add CLI Commands
 
@@ -433,71 +440,69 @@ program
   .action(async (repoPath) => {
     const config = new WorkspaceConfig('.ctxman-workspace.json');
     const workspace = await config.load();
-    
+
     if (!workspace) {
       console.log('No workspace found. Run: ctxman workspace init');
       return;
     }
-    
+
     workspace.repositories.push({
       name: path.basename(repoPath),
       path: repoPath,
       type: 'other',
     });
-    
+
     await config.save(workspace);
     console.log(`\n✅ Added ${repoPath} to workspace\n`);
   });
 
-program
-  .option('-w, --workspace', 'Analyze entire workspace')
-  .action(async (options) => {
-    if (options.workspace) {
-      const config = new WorkspaceConfig('.ctxman-workspace.json');
-      const workspace = await config.load();
-      
-      if (!workspace) {
-        console.log('No workspace found. Run: ctxman workspace init');
-        return;
-      }
-      
-      const scanner = new MultiRepoScanner(workspace);
-      await scanner.init();
-      
-      console.log('\n📊 Multi-Repository Analysis\n');
-      
-      const analysis = await scanner.scanAll();
-      
-      // Display summary
-      displayWorkspaceSummary(analysis);
-      
-      // Save output
-      const formatter = new WorkspaceFormatter();
-      const output = options.json
-        ? formatter.formatJSON(analysis)
-        : formatter.formatMarkdown(analysis);
-      
-      await fs.writeFile('llm-context.md', output);
-      console.log('\n📁 Generated context: llm-context.md\n');
+program.option('-w, --workspace', 'Analyze entire workspace').action(async (options) => {
+  if (options.workspace) {
+    const config = new WorkspaceConfig('.ctxman-workspace.json');
+    const workspace = await config.load();
+
+    if (!workspace) {
+      console.log('No workspace found. Run: ctxman workspace init');
+      return;
     }
-  });
+
+    const scanner = new MultiRepoScanner(workspace);
+    await scanner.init();
+
+    console.log('\n📊 Multi-Repository Analysis\n');
+
+    const analysis = await scanner.scanAll();
+
+    // Display summary
+    displayWorkspaceSummary(analysis);
+
+    // Save output
+    const formatter = new WorkspaceFormatter();
+    const output = options.json
+      ? formatter.formatJSON(analysis)
+      : formatter.formatMarkdown(analysis);
+
+    await fs.writeFile('llm-context.md', output);
+    console.log('\n📁 Generated context: llm-context.md\n');
+  }
+});
 
 function displayWorkspaceSummary(analysis) {
   console.log('Repository         Files    Tokens     % of Total');
   console.log('─'.repeat(50));
-  
+
   for (const repo of analysis.combined.repositories) {
     const percent = ((repo.tokens / analysis.combined.totalTokens) * 100).toFixed(1);
     console.log(
       `${repo.name.padEnd(18)} ${String(repo.fileCount).padStart(6)} ${String(repo.tokens.toLocaleString()).padStart(10)} ${percent.padStart(10)}%`
     );
   }
-  
+
   console.log('─'.repeat(50));
   console.log(
     `Total${' '.repeat(13)} ${String(analysis.combined.files.length).padStart(6)} ${String(analysis.combined.totalTokens.toLocaleString()).padStart(10)} ${'100.0%'.padStart(11)}`
   );
-  
+
   if (analysis.crossRefs.length > 0) {
     console.log('\n🔗 Cross-repository dependencies:');
     for (const ref of analysis.crossRefs) {
@@ -512,17 +517,20 @@ function displayWorkspaceSummary(analysis) {
 ## Acceptance Criteria
 
 ### Must Have
+
 - [ ] `ctxman workspace init` creates workspace config
 - [ ] `ctxman --workspace` analyzes all repos
 - [ ] Cross-repository dependency detection
 - [ ] Combined output generation
 
 ### Should Have
+
 - [ ] `ctxman workspace add <path>` adds repo
 - [ ] `ctxman workspace remove <name>` removes repo
 - [ ] Separate output files per repository
 
 ### Nice to Have
+
 - [ ] Workspace-level configuration profiles
 - [ ] Automatic workspace detection (monorepo)
 - [ ] Git submodule integration
@@ -533,11 +541,11 @@ function displayWorkspaceSummary(analysis) {
 
 ### Quantitative Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Multi-repo adoption | 30% of enterprise users | Analytics |
-| Cross-ref accuracy | 90% correct | Manual review |
-| Time saved | 15 min per multi-repo task | User testing |
+| Metric              | Target                     | Measurement   |
+| ------------------- | -------------------------- | ------------- |
+| Multi-repo adoption | 30% of enterprise users    | Analytics     |
+| Cross-ref accuracy  | 90% correct                | Manual review |
+| Time saved          | 15 min per multi-repo task | User testing  |
 
 ### Qualitative Metrics
 
@@ -549,14 +557,14 @@ function displayWorkspaceSummary(analysis) {
 
 ## Timeline
 
-| Task | Effort | Week |
-|------|--------|------|
-| Workspace configuration | 4 hours | Week 1 |
-| Multi-repo scanner | 8 hours | Week 1-2 |
-| Cross-ref analysis | 6 hours | Week 2 |
-| Output formatting | 4 hours | Week 2 |
-| CLI commands | 4 hours | Week 3 |
-| Testing & docs | 4 hours | Week 3 |
+| Task                    | Effort  | Week     |
+| ----------------------- | ------- | -------- |
+| Workspace configuration | 4 hours | Week 1   |
+| Multi-repo scanner      | 8 hours | Week 1-2 |
+| Cross-ref analysis      | 6 hours | Week 2   |
+| Output formatting       | 4 hours | Week 2   |
+| CLI commands            | 4 hours | Week 3   |
+| Testing & docs          | 4 hours | Week 3   |
 
 **Total Estimated Effort**: 30 hours over 3 weeks
 
@@ -570,5 +578,5 @@ function displayWorkspaceSummary(analysis) {
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q2 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q2 2025_

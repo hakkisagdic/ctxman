@@ -8,6 +8,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Basic Workflow](#basic-workflow)
 3. [Running the Tool Interactively](#running-the-tool-interactively)
@@ -24,6 +25,7 @@
 The ctxman CLI tool is designed to optimize LLM context by providing exact token counting, method-level filtering, and intelligent file selection. This quick start guide will help you get up and running with the tool, understand its core functionality, and effectively use its features for AI-assisted development workflows.
 
 **Section sources**
+
 - [README.md](file://README.md#L0-L891)
 
 ## Basic Workflow
@@ -53,10 +55,12 @@ NoExport --> End
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L793-L813)
 - [README.md](file://README.md#L0-L891)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L793-L813)
 - [README.md](file://README.md#L0-L891)
 
@@ -73,6 +77,7 @@ This will initiate the analysis process, scan your project directory while respe
 The interactive mode is ideal for first-time users and those who want to explore different export options based on the analysis results. The tool provides clear guidance throughout the process, making it easy to understand what files were analyzed and how the token counts were calculated.
 
 **Section sources**
+
 - [README.md](file://README.md#L0-L891)
 - [ctxman.js](file://ctxman.js#L793-L813)
 
@@ -81,6 +86,7 @@ The interactive mode is ideal for first-time users and those who want to explore
 When you run the ctxman tool, it produces a detailed analysis report that includes several key pieces of information. The output begins with metadata about the analysis process, including the project root directory, configuration mode (INCLUDE or EXCLUDE), and token calculation method (exact using tiktoken or estimated).
 
 The main report includes:
+
 - Total files analyzed and total token count
 - Total size in MB and total lines of code
 - Average tokens per file
@@ -103,10 +109,12 @@ LargestDirectories --> Tip["Usage Tip\nSave detailed report option"]
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L683-L703)
 - [README.md](file://README.md#L0-L891)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L683-L703)
 - [README.md](file://README.md#L0-L891)
 
@@ -122,6 +130,7 @@ The ctxman tool provides multiple export options to accommodate different use ca
 The interactive export selection ensures that users never miss the opportunity to export their analysis results in the format they need. This feature is particularly helpful for beginners who may not be familiar with all the available export options.
 
 For automated workflows, you can specify export options directly via command line flags, bypassing the interactive prompt. The available flags are:
+
 - `--save-report` or `-s`: Save a detailed JSON report
 - `--context-export`: Generate an LLM context file
 - `--context-clipboard`: Copy context directly to clipboard
@@ -146,10 +155,12 @@ Complete --> [*]
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L575-L616)
 - [bin/cli.js](file://bin/cli.js#L4-L25)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L575-L616)
 - [bin/cli.js](file://bin/cli.js#L4-L25)
 
@@ -184,6 +195,7 @@ ctxman --method-level --save-report --context-export
 The tool also supports verbose output (enabled by default) which shows all included files, or quiet mode with `--no-verbose` which suppresses the file listing.
 
 **Section sources**
+
 - [README.md](file://README.md#L0-L891)
 - [ctxman.js](file://ctxman.js#L793-L813)
 
@@ -200,6 +212,7 @@ ctxman --method-level
 When method-level analysis is enabled, the tool extracts methods from JavaScript/TypeScript files using pattern matching for function declarations, method assignments, and arrow functions. The analysis includes information about each method's name, line number, and token count.
 
 The tool supports method filtering through configuration files:
+
 - `.methodinclude`: Include only specified methods (takes priority)
 - `.methodignore`: Exclude specified methods
 
@@ -226,10 +239,12 @@ ContextGeneration --> ExportOptions["Export via specified method\nreport, file, 
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L14-L67)
 - [ctxman.js](file://ctxman.js#L118-L223)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L14-L67)
 - [ctxman.js](file://ctxman.js#L118-L223)
 
@@ -274,10 +289,12 @@ end
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L541-L567)
 - [README.md](file://README.md#L0-L891)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L541-L567)
 - [README.md](file://README.md#L0-L891)
 
@@ -286,10 +303,12 @@ end
 The ctxman tool uses several configuration files to control which files and methods are included in the analysis. Understanding these files is essential for customizing the tool to your specific needs.
 
 The primary configuration files for file-level filtering are:
+
 - `.contextinclude`: Include only files matching the specified patterns (takes priority)
 - `.contextignore`: Exclude files matching the specified patterns
 
 The tool follows a priority order for configuration files:
+
 1. `.gitignore` (always respected)
 2. `.contextinclude` (highest priority for files)
 3. `.contextignore` (used when no include file exists)
@@ -297,6 +316,7 @@ The tool follows a priority order for configuration files:
 When `.contextinclude` exists, the tool operates in INCLUDE mode, meaning only files matching the include patterns are analyzed (except those excluded by .gitignore). When only `.contextignore` exists, the tool operates in EXCLUDE mode, analyzing all files except those matching the ignore patterns.
 
 For method-level analysis, the tool uses:
+
 - `.methodinclude`: Include only specified methods
 - `.methodignore`: Exclude specified methods
 
@@ -327,10 +347,12 @@ style Analysis fill:#9f9,stroke:#333
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L118-L223)
 - [README.md](file://README.md#L0-L891)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L118-L223)
 - [README.md](file://README.md#L0-L891)
 
@@ -341,6 +363,7 @@ When getting started with the ctxman tool, you may encounter a few common issues
 **Understanding verbose output**: The tool's verbose output (enabled by default) can be overwhelming for beginners. It shows all included files, token counts, and detailed statistics. To reduce output, use the `--no-verbose` flag, though this is not recommended as it reduces transparency about what files are being analyzed.
 
 **Interpreting token counts**: The tool uses tiktoken for exact token counting when available. If you haven't installed tiktoken, the tool falls back to estimation mode. To ensure exact counts, install tiktoken:
+
 ```bash
 npm install tiktoken
 ```
@@ -352,5 +375,6 @@ npm install tiktoken
 **Method-level analysis issues**: When using method-level analysis, ensure your `.methodinclude` or `.methodignore` files are in the correct location (project root or tool directory) and use proper pattern syntax. The tool will indicate which mode is active in the output.
 
 **Section sources**
+
 - [README.md](file://README.md#L0-L891)
 - [ctxman.js](file://ctxman.js#L793-L813)

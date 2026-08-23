@@ -20,11 +20,13 @@ New users struggle to configure ctxman correctly. The tool requires several conf
 - Give up before getting value from the tool
 
 **User Impact**:
+
 - High onboarding friction
 - Suboptimal context generation
 - Frustration and potential abandonment
 
 **Business Impact**:
+
 - Lower adoption rates
 - Higher support burden
 - Negative first impressions
@@ -32,6 +34,7 @@ New users struggle to configure ctxman correctly. The tool requires several conf
 ### Research Findings
 
 From user feedback and support queries:
+
 - 40% of support questions relate to configuration
 - Average time to working configuration: 30 minutes
 - Most users don't discover advanced features
@@ -95,41 +98,41 @@ const DETECTORS = {
   nodejs: {
     files: ['package.json'],
     patterns: ['**/*.js', '**/*.mjs'],
-    priority: 1
+    priority: 1,
   },
   typescript: {
     files: ['tsconfig.json'],
     patterns: ['**/*.ts', '**/*.tsx'],
-    priority: 2
+    priority: 2,
   },
   react: {
     dependencies: ['react', 'react-dom'],
     patterns: ['**/*.jsx', '**/*.tsx'],
-    priority: 3
+    priority: 3,
   },
   python: {
     files: ['setup.py', 'pyproject.toml', 'requirements.txt'],
     patterns: ['**/*.py'],
-    priority: 1
+    priority: 1,
   },
   rust: {
     files: ['Cargo.toml'],
     patterns: ['**/*.rs'],
-    priority: 1
+    priority: 1,
   },
   // ... more detectors
 };
 
 export async function detectProjectType(rootPath) {
   const results = [];
-  
+
   for (const [type, config] of Object.entries(DETECTORS)) {
     const matches = await checkDetector(rootPath, config);
     if (matches.length > 0) {
       results.push({ type, confidence: matches.length, files: matches });
     }
   }
-  
+
   return results.sort((a, b) => b.confidence - a.confidence);
 }
 ```
@@ -141,19 +144,8 @@ export async function detectProjectType(rootPath) {
 
 const TEMPLATES = {
   nodejs: {
-    contextignore: [
-      'node_modules/',
-      'dist/',
-      'coverage/',
-      '*.test.js',
-      '*.spec.js',
-      '__tests__/',
-    ],
-    contextinclude: [
-      'src/**/*.js',
-      'lib/**/*.js',
-      'index.js',
-    ],
+    contextignore: ['node_modules/', 'dist/', 'coverage/', '*.test.js', '*.spec.js', '__tests__/'],
+    contextinclude: ['src/**/*.js', 'lib/**/*.js', 'index.js'],
   },
   typescript: {
     contextignore: [
@@ -165,11 +157,7 @@ const TEMPLATES = {
       '__tests__/',
       '*.d.ts',
     ],
-    contextinclude: [
-      'src/**/*.ts',
-      'lib/**/*.ts',
-      'index.ts',
-    ],
+    contextinclude: ['src/**/*.ts', 'lib/**/*.ts', 'index.ts'],
   },
   // ... more templates
 };
@@ -179,15 +167,15 @@ export function getTemplate(projectTypes) {
     contextignore: new Set(),
     contextinclude: new Set(),
   };
-  
+
   for (const type of projectTypes) {
     const template = TEMPLATES[type];
     if (template) {
-      template.contextignore.forEach(p => merged.contextignore.add(p));
-      template.contextinclude.forEach(p => merged.contextinclude.add(p));
+      template.contextignore.forEach((p) => merged.contextignore.add(p));
+      template.contextinclude.forEach((p) => merged.contextinclude.add(p));
     }
   }
-  
+
   return {
     contextignore: [...merged.contextignore],
     contextinclude: [...merged.contextinclude],
@@ -203,39 +191,41 @@ import inquirer from 'inquirer';
 
 export async function runInitWizard(options = {}) {
   console.log('🔍 Analyzing your project...\n');
-  
+
   // Detect project type
   const projectTypes = await detectProjectType(process.cwd());
-  
+
   if (projectTypes.length === 0) {
     console.log('⚠️  Could not auto-detect project type.');
     return manualWizard();
   }
-  
+
   console.log('✓ Detected project types:');
-  projectTypes.forEach(p => console.log(`  - ${p.type}`));
+  projectTypes.forEach((p) => console.log(`  - ${p.type}`));
   console.log('');
-  
+
   // Get template
-  const template = getTemplate(projectTypes.map(p => p.type));
-  
+  const template = getTemplate(projectTypes.map((p) => p.type));
+
   // Ask for customization
-  const { customize } = await inquirer.prompt([{
-    type: 'confirm',
-    name: 'customize',
-    message: 'Would you like to customize the configuration?',
-    default: false,
-  }]);
-  
+  const { customize } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'customize',
+      message: 'Would you like to customize the configuration?',
+      default: false,
+    },
+  ]);
+
   let finalConfig = template;
-  
+
   if (customize) {
     finalConfig = await customizationWizard(template);
   }
-  
+
   // Write files
   await writeConfigFiles(finalConfig);
-  
+
   console.log('\n🎉 Configuration complete!');
   console.log('Try: ctxman --cli\n');
 }
@@ -269,6 +259,7 @@ npm install inquirer
 ## Acceptance Criteria
 
 ### Must Have
+
 - [ ] `ctxman init` command available
 - [ ] Auto-detects at least 5 project types (Node.js, TypeScript, Python, Rust, Go)
 - [ ] Generates `.contextignore` with sensible defaults
@@ -276,11 +267,13 @@ npm install inquirer
 - [ ] Prompts before overwriting existing files
 
 ### Should Have
+
 - [ ] Interactive customization mode
 - [ ] Preview of generated files before writing
 - [ ] Merge with existing configuration option
 
 ### Nice to Have
+
 - [ ] Detect frameworks (React, Vue, Express, etc.)
 - [ ] Suggest method-level includes for popular libraries
 - [ ] Team profile selection (see FEAT-004)
@@ -291,12 +284,12 @@ npm install inquirer
 
 ### Quantitative Metrics
 
-| Metric | Before | Target | Measurement |
-|--------|--------|--------|-------------|
-| Time to first context | ~15 min | < 3 min | User testing |
-| Configuration support tickets | ~5/week | < 2/week | Support tracking |
-| Init command usage | N/A | 80% of new users | Analytics |
-| Configuration error rate | ~30% | < 5% | Error logs |
+| Metric                        | Before  | Target           | Measurement      |
+| ----------------------------- | ------- | ---------------- | ---------------- |
+| Time to first context         | ~15 min | < 3 min          | User testing     |
+| Configuration support tickets | ~5/week | < 2/week         | Support tracking |
+| Init command usage            | N/A     | 80% of new users | Analytics        |
+| Configuration error rate      | ~30%    | < 5%             | Error logs       |
 
 ### Qualitative Metrics
 
@@ -308,14 +301,14 @@ npm install inquirer
 
 ## Timeline
 
-| Task | Effort | Week |
-|------|--------|------|
+| Task                     | Effort  | Week   |
+| ------------------------ | ------- | ------ |
 | Project detection module | 4 hours | Week 1 |
-| Template system | 2 hours | Week 1 |
-| Interactive CLI wizard | 4 hours | Week 1 |
-| CLI command integration | 2 hours | Week 1 |
-| Testing & documentation | 4 hours | Week 2 |
-| Polish & edge cases | 4 hours | Week 2 |
+| Template system          | 2 hours | Week 1 |
+| Interactive CLI wizard   | 4 hours | Week 1 |
+| CLI command integration  | 2 hours | Week 1 |
+| Testing & documentation  | 4 hours | Week 2 |
+| Polish & edge cases      | 4 hours | Week 2 |
 
 **Total Estimated Effort**: 20 hours over 2 weeks
 
@@ -323,10 +316,10 @@ npm install inquirer
 
 ## Dependencies
 
-| Dependency | Type | Purpose |
-|------------|------|---------|
-| inquirer | npm | Interactive prompts |
-| glob | npm (existing) | File pattern matching |
+| Dependency | Type           | Purpose               |
+| ---------- | -------------- | --------------------- |
+| inquirer   | npm            | Interactive prompts   |
+| glob       | npm (existing) | File pattern matching |
 
 ---
 
@@ -338,5 +331,5 @@ npm install inquirer
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q1 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q1 2025_

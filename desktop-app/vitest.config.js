@@ -5,6 +5,6 @@ export default {
     environment: 'jsdom',
     include: ['test/**/*.{test,spec}.{js,mjs,jsx,tsx,vue}'],
     // Exclude E2E from unit tests (handled by Playwright)
-    exclude: ['e2e/**'], 
-  }
-}
+    exclude: ['e2e/**'],
+  },
+};

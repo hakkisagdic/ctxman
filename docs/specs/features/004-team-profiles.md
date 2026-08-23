@@ -15,26 +15,31 @@
 When multiple developers work on the same project, context generation should be consistent. Currently:
 
 **Configuration Inconsistency**:
+
 - Each developer creates their own `.contextignore`
 - Team members get different context for same project
 - LLM responses vary based on who generated context
 
 **Onboarding Overhead**:
+
 - New team members must recreate configurations
 - No way to share best practices
 - Knowledge loss when developers leave
 
 **CI/CD Challenges**:
+
 - Different local vs CI configurations
 - Automated context generation differs from manual
 - Difficult to standardize across environments
 
 **User Impact**:
+
 - Inconsistent AI assistance across team
 - Repeated configuration work
 - Confusion when comparing LLM outputs
 
 **Business Impact**:
+
 - Wasted developer time
 - Inconsistent code review assistance
 - Reduced team productivity
@@ -133,7 +138,7 @@ export class TeamProfile {
   constructor(projectRoot) {
     this.configPath = path.join(projectRoot, '.ctxmanrc.json');
   }
-  
+
   async load() {
     try {
       const content = await fs.readFile(this.configPath, 'utf-8');
@@ -142,22 +147,22 @@ export class TeamProfile {
       return { version: '1.0', profiles: {} };
     }
   }
-  
+
   async save(config) {
     await fs.writeFile(this.configPath, JSON.stringify(config, null, 2));
   }
-  
+
   async getProfile(name) {
     const config = await this.load();
     return config.profiles[name] || null;
   }
-  
+
   async createProfile(name, settings) {
     const config = await this.load();
     config.profiles[name] = settings;
     await this.save(config);
   }
-  
+
   async setDefault(name) {
     const config = await this.load();
     if (!config.profiles[name]) {
@@ -178,34 +183,28 @@ export class ProfileManager {
   constructor(projectRoot) {
     this.teamProfile = new TeamProfile(projectRoot);
   }
-  
+
   async applyProfile(name, options = {}) {
     const profile = await this.teamProfile.getProfile(name);
-    
+
     if (!profile) {
       throw new Error(`Profile '${name}' not found`);
     }
-    
+
     // Merge profile settings with CLI options
     return {
-      ignorePatterns: [
-        ...(profile.ignore || []),
-        ...(options.ignorePatterns || []),
-      ],
-      includePatterns: [
-        ...(profile.include || []),
-        ...(options.includePatterns || []),
-      ],
+      ignorePatterns: [...(profile.ignore || []), ...(options.ignorePatterns || [])],
+      includePatterns: [...(profile.include || []), ...(options.includePatterns || [])],
       methodInclude: profile.methodInclude,
       budget: profile.budget || options.budget,
       ...profile.options,
       ...options,
     };
   }
-  
+
   async createProfileInteractive(name) {
     const inquirer = (await import('inquirer')).default;
-    
+
     const answers = await inquirer.prompt([
       {
         type: 'input',
@@ -216,13 +215,21 @@ export class ProfileManager {
         type: 'input',
         name: 'ignore',
         message: 'Ignore patterns (comma-separated):',
-        filter: (input) => input.split(',').map(s => s.trim()).filter(Boolean),
+        filter: (input) =>
+          input
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
       },
       {
         type: 'input',
         name: 'include',
         message: 'Include patterns (comma-separated):',
-        filter: (input) => input.split(',').map(s => s.trim()).filter(Boolean),
+        filter: (input) =>
+          input
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
       },
       {
         type: 'confirm',
@@ -231,20 +238,20 @@ export class ProfileManager {
         default: false,
       },
     ]);
-    
+
     await this.teamProfile.createProfile(name, answers);
     console.log(`\n✅ Created profile '${name}' in .ctxmanrc.json\n`);
   }
-  
+
   async listProfiles() {
     const config = await this.teamProfile.load();
     const profiles = Object.entries(config.profiles);
-    
+
     if (profiles.length === 0) {
       console.log('No profiles configured. Run: ctxman profile create');
       return;
     }
-    
+
     console.log('\n📋 Available profiles:\n');
     for (const [name, profile] of profiles) {
       const isDefault = config.defaultProfile === name;
@@ -282,7 +289,7 @@ program
   .description('Create a new profile')
   .action(async (name) => {
     const manager = new ProfileManager(process.cwd());
-    const profileName = name || await promptProfileName();
+    const profileName = name || (await promptProfileName());
     await manager.createProfileInteractive(profileName);
   });
 
@@ -318,7 +325,7 @@ async scan(options = {}) {
     const profileConfig = await manager.applyProfile(options.profile);
     options = { ...profileConfig, ...options };
   }
-  
+
   // Continue with existing scan logic
   // ...
 }
@@ -329,6 +336,7 @@ async scan(options = {}) {
 ## Acceptance Criteria
 
 ### Must Have
+
 - [ ] `.ctxmanrc.json` file format defined
 - [ ] `ctxman --profile <name>` selects profile
 - [ ] `ctxman profile create <name>` creates profile
@@ -336,11 +344,13 @@ async scan(options = {}) {
 - [ ] Profile config merges with CLI options
 
 ### Should Have
+
 - [ ] `ctxman profile default <name>` sets default
 - [ ] Profile validation against schema
 - [ ] Profile export/import
 
 ### Nice to Have
+
 - [ ] Profile inheritance (extend base profile)
 - [ ] Remote profile fetching (URL)
 - [ ] Profile encryption for secrets
@@ -351,11 +361,11 @@ async scan(options = {}) {
 
 ### Quantitative Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Teams using profiles | 40% of multi-dev teams | Analytics |
-| Profile file adoption | 50% of projects | File detection |
-| Configuration consistency | 95% match across team | Diff reports |
+| Metric                    | Target                 | Measurement    |
+| ------------------------- | ---------------------- | -------------- |
+| Teams using profiles      | 40% of multi-dev teams | Analytics      |
+| Profile file adoption     | 50% of projects        | File detection |
+| Configuration consistency | 95% match across team  | Diff reports   |
 
 ### Qualitative Metrics
 
@@ -367,13 +377,13 @@ async scan(options = {}) {
 
 ## Timeline
 
-| Task | Effort | Week |
-|------|--------|------|
+| Task                     | Effort  | Week   |
+| ------------------------ | ------- | ------ |
 | Profile schema & storage | 2 hours | Week 1 |
-| Profile manager | 2 hours | Week 1 |
-| CLI commands | 2 hours | Week 1 |
-| Scanner integration | 1 hour | Week 1 |
-| Testing & docs | 2 hours | Week 1 |
+| Profile manager          | 2 hours | Week 1 |
+| CLI commands             | 2 hours | Week 1 |
+| Scanner integration      | 1 hour  | Week 1 |
+| Testing & docs           | 2 hours | Week 1 |
 
 **Total Estimated Effort**: 9 hours over 1 week
 
@@ -421,5 +431,5 @@ async scan(options = {}) {
 
 ---
 
-*Planned by: Ctxman Development Team*
-*Target: Q1 2025*
+_Planned by: Ctxman Development Team_
+_Target: Q1 2025_

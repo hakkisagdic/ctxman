@@ -9,7 +9,9 @@
 </cite>
 
 ## Güncelleme Özeti
+
 **Yapılan Değişiklikler**
+
 - Tüm bölümler method filtreleme sisteminin gerçek uygulamasını yansıtacak şekilde güncellendi
 - Kod analizine dayalı olarak tüm bölümler için doğru kaynak referansları eklendi
 - Yapılandırma dosyası yükleme mekanizması, ConfigUtils aracılığıyla doğru başlatmayı gösterecek şekilde düzeltildi
@@ -19,6 +21,7 @@
 - Pratik örnekler mevcut README içeriğiyle uyumlu hale getirildi
 
 ## İçindekiler
+
 1. [Giriş](#giriş)
 2. [Yapilandirma Dosyaları](#yapilandirma-dosyaları)
 3. [Pattern Sözdizimi](#pattern-sözdizimi)
@@ -33,6 +36,7 @@
 ctxman aracı, LLM context oluşturmasına hangi methodların dahil edileceği üzerinde ayrıntılı kontrol sağlayan gelişmiş bir method seviyesinde filtreleme sistemi sunar. Bu sistem, hangi methodların analiz edilip nihai context çıktısına dahil edileceğini belirlemek için `MethodFilterParser` class'ı ile birlikte çalışan iki yapilandirma dosyası aracılığıyla çalışır: `.methodinclude` ve `.methodignore`. Filtreleme sistemi, geliştiricilerin LLM context'ine gürültü ekleyen utility, test ve debugging methodlarını hariç tutarken core business logic'e odaklanarak token kullanımını optimize etmelerine yardımcı olmak için tasarlanmıştır.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L544-L610)
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js)
 
@@ -60,10 +64,12 @@ F --> I[Include all methods]
 ```
 
 **Diagram kaynakları**
+
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
 - [lib/utils/config-utils.js](file://lib/utils/config-utils.js#L28-L41)
 
 **Bölüm kaynakları**
+
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
 - [lib/utils/config-utils.js](file://lib/utils/config-utils.js#L28-L41)
 
@@ -71,16 +77,17 @@ F --> I[Include all methods]
 
 Method filtreleme sistemi, esnek eşleştirme yetenekleri sağlayan birkaç pattern türünü destekler:
 
-| Pattern Türü | Sözdizimi | Açıklama | Örnek |
-|--------------|--------|-------------|---------|
-| Tam Eşleşme | `methodName` | Tam adla eşleşen methodları eşleştirir | `calculateTokens` yalnızca "calculateTokens" adlı methodu eşleştirir |
-| Wildcard | `*pattern*` | Pattern içeren methodları eşleştirir | `*Handler`, "requestHandler", "responseHandler" eşleştirir |
-| Class Methodları | `Class.*` | Belirli bir class içindeki tüm methodları eşleştirir | `TokenCalculator.*`, TokenCalculator class'ındaki tüm methodları eşleştirir |
-| File Methodları | `filename.methodName` | Belirli dosyalardaki belirli methodları eşleştirir | `server.handleRequest` yalnızca server.js'deki handleRequest methodunu eşleştirir |
+| Pattern Türü     | Sözdizimi             | Açıklama                                             | Örnek                                                                             |
+| ---------------- | --------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Tam Eşleşme      | `methodName`          | Tam adla eşleşen methodları eşleştirir               | `calculateTokens` yalnızca "calculateTokens" adlı methodu eşleştirir              |
+| Wildcard         | `*pattern*`           | Pattern içeren methodları eşleştirir                 | `*Handler`, "requestHandler", "responseHandler" eşleştirir                        |
+| Class Methodları | `Class.*`             | Belirli bir class içindeki tüm methodları eşleştirir | `TokenCalculator.*`, TokenCalculator class'ındaki tüm methodları eşleştirir       |
+| File Methodları  | `filename.methodName` | Belirli dosyalardaki belirli methodları eşleştirir   | `server.handleRequest` yalnızca server.js'deki handleRequest methodunu eşleştirir |
 
 Pattern eşleştirme büyük/küçük harf duyarsızdır ve herhangi bir karakter dizisini eşleştirmek için `*` wildcard karakterinin kullanımını destekler. Bu, test, debug veya utility methodlarını öngörülebilir adlandırma pattern'lerini takip eden kategorilere göre hedefleyebilen güçlü filtreleme kurallarına olanak tanır ve özellikle bu tür methodları hariç tutmak için yararlıdır.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L588-L610)
 
 ## Filtreleme Mantığı
@@ -113,10 +120,12 @@ TokenCalculator --> MethodFilterParser : "uses"
 ```
 
 **Diagram kaynakları**
+
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
 - [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L82-L107)
 
 **Bölüm kaynakları**
+
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
 
 ## TokenCalculator ile Entegrasyon
@@ -151,10 +160,12 @@ TC->>TC : generateLLMContext()
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L231-L800)
 - [ctxman.js](file://ctxman.js#L358-L383)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L231-L800)
 - [ctxman.js](file://ctxman.js#L358-L383)
 
@@ -163,6 +174,7 @@ TC->>TC : generateLLMContext()
 README, method filtrelemenin farklı senaryolar için nasıl kullanılacağını gösteren birkaç pratik örnek sağlar:
 
 **Core Business Logic'i Dahil Etme:**
+
 ```bash
 # .methodinclude
 calculateTokens
@@ -180,6 +192,7 @@ TokenCalculator.*
 Bu yapilandirma, belirli business methodlarını ve genellikle önemli business bileşenlerini gösteren "Handler", "Validator" ve "Manager" gibi yaygın son eklerle biten tüm methodları dahil ederek core uygulama mantığına odaklanır.
 
 **Utility Methodlarını Hariç Tutma:**
+
 ```bash
 # .methodignore
 console
@@ -197,6 +210,7 @@ Bu yapilandirma, anlamlı business logic katkısı sağlamayan yaygın utility, 
 Bu örnekler, geliştiricilerin kod tabanlarının en önemli kısımlarını vurgularken token kullanımını en aza indiren odaklanmış context'ler oluşturarak LLM etkileşimlerini daha verimli ve etkili hale getirme yollarını gösterir.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L577-L587)
 
 ## Yapilandirma Tuzakları
@@ -212,6 +226,7 @@ Method filtrelemeyi yapılandırırken, geliştiriciler birkaç yaygın tuzağı
 **Aşırı Geniş Pattern'ler**: `*` veya `*.*` gibi pattern'leri kullanmak istenmeyen eşleşmelere yol açabilir. Geliştiriciler, amaçlanan filtreleme hedefleriyle uyumlu olmayan methodları dahil etmekten kaçınmak için pattern'leri ile özel olmalıdır.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L544-L576)
 
 ## En İyi Uygulamalar
@@ -233,4 +248,5 @@ LLM context oluşturma için method filtrelemeyi optimize etmek amacıyla şu en
 Bu uygulamaları takip ederek, geliştiriciler kapsamlılık ile verimliliği dengeleyen optimize edilmiş LLM context'leri oluşturabilir; AI asistanlarının token sınırlamaları içinde çalışırken en ilgili koda erişime sahip olmasını sağlar.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L544-L610)

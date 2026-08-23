@@ -11,7 +11,7 @@ export default [
       'dist/**',
       'coverage/**',
       'test-repos/**',
-      'html/**',  // Built desktop app assets
+      'html/**', // Built desktop app assets
     ],
   },
   {

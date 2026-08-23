@@ -33,7 +33,7 @@ async function main() {
 
   // 2. Check if indexed
   const isIndexed = await checkIndexExists(storePath);
-  
+
   if (!isIndexed) {
     console.log('📚 Index not found. Auto-indexing current project...');
     await indexProject(store);
@@ -50,16 +50,16 @@ async function main() {
 
   // 4. Display Results (or feed to LLM if we had one configured)
   console.log(`\nFound ${results.length} relevant snippets:\n`);
-  
+
   results.forEach((r, i) => {
-    console.log(`[${i+1}] ${r.metadata.filename} (Score: ${r.score?.toFixed(4)})`);
+    console.log(`[${i + 1}] ${r.metadata.filename} (Score: ${r.score?.toFixed(4)})`);
     console.log('─'.repeat(40));
     // Show a small snippet around the match if possible, but we stored full text.
     // Let's just show the first 200 chars or so.
     console.log(r.text.substring(0, 300).replace(/\n/g, ' ') + '...');
     console.log('\n');
   });
-  
+
   // Future: Pass `results` to an LLM API to generate a real answer.
   // For now, this validates the retrieval pipeline works from CLI.
 }
@@ -84,12 +84,12 @@ async function indexProject(store) {
   await indexer.index('local-files', {
     targetDir: process.cwd(),
     include: ['.js', '.md', '.ts', '.json'], // Configurable?
-    exclude: ['node_modules', '.git', 'dist', 'coverage', '.ctxman']
+    exclude: ['node_modules', '.git', 'dist', 'coverage', '.ctxman'],
   });
   console.log('✅ Indexing complete.');
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error('❌ Error:', err);
   process.exit(1);
 });

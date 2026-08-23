@@ -38,18 +38,19 @@ code --install-extension ctxman-1.0.0.vsix
 
 All commands are available via the Command Palette (Ctrl+Shift+P):
 
-| Command | Description |
-|---------|-------------|
-| `Ctxman: Generate LLM Context` | Generate context for the entire project |
-| `Ctxman: Generate Context for Current File` | Generate context for the active file |
-| `Ctxman: Generate Context for Selection` | Generate context for selected code |
-| `Ctxman: Generate Context for Project` | Generate context for the entire workspace |
-| `Ctxman: Show Token Count` | Display total token count for the workspace |
-| `Ctxman: Select Template` | Choose a context generation template |
+| Command                                     | Description                                 |
+| ------------------------------------------- | ------------------------------------------- |
+| `Ctxman: Generate LLM Context`              | Generate context for the entire project     |
+| `Ctxman: Generate Context for Current File` | Generate context for the active file        |
+| `Ctxman: Generate Context for Selection`    | Generate context for selected code          |
+| `Ctxman: Generate Context for Project`      | Generate context for the entire workspace   |
+| `Ctxman: Show Token Count`                  | Display total token count for the workspace |
+| `Ctxman: Select Template`                   | Choose a context generation template        |
 
 ### Right-Click Menu
 
 Right-click in the editor to access quick actions:
+
 - Generate context for selection
 - Generate context for current file
 - Generate project context
@@ -62,15 +63,15 @@ The extension displays the token count for the current file in the status bar. C
 
 Configure the extension in VS Code settings:
 
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| `ctxman.targetModel` | string | `gpt-4` | Target LLM model for token estimation |
-| `ctxman.budget` | number | `100000` | Token budget for alerts |
-| `ctxman.defaultTemplate` | string | `feature` | Default context template |
-| `ctxman.excludePatterns` | array | `["**/node_modules/**", ...]` | File patterns to exclude |
-| `ctxman.outputFormat` | string | `json` | Output format (json, markdown, gitingest, toon) |
-| `ctxman.showStatusBar` | boolean | `true` | Show token count in status bar |
-| `ctxman.enableCodeLens` | boolean | `false` | Enable CodeLens for token hints |
+| Setting                  | Type    | Default                       | Description                                     |
+| ------------------------ | ------- | ----------------------------- | ----------------------------------------------- |
+| `ctxman.targetModel`     | string  | `gpt-4`                       | Target LLM model for token estimation           |
+| `ctxman.budget`          | number  | `100000`                      | Token budget for alerts                         |
+| `ctxman.defaultTemplate` | string  | `feature`                     | Default context template                        |
+| `ctxman.excludePatterns` | array   | `["**/node_modules/**", ...]` | File patterns to exclude                        |
+| `ctxman.outputFormat`    | string  | `json`                        | Output format (json, markdown, gitingest, toon) |
+| `ctxman.showStatusBar`   | boolean | `true`                        | Show token count in status bar                  |
+| `ctxman.enableCodeLens`  | boolean | `false`                       | Enable CodeLens for token hints                 |
 
 ### Supported Models
 
@@ -98,14 +99,14 @@ Example `keybindings.json`:
 
 ```json
 [
-    {
-        "key": "ctrl+alt+c",
-        "command": "ctxman.generateContext"
-    },
-    {
-        "key": "ctrl+alt+f",
-        "command": "ctxman.generateCurrentFile"
-    }
+  {
+    "key": "ctrl+alt+c",
+    "command": "ctxman.generateContext"
+  },
+  {
+    "key": "ctrl+alt+f",
+    "command": "ctxman.generateCurrentFile"
+  }
 ]
 ```
 

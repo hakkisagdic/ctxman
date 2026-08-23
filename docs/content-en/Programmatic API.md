@@ -11,7 +11,9 @@
 </cite>
 
 ## Update Summary
-**Changes Made**   
+
+**Changes Made**
+
 - Updated TokenAnalyzer class documentation to reflect its alias relationship with TokenCalculator
 - Added new sections for GitIngestFormatter and MethodFilterParser classes
 - Updated configuration options to include the new gitingest option
@@ -20,6 +22,7 @@
 - Enhanced core components diagram to show new relationships
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Core Components](#core-components)
 3. [TokenAnalyzer Class](#tokenanalyzer-class)
@@ -37,6 +40,7 @@ The ctxman tool provides a programmatic interface for analyzing codebases and ge
 The tool is designed to help developers understand their codebase complexity, optimize LLM context usage, and automate analysis tasks within development pipelines. It supports both file-level and method-level analysis, with flexible configuration options for filtering and output formats.
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L100)
 
 ## Core Components
@@ -44,6 +48,7 @@ The tool is designed to help developers understand their codebase complexity, op
 The ctxman tool is built around several core components that work together through composition to provide comprehensive analysis capabilities. The TokenAnalyzer class serves as the primary interface, orchestrating interactions between specialized components for different aspects of the analysis process.
 
 The architecture follows a modular design where each component has a specific responsibility:
+
 - GitIgnoreParser handles file exclusion based on .gitignore and custom ignore rules
 - MethodAnalyzer extracts method definitions from code files
 - MethodFilterParser applies inclusion/exclusion rules to methods
@@ -85,12 +90,14 @@ GitIngestFormatter --> MethodFilterParser : "uses for method filtering"
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L14-L109)
 - [ctxman.js](file://ctxman.js#L118-L223)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L14-L223)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
@@ -159,10 +166,12 @@ TokenAnalyzer->>Application : Output results
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L225-L790)
 - [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L13-L522)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L225-L790)
 - [index.js](file://index.js#L1-L8)
 - [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L13-L522)
@@ -173,14 +182,14 @@ The TokenAnalyzer class accepts various options through the options object param
 
 ### Available Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| methodLevel | boolean | false | Enables method-level analysis, extracting individual methods from code files |
-| verbose | boolean | false | Controls whether detailed information is displayed during analysis |
-| saveReport | boolean | false | Saves a detailed JSON report of the analysis to token-analysis-report.json |
-| contextExport | boolean | false | Generates an LLM context file (llm-context.json) with optimized file listings |
-| contextClipboard | boolean | false | Copies the LLM context directly to the system clipboard |
-| gitingest | boolean | false | Generates a GitIngest-style digest file (digest.txt) containing the full codebase content |
+| Option           | Type    | Default | Description                                                                               |
+| ---------------- | ------- | ------- | ----------------------------------------------------------------------------------------- |
+| methodLevel      | boolean | false   | Enables method-level analysis, extracting individual methods from code files              |
+| verbose          | boolean | false   | Controls whether detailed information is displayed during analysis                        |
+| saveReport       | boolean | false   | Saves a detailed JSON report of the analysis to token-analysis-report.json                |
+| contextExport    | boolean | false   | Generates an LLM context file (llm-context.json) with optimized file listings             |
+| contextClipboard | boolean | false   | Copies the LLM context directly to the system clipboard                                   |
+| gitingest        | boolean | false   | Generates a GitIngest-style digest file (digest.txt) containing the full codebase content |
 
 ### Option Interactions
 
@@ -195,6 +204,7 @@ These options can be combined to achieve different analysis workflows:
 When no export options are specified, the tool will prompt the user to select an export option after completing the analysis.
 
 **Section sources**
+
 - [README.md](file://README.md#L100-L300)
 - [ctxman.js](file://ctxman.js#L225-L232)
 - [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L13-L522)
@@ -209,13 +219,13 @@ The FileInfo model represents information about an analyzed file:
 
 ```typescript
 interface FileInfo {
-    path: string;           // Absolute path to the file
-    relativePath: string;   // Path relative to the project root
-    sizeBytes: number;      // File size in bytes
-    tokens: number;         // Calculated token count
-    lines: number;          // Number of lines in the file
-    extension: string;      // File extension
-    methods?: MethodInfo[]; // Array of methods (when methodLevel is enabled)
+  path: string; // Absolute path to the file
+  relativePath: string; // Path relative to the project root
+  sizeBytes: number; // File size in bytes
+  tokens: number; // Calculated token count
+  lines: number; // Number of lines in the file
+  extension: string; // File extension
+  methods?: MethodInfo[]; // Array of methods (when methodLevel is enabled)
 }
 ```
 
@@ -225,10 +235,10 @@ The MethodInfo model represents information about an extracted method:
 
 ```typescript
 interface MethodInfo {
-    name: string;           // Method name
-    line: number;           // Line number where the method is defined
-    tokens: number;         // Token count for the method content
-    file: string;           // Relative path to the file containing the method
+  name: string; // Method name
+  line: number; // Line number where the method is defined
+  tokens: number; // Token count for the method content
+  file: string; // Relative path to the file containing the method
 }
 ```
 
@@ -237,6 +247,7 @@ These models are used to structure the analysis results and are serialized in th
 The data models are designed to be lightweight and focused on the essential information needed for token analysis and LLM context optimization.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L400-L420)
 - [ctxman.js](file://ctxman.js#L480-L500)
 
@@ -251,8 +262,8 @@ const { TokenAnalyzer } = require('ctxman');
 
 // Basic file-level analysis
 const analyzer = new TokenAnalyzer('./src', {
-    verbose: true,
-    saveReport: true
+  verbose: true,
+  saveReport: true,
 });
 
 analyzer.run();
@@ -263,10 +274,10 @@ analyzer.run();
 ```javascript
 // Method-level analysis with all outputs
 const methodAnalyzer = new TokenAnalyzer('./src', {
-    methodLevel: true,
-    saveReport: true,
-    contextExport: true,
-    verbose: true
+  methodLevel: true,
+  saveReport: true,
+  contextExport: true,
+  verbose: true,
 });
 
 methodAnalyzer.run();
@@ -277,8 +288,8 @@ methodAnalyzer.run();
 ```javascript
 // Generate context optimized for LLM consumption
 const llmAnalyzer = new TokenAnalyzer('./src', {
-    methodLevel: true,
-    contextClipboard: true
+  methodLevel: true,
+  contextClipboard: true,
 });
 
 llmAnalyzer.run();
@@ -289,8 +300,8 @@ llmAnalyzer.run();
 ```javascript
 // Generate GitIngest-style digest
 const digestAnalyzer = new TokenAnalyzer('./src', {
-    gitingest: true,
-    methodLevel: true
+  gitingest: true,
+  methodLevel: true,
 });
 
 digestAnalyzer.run();
@@ -308,11 +319,7 @@ const analyzer = new TokenAnalyzer('./src', { methodLevel: true });
 const analysisResults = []; // This would be populated during analysis
 
 // Create formatter with results
-const formatter = new GitIngestFormatter(
-    process.cwd(),
-    analyzer.stats,
-    analysisResults
-);
+const formatter = new GitIngestFormatter(process.cwd(), analyzer.stats, analysisResults);
 
 // Generate and save digest
 formatter.saveToFile('custom-digest.txt');
@@ -326,8 +333,8 @@ const { MethodFilterParser } = require('ctxman');
 
 // Create filter parser with custom paths
 const methodFilter = new MethodFilterParser(
-    './.methodinclude',  // Path to include file
-    './.methodignore'    // Path to ignore file
+  './.methodinclude', // Path to include file
+  './.methodignore' // Path to ignore file
 );
 
 // Check if a method should be included
@@ -351,6 +358,7 @@ generateDigestFromContext('llm-context.json');
 These examples show how the TokenAnalyzer can be configured for different use cases, from basic analysis to LLM-optimized context generation. The flexibility of the options allows developers to tailor the analysis to their specific needs, whether for development, debugging, or automated workflows.
 
 **Section sources**
+
 - [README.md](file://README.md#L700-L800)
 - [index.js](file://index.js#L1-L48)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
@@ -369,6 +377,7 @@ For configuration issues, the tool provides clear feedback about which configura
 The error handling strategy prioritizes completing the analysis over stopping at the first error, ensuring that users receive as much information as possible even when some parts of the process encounter issues.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L400-L415)
 - [ctxman.js](file://ctxman.js#L700-L730)
 
@@ -379,10 +388,12 @@ When using the ctxman API programmatically, several performance considerations s
 ### Token Counting Methods
 
 The tool supports two methods for token counting:
+
 - **Exact counting** using the tiktoken library (requires installation)
 - **Estimation** using character-based heuristics (fallback when tiktoken is not available)
 
 For optimal accuracy, install the tiktoken package:
+
 ```bash
 npm install tiktoken
 ```
@@ -390,6 +401,7 @@ npm install tiktoken
 ### Analysis Scope
 
 The performance of the analysis is directly related to the size of the codebase being analyzed. To optimize performance:
+
 - Limit the analysis to specific directories when possible
 - Use configuration files (.contextignore, .contextinclude) to exclude irrelevant files
 - Consider the trade-off between analysis depth and execution time
@@ -405,6 +417,7 @@ While the `run()` method doesn't return a Promise, it performs several asynchron
 The tool is optimized for performance with caching and efficient file system operations, but very large codebases may still require significant processing time.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L300-L350)
 - [README.md](file://README.md#L500-L600)
 
@@ -423,6 +436,7 @@ Check the release notes for any changes to configuration file formats or option 
 ### New Features
 
 Recent updates have introduced several new features that enhance the tool's capabilities:
+
 - **GitIngestFormatter**: A new formatter class that generates GitIngest-style digest files containing the full codebase content
 - **MethodFilterParser**: A new parser class that handles method-level filtering based on .methodinclude and .methodignore files
 - **gitingest option**: A new configuration option that enables generation of GitIngest-style digest files
@@ -435,6 +449,7 @@ Ensure that required dependencies are properly installed, particularly tiktoken 
 ### Testing
 
 After upgrading, test the analysis with your typical codebases to ensure expected behavior. Pay particular attention to:
+
 - File inclusion/exclusion patterns
 - Token count accuracy
 - Export functionality
@@ -443,6 +458,7 @@ After upgrading, test the analysis with your typical codebases to ensure expecte
 The tool's output format for JSON reports and context exports is designed to be stable, minimizing the impact of upgrades on downstream processes that consume these outputs.
 
 **Section sources**
+
 - [README.md](file://README.md#L800-L891)
 - [index.js](file://index.js#L1-L48)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)

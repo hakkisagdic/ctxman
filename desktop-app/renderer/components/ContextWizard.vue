@@ -4,8 +4,8 @@
     <div class="wizard-header">
       <h3>🧙 Context Wizard</h3>
       <div class="steps">
-        <div 
-          v-for="(step, index) in steps" 
+        <div
+          v-for="(step, index) in steps"
           :key="step.id"
           :class="['step', { active: currentStep === index, completed: currentStep > index }]"
         >
@@ -70,7 +70,7 @@
               <option value="gemini-pro">Gemini Pro</option>
             </select>
           </label>
-          
+
           <label class="setting-row">
             <span>Max Tokens</span>
             <input type="number" v-model="config.maxTokens" class="form-input" />
@@ -80,7 +80,7 @@
             <input type="checkbox" v-model="config.removeComments" />
             <span>Remove Comments</span>
           </label>
-          
+
           <label class="setting-row">
             <input type="checkbox" v-model="config.removeEmptyLines" />
             <span>Remove Empty Lines</span>
@@ -112,28 +112,13 @@
     </div>
 
     <div class="wizard-footer">
-      <button 
-        @click="prevStep" 
-        class="btn-secondary" 
-        :disabled="currentStep === 0"
-      >
-        Back
-      </button>
-      
-      <button 
-        v-if="currentStep < steps.length - 1" 
-        @click="nextStep" 
-        class="btn-primary"
-      >
+      <button @click="prevStep" class="btn-secondary" :disabled="currentStep === 0">Back</button>
+
+      <button v-if="currentStep < steps.length - 1" @click="nextStep" class="btn-primary">
         Next
       </button>
-      
-      <button 
-        v-else 
-        @click="generate" 
-        class="btn-success"
-        :disabled="generating"
-      >
+
+      <button v-else @click="generate" class="btn-success" :disabled="generating">
         {{ generating ? 'Generating...' : 'Generate Context' }}
       </button>
     </div>
@@ -149,7 +134,7 @@ const steps = [
   { id: 'files', label: 'Files' },
   { id: 'format', label: 'Format' },
   { id: 'optimize', label: 'Optimize' },
-  { id: 'generate', label: 'Generate' }
+  { id: 'generate', label: 'Generate' },
 ];
 
 const currentStep = ref(0);
@@ -161,7 +146,7 @@ const config = reactive({
   targetLlm: 'claude-3.5-sonnet',
   maxTokens: 100000,
   removeComments: false,
-  removeEmptyLines: false
+  removeEmptyLines: false,
 });
 
 function nextStep() {
@@ -181,7 +166,7 @@ async function generate() {
   try {
     // Simulate generation for now
     // In real implementation, this would call window.api.cli.generateContext
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     emit('generate', config);
   } finally {
     generating.value = false;

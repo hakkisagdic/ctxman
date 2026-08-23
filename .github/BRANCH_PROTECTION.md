@@ -31,26 +31,26 @@ required_pull_request_reviews:
 
 # Require status checks to pass
 required_status_checks:
-  strict: true  # Require branches to be up to date
+  strict: true # Require branches to be up to date
   contexts:
-    - "lint"
-    - "test (Node 20.x, ubuntu-latest)"
-    - "test (Node 22.x, ubuntu-latest)"
-    - "codeql"
+    - 'lint'
+    - 'test (Node 20.x, ubuntu-latest)'
+    - 'test (Node 22.x, ubuntu-latest)'
+    - 'codeql'
 
 # Require conversation resolution
 required_conversation_resolution: true
 
 # Restrictions
-restrictions: null  # No push restrictions (rely on PR reviews)
+restrictions: null # No push restrictions (rely on PR reviews)
 
 # Other settings
-enforce_admins: true  # Apply rules to admins
+enforce_admins: true # Apply rules to admins
 allow_force_pushes: false
 allow_deletions: false
 
 # Linear history (optional, for cleaner git history)
-required_linear_history: false  # Set to true if you prefer linear history
+required_linear_history: false # Set to true if you prefer linear history
 ```
 
 ## Develop Branch Protection
@@ -62,13 +62,13 @@ Apply similar rules to the `develop` branch with less strict settings:
 
 required_pull_request_reviews:
   dismiss_stale_reviews: true
-  required_approving_review_count: 0  # No approval required for develop
+  required_approving_review_count: 0 # No approval required for develop
 
 required_status_checks:
   strict: false
   contexts:
-    - "lint"
-    - "test (Node 22.x, ubuntu-latest)"
+    - 'lint'
+    - 'test (Node 22.x, ubuntu-latest)'
 
 enforce_admins: false
 allow_force_pushes: false
