@@ -45,7 +45,10 @@
     "prepack": "npm run clean && npm test",
     "prepare": "husky || true",
     "mcp": "node bin/mcp-server.js",
-    "postinstall": "node -e \"console.log('\\n✅ Ctxman installed! Run: ctxman --help\\n')\""
+    "postinstall": "node -e \"console.log('\\n✅ Ctxman installed! Run: ctxman --help\\n')\"",
+    "docs:dev": "npm run docs:dev --prefix website",
+    "docs:build": "npm run docs:build --prefix website",
+    "docs:preview": "npm run docs:preview --prefix website"
   },
   "keywords": [
     "code",
