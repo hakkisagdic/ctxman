@@ -1,0 +1,31 @@
+{
+  "id": "FEAT-005",
+  "type": "ci",
+  "description": "CI/CD Workflow Fixes and Enhancements - Fix any issues with existing CI workflows (PR Labeler, CI tests), enhance workflow reliability.",
+  "status": "pending",
+  "steps": [
+    "Analyze .github/workflows/label.yml for potential issues - the workflow uses actions/labeler@v5 with sync-labels which should work",
+    "Verify .github/labeler.yml syntax matches actions/labeler@v5 format (already using correct 'changed-files' and 'any-glob-to-any-file' syntax)",
+    "Review .github/workflows/ci.yml - check if npm run format -- --check is correct or if it should be npm run format:check",
+    "Add format:check script to package.json if it doesn't exist: \"format:check\": \"prettier --check .\"",
+    "Review .github/workflows/codeql.yml for proper configuration",
+    "Review .github/workflows/npm-publish.yml for proper npm publishing setup",
+    "Review .github/workflows/release.yml for proper release automation",
+    "Add workflow dispatch triggers where missing for manual runs",
+    "Ensure all workflows have proper concurrency groups to cancel duplicate runs"
+  ],
+  "acceptance_criteria": [
+    "CI workflow can run npm run format:check or equivalent",
+    "All workflows have proper syntax",
+    "All workflows have concurrency groups",
+    "All workflows have workflow_dispatch for manual triggers",
+    "PR Labeler workflow is correctly configured"
+  ],
+  "verification": [
+    "npm run format:check or npm run format -- --check",
+    "Review workflow YAML syntax",
+    "Test npm run scripts referenced in CI"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

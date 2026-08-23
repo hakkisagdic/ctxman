@@ -1,0 +1,33 @@
+{
+  "id": "FEAT-006",
+  "type": "chore",
+  "description": "Package.json Scripts Enhancement - Add missing scripts for quality, documentation, and CI/CD. Ensure all necessary npm scripts exist.",
+  "status": "pending",
+  "steps": [
+    "Add format:check script: \"format:check\": \"prettier --check .\"",
+    "Add lint:strict script that fails on warnings: \"lint:strict\": \"eslint . --max-warnings 0\"",
+    "Add test:comprehensive script if missing (currently references test:v3, test:git, etc.)",
+    "Add clean script to remove generated files: \"clean\": \"rm -rf coverage test-results\"",
+    "Add prepack script for npm publishing preparation",
+    "Add docs:validate script if there's a way to validate documentation links",
+    "Ensure prepare script exists for Husky (already have postinstall)",
+    "Add all scripts referenced in CI workflows if missing",
+    "Update package.json exports field to include TypeScript definition files if they will be created"
+  ],
+  "acceptance_criteria": [
+    "format:check script exists",
+    "lint:strict script exists",
+    "clean script exists",
+    "All CI-referenced scripts exist",
+    "npm run scripts all work without errors"
+  ],
+  "verification": [
+    "npm run format:check",
+    "npm run lint",
+    "npm run lint:strict",
+    "npm run clean",
+    "npm run test"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

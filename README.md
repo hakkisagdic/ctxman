@@ -6,10 +6,30 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/ctxman.svg)](https://nodejs.org)
 [![codecov](https://codecov.io/gh/hakkisagdic/ctxman/branch/main/graph/badge.svg)](https://codecov.io/gh/hakkisagdic/ctxman)
+[![Documentation](https://img.shields.io/badge/docs-complete-brightgreen)](docs/)
 
 **AI Development Platform** with plugin architecture, Git integration, REST API, and watch mode. Supporting 14+ programming languages with method-level filtering, automatic LLM optimization, and real-time analysis. Perfect for AI-assisted development workflows.
 
 **v3.0.0** - Platform Foundation Release 🚀
+
+**Languages**: [English](README.md) | [Türkçe](README-tr.md)
+
+## Table of Contents
+
+- [Support This Project](#-support-this-project)
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [API Server](#api-server)
+- [Git Integration](#-git-integration-v300)
+- [Watch Mode](#-watch-mode-v300)
+- [LLM Optimization](#-llm-optimization-v237)
+- [Export Options](#-export-options)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## ☕ Support This Project
 
@@ -24,6 +44,20 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 </p>
 
 ---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [API Documentation](docs/API.md) | REST API endpoints and usage |
+| [Architecture](docs/ARCHITECTURE.md) | Plugin system, core modules, data flow |
+| [Changelog](CHANGELOG.md) | Version history and release notes |
+| [Contributing](CONTRIBUTING.md) | Development setup and guidelines |
+| [Security Policy](SECURITY.md) | Security policy and vulnerability reporting |
+| [Code of Conduct](CODE_OF_CONDUCT.md) | Community guidelines |
+| [API Dokümantasyonu](docs/API-tr.md) | REST API dokümantasyonu (Türkçe) |
+| [Mimari](docs/ARCHITECTURE-tr.md) | Plugin sistemi, çekirdek modüller (Türkçe) |
+| [Katkı Rehberi](CONTRIBUTING-tr.md) | Geliştirme kurulumu ve yönergeler (Türkçe) |
 
 ## Files
 
