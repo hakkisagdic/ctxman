@@ -2,7 +2,7 @@
   "id": "FEAT-004",
   "type": "chore",
   "description": "GitHub Templates and Community Standards - Create PR template, issue templates (bug report, feature request), and verify CODEOWNERS file.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Create .github/PULL_REQUEST_TEMPLATE.md with sections for: Description, Type of Change, Testing, Checklist, Screenshots (if applicable)",
     "Create .github/ISSUE_TEMPLATE/ directory",

@@ -1,0 +1,25 @@
+# GitHub Issue Template Configuration
+# https://docs.github.com/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository
+
+blank_issues_enabled: false
+
+contact_links:
+  - name: 📖 Documentation / Dokümantasyon
+    url: https://github.com/hakkisagdic/ctxman#readme
+    about: Check the documentation before opening an issue / Sorun açmadan önce dokümantasyonu kontrol edin
+
+  - name: 💬 Discussions / Tartışmalar
+    url: https://github.com/hakkisagdic/ctxman/discussions
+    about: Ask questions and discuss with the community / Toplulukla sorular sorun ve tartışın
+
+  - name: 🔒 Security Issue / Güvenlik Sorunu
+    url: https://github.com/hakkisagdic/ctxman/security/policy
+    about: Report a security vulnerability / Güvenlik açığı bildirin
+
+  - name: 🐛 Bug Report / Hata Raporu
+    url: https://github.com/hakkisagdic/ctxman/issues/new?template=bug_report.md
+    about: Report a bug to help us improve / Projeyi geliştirmemize yardımcı olmak için hata bildirin
+
+  - name: ✨ Feature Request / Özellik Talebi
+    url: https://github.com/hakkisagdic/ctxman/issues/new?template=feature_request.md
+    about: Suggest a new feature / Yeni bir özellik önerin
