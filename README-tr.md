@@ -18,6 +18,22 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 
 ---
 
+## Dokümantasyon
+
+| Belge                                                  | Açıklama                                           |
+| ------------------------------------------------------ | -------------------------------------------------- |
+| [API Dokümantasyonu](docs/API-tr.md)                   | REST API uç noktaları ve kullanım                  |
+| [Mimari](docs/ARCHITECTURE-tr.md)                      | Plugin sistemi, çekirdek modüller, veri akışı      |
+| [Performans Kıyaslamaları](docs/PERFORMANCE-tr.md)     | Performans metrikleri ve optimizasyon ipuçları     |
+| [Değişiklik Günlüğü](CHANGELOG.md)                     | Sürüm geçmişi ve sürüm notları                     |
+| [Katkı Rehberi](CONTRIBUTING-tr.md)                    | Geliştirme kurulumu ve yönergeler                  |
+| [Güvenlik Politikası](SECURITY.md)                     | Güvenlik politikası ve güvenlik açığı bildirimi    |
+| [Davranış Kuralları](CODE_OF_CONDUCT.md)               | Topluluk kuralları                                 |
+| [API Documentation](docs/API.md)                       | REST API endpoints and usage (English)             |
+| [Architecture](docs/ARCHITECTURE.md)                   | Plugin system, core modules (English)              |
+| [Performance Benchmarks](docs/PERFORMANCE.md)          | Performance metrics and optimization tips (English)|
+| [Contributing Guide](CONTRIBUTING.md)                  | Development setup and guidelines (English)         |
+
 ## Dosyalar
 
 - **`ctxman.js`** - Kesin token sayımı ile ana LLM bağlam analiz scripti

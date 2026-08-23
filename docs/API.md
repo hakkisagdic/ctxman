@@ -8,6 +8,7 @@ This document describes the REST API endpoints provided by Ctxman v3.0.0.
 - [Getting Started](#getting-started)
 - [Authentication](#authentication)
 - [Endpoints](#endpoints)
+  - [GET /api/v1/health](#get-apiv1health)
   - [GET /api/v1/analyze](#get-apiv1analyze)
   - [GET /api/v1/methods](#get-apiv1methods)
   - [GET /api/v1/stats](#get-apiv1stats)
@@ -52,12 +53,12 @@ ctxman serve --port 3000 --auth-token your-secret-token
 
 ### Server Options
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--port` | 3000 | Port number to listen on |
-| `--host` | localhost | Host address to bind |
-| `--auth-token` | null | Optional authentication token |
-| `--cors` | true | Enable CORS headers |
+| Option         | Default   | Description                   |
+| -------------- | --------- | ----------------------------- |
+| `--port`       | 3000      | Port number to listen on      |
+| `--host`       | localhost | Host address to bind          |
+| `--auth-token` | null      | Optional authentication token |
+| `--cors`       | true      | Enable CORS headers           |
 
 ## Authentication
 
@@ -69,16 +70,104 @@ curl -H "Authorization: Bearer your-secret-token" http://localhost:3000/api/v1/a
 
 ## Endpoints
 
+### GET /api/v1/health
+
+Check the health status of the API server. This endpoint is useful for monitoring, load balancer health checks, and CI/CD pipelines.
+
+#### Example Request
+
+```bash
+curl http://localhost:3000/api/v1/health
+```
+
+#### Response
+
+```json
+{
+  "status": "healthy",
+  "version": "3.0.0",
+  "uptime": 3600,
+  "timestamp": "2025-08-23T10:30:00.000Z",
+  "checks": {
+    "memory": {
+      "status": "ok",
+      "used": 85,
+      "total": 512
+    },
+    "tiktoken": {
+      "status": "available"
+    }
+  }
+}
+```
+
+#### Response Fields
+
+| Field          | Type   | Description                                    |
+| -------------- | ------ | ---------------------------------------------- |
+| `status`       | string | Overall health status ("healthy" or "unhealthy") |
+| `version`      | string | Current Ctxman version                         |
+| `uptime`       | number | Server uptime in seconds                       |
+| `timestamp`    | string | ISO 8601 timestamp of the health check         |
+| `checks`       | object | Individual component health checks             |
+| `checks.memory`| object | Memory usage information                       |
+| `checks.tiktoken`| object | tiktoken availability status                 |
+
+#### Use Cases
+
+**Load Balancer Health Check:**
+
+```bash
+# Example for nginx upstream health check
+curl -f http://localhost:3000/api/v1/health || exit 1
+```
+
+**Kubernetes Liveness Probe:**
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /api/v1/health
+    port: 3000
+  initialDelaySeconds: 10
+  periodSeconds: 30
+```
+
+**Docker Health Check:**
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/api/v1/health || exit 1
+```
+
+**CI/CD Pipeline Check:**
+
+```bash
+#!/bin/bash
+# Wait for server to be healthy
+for i in {1..30}; do
+  if curl -sf http://localhost:3000/api/v1/health > /dev/null; then
+    echo "Server is healthy"
+    exit 0
+  fi
+  sleep 1
+done
+echo "Server health check failed"
+exit 1
+```
+
+---
+
 ### GET /api/v1/analyze
 
 Analyze project files and get comprehensive token counts.
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `path` | string | No | Project path (defaults to current directory) |
-| `methods` | boolean | No | Include method-level analysis (default: false) |
+| Parameter | Type    | Required | Description                                    |
+| --------- | ------- | -------- | ---------------------------------------------- |
+| `path`    | string  | No       | Project path (defaults to current directory)   |
+| `methods` | boolean | No       | Include method-level analysis (default: false) |
 
 #### Example Request
 
@@ -142,9 +231,9 @@ Extract methods from a specific file.
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `file` | string | Yes | Absolute or relative path to the file |
+| Parameter | Type   | Required | Description                           |
+| --------- | ------ | -------- | ------------------------------------- |
+| `file`    | string | Yes      | Absolute or relative path to the file |
 
 #### Example Request
 
@@ -194,9 +283,9 @@ Get project statistics without full file details.
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `path` | string | No | Project path (defaults to current directory) |
+| Parameter | Type   | Required | Description                                  |
+| --------- | ------ | -------- | -------------------------------------------- |
+| `path`    | string | No       | Project path (defaults to current directory) |
 
 #### Example Request
 
@@ -239,10 +328,10 @@ Analyze git diff to see changed files and their impact.
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `path` | string | No | Project path (defaults to current directory) |
-| `since` | string | No | Git reference (branch, tag, or commit) |
+| Parameter | Type   | Required | Description                                  |
+| --------- | ------ | -------- | -------------------------------------------- |
+| `path`    | string | No       | Project path (defaults to current directory) |
+| `since`   | string | No       | Git reference (branch, tag, or commit)       |
 
 #### Example Request
 
@@ -302,13 +391,13 @@ Generate optimized LLM context based on parameters.
 
 #### Request Body
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `path` | string | No | Project path (defaults to current directory) |
-| `methodLevel` | boolean | No | Include method-level analysis |
-| `targetModel` | string | No | Target LLM model (e.g., "claude-sonnet-4.5") |
-| `targetTokens` | number | No | Target token budget |
-| `useCase` | string | No | Use case template (bug-fix, feature, code-review, etc.) |
+| Parameter      | Type    | Required | Description                                             |
+| -------------- | ------- | -------- | ------------------------------------------------------- |
+| `path`         | string  | No       | Project path (defaults to current directory)            |
+| `methodLevel`  | boolean | No       | Include method-level analysis                           |
+| `targetModel`  | string  | No       | Target LLM model (e.g., "claude-sonnet-4.5")            |
+| `targetTokens` | number  | No       | Target token budget                                     |
+| `useCase`      | string  | No       | Use case template (bug-fix, feature, code-review, etc.) |
 
 #### Example Request
 
@@ -402,13 +491,13 @@ All errors return a consistent JSON structure:
 
 ### HTTP Status Codes
 
-| Code | Description |
-|------|-------------|
-| 200 | Success |
-| 400 | Bad Request (missing parameters, invalid input) |
-| 401 | Unauthorized (invalid or missing auth token) |
-| 404 | Not Found (endpoint or resource not found) |
-| 500 | Internal Server Error |
+| Code | Description                                     |
+| ---- | ----------------------------------------------- |
+| 200  | Success                                         |
+| 400  | Bad Request (missing parameters, invalid input) |
+| 401  | Unauthorized (invalid or missing auth token)    |
+| 404  | Not Found (endpoint or resource not found)      |
+| 500  | Internal Server Error                           |
 
 ### Common Errors
 
@@ -495,14 +584,12 @@ kill $SERVER_PID
 const API_BASE = 'http://localhost:3000/api/v1';
 
 async function analyzeProject(projectPath) {
-  const response = await fetch(
-    `${API_BASE}/analyze?path=${encodeURIComponent(projectPath)}`
-  );
-  
+  const response = await fetch(`${API_BASE}/analyze?path=${encodeURIComponent(projectPath)}`);
+
   if (!response.ok) {
     throw new Error(`API error: ${response.status}`);
   }
-  
+
   return response.json();
 }
 
@@ -510,9 +597,9 @@ async function generateContext(options) {
   const response = await fetch(`${API_BASE}/context`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(options)
+    body: JSON.stringify(options),
   });
-  
+
   return response.json();
 }
 
@@ -520,7 +607,7 @@ async function generateContext(options) {
 const analysis = await analyzeProject('/path/to/project');
 const context = await generateContext({
   targetModel: 'claude-sonnet-4.5',
-  methodLevel: true
+  methodLevel: true,
 });
 ```
 
@@ -548,4 +635,4 @@ WebSocket support for real-time updates is planned for a future release. Current
 
 ---
 
-*API Version: v1 | Ctxman Version: 3.0.0*
+_API Version: v1 | Ctxman Version: 3.0.0_

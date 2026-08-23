@@ -8,6 +8,7 @@ Bu belge, Ctxman v3.0.0 tarafından sağlanan REST API uç noktalarını açıkl
 - [Başlarken](#başlarken)
 - [Kimlik Doğrulama](#kimlik-doğrulama)
 - [Uç Noktalar](#uç-noktalar)
+  - [GET /api/v1/health](#get-apiv1health)
   - [GET /api/v1/analyze](#get-apiv1analyze)
   - [GET /api/v1/methods](#get-apiv1methods)
   - [GET /api/v1/stats](#get-apiv1stats)
@@ -52,12 +53,12 @@ ctxman serve --port 3000 --auth-token gizli-anahtariniz
 
 ### Sunucu Seçenekleri
 
-| Seçenek | Varsayılan | Açıklama |
-|---------|------------|----------|
-| `--port` | 3000 | Dinlenecek port numarası |
-| `--host` | localhost | Bağlanılacak host adresi |
-| `--auth-token` | null | İsteğe bağlı kimlik doğrulama token'ı |
-| `--cors` | true | CORS başlıklarını etkinleştir |
+| Seçenek        | Varsayılan | Açıklama                              |
+| -------------- | ---------- | ------------------------------------- |
+| `--port`       | 3000       | Dinlenecek port numarası              |
+| `--host`       | localhost  | Bağlanılacak host adresi              |
+| `--auth-token` | null       | İsteğe bağlı kimlik doğrulama token'ı |
+| `--cors`       | true       | CORS başlıklarını etkinleştir         |
 
 ## Kimlik Doğrulama
 
@@ -69,16 +70,104 @@ curl -H "Authorization: Bearer gizli-anahtariniz" http://localhost:3000/api/v1/a
 
 ## Uç Noktalar
 
+### GET /api/v1/health
+
+API sunucusunun sağlık durumunu kontrol edin. Bu uç nokta, izleme, yük dengeleyici sağlık kontrolleri ve CI/CD pipeline'ları için kullanışlıdır.
+
+#### Örnek İstek
+
+```bash
+curl http://localhost:3000/api/v1/health
+```
+
+#### Yanıt
+
+```json
+{
+  "status": "healthy",
+  "version": "3.0.0",
+  "uptime": 3600,
+  "timestamp": "2025-08-23T10:30:00.000Z",
+  "checks": {
+    "memory": {
+      "status": "ok",
+      "used": 85,
+      "total": 512
+    },
+    "tiktoken": {
+      "status": "available"
+    }
+  }
+}
+```
+
+#### Yanıt Alanları
+
+| Alan            | Tür    | Açıklama                                       |
+| --------------- | ------ | ---------------------------------------------- |
+| `status`        | string | Genel sağlık durumu ("healthy" veya "unhealthy") |
+| `version`       | string | Mevcut Ctxman sürümü                           |
+| `uptime`        | number | Sunucu çalışma süresi (saniye)                 |
+| `timestamp`     | string | Sağlık kontrolünün ISO 8601 zaman damgası     |
+| `checks`        | object | Bireysel bileşen sağlık kontrolleri           |
+| `checks.memory` | object | Bellek kullanım bilgileri                     |
+| `checks.tiktoken`| object | tiktoken kullanılabilirlik durumu             |
+
+#### Kullanım Senaryoları
+
+**Yük Dengeleyici Sağlık Kontrolü:**
+
+```bash
+# nginx upstream sağlık kontrolü için örnek
+curl -f http://localhost:3000/api/v1/health || exit 1
+```
+
+**Kubernetes Liveness Probe:**
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /api/v1/health
+    port: 3000
+  initialDelaySeconds: 10
+  periodSeconds: 30
+```
+
+**Docker Sağlık Kontrolü:**
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/api/v1/health || exit 1
+```
+
+**CI/CD Pipeline Kontrolü:**
+
+```bash
+#!/bin/bash
+# Sunucunun sağlıklı olmasını bekle
+for i in {1..30}; do
+  if curl -sf http://localhost:3000/api/v1/health > /dev/null; then
+    echo "Sunucu sağlıklı"
+    exit 0
+  fi
+  sleep 1
+done
+echo "Sunucu sağlık kontrolü başarısız"
+exit 1
+```
+
+---
+
 ### GET /api/v1/analyze
 
 Proje dosyalarını analiz edin ve kapsamlı token sayılarını alın.
 
 #### Parametreler
 
-| Parametre | Tür | Zorunlu | Açıklama |
-|-----------|-----|---------|----------|
-| `path` | string | Hayır | Proje yolu (varsayılan: mevcut dizin) |
-| `methods` | boolean | Hayır | Method seviyesi analizini dahil et (varsayılan: false) |
+| Parametre | Tür     | Zorunlu | Açıklama                                               |
+| --------- | ------- | ------- | ------------------------------------------------------ |
+| `path`    | string  | Hayır   | Proje yolu (varsayılan: mevcut dizin)                  |
+| `methods` | boolean | Hayır   | Method seviyesi analizini dahil et (varsayılan: false) |
 
 #### Örnek İstek
 
@@ -142,9 +231,9 @@ Belirli bir dosyadan method'ları çıkarın.
 
 #### Parametreler
 
-| Parametre | Tür | Zorunlu | Açıklama |
-|-----------|-----|---------|----------|
-| `file` | string | Evet | Dosyanın mutlak veya göreli yolu |
+| Parametre | Tür    | Zorunlu | Açıklama                         |
+| --------- | ------ | ------- | -------------------------------- |
+| `file`    | string | Evet    | Dosyanın mutlak veya göreli yolu |
 
 #### Örnek İstek
 
@@ -194,9 +283,9 @@ Tam dosya detayları olmadan proje istatistiklerini alın.
 
 #### Parametreler
 
-| Parametre | Tür | Zorunlu | Açıklama |
-|-----------|-----|---------|----------|
-| `path` | string | Hayır | Proje yolu (varsayılan: mevcut dizin) |
+| Parametre | Tür    | Zorunlu | Açıklama                              |
+| --------- | ------ | ------- | ------------------------------------- |
+| `path`    | string | Hayır   | Proje yolu (varsayılan: mevcut dizin) |
 
 #### Örnek İstek
 
@@ -239,10 +328,10 @@ Değişen dosyaları ve etkilerini görmek için git diff'i analiz edin.
 
 #### Parametreler
 
-| Parametre | Tür | Zorunlu | Açıklama |
-|-----------|-----|---------|----------|
-| `path` | string | Hayır | Proje yolu (varsayılan: mevcut dizin) |
-| `since` | string | Hayır | Git referansı (branch, tag veya commit) |
+| Parametre | Tür    | Zorunlu | Açıklama                                |
+| --------- | ------ | ------- | --------------------------------------- |
+| `path`    | string | Hayır   | Proje yolu (varsayılan: mevcut dizin)   |
+| `since`   | string | Hayır   | Git referansı (branch, tag veya commit) |
 
 #### Örnek İstek
 
@@ -302,13 +391,13 @@ Parametrelere göre optimize edilmiş LLM bağlamı oluşturun.
 
 #### İstek Gövdesi
 
-| Parametre | Tür | Zorunlu | Açıklama |
-|-----------|-----|---------|----------|
-| `path` | string | Hayır | Proje yolu (varsayılan: mevcut dizin) |
-| `methodLevel` | boolean | Hayır | Method seviyesi analizini dahil et |
-| `targetModel` | string | Hayır | Hedef LLM modeli (örn. "claude-sonnet-4.5") |
-| `targetTokens` | number | Hayır | Hedef token bütçesi |
-| `useCase` | string | Hayır | Kullanım durumu şablonu (bug-fix, feature, code-review, vb.) |
+| Parametre      | Tür     | Zorunlu | Açıklama                                                     |
+| -------------- | ------- | ------- | ------------------------------------------------------------ |
+| `path`         | string  | Hayır   | Proje yolu (varsayılan: mevcut dizin)                        |
+| `methodLevel`  | boolean | Hayır   | Method seviyesi analizini dahil et                           |
+| `targetModel`  | string  | Hayır   | Hedef LLM modeli (örn. "claude-sonnet-4.5")                  |
+| `targetTokens` | number  | Hayır   | Hedef token bütçesi                                          |
+| `useCase`      | string  | Hayır   | Kullanım durumu şablonu (bug-fix, feature, code-review, vb.) |
 
 #### Örnek İstek
 
@@ -402,13 +491,13 @@ Tüm hatalar tutarlı bir JSON yapısı döndürür:
 
 ### HTTP Durum Kodları
 
-| Kod | Açıklama |
-|-----|----------|
-| 200 | Başarılı |
+| Kod | Açıklama                                        |
+| --- | ----------------------------------------------- |
+| 200 | Başarılı                                        |
 | 400 | Kötü İstek (eksik parametreler, geçersiz girdi) |
-| 401 | Yetkisiz (geçersiz veya eksik auth token) |
-| 404 | Bulunamadı (uç nokta veya kaynak bulunamadı) |
-| 500 | İç Sunucu Hatası |
+| 401 | Yetkisiz (geçersiz veya eksik auth token)       |
+| 404 | Bulunamadı (uç nokta veya kaynak bulunamadı)    |
+| 500 | İç Sunucu Hatası                                |
 
 ### Yaygın Hatalar
 
@@ -495,14 +584,12 @@ kill $SERVER_PID
 const API_BASE = 'http://localhost:3000/api/v1';
 
 async function analyzeProject(projectPath) {
-  const response = await fetch(
-    `${API_BASE}/analyze?path=${encodeURIComponent(projectPath)}`
-  );
-  
+  const response = await fetch(`${API_BASE}/analyze?path=${encodeURIComponent(projectPath)}`);
+
   if (!response.ok) {
     throw new Error(`API hatası: ${response.status}`);
   }
-  
+
   return response.json();
 }
 
@@ -510,9 +597,9 @@ async function generateContext(options) {
   const response = await fetch(`${API_BASE}/context`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(options)
+    body: JSON.stringify(options),
   });
-  
+
   return response.json();
 }
 
@@ -520,7 +607,7 @@ async function generateContext(options) {
 const analysis = await analyzeProject('/proje/yolu');
 const context = await generateContext({
   targetModel: 'claude-sonnet-4.5',
-  methodLevel: true
+  methodLevel: true,
 });
 ```
 
@@ -548,4 +635,4 @@ Gerçek zamanlı güncellemeler için WebSocket desteği gelecekteki bir sürüm
 
 ---
 
-*API Sürümü: v1 | Ctxman Sürümü: 3.0.0*
+_API Sürümü: v1 | Ctxman Sürümü: 3.0.0_
