@@ -12,6 +12,8 @@ import DiffAnalyzer from '../lib/integrations/git/DiffAnalyzer.js';
 import TemplateManager from '../lib/utils/template-manager.js';
 import ProfileManager from '../lib/utils/profile-manager.js';
 import { AISuggester } from '../lib/analyzers/ai-suggester.js';
+import { DependencyScanner } from '../lib/analyzers/dependency-scanner.js';
+import { ImportTracker } from '../lib/analyzers/import-tracker.js';
 import MultiRepoManager from '../lib/utils/multi-repo-manager.js';
 import SnapshotManager from '../lib/utils/snapshot-manager.js';
 import ContextVersioning from '../lib/utils/context-versioning.js';
@@ -150,6 +152,12 @@ async function main() {
     // Check for performance dashboard (FEAT-001)
     if (args.includes('--perf-dashboard')) {
         await runPerfDashboard(args);
+        return;
+    }
+
+    // Check for dependency scanning (FEAT-002)
+    if (args.includes('--scan-dependencies')) {
+        await runDependencyScan(args);
         return;
     }
 
@@ -563,6 +571,12 @@ function printHelp() {
     console.log('  --perf-dashboard         Display text-based performance dashboard');
     console.log('    --period <period>      Time period: 7d (default), 30d, all');
     console.log('    --save-report          Save dashboard output to file');
+    console.log();
+    console.log('Dependency Scanner (FEAT-002):');
+    console.log('  --scan-dependencies      Analyze node_modules for token impact');
+    console.log('    --dependency-depth N   How deep to scan (default: 1)');
+    console.log('    --include-types         Include TypeScript definitions');
+    console.log('    --check-security        Check for security vulnerabilities (npm audit)');
     console.log();
     console.log('Multi-Repository (FEAT-006):');
     console.log('  --multi-repo             Analyze all configured repositories');
@@ -1572,6 +1586,144 @@ async function compareVersions(args) {
         console.log(JSON.stringify(comparison, null, 2));
     } else {
         console.log(manager.formatComparison(comparison));
+    }
+}
+
+/**
+ * Run dependency scan (FEAT-002)
+ * @param {string[]} args - Command line arguments
+ */
+async function runDependencyScan(args) {
+    console.log('📦 Dependency Context Scanner');
+    console.log('═'.repeat(60));
+    console.log();
+
+    // Parse options
+    const depthIndex = args.findIndex(arg => arg === '--dependency-depth');
+    const depth = depthIndex !== -1 && args[depthIndex + 1]
+        ? parseInt(args[depthIndex + 1], 10)
+        : 1;
+
+    const includeTypes = args.includes('--include-types');
+    const checkSecurity = args.includes('--check-security');
+
+    try {
+        // Initialize scanner
+        const scanner = new DependencyScanner(process.cwd(), {
+            depth,
+            includeTypes,
+            checkSecurity
+        });
+
+        // Initialize import tracker
+        const tracker = new ImportTracker(process.cwd());
+        
+        console.log('🔍 Scanning source files for imports...');
+        const activeImports = tracker.trackImports();
+        
+        console.log(`📋 Found ${activeImports.length} actively imported packages`);
+        console.log();
+        
+        console.log('🔍 Analyzing dependencies...');
+        const analysis = await scanner.analyze(activeImports);
+        
+        // Display results
+        console.log('═'.repeat(60));
+        console.log('📊 DEPENDENCY ANALYSIS REPORT');
+        console.log('═'.repeat(60));
+        console.log();
+        
+        console.log(`Total dependencies: ${analysis.summary.totalDependencies}`);
+        console.log(`Installed: ${analysis.summary.installedDependencies}`);
+        console.log(`Missing: ${analysis.summary.missingDependencies}`);
+        console.log(`Active in codebase: ${analysis.summary.activeDependencies}`);
+        console.log(`Total tokens: ${analysis.summary.totalTokens.toLocaleString()}`);
+        
+        if (analysis.summary.securityIssues > 0) {
+            console.log(`⚠️  Security issues: ${analysis.summary.securityIssues}`);
+        }
+        console.log();
+
+        // Display table
+        console.log('─'.repeat(80));
+        console.log('Package'.padEnd(30) + 'Version'.padEnd(12) + 'Tokens'.padStart(12) + 'Status'.padStart(10) + 'Security'.padStart(10));
+        console.log('─'.repeat(80));
+
+        for (const dep of analysis.dependencies.slice(0, 20)) {
+            const active = dep.active ? '✓' : ' ';
+            const security = dep.security?.status || 'unknown';
+            const securityIcon = security === 'ok' ? '✅' : security === 'review' ? '⚠️' : '❓';
+            
+            console.log(
+                `${active} ${dep.name}`.substring(0, 30).padEnd(30) +
+                dep.version.substring(0, 10).padEnd(12) +
+                dep.tokens.toLocaleString().padStart(12) +
+                dep.status.padStart(10) +
+                securityIcon.padStart(8)
+            );
+        }
+
+        if (analysis.dependencies.length > 20) {
+            console.log(`... and ${analysis.dependencies.length - 20} more dependencies`);
+        }
+        console.log();
+
+        // Display security alerts
+        const securityIssues = analysis.dependencies.filter(d => 
+            d.security?.vulnerabilities?.length > 0
+        );
+
+        if (securityIssues.length > 0) {
+            console.log('⚠️  SECURITY ALERTS:');
+            console.log('─'.repeat(60));
+            
+            for (const dep of securityIssues) {
+                for (const vuln of dep.security.vulnerabilities) {
+                    console.log(`  - ${dep.name}@${dep.version}: ${vuln.severity.toUpperCase()} - ${vuln.title}`);
+                    if (vuln.fixAvailable) {
+                        console.log(`    💡 Fix available - consider upgrading`);
+                    }
+                }
+            }
+            console.log();
+        }
+
+        // Generate dependency context
+        console.log('📄 Generating dependency context...');
+        const context = scanner.generateContext(analysis, activeImports);
+
+        // Write to file
+        const outputPath = resolve(process.cwd(), 'dependency-context.json');
+        const fs = await import('fs');
+        fs.writeFileSync(outputPath, JSON.stringify(context, null, 2));
+
+        const contextTokens = JSON.stringify(context).length / 4; // Rough estimate
+        console.log(`✅ dependency-context.json created (~${Math.round(contextTokens).toLocaleString()} tokens)`);
+        console.log(`   Active dependencies: ${analysis.summary.activeDependencies}`);
+        console.log(`   Total tokens in dependencies: ${analysis.summary.totalTokens.toLocaleString()}`);
+        console.log();
+
+        // Display type definitions if extracted
+        if (includeTypes && analysis.summary.typesExtracted > 0) {
+            console.log(`📝 TypeScript definitions extracted: ${analysis.summary.typesExtracted} files`);
+            console.log();
+        }
+
+        // Display largest dependencies
+        if (analysis.summary.largestDependencies.length > 0) {
+            console.log('🏆 LARGEST DEPENDENCIES BY TOKEN COUNT:');
+            console.log('─'.repeat(40));
+            for (const dep of analysis.summary.largestDependencies.slice(0, 5)) {
+                console.log(`  ${dep.name.padEnd(25)} ${dep.tokens.toLocaleString().padStart(10)} tokens`);
+            }
+            console.log();
+        }
+
+    } catch (error) {
+        console.error('❌ Dependency scan failed:', error.message);
+        console.error();
+        console.error('Make sure you are in a Node.js project with package.json and node_modules.');
+        process.exit(1);
     }
 }
 
