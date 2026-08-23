@@ -9,6 +9,7 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  workflow_dispatch:
 
 # Concurrency: cancel in-progress runs for same branch/PR
 concurrency:
@@ -142,6 +143,8 @@ jobs:
           if-no-files-found: ignore
 
   # CodeQL analysis job (security scanning)
+  # Note: This runs CodeQL as part of CI for fast feedback
+  # The standalone codeql.yml runs on schedule and main branch pushes
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest

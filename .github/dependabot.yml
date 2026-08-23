@@ -51,8 +51,6 @@ updates:
       - hakkisagdic
     # PR branch naming
     branch-name-separator: '-'
-    # Milestone for tracking
-    milestone: 1
     # Ignore specific packages that need manual updates
     ignore:
       # Express 5.x is intentional (modern features)

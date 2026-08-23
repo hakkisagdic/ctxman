@@ -1,5 +1,6 @@
 # Release Workflow for ctxman
 # Automated release with changelog generation and semantic versioning
+# Triggers npm-publish.yml via release event for npm publishing with OIDC
 
 name: Release
 
@@ -115,6 +116,7 @@ jobs:
         run: npm run lint
 
   # Create GitHub Release
+  # This triggers npm-publish.yml via the release: created event
   create-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
@@ -140,34 +142,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Publish to npm (triggers npm-publish.yml)
-  publish-npm:
-    name: Publish to npm
+  # Summary job for branch protection
+  release-success:
+    name: Release Success
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     needs: [prepare, test, create-release]
-
+    if: always()
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Setup Node.js 22.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-          registry-url: https://registry.npmjs.org/
-
-      - name: Install npm latest
-        run: npm install -g npm@latest
-
-      - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
-
-      - name: Publish to npm
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Check all jobs passed
+        run: |
+          if [[ "${{ needs.test.result }}" != "success" || "${{ needs.create-release.result }}" != "success" ]]; then
+            echo "::error::One or more release jobs failed"
+            exit 1
+          fi
+          echo "Release created successfully!"
+          echo "NPM publishing will be handled by npm-publish.yml workflow"
