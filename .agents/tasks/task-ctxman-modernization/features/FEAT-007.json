@@ -1,0 +1,30 @@
+{
+  "id": "FEAT-007",
+  "type": "chore",
+  "description": "Add commitlint and improve lint-staged configuration for code quality enforcement",
+  "status": "completed",
+  "steps": [
+    "Install @commitlint/cli and @commitlint/config-conventional",
+    "Create commitlint.config.js with conventional commits configuration",
+    "Update .husky/pre-commit with proper lint-staged configuration",
+    "Create .lintstagedrc.json with file-specific lint commands",
+    "Add commit-msg hook for commitlint in .husky/commit-msg",
+    "Update package.json with commitlint devDependencies",
+    "Test pre-commit and commit-msg hooks"
+  ],
+  "acceptance_criteria": [
+    "commitlint.config.js exists with conventional commits config",
+    ".lintstagedrc.json exists with proper configuration",
+    ".husky/commit-msg exists and runs commitlint",
+    "Pre-commit hook runs lint-staged correctly",
+    "Commit messages are validated against conventional format"
+  ],
+  "verification": [
+    "Verify commitlint.config.js exists",
+    "Verify .lintstagedrc.json exists",
+    "Verify .husky/commit-msg exists",
+    "Test with invalid commit message to verify rejection"
+  ],
+  "blocked_reason": null,
+  "findings": "Successfully implemented commitlint with conventional commits config and lint-staged with file-specific lint commands. All 952 tests pass. Commit message validation tested and working - invalid messages are properly rejected with helpful error messages."
+}

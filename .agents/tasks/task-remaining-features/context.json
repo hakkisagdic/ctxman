@@ -1,0 +1,29 @@
+{
+  "project_type": "Node.js CLI Tool with Desktop App (Electron + Vue 3)",
+  "language": "JavaScript (ES6+), with Vue 3 for desktop app",
+  "build_system": "npm with Vitest for testing, Vite for desktop app, Makefile for Debian packages",
+  "test_framework": "Vitest with v8 coverage",
+  "build_command": "npm run build (no-op for CLI)",
+  "test_command": "npm test (vitest run)",
+  "verification_instructions": "1. Run npm test to verify all tests pass 2. Run npm run lint to verify linting 3. Test CLI: node bin/cli.js --help",
+  "snapshot_or_generated_files": "No snapshot files. Generated files are user outputs, not checked in",
+  "setup_instructions": "1. npm install 2. Tests should pass (1121+ tests)",
+  "environment_constraints": "Node.js >=20.0.0 required. Project has existing test infrastructure with vitest.",
+  "contribution_requirements": "Pre-commit hook runs lint-staged. Pre-push hook runs npm test.",
+  "key_patterns": "ES6 modules (type: module in package.json). Export pattern: index.js exports public API. Core modules in lib/: analyzers, parsers, formatters, utils, core, plugins. Test files in test/ with *.test.js naming.",
+  "relevant_files": [
+    "bin/cli.js",
+    "lib/analyzers/token-calculator.js",
+    "lib/analyzers/method-analyzer.js",
+    "lib/core/Scanner.js",
+    "lib/ui/dashboard.js",
+    "lib/utils/profile-manager.js",
+    "test/"
+  ],
+  "directory_structure": "Root: CLI tool entry points (index.js, ctxman.js, bin/cli.js). lib/: core modules (analyzers, parsers, formatters, utils, core/, plugins/, api/, cache/, watch/, rag/, integrations/). test/: 77+ test files. docs/: documentation. docs/specs/features/: feature specifications.",
+  "existing_implementations": {
+    "dashboard": "lib/ui/dashboard.js exists as Ink-based React component. Spec requires text-based dashboard with ASCII charts for terminal output.",
+    "dependency_scanner": "Not implemented. Need to create lib/analyzers/dependency-scanner.js per spec in docs/specs/features/008-dependency-scanner.md",
+    "typescript_migration_spec": "Exists at docs/specs/modernization/003-typescript-migration.md. Needs update with detailed incremental migration guide."
+  }
+}

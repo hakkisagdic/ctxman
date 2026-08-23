@@ -1,0 +1,381 @@
+{
+  "generated": "2026-08-23T01:41:25.263Z",
+  "projectRoot": "/projects/sandbox/ctxman",
+  "summary": {
+    "totalDependencies": 29,
+    "activeDependencies": 18,
+    "totalTokens": 17716208,
+    "securityIssues": 0
+  },
+  "packages": [
+    {
+      "name": "llama3-tokenizer-js",
+      "version": "1.2.0",
+      "active": true,
+      "tokens": 6698817,
+      "security": "skipped",
+      "imports": [
+        "*"
+      ],
+      "usedIn": [
+        "lib/utils/tokenizer-adapter.js"
+      ]
+    },
+    {
+      "name": "tiktoken",
+      "version": "1.0.22",
+      "active": true,
+      "tokens": 4012229,
+      "security": "skipped",
+      "imports": [
+        "*",
+        "tiktoken"
+      ],
+      "usedIn": [
+        "lib/utils/token-utils.js",
+        "lib/utils/tokenizer-adapter.js",
+        "test/setup.js",
+        "test/token-utils-tiktoken.test.js",
+        "test/tokenizer-adapter-advanced.test.js"
+      ]
+    },
+    {
+      "name": "@xenova/transformers",
+      "version": "2.17.2",
+      "active": true,
+      "tokens": 1156628,
+      "security": "skipped",
+      "imports": [
+        "pipeline"
+      ],
+      "usedIn": [
+        "lib/rag/EmbeddingProvider.js"
+      ]
+    },
+    {
+      "name": "@anthropic-ai/tokenizer",
+      "version": "0.0.4",
+      "active": true,
+      "tokens": 894533,
+      "security": "skipped",
+      "imports": [
+        "*"
+      ],
+      "usedIn": [
+        "lib/utils/tokenizer-adapter.js"
+      ]
+    },
+    {
+      "name": "vue",
+      "version": "3.5.41",
+      "active": true,
+      "tokens": 697246,
+      "security": "skipped",
+      "imports": [
+        "createApp"
+      ],
+      "usedIn": [
+        "desktop-app/renderer/main.js"
+      ]
+    },
+    {
+      "name": "vitest",
+      "version": "4.1.11",
+      "active": true,
+      "tokens": 483223,
+      "security": "skipped",
+      "imports": [
+        "describe",
+        "it",
+        "expect",
+        "vi",
+        "beforeEach",
+        "test",
+        "afterEach",
+        "beforeAll",
+        "afterAll",
+        "defineConfig",
+        "defineWorkspace"
+      ],
+      "usedIn": [
+        "desktop-app/test/App.test.js",
+        "desktop-app/test/StatsPanel.test.js",
+        "test/ai-suggester.test.js",
+        "test/analyzer-coverage.test.js",
+        "test/api-surface.test.js"
+      ]
+    },
+    {
+      "name": "@vue/test-utils",
+      "version": "2.4.11",
+      "active": true,
+      "tokens": 289107,
+      "security": "skipped",
+      "imports": [
+        "mount"
+      ],
+      "usedIn": [
+        "desktop-app/test/App.test.js",
+        "desktop-app/test/StatsPanel.test.js"
+      ]
+    },
+    {
+      "name": "zod",
+      "version": "4.4.3",
+      "active": true,
+      "tokens": 226259,
+      "security": "skipped",
+      "imports": [
+        "z"
+      ],
+      "usedIn": [
+        "lib/api/mcp/server.js"
+      ]
+    },
+    {
+      "name": "@modelcontextprotocol/sdk",
+      "version": "1.30.0",
+      "active": true,
+      "tokens": 113050,
+      "security": "skipped",
+      "imports": [
+        "Server",
+        "CallToolRequestSchema",
+        "ListToolsRequestSchema",
+        "ListResourcesRequestSchema",
+        "ReadResourceRequestSchema",
+        "ListResourceTemplatesRequestSchema",
+        "ListPromptsRequestSchema",
+        "GetPromptRequestSchema",
+        "*",
+        "StreamableHTTPServerTransport"
+      ],
+      "usedIn": [
+        "lib/api/mcp/server.js",
+        "lib/api/mcp/transports/HttpSseTransport.js",
+        "test/mcp-tools.test.js"
+      ]
+    },
+    {
+      "name": "@lancedb/lancedb",
+      "version": "0.23.0",
+      "active": true,
+      "tokens": 82758,
+      "security": "skipped",
+      "imports": [
+        "* as lancedb"
+      ],
+      "usedIn": [
+        "lib/rag/stores/LanceDBStore.js"
+      ]
+    },
+    {
+      "name": "ink",
+      "version": "6.8.0",
+      "active": true,
+      "tokens": 38300,
+      "security": "skipped",
+      "imports": [
+        "*",
+        "Box",
+        "Text",
+        "useInput",
+        "useStdin"
+      ],
+      "usedIn": [
+        "bin/cli.js",
+        "lib/ui/dashboard.js",
+        "lib/ui/init-wizard-ui.js",
+        "lib/ui/select-input.js",
+        "lib/ui/template-selector.js"
+      ]
+    },
+    {
+      "name": "react",
+      "version": "19.2.8",
+      "active": true,
+      "tokens": 37736,
+      "security": "skipped",
+      "imports": [
+        "*",
+        "React",
+        "useState",
+        "useCallback",
+        "useMemo",
+        "useEffect"
+      ],
+      "usedIn": [
+        "bin/cli.js",
+        "lib/ui/dashboard.js",
+        "lib/ui/init-wizard-ui.js",
+        "lib/ui/select-input.js",
+        "lib/ui/template-selector.js"
+      ]
+    },
+    {
+      "name": "express",
+      "version": "5.2.1",
+      "active": true,
+      "tokens": 20111,
+      "security": "skipped",
+      "imports": [
+        "express",
+        "Router"
+      ],
+      "usedIn": [
+        "lib/api/mcp/transports/HttpSseTransport.js",
+        "test/import-tracker.test.js",
+        "test/mcp-transport.test.js"
+      ]
+    },
+    {
+      "name": "@toon-format/toon",
+      "version": "0.7.3",
+      "active": true,
+      "tokens": 19519,
+      "security": "skipped",
+      "imports": [
+        "*"
+      ],
+      "usedIn": [
+        "lib/formatters/toon-formatter.js",
+        "test/toon-formatter-advanced.test.js"
+      ]
+    },
+    {
+      "name": "supertest",
+      "version": "7.2.2",
+      "active": true,
+      "tokens": 11411,
+      "security": "skipped",
+      "imports": [
+        "request",
+        "*"
+      ],
+      "usedIn": [
+        "test/mcp-transport.test.js",
+        "test/setup.js"
+      ]
+    },
+    {
+      "name": "cors",
+      "version": "2.8.6",
+      "active": true,
+      "tokens": 4792,
+      "security": "skipped",
+      "imports": [
+        "cors"
+      ],
+      "usedIn": [
+        "lib/api/mcp/transports/HttpSseTransport.js"
+      ]
+    },
+    {
+      "name": "ink-text-input",
+      "version": "6.0.0",
+      "active": true,
+      "tokens": 2727,
+      "security": "skipped",
+      "imports": [
+        "TextInput",
+        "*"
+      ],
+      "usedIn": [
+        "lib/ui/init-wizard-ui.js",
+        "test/test-ink-ui.js"
+      ]
+    },
+    {
+      "name": "ink-spinner",
+      "version": "5.0.0",
+      "active": true,
+      "tokens": 1324,
+      "security": "skipped",
+      "imports": [
+        "Spinner",
+        "*"
+      ],
+      "usedIn": [
+        "lib/ui/init-wizard-ui.js",
+        "test/test-ink-ui.js"
+      ]
+    },
+    {
+      "name": "prettier",
+      "version": "3.9.6",
+      "active": false,
+      "tokens": 1693122,
+      "security": "skipped"
+    },
+    {
+      "name": "vite",
+      "version": "7.3.6",
+      "active": false,
+      "tokens": 623322,
+      "security": "skipped"
+    },
+    {
+      "name": "@vitest/ui",
+      "version": "4.1.11",
+      "active": false,
+      "tokens": 319429,
+      "security": "skipped"
+    },
+    {
+      "name": "eslint",
+      "version": "9.39.5",
+      "active": false,
+      "tokens": 214777,
+      "security": "skipped"
+    },
+    {
+      "name": "lint-staged",
+      "version": "17.3.0",
+      "active": false,
+      "tokens": 41708,
+      "security": "skipped"
+    },
+    {
+      "name": "c8",
+      "version": "10.1.3",
+      "active": false,
+      "tokens": 10618,
+      "security": "skipped"
+    },
+    {
+      "name": "@vitest/coverage-v8",
+      "version": "4.1.11",
+      "active": false,
+      "tokens": 6137,
+      "security": "skipped"
+    },
+    {
+      "name": "@playwright/test",
+      "version": "1.62.1",
+      "active": false,
+      "tokens": 5993,
+      "security": "skipped"
+    },
+    {
+      "name": "@commitlint/cli",
+      "version": "21.2.2",
+      "active": false,
+      "tokens": 5067,
+      "security": "skipped"
+    },
+    {
+      "name": "@commitlint/config-conventional",
+      "version": "21.2.2",
+      "active": false,
+      "tokens": 3536,
+      "security": "skipped"
+    },
+    {
+      "name": "@vitejs/plugin-vue",
+      "version": "6.0.8",
+      "active": false,
+      "tokens": 2729,
+      "security": "skipped"
+    }
+  ]
+}
