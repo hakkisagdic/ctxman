@@ -13,6 +13,7 @@ import TemplateManager from '../lib/utils/template-manager.js';
 import ProfileManager from '../lib/utils/profile-manager.js';
 import { AISuggester } from '../lib/analyzers/ai-suggester.js';
 import MultiRepoManager from '../lib/utils/multi-repo-manager.js';
+import SnapshotManager from '../lib/utils/snapshot-manager.js';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
@@ -100,6 +101,32 @@ async function main() {
     // Check for AI suggestions (FEAT-005)
     if (args.includes('--ai-suggest')) {
         await runAISuggest(args);
+        return;
+    }
+
+    // Check for snapshot commands (FEAT-003)
+    if (args.includes('--snapshot')) {
+        await runSnapshot(args);
+        return;
+    }
+
+    if (args.includes('--list-snapshots')) {
+        await listSnapshots();
+        return;
+    }
+
+    if (args.includes('--diff-last')) {
+        await runDiffLast(args);
+        return;
+    }
+
+    if (args.includes('--diff-snapshot')) {
+        await runDiffSnapshot(args);
+        return;
+    }
+
+    if (args.includes('--snapshot-trend')) {
+        await runSnapshotTrend(args);
         return;
     }
 
@@ -487,6 +514,15 @@ function printHelp() {
     console.log();
     console.log('Cost Estimation (FEAT-010):');
     console.log('  --estimate-cost          Show cost estimates for all LLM providers');
+    console.log();
+    console.log('Snapshot & Diff (FEAT-003):');
+    console.log('  --snapshot [message]     Create a snapshot of current token state');
+    console.log('  --list-snapshots         List all saved snapshots');
+    console.log('  --diff-last              Compare current state with last snapshot');
+    console.log('  --diff-snapshot <id1> <id2>  Compare two specific snapshots');
+    console.log('  --snapshot-trend         Show token growth trend across snapshots');
+    console.log('    --limit N              Limit snapshots to analyze (default: 10)');
+    console.log('    --json                 Output in JSON format');
     console.log();
     console.log('Multi-Repository (FEAT-006):');
     console.log('  --multi-repo             Analyze all configured repositories');
@@ -1240,6 +1276,177 @@ function runFormatConversion(args) {
     } catch (error) {
         console.error('❌ Conversion failed:', error.message);
         process.exit(1);
+    }
+}
+
+/**
+ * Create a snapshot (FEAT-003)
+ * @param {string[]} args - Command line arguments
+ */
+async function runSnapshot(args) {
+    console.log('📸 Creating Snapshot');
+    console.log('═'.repeat(60));
+    console.log();
+
+    // Get message from arguments
+    const snapshotIndex = args.findIndex(arg => arg === '--snapshot');
+    let message = '';
+    if (snapshotIndex !== -1 && args[snapshotIndex + 1] && !args[snapshotIndex + 1].startsWith('-')) {
+        message = args[snapshotIndex + 1];
+    }
+
+    // Run analyzer silently
+    const originalLog = console.log;
+    const logs = [];
+    console.log = (...args) => logs.push(args);
+
+    const analyzer = new TokenAnalyzer(process.cwd(), {
+        simple: true,
+        verbose: false,
+        dashboard: true
+    });
+    const stats = analyzer.run();
+
+    console.log = originalLog;
+
+    if (!stats || !stats.totalTokens) {
+        console.error('❌ Failed to analyze repository');
+        process.exit(1);
+    }
+
+    // Create snapshot
+    const manager = new SnapshotManager(process.cwd());
+    const { id, snapshot } = await manager.createSnapshot(stats, message);
+
+    // Format output
+    console.log('\n📸 Snapshot created:', id);
+    console.log('   Files:', snapshot.summary.totalFiles.toLocaleString());
+    console.log('   Tokens:', snapshot.summary.totalTokens.toLocaleString());
+    if (message) {
+        console.log('   Message:', message);
+    }
+    console.log();
+}
+
+/**
+ * List all snapshots (FEAT-003)
+ */
+async function listSnapshots() {
+    const manager = new SnapshotManager(process.cwd());
+    const output = await manager.listSnapshots();
+    console.log(output);
+}
+
+/**
+ * Compare with last snapshot (FEAT-003)
+ * @param {string[]} args - Command line arguments
+ */
+async function runDiffLast(args) {
+    console.log('📊 Comparing with Last Snapshot');
+    console.log('═'.repeat(60));
+    console.log();
+
+    const json = args.includes('--json');
+
+    // Run current analysis
+    const originalLog = console.log;
+    const logs = [];
+    console.log = (...args) => logs.push(args);
+
+    const analyzer = new TokenAnalyzer(process.cwd(), {
+        simple: true,
+        verbose: false,
+        dashboard: true
+    });
+    const stats = analyzer.run();
+
+    console.log = originalLog;
+
+    if (!stats || !stats.totalTokens) {
+        console.error('❌ Failed to analyze repository');
+        process.exit(1);
+    }
+
+    // Compare with last snapshot
+    const manager = new SnapshotManager(process.cwd());
+    const comparison = await manager.compareWithLast(stats);
+
+    if (!comparison) {
+        console.log('\n⚠️  No previous snapshots found.');
+        console.log('   Create one with: ctxman --snapshot "message"\n');
+        return;
+    }
+
+    if (json) {
+        console.log(JSON.stringify(comparison, null, 2));
+    } else {
+        console.log(manager.formatDiff(comparison));
+    }
+}
+
+/**
+ * Compare two specific snapshots (FEAT-003)
+ * @param {string[]} args - Command line arguments
+ */
+async function runDiffSnapshot(args) {
+    const diffIndex = args.findIndex(arg => arg === '--diff-snapshot');
+    const id1 = diffIndex !== -1 && args[diffIndex + 1] ? args[diffIndex + 1] : null;
+    const id2 = diffIndex !== -1 && args[diffIndex + 2] ? args[diffIndex + 2] : null;
+
+    const json = args.includes('--json');
+
+    if (!id1 || !id2) {
+        console.error('❌ Two snapshot IDs required');
+        console.error('   Usage: ctxman --diff-snapshot <id1> <id2>');
+        console.error('   Example: ctxman --diff-snapshot snap-001 snap-002');
+        process.exit(1);
+    }
+
+    const manager = new SnapshotManager(process.cwd());
+    const comparison = await manager.compareSnapshots(id1, id2);
+
+    if (!comparison) {
+        console.error('❌ One or both snapshots not found');
+        console.error(`   ID1: ${id1}`);
+        console.error(`   ID2: ${id2}`);
+        process.exit(1);
+    }
+
+    if (json) {
+        console.log(JSON.stringify(comparison, null, 2));
+    } else {
+        console.log(manager.formatDiff(comparison));
+    }
+}
+
+/**
+ * Show snapshot trend (FEAT-003)
+ * @param {string[]} args - Command line arguments
+ */
+async function runSnapshotTrend(args) {
+    console.log('📈 Snapshot Trend Analysis');
+    console.log('═'.repeat(60));
+    console.log();
+
+    const json = args.includes('--json');
+    const limitIndex = args.findIndex(arg => arg === '--limit');
+    const limit = limitIndex !== -1 && args[limitIndex + 1]
+        ? parseInt(args[limitIndex + 1], 10)
+        : 10;
+
+    const manager = new SnapshotManager(process.cwd());
+    const trend = await manager.getTrend(limit);
+
+    if (!trend) {
+        console.log('\n⚠️  Need at least 2 snapshots for trend analysis.');
+        console.log('   Create snapshots with: ctxman --snapshot "message"\n');
+        return;
+    }
+
+    if (json) {
+        console.log(JSON.stringify(trend, null, 2));
+    } else {
+        console.log(manager.formatTrend(trend));
     }
 }
 
