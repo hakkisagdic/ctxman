@@ -6,7 +6,7 @@
  * @module test/ide-integration.test
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, _beforeEach } from 'vitest';
 
 describe('IDE Integration', () => {
   describe('VS Code Extension', () => {

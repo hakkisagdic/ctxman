@@ -15,13 +15,13 @@ global.console = {
 // This ensures tests don't crash on import, but logic might fail if not handled
 try {
   await import('tiktoken');
-} catch (e) {
+} catch (_e) {
   // doMock is NOT hoisted — the fallback only applies when the import truly failed
   vi.doMock('tiktoken', () => ({
     default: {
       get_encoding: () => ({
         encode: (text) => new Uint32Array(text.length), // Dummy encoder
-        decode: (tokens) => 'decoded text',
+        decode: (_tokens) => 'decoded text',
         free: () => {},
       }),
     },
@@ -30,7 +30,7 @@ try {
 
 try {
   await import('supertest');
-} catch (e) {
+} catch (_e) {
   vi.doMock('supertest', () => ({
     default: () => ({
       get: () => ({ expect: () => Promise.resolve() }),

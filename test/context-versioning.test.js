@@ -2,9 +2,9 @@
  * Tests for Context Versioning (FEAT-012)
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, _vi } from 'vitest';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 import ContextVersioning, {
   VersionStorage,
   VersionDiffEngine,

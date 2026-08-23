@@ -2,7 +2,7 @@
  * Tests for Multi-Repository Manager (FEAT-006)
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, _vi } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import MultiRepoManager from '../lib/utils/multi-repo-manager.js';
@@ -38,7 +38,7 @@ describe('MultiRepoManager', () => {
       if (fs.existsSync(testConfigDir)) {
         fs.rmSync(testConfigDir, { recursive: true, force: true });
       }
-    } catch (e) {
+    } catch (_e) {
       // Ignore cleanup errors
     }
   });

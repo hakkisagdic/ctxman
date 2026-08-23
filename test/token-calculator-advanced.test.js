@@ -1,11 +1,11 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import TokenCalculator from '../lib/analyzers/token-calculator.js';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 import readline from 'readline';
 import ConfigUtils from '../lib/utils/config-utils.js';
 import TokenUtils from '../lib/utils/token-utils.js';
-import GitIgnoreParser from '../lib/parsers/gitignore-parser.js';
+import _GitIgnoreParser from '../lib/parsers/gitignore-parser.js';
 
 vi.mock('fs');
 vi.mock('readline');

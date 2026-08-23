@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Logger, getLogger, createLogger } from '../lib/utils/logger.js';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 
 vi.mock('fs');
 

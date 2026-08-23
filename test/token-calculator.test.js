@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, _afterEach } from 'vitest';
 import TokenCalculator from '../lib/analyzers/token-calculator.js';
 import TokenUtils from '../lib/utils/token-utils.js';
 import ConfigUtils from '../lib/utils/config-utils.js';
@@ -170,7 +170,7 @@ describe('TokenCalculator', () => {
 
   describe('Reporting', () => {
     test('saveDetailedReport writes to file', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const _consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
       calculator.saveDetailedReport([]);
 
       expect(fs.writeFileSync).toHaveBeenCalledWith(
@@ -180,7 +180,7 @@ describe('TokenCalculator', () => {
     });
 
     test('saveContextToFile writes to file', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const _consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
       calculator.saveContextToFile({});
 
       expect(fs.writeFileSync).toHaveBeenCalledWith(

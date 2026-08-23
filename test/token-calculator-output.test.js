@@ -3,9 +3,9 @@ import TokenCalculator from '../lib/analyzers/token-calculator.js';
 import TokenUtils from '../lib/utils/token-utils.js';
 import ConfigUtils from '../lib/utils/config-utils.js';
 import { LLMDetector } from '../lib/utils/llm-detector.js';
-import ClipboardUtils from '../lib/utils/clipboard-utils.js';
+import _ClipboardUtils from '../lib/utils/clipboard-utils.js';
 import fs from 'fs';
-import readline from 'readline';
+import _readline from 'readline';
 
 const { mockRl } = vi.hoisted(() => {
   return {

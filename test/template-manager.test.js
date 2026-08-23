@@ -217,7 +217,7 @@ describe('TemplateManager', () => {
     });
 
     it('should have required properties for each template', () => {
-      for (const [id, template] of Object.entries(BUILTIN_TEMPLATES)) {
+      for (const [_id, template] of Object.entries(BUILTIN_TEMPLATES)) {
         expect(template.name).toBeDefined();
         expect(template.description).toBeDefined();
         expect(typeof template.name).toBe('string');

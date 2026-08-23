@@ -1,8 +1,8 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, _afterEach } from 'vitest';
 import FormatConverter from '../lib/utils/format-converter.js';
 import FormatRegistry from '../lib/formatters/format-registry.js';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 
 vi.mock('fs');
 vi.mock('../lib/formatters/format-registry.js');

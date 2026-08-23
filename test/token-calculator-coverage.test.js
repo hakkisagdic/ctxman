@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import TokenCalculator from '../lib/analyzers/token-calculator.js';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 import readline from 'readline';
 import ClipboardUtils from '../lib/utils/clipboard-utils.js';
 import GitIngestFormatter from '../lib/formatters/gitingest-formatter.js';

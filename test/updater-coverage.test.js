@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import Updater from '../lib/utils/updater.js';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 import https from 'https';
 import { execSync } from 'child_process';
 import { EventEmitter } from 'events';
@@ -12,13 +12,13 @@ vi.mock('child_process');
 
 describe('Updater Coverage', () => {
   let updater;
-  let consoleLogSpy;
-  let consoleErrorSpy;
+  let _consoleLogSpy;
+  let _consoleErrorSpy;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    _consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    _consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // Mock package.json read
     fs.readFileSync.mockImplementation((p) => {
@@ -40,7 +40,7 @@ describe('Updater Coverage', () => {
       const mockReq = new EventEmitter();
       const mockRes = new EventEmitter();
 
-      https.get.mockImplementation((url, options, cb) => {
+      https.get.mockImplementation((_url, _options, cb) => {
         cb(mockRes);
         return mockReq;
       });
@@ -58,7 +58,7 @@ describe('Updater Coverage', () => {
       const mockReq = new EventEmitter();
       const mockRes = new EventEmitter();
 
-      https.get.mockImplementation((url, options, cb) => {
+      https.get.mockImplementation((_url, _options, cb) => {
         cb(mockRes);
         return mockReq;
       });
@@ -74,7 +74,7 @@ describe('Updater Coverage', () => {
     test('handles network errors', async () => {
       const mockReq = new EventEmitter();
 
-      https.get.mockImplementation((url, options, cb) => {
+      https.get.mockImplementation((_url, _options, _cb) => {
         return mockReq;
       });
 

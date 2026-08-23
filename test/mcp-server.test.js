@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import MCPServer from '../lib/api/mcp/server.js';
-import { Analyzer } from '../lib/core/Analyzer.js';
-import { ContextBuilder } from '../lib/core/ContextBuilder.js';
+import { Analyzer as _Analyzer } from '../lib/core/Analyzer.js';
+import { ContextBuilder as _ContextBuilder } from '../lib/core/ContextBuilder.js';
 
 // Mock dependencies
 vi.mock('@modelcontextprotocol/sdk/server/index.js', () => {
@@ -24,15 +24,15 @@ vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => {
 
 vi.mock('../lib/core/Analyzer.js', () => ({
   Analyzer: class {
-    analyze(files) {
-      return Promise.resolve({ files: [], stats: { totalFiles: 0, totalTokens: 0 } });
+    analyze(_files) {
+      return Promise.resolve({ _files: [], stats: { totalFiles: 0, totalTokens: 0 } });
     }
   },
 }));
 
 vi.mock('../lib/core/ContextBuilder.js', () => ({
   ContextBuilder: class {
-    build(analysis) {
+    build(_analysis) {
       return { metadata: {}, files: {}, content: 'Mock context' };
     }
   },

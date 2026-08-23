@@ -2,7 +2,7 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import GitUtils from '../lib/utils/git-utils.js';
 import { execSync } from 'child_process';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 import https from 'https';
 import { EventEmitter } from 'events';
 
@@ -105,7 +105,7 @@ describe('GitUtils Advanced Coverage', () => {
   describe('GitHub API & Fetching', () => {
     test('fetchFileFromGitHub handles errors', async () => {
       const mockReq = new EventEmitter();
-      https.get.mockImplementation((url, callback) => {
+      https.get.mockImplementation((_url, _callback) => {
         return mockReq;
       });
 
@@ -120,7 +120,7 @@ describe('GitUtils Advanced Coverage', () => {
       const mockRes = new EventEmitter();
       mockRes.statusCode = 404;
 
-      https.get.mockImplementation((url, callback) => {
+      https.get.mockImplementation((_url, callback) => {
         callback(mockRes);
         return mockReq;
       });

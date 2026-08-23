@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, _afterEach } from 'vitest';
 import { ImportTracker } from '../lib/analyzers/import-tracker.js';
 import fs from 'fs';
 import path from 'path';

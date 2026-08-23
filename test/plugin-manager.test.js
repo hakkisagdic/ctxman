@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, __vi, beforeEach, afterEach } from 'vitest';
 import { PluginManager } from '../lib/plugins/PluginManager.js';
 import fs from 'fs';
 import path from 'path';

@@ -1,8 +1,8 @@
 import { Indexer } from '../lib/rag/Indexer.js';
 import { VectorStoreFactory } from '../lib/rag/VectorStoreFactory.js';
-import { EmbeddingProvider } from '../lib/rag/EmbeddingProvider.js';
+import { EmbeddingProvider as _EmbeddingProvider } from '../lib/rag/EmbeddingProvider.js';
 import { FileDataSource } from '../lib/rag/sources/FileDataSource.js';
-import path from 'path';
+import _path from 'path';
 
 async function main() {
   console.log('🚀 Starting Self-Reflection (Indexing Ctxman)...');
@@ -34,7 +34,7 @@ async function main() {
     // Trigger init explicitly to catch errors early
     await provider.init();
     console.log('✅ Model loaded.');
-  } catch (e) {
+  } catch (_e) {
     console.log(`⚠️ Local embedding failed: ${e.message}`);
     console.log('⚠️ Falling back to MockEmbeddingProvider for structure test.');
     provider = new MockEmbeddingProvider();

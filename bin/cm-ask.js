@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 import { VectorStoreFactory } from '../lib/rag/VectorStoreFactory.js';
-import { EmbeddingProvider, TransformersEmbeddingProvider } from '../lib/rag/EmbeddingProvider.js';
+import { TransformersEmbeddingProvider } from '../lib/rag/EmbeddingProvider.js';
 import { Indexer } from '../lib/rag/Indexer.js';
 import { FileDataSource } from '../lib/rag/sources/FileDataSource.js';
 import path from 'path';
 import fs from 'fs/promises';
-import { TokenizerManager } from '../lib/utils/tokenizer-adapter.js';
 
 async function main() {
   const args = process.argv.slice(2);

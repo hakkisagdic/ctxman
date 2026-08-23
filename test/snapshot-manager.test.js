@@ -2,9 +2,9 @@
  * Tests for Snapshot Manager (FEAT-003)
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, _vi } from 'vitest';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 import SnapshotManager, { SnapshotStore, SnapshotDiff } from '../lib/utils/snapshot-manager.js';
 
 const TEST_DIR = './test-snapshot-temp';

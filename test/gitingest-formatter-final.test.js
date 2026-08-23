@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import GitIngestFormatter from '../lib/formatters/gitingest-formatter.js';
-import path from 'path';
+import _path from 'path';
 import fs from 'fs';
 
 vi.mock('fs');

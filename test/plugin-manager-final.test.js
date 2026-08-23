@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import PluginManager from '../lib/plugins/PluginManager.js';
-import path from 'path';
+import _path from 'path';
 
 vi.mock('../lib/utils/logger.js', () => ({
   getLogger: () => ({

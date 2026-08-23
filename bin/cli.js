@@ -207,7 +207,7 @@ async function main() {
     try {
       await runDashboard();
       return;
-    } catch (error) {
+    } catch (_error) {
       console.error('⚠️  Live dashboard failed.');
       console.error('   Error:', error.message);
       console.error('   Falling back to standard mode...\n');
@@ -226,7 +226,7 @@ async function main() {
     try {
       await runWizard();
       return;
-    } catch (error) {
+    } catch (_error) {
       // If wizard fails, fall through to normal mode
       console.error('⚠️  Interactive wizard mode failed.');
       console.error('   Error:', error.message);
@@ -253,7 +253,7 @@ async function main() {
         // Use template's target model if not explicitly set
         targetModel: options.targetModel || templateConfig.targetModel,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error(`❌ Template error: ${error.message}`);
       process.exit(1);
     }
@@ -275,7 +275,7 @@ async function main() {
         targetModel: options.targetModel || profileConfig.targetModel,
         methodLevel: options.methodLevel || profileConfig.methodLevel,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error(`❌ Profile error: ${error.message}`);
       process.exit(1);
     }
@@ -740,7 +740,7 @@ function createProfile(args) {
     console.log(`\n✅ Created profile '${profileName}'`);
     console.log(`   Location: ${filePath}\n`);
     console.log('   Edit the file to customize your team configuration.\n');
-  } catch (error) {
+  } catch (_error) {
     console.error(`❌ Failed to create profile: ${error.message}`);
     process.exit(1);
   }
@@ -761,7 +761,7 @@ function exportProfile(args) {
   try {
     const profile = manager.export(profileName);
     console.log(JSON.stringify(profile, null, 2));
-  } catch (error) {
+  } catch (_error) {
     console.error(`❌ Failed to export profile: ${error.message}`);
     process.exit(1);
   }
@@ -908,7 +908,7 @@ async function runWizard() {
         },
       })
     );
-  } catch (error) {
+  } catch (_error) {
     throw error; // Re-throw to be caught by main()
   }
 }
@@ -953,7 +953,7 @@ async function runDashboard() {
         },
       })
     );
-  } catch (error) {
+  } catch (_error) {
     throw error; // Re-throw to be caught by main()
   }
 }
@@ -1033,7 +1033,7 @@ async function runInitWizard(args) {
         },
       })
     );
-  } catch (error) {
+  } catch (_error) {
     console.error('❌ Init wizard failed:', error.message);
     console.error(error.stack);
     process.exit(1);
@@ -1044,7 +1044,7 @@ async function runInitWizard(args) {
  * Run cost estimation for all LLM providers (FEAT-010)
  * @param {string[]} args - Command line arguments
  */
-function runCostEstimation(args) {
+function runCostEstimation(_args) {
   console.log('💰 LLM Cost Estimator');
   console.log('═'.repeat(60));
   console.log();
@@ -1107,7 +1107,7 @@ function addRepo(args) {
     console.log(`\n✅ Added repository: ${repo.alias}`);
     console.log(`   Path: ${repo.path}`);
     console.log(`   ID: ${repo.id}\n`);
-  } catch (error) {
+  } catch (_error) {
     console.error(`❌ Failed to add repository: ${error.message}`);
     process.exit(1);
   }
@@ -1192,7 +1192,7 @@ async function runMultiRepoAnalysis(options) {
  * @param {object} results - Multi-repo analysis results
  * @param {object} options - Generation options
  */
-async function generateMultiRepoDigest(results, options) {
+async function generateMultiRepoDigest(results, _options) {
   const fs = await import('fs');
   const path = await import('path');
 
@@ -1332,7 +1332,7 @@ function runFormatConversion(args) {
     console.log(`   Output size: ${result.outputSize.toLocaleString()} chars`);
     console.log(`   Savings:     ${result.savingsPercent} (${result.savings} chars)`);
     console.log(`   Output file: ${result.outputFile}`);
-  } catch (error) {
+  } catch (_error) {
     console.error('❌ Conversion failed:', error.message);
     process.exit(1);
   }
@@ -1731,7 +1731,7 @@ async function runDependencyScan(args) {
       }
       console.log();
     }
-  } catch (error) {
+  } catch (_error) {
     console.error('❌ Dependency scan failed:', error.message);
     console.error();
     console.error('Make sure you are in a Node.js project with package.json and node_modules.');
@@ -1769,7 +1769,7 @@ async function runPerfDashboard(args) {
 
   try {
     await dashboard.runAnalysis();
-  } catch (error) {
+  } catch (_error) {
     // Continue even if analysis fails - we may have historical data
   }
 

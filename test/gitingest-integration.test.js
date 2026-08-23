@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import fs from 'fs';
+import _fs from 'fs';
 import path from 'path';
 import GitIngestFormatter from '../lib/formatters/gitingest-formatter.js';
 import TokenCalculator from '../lib/analyzers/token-calculator.js';

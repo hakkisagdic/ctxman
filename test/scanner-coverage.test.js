@@ -113,7 +113,7 @@ describe('Scanner Coverage', () => {
       return originalReaddirSync(dirPath, options);
     });
 
-    const files = scanner.scan();
+    const _files = scanner.scan();
     const stats = scanner.getStats();
 
     // Should have encountered an error

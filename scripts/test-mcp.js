@@ -30,7 +30,7 @@ server.stdout.on('data', (data) => {
       );
       process.exit(0);
     }
-  } catch (e) {
+  } catch (_e) {
     // Ignore partial chunks
   }
 });

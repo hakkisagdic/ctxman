@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, __beforeEach, afterEach } from 'vitest';
 
 import { HttpSseTransport } from '../lib/api/mcp/transports/HttpSseTransport.js';
-import express from 'express';
+import _express from 'express';
 import request from 'supertest';
 
 // Mock StreamableHTTPServerTransport

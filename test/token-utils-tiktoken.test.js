@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { describe, test, expect, vi, _beforeEach } from 'vitest';
 import TokenUtils from '../lib/utils/token-utils.js';
 
 // Mock tiktoken

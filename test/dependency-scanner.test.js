@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, _afterEach } from 'vitest';
 import { DependencyScanner } from '../lib/analyzers/dependency-scanner.js';
 import fs from 'fs';
 import path from 'path';
@@ -226,7 +226,7 @@ describe('DependencyScanner', () => {
     });
 
     test('should limit to max files', () => {
-      vi.mocked(fs.readdirSync).mockImplementation((dir) => {
+      vi.mocked(fs.readdirSync).mockImplementation((_dir) => {
         return Array.from({ length: 15 }, (_, i) => ({
           name: `file${i}.d.ts`,
           isDirectory: () => false,

@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, _afterEach } from 'vitest';
 import GitUtils from '../lib/utils/git-utils.js';
 import { execSync } from 'child_process';
 import fs from 'fs';

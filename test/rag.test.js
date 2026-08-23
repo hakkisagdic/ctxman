@@ -4,7 +4,7 @@ import { MockEmbeddingProvider } from '../lib/rag/EmbeddingProvider.js';
 import { Indexer } from '../lib/rag/Indexer.js';
 import { DataSourcePlugin } from '../lib/rag/DataSourcePlugin.js';
 import fs from 'fs/promises';
-import path from 'path';
+import _path from 'path';
 
 const TEST_DB_PATH = '.ctxman/test-rag-store';
 
@@ -34,7 +34,7 @@ describe('RAG System', () => {
     // Cleanup LanceDB files
     try {
       await fs.rm(TEST_DB_PATH, { recursive: true, force: true });
-    } catch (e) {}
+    } catch (_e) {}
   });
 
   it('should store and retrieve documents', async () => {

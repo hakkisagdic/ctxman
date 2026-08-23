@@ -1,7 +1,7 @@
 // Mock tiktoken if missing (Environment issue workaround)
 try {
   require.resolve('tiktoken');
-} catch (e) {
+} catch (_e) {
   vi.mock('tiktoken', () => ({
     default: {
       encoding_for_model: () => ({
@@ -49,7 +49,7 @@ describe('TokenizerManager Advanced Coverage', () => {
       // Force availability for testing selection logic if needed,
       // but initialize() should have handled it if mocks are correct.
 
-      const gptTokenizer = manager.getTokenizerForModel('gpt-4');
+      const _gptTokenizer = manager.getTokenizerForModel('gpt-4');
       // If tiktoken mock works, it should be available
       // If not, it might fall back to estimation.
       // Let's check what we get.

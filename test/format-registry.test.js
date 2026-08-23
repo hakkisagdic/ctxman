@@ -3,7 +3,7 @@ import FormatRegistry from '../lib/formatters/format-registry.js';
 
 vi.mock('../lib/formatters/toon-formatter.js', () => ({
   default: class {
-    encode(data) {
+    encode(_data) {
       return 'TOON_ENCODED';
     }
   },

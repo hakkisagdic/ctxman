@@ -1,9 +1,9 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, _afterEach } from 'vitest';
 import GitIngestFormatter from '../lib/formatters/gitingest-formatter.js';
-import MethodAnalyzer from '../lib/analyzers/method-analyzer.js';
+import _MethodAnalyzer from '../lib/analyzers/method-analyzer.js';
 import ConfigUtils from '../lib/utils/config-utils.js';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 
 vi.mock('fs');
 vi.mock('../lib/analyzers/method-analyzer.js');

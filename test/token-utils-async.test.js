@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll } from 'vitest';
+import { describe, test, expect, _beforeAll } from 'vitest';
 import TokenUtils from '../lib/utils/token-utils.js';
 
 describe('TokenUtils Async Coverage', () => {

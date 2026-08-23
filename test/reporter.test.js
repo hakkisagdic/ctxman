@@ -3,7 +3,7 @@ import { Reporter } from '../lib/core/Reporter.js';
 import FormatRegistry from '../lib/formatters/format-registry.js';
 import ClipboardUtils from '../lib/utils/clipboard-utils.js';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 
 // Mocks
 vi.mock('fs');

@@ -259,7 +259,7 @@ describe('MethodAnalyzer Coverage', () => {
                 init() {}
                 convenience init() {}
             `;
-      const result = analyzer.extractMethods(content, 'test.swift');
+      const _result = analyzer.extractMethods(content, 'test.swift');
       // The regex for init captures nothing in group 1 because 'init' is the keyword itself
       // Wait, looking at regex: `init\\s*\\(`, type: 'init'
       // processPatterns expects match[1] for methodName.

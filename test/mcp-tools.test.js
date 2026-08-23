@@ -4,7 +4,7 @@ import { Scanner } from '../lib/core/Scanner.js';
 import { Analyzer } from '../lib/core/Analyzer.js';
 import { ContextBuilder } from '../lib/core/ContextBuilder.js';
 import { GitClient } from '../lib/integrations/git/GitClient.js';
-import { CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import { CallToolRequestSchema as _CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import fs from 'fs';
 
 // Mock fs to prevent side effects in constructors
@@ -89,7 +89,7 @@ describe('MCPServer Tool Logic', () => {
   it('should handle generate_context', async () => {
     // CallTool handler is at index 6 (last handler)
     const handler = server.server.setRequestHandler.mock.calls[6][1];
-    const result = await handler({
+    const _result = await handler({
       params: { name: 'generate_context', arguments: { path: '/test', maxTokens: 1000 } },
     });
 

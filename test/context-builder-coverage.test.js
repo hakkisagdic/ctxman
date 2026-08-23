@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, _afterEach } from 'vitest';
 import ContextBuilder from '../lib/core/ContextBuilder.js';
 import { LLMDetector } from '../lib/utils/llm-detector.js';
 

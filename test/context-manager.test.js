@@ -3,7 +3,7 @@ import { main, generateDigestFromReport, generateDigestFromContext } from '../ct
 import TokenCalculator from '../lib/analyzers/token-calculator.js';
 import GitIngestFormatter from '../lib/formatters/gitingest-formatter.js';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 
 // Mock dependencies
 vi.mock('../lib/analyzers/token-calculator.js');
@@ -13,7 +13,7 @@ vi.mock('fs');
 describe('Ctxman CLI', () => {
   let consoleLogSpy;
   let consoleErrorSpy;
-  let processExitSpy;
+  let _processExitSpy;
 
   beforeEach(() => {
     // Reset mocks
@@ -24,7 +24,7 @@ describe('Ctxman CLI', () => {
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // Mock process.exit to throw error so we can catch it
-    processExitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
+    _processExitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
       throw new Error(`Process exit: ${code}`);
     });
 

@@ -1,9 +1,9 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, _afterEach } from 'vitest';
 import Updater from '../lib/utils/updater.js';
 import https from 'https';
 import fs from 'fs';
 import { execSync } from 'child_process';
-import path from 'path';
+import _path from 'path';
 import { EventEmitter } from 'events';
 
 vi.mock('https');
@@ -28,7 +28,7 @@ describe('Updater Advanced Coverage', () => {
   describe('Network Handling', () => {
     test('fetchJSON handles network errors', async () => {
       const mockReq = new EventEmitter();
-      https.get.mockImplementation((url, options, callback) => {
+      https.get.mockImplementation((_url, _options, _callback) => {
         return mockReq;
       });
 
@@ -42,7 +42,7 @@ describe('Updater Advanced Coverage', () => {
       const mockReq = new EventEmitter();
       const mockRes = new EventEmitter();
 
-      https.get.mockImplementation((url, options, callback) => {
+      https.get.mockImplementation((_url, _options, callback) => {
         callback(mockRes);
         return mockReq;
       });
@@ -97,7 +97,7 @@ describe('Updater Advanced Coverage', () => {
       execSync.mockReturnValue('updated');
 
       // Mock getCurrentVersion to return OLD version (verification failure)
-      const originalGetCurrentVersion = updater.getCurrentVersion;
+      const _originalGetCurrentVersion = updater.getCurrentVersion;
       updater.getCurrentVersion = vi.fn().mockReturnValue('1.0.0'); // Still old version
 
       const updateInfo = {

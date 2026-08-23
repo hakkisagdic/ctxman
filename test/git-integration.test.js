@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, _afterEach } from 'vitest';
 import GitUtils from '../lib/utils/git-utils.js';
 import { execSync } from 'child_process';
 import https from 'https';
@@ -86,7 +86,7 @@ describe('Git Integration Utilities', () => {
       };
 
       // Mock https.get
-      https.get.mockImplementation((url, options, callback) => {
+      https.get.mockImplementation((_url, _options, callback) => {
         const response = new EventEmitter();
         response.statusCode = 200;
 
@@ -110,7 +110,7 @@ describe('Git Integration Utilities', () => {
 
     test('handles API errors', async () => {
       // Mock https.get failure
-      https.get.mockImplementation((url, options, callback) => {
+      https.get.mockImplementation((_url, _options, _callback) => {
         const req = { on: vi.fn() };
         // Simulate error event on request
         const errorCallback = req.on.mock.calls.find((call) => call[0] === 'error')?.[1];

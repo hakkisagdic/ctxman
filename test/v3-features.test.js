@@ -55,7 +55,7 @@ describe('v3.0.0 Features', () => {
       const files = scanner.scan().slice(0, 10);
 
       const analyzer = new Analyzer();
-      const result = await analyzer.analyze(files);
+      const _result = await analyzer.analyze(files);
 
       const distribution = analyzer.getLanguageDistribution();
       expect(Array.isArray(distribution)).toBe(true);

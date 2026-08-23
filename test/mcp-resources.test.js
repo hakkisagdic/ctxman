@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, _afterEach } from 'vitest';
 import { ResourceProvider } from '../lib/api/mcp/resources.js';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 
 // Mock fs module
 vi.mock('fs', () => ({

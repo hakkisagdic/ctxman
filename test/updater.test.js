@@ -1,9 +1,9 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, _afterEach } from 'vitest';
 import Updater from '../lib/utils/updater.js';
 import fs from 'fs';
 import https from 'https';
 import { execSync } from 'child_process';
-import path from 'path';
+import _path from 'path';
 
 vi.mock('fs');
 vi.mock('https');
@@ -43,7 +43,7 @@ describe('Updater', () => {
   describe('checkForUpdates()', () => {
     test('handles API errors gracefully', async () => {
       // Mock https.get to error
-      https.get.mockImplementation((url, options, callback) => {
+      https.get.mockImplementation((_url, _options, _callback) => {
         const req = { on: vi.fn() };
         return req; // In real life this returns req, but we need to trigger error
       });
