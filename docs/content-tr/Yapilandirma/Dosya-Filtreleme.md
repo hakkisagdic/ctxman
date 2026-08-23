@@ -7,6 +7,7 @@
 </cite>
 
 ## İçindekiler
+
 1. [Giriş](#giriş)
 2. [Çift Modlu Filtreleme Sistemi](#çift-modlu-filtreleme-sistemi)
 3. [Pattern Sözdizimi ve Örnekler](#pattern-sözdizimi-ve-örnekler)
@@ -20,6 +21,7 @@
 ctxman aracı, LLM (Large Language Model) context oluşturma için kod analizini optimize etmek üzere tasarlanmış gelişmiş bir dosya filtreleme mekanizması uygular. Bu sistem, `.contextignore` ve `.contextinclude` yapilandirma dosyalarını kullanan çift modlu bir yaklaşım aracılığıyla hangi dosyaların analize dahil edildiği veya hariç tutulduğu üzerinde hassas kontrol sağlar. Filtreleme sistemi, mevcut `.gitignore` kurallarına saygı gösterirken, belirli kod bileşenlerinin odaklanmış analizi için ek kontrol katmanları sağlar. Bu dokümantasyon, kod analizi ve token hesaplamasında optimal sonuçlar elde etmek için dosya filtreleme sistemini yapılandırmanın implementasyonunu, kullanımını ve en iyi uygulamalarını detaylandırır.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L544-L610)
 - [ctxman.js](file://ctxman.js#L124-L270)
 
@@ -49,10 +51,12 @@ E --> H[Process All Files Except Those Matching<br>.contextignore Patterns]
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L134-L149)
 - [README.md](file://README.md#L544-L610)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L134-L149)
 - [README.md](file://README.md#L544-L610)
 
@@ -77,6 +81,7 @@ Pattern'ler, proje kökünden göreceli yollar olarak veya tüm kod tabanında e
 README, etkili yapilandirma pattern'lerinin somut örneklerini sağlar:
 
 Test ve workflow bileşenlerini hariç tutarken core JavaScript dosyalarına odaklanan INCLUDE modu için:
+
 ```bash
 # Yalnızca core JavaScript dosyalarını dahil et
 utility-mcp/src/**/*.js
@@ -85,6 +90,7 @@ utility-mcp/src/**/*.js
 ```
 
 Dokümantasyon, yapilandirma ve test dosyalarını filtrelemek için EXCLUDE modu:
+
 ```bash
 # Dokümantasyon ve config'i hariç tut
 **/*.md
@@ -119,10 +125,12 @@ Output --> End([Pattern Ready for Matching])
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L159-L179)
 - [README.md](file://README.md#L544-L610)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L159-L179)
 - [README.md](file://README.md#L544-L610)
 
@@ -160,10 +168,12 @@ F --> |Not Matched or Negated| I[Include File]
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L181-L206)
 - [ctxman.js](file://ctxman.js#L134-L149)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L134-L149)
 - [ctxman.js](file://ctxman.js#L181-L206)
 
@@ -217,9 +227,11 @@ TokenCalculator --> MethodFilterParser : "uses for method filtering"
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L124-L270)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L124-L270)
 
 ## Yaygın Sorunlar ve Sorun Giderme
@@ -249,6 +261,7 @@ Mümkün olduğunda geniş wildcard'lar yerine özel pattern'leri tercih edin. T
 ### Negasyonu Etkili Kullanın
 
 Geniş dahil etme kurallarını iyileştirmek için negasyon pattern'lerini kullanın. Örneğin, bir kaynak dizindeki tüm JavaScript dosyalarını dahil edin ancak test dosyalarını hariç tutun:
+
 ```bash
 src/**/*.js
 !src/**/*.test.js

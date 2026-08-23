@@ -8,13 +8,11 @@
       </button>
     </div>
 
-    <div v-if="loading && !resources.length" class="loading">
-      Loading resources...
-    </div>
+    <div v-if="loading && !resources.length" class="loading">Loading resources...</div>
 
     <div v-else-if="resources.length" class="resources">
-      <div 
-        v-for="resource in resources" 
+      <div
+        v-for="resource in resources"
         :key="resource.uri"
         class="resource-card"
         @click="selectResource(resource)"

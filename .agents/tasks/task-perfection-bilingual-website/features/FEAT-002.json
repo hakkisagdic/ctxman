@@ -1,0 +1,31 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Add TypeScript definition file (index.d.ts) for programmatic API, providing full type support for all exported modules including TokenCalculator, MethodAnalyzer, formatters, parsers, and utility classes.",
+  "status": "completed",
+  "steps": [
+    "1. Analyze index.js exports and all imported modules to identify public API surface",
+    "2. Read existing JSDoc comments in lib/analyzers/token-calculator.js, lib/analyzers/method-analyzer.js, lib/formatters/*.js, lib/utils/*.js",
+    "3. Create index.d.ts at project root with TypeScript declarations for: TokenCalculator class and its methods, MethodAnalyzer class, GitIgnoreParser class, MethodFilterParser class, GitIngestFormatter class, ToonFormatter class, FormatRegistry class, TokenUtils class, FileUtils class, ClipboardUtils class, ConfigUtils class, FormatConverter class, ErrorHandler class, Logger class and functions, Updater class, GitUtils class",
+    "4. Add type definitions for configuration options interfaces (TokenCalculatorOptions, AnalysisOptions, ExportOptions)",
+    "5. Add type definitions for result interfaces (AnalysisResult, MethodInfo, FileAnalysis, TokenReport)",
+    "6. Update package.json to include 'types': 'index.d.ts' in exports",
+    "7. Add @types/* devDependencies if needed for express, node, etc.",
+    "8. Create types test file to verify declarations compile correctly"
+  ],
+  "acceptance_criteria": [
+    "index.d.ts exists at project root with complete type declarations",
+    "TypeScript can resolve types when importing ctxman",
+    "All exported classes and functions have proper type signatures",
+    "Configuration interfaces are typed with all options documented",
+    "Running tsc --noEmit on a test file importing ctxman produces no type errors",
+    "package.json exports field includes types key"
+  ],
+  "verification": [
+    "npm run build should succeed (no build required, but validates package.json)",
+    "Create a test.ts file that imports ctxman and verify tsc --noEmit passes",
+    "npm publish --dry-run should include index.d.ts in packed files"
+  ],
+  "blocked_reason": null,
+  "findings": "Created comprehensive TypeScript definitions for all 17 exported classes and functions. Added interfaces for options, results, and method/data structures. Updated package.json with types field in exports and added index.d.ts to files array. All 1211 tests pass. npm publish --dry-run confirms index.d.ts (20.9kB) is included in the package."
+}

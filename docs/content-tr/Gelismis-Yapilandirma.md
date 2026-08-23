@@ -7,6 +7,7 @@
 </cite>
 
 ## İçindekiler
+
 1. [Giriş](#giriş)
 2. [Konfigürasyon Dosyası Önceliği](#konfigürasyon-dosyası-önceliği)
 3. [Özel Filtre Desenleri](#özel-filtre-desenleri)
@@ -21,6 +22,7 @@
 ctxman aracı, token analizi ve LLM context oluşturmaya hangi dosya ve methodların dahil edileceğini kontrol etmek için sofistike konfigürasyon seçenekleri sağlar. Bu doküman, özel kullanım senaryoları için gelişmiş konfigürasyon tekniklerini detaylandırır, özel filtre desenlerine, öncelik hiyerarşilerine ve performans optimizasyon stratejilerine odaklanır.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 
 ## Konfigürasyon Dosyası Önceliği
@@ -51,10 +53,12 @@ I --> J
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L124-L229)
 - [ctxman.js](file://ctxman.js#L231-L800)
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L124-L229)
 
@@ -117,10 +121,12 @@ TokenCalculator --> MethodFilterParser : "kullanır"
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L75-L115)
 - [ctxman.js](file://ctxman.js#L231-L800)
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L75-L115)
 
@@ -160,9 +166,11 @@ N --> O
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L159-L179)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L159-L179)
 
 ### Karmaşık Negasyon Kuralları
@@ -240,10 +248,12 @@ P --> |Hayır| Q[Tamamlandı]
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L272-L278)
 - [ctxman.js](file://ctxman.js#L380-L400)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L272-L278)
 
 ## Entegrasyon ve Scripting
@@ -258,9 +268,9 @@ Araç, TokenAnalyzer sınıfı import edilerek programatik olarak kullanılabili
 const { TokenAnalyzer } = require('ctxman');
 
 const analyzer = new TokenAnalyzer('./src', {
-    methodLevel: true,
-    saveReport: true,
-    verbose: true
+  methodLevel: true,
+  saveReport: true,
+  verbose: true,
 });
 
 analyzer.run();
@@ -307,9 +317,11 @@ SUMMARY ||--o{ FILE : içerir
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L784-L799)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L784-L799)
 
 ## En İyi Uygulamalar

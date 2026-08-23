@@ -6,6 +6,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [File-Level Analysis](#file-level-analysis)
 2. [Directory Scanning and Filtering](#directory-scanning-and-filtering)
 3. [GitIgnore Processing](#gitignore-processing)
@@ -25,6 +26,7 @@ For non-ignored items, the system determines whether the item is a file or direc
 Text files that pass the ignore checks are added to the results array, which is returned after all items in the directory have been processed. This recursive approach ensures comprehensive coverage of the file system while maintaining efficient filtering at each level of the directory hierarchy.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L385-L412)
 
 ## GitIgnore Processing
@@ -38,6 +40,7 @@ The pattern processing involves converting glob-style patterns into regular expr
 The isIgnored method implements the core filtering logic, first checking .gitignore rules, then applying calculator-specific rules based on whether include or exclude mode is active. In include mode, a file is considered ignored if it doesn't match any include pattern (after accounting for negations), while in exclude mode, a file is ignored if it matches any exclude pattern. This two-tiered approach ensures compatibility with existing .gitignore conventions while providing enhanced filtering capabilities.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L124-L229)
 
 ## Text File Detection
@@ -51,6 +54,7 @@ In addition to extension-based detection, the method checks for specific basenam
 This dual-criteria approach provides flexible file detection that accommodates both conventional naming patterns and common exceptions in development workflows. By combining extension and basename analysis, the system can accurately identify text files across various project structures and naming conventions.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L306-L321)
 
 ## File Filtering and Token Counting Relationship
@@ -62,6 +66,7 @@ The filtering process occurs in a specific order: first .gitignore rules are app
 The relationship between filtering and token counting is reflected in the tool's output, which provides detailed statistics about both included and excluded files. This transparency allows users to understand exactly how filtering decisions affect the final token count and adjust their configuration files accordingly. The system also distinguishes between files ignored due to .gitignore rules versus those filtered by context rules, providing insight into which configuration files are most influential in shaping the analysis scope.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L385-L412)
 - [ctxman.js](file://ctxman.js#L124-L229)
 - [ctxman.js](file://ctxman.js#L306-L321)
@@ -77,6 +82,7 @@ The system tracks ignored files separately, distinguishing between those exclude
 These statistics are used to generate the final analysis report, which includes summary metrics, extension breakdowns, and rankings of the largest files and directories. This comprehensive reporting enables users to make informed decisions about their codebase structure and filtering configuration.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L455-L489)
 - [ctxman.js](file://ctxman.js#L715-L743)
 - [ctxman.js](file://ctxman.js#L673-L696)
@@ -92,6 +98,7 @@ Performance bottlenecks can occur when analyzing very large directories or when 
 Additional optimization strategies include avoiding recursive wildcards (**/ ) when possible, as they require more extensive file system traversal, and ensuring that the most commonly matched patterns are listed first in configuration files to minimize the number of pattern comparisons needed. Regularly reviewing and refining the filtering configuration based on the tool's statistics can help maintain optimal performance and accuracy.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L385-L412)
 - [ctxman.js](file://ctxman.js#L124-L229)
 - [ctxman.js](file://ctxman.js#L306-L321)

@@ -1,0 +1,21 @@
+{
+  "name": "DevOps Team Profile",
+  "description": "Configuration for DevOps engineers",
+  "createdBy": "ctxman",
+  "createdAt": "2025-01-15T10:00:00Z",
+  "config": {
+    "exclude": ["**/*.test.js", "src/**/*.js", "frontend/**"],
+    "include": [
+      "**/*.yaml",
+      "**/*.yml",
+      "**/Dockerfile*",
+      "**/*.sh",
+      "scripts/**",
+      ".github/**",
+      "terraform/**",
+      "k8s/**"
+    ],
+    "targetModel": "claude-sonnet-4.5",
+    "methodLevel": false
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "FEAT-007",
+  "type": "feat",
+  "description": "TypeScript Definition Files - Create index.d.ts TypeScript definition file for the public API, enabling better IDE support and TypeScript integration.",
+  "status": "in_progress",
+  "steps": [
+    "Analyze index.js to understand the public API exports",
+    "Analyze ctxman.js to understand CLI exports (if any programmatic API)",
+    "Analyze lib/ directory structure to identify all public modules",
+    "Create index.d.ts in project root with TypeScript definitions for all public APIs",
+    "Add types field to package.json exports: \"types\": \"./index.d.ts\"",
+    "Ensure definitions cover: TokenAnalyzer class, all exported functions, configuration options",
+    "Add JSDoc comments to source files if needed for better type inference",
+    "Create lib/*.d.ts files for internal modules if beneficial for IDE support"
+  ],
+  "acceptance_criteria": [
+    "index.d.ts exists in project root",
+    "package.json has types field in exports",
+    "TypeScript definitions cover all public APIs",
+    "Definitions are syntactically valid (can be tested with tsc --noEmit)"
+  ],
+  "verification": [
+    "cat index.d.ts",
+    "grep -n 'types' package.json",
+    "Optionally install typescript and run tsc --noEmit index.d.ts"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

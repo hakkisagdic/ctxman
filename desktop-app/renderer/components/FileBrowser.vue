@@ -3,14 +3,10 @@
   <div class="file-browser">
     <div class="browser-header">
       <h3>📁 Files</h3>
-      <button @click="refresh" class="btn-icon" title="Refresh">
-        🔄
-      </button>
+      <button @click="refresh" class="btn-icon" title="Refresh">🔄</button>
     </div>
-    
-    <div v-if="loading" class="loading">
-      Loading files...
-    </div>
+
+    <div v-if="loading" class="loading">Loading files...</div>
 
     <div v-else-if="files.length" class="file-tree">
       <FileTreeNode
@@ -24,9 +20,7 @@
 
     <div v-else class="empty-state">
       <p>No files found</p>
-      <button @click="$emit('select-directory')" class="btn-primary">
-        Select Directory
-      </button>
+      <button @click="$emit('select-directory')" class="btn-primary">Select Directory</button>
     </div>
   </div>
 </template>
@@ -36,7 +30,7 @@ import { ref, computed } from 'vue';
 import FileTreeNode from './FileTreeNode.vue';
 
 const props = defineProps({
-  projectPath: String
+  projectPath: String,
 });
 
 const emit = defineEmits(['select', 'select-directory']);
@@ -47,11 +41,11 @@ const loading = ref(false);
 const rootFiles = computed(() => {
   // Build tree structure
   const tree = {};
-  
-  files.value.forEach(file => {
+
+  files.value.forEach((file) => {
     const parts = file.relativePath.split('/');
     let current = tree;
-    
+
     parts.forEach((part, index) => {
       if (!current[part]) {
         current[part] = {
@@ -59,7 +53,7 @@ const rootFiles = computed(() => {
           path: file.path,
           relativePath: parts.slice(0, index + 1).join('/'),
           isDirectory: index < parts.length - 1,
-          children: {}
+          children: {},
         };
       }
       current = current[part].children;
@@ -71,7 +65,7 @@ const rootFiles = computed(() => {
 
 async function refresh() {
   if (!props.projectPath) return;
-  
+
   loading.value = true;
   try {
     const result = await window.api.cli.scanFiles(props.projectPath);

@@ -1,0 +1,185 @@
+{
+  "name": "ctxman",
+  "displayName": "Ctxman - LLM Context Manager",
+  "description": "Generate optimized LLM context from your codebase directly in VS Code",
+  "version": "1.0.0",
+  "publisher": "ctxman",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "llm",
+    "context",
+    "ai",
+    "code-analysis",
+    "token-count"
+  ],
+  "activationEvents": [
+    "onCommand:ctxman.generateContext",
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "icon": "resources/icon.png",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ctxman.generateContext",
+        "title": "Ctxman: Generate LLM Context"
+      },
+      {
+        "command": "ctxman.generateCurrentFile",
+        "title": "Ctxman: Generate Context for Current File"
+      },
+      {
+        "command": "ctxman.generateSelection",
+        "title": "Ctxman: Generate Context for Selection"
+      },
+      {
+        "command": "ctxman.generateProject",
+        "title": "Ctxman: Generate Context for Project"
+      },
+      {
+        "command": "ctxman.showTokenCount",
+        "title": "Ctxman: Show Token Count"
+      },
+      {
+        "command": "ctxman.selectTemplate",
+        "title": "Ctxman: Select Template"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "ctxman.generateSelection",
+          "when": "editorHasSelection",
+          "group": "ctxman@1"
+        },
+        {
+          "command": "ctxman.generateCurrentFile",
+          "when": "editorTextFocus",
+          "group": "ctxman@2"
+        },
+        {
+          "command": "ctxman.generateContext",
+          "group": "ctxman@3"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "ctxman.generateContext",
+          "group": "ctxman@1"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ctxman",
+          "title": "Ctxman",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "ctxman": [
+        {
+          "id": "ctxman.contextPanel",
+          "name": "Context"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Ctxman",
+      "properties": {
+        "ctxman.targetModel": {
+          "type": "string",
+          "enum": [
+            "gpt-4",
+            "gpt-4-turbo",
+            "gpt-3.5-turbo",
+            "claude-3-opus",
+            "claude-3-sonnet",
+            "claude-3-haiku",
+            "llama-2-70b",
+            "gemini-pro"
+          ],
+          "default": "gpt-4",
+          "description": "Target LLM model for token estimation"
+        },
+        "ctxman.budget": {
+          "type": "number",
+          "default": 100000,
+          "description": "Token budget for alerts"
+        },
+        "ctxman.defaultTemplate": {
+          "type": "string",
+          "enum": [
+            "bug-fix",
+            "feature",
+            "refactor",
+            "code-review"
+          ],
+          "default": "feature",
+          "description": "Default context template"
+        },
+        "ctxman.excludePatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/node_modules/**",
+            "**/.git/**",
+            "**/dist/**",
+            "**/build/**"
+          ],
+          "description": "File patterns to exclude from analysis"
+        },
+        "ctxman.outputFormat": {
+          "type": "string",
+          "enum": [
+            "json",
+            "markdown",
+            "gitingest",
+            "toon"
+          ],
+          "default": "json",
+          "description": "Output format for generated context"
+        },
+        "ctxman.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show token count in status bar"
+        },
+        "ctxman.enableCodeLens": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable CodeLens for token hints (experimental)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "node test/run-test.js",
+    "vsce:package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.22.0",
+    "eslint": "^9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hakkisagdic/ctxman"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hakkisagdic/ctxman/issues"
+  },
+  "homepage": "https://github.com/hakkisagdic/ctxman#readme"
+}

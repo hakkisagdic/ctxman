@@ -27,6 +27,7 @@ npm install
 ```
 
 This will install all dependencies including:
+
 - `ink@^4.4.1` - React-based terminal UI framework
 - `react@^18.2.0` - React library
 - `ink-spinner@^5.0.0` - Loading spinners
@@ -44,6 +45,7 @@ ctxman --dashboard
 ```
 
 If dependencies are missing, you'll see:
+
 ```
 ⚠️  Interactive wizard requires additional dependencies.
    Install: npm install ink react ink-select-input ink-text-input
@@ -57,6 +59,7 @@ If dependencies are missing, you'll see:
 ### What is the Wizard?
 
 The wizard provides a **step-by-step guided experience** for configuring your context generation. Perfect for:
+
 - First-time users
 - Complex configurations
 - Quick setup for common use cases
@@ -71,6 +74,7 @@ ctxman --wizard
 ### Wizard Flow
 
 #### Step 1: Select Your Use Case
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  Context Generation Wizard                              │
@@ -91,23 +95,25 @@ ctxman --wizard
 ```
 
 **Controls:**
+
 - `↑↓` - Navigate options
 - `Enter` - Select and continue
 - `Esc` - Cancel wizard
 
 **Use Case Templates:**
 
-| Use Case | Includes | Best For |
-|----------|----------|----------|
-| 🐛 Bug Fix | Changed files + related code | Fixing specific issues |
-| ✨ New Feature | Core modules + architecture | Adding functionality |
-| 👀 Code Review | Full context with tests | Reviewing PRs |
-| ♻️ Refactoring | Target modules + dependencies | Code improvements |
-| 🔒 Security Audit | Security-critical files | Security review |
-| 📚 Documentation | Code + existing docs | Writing docs |
-| ⚙️ Custom | Full customization | Special cases |
+| Use Case          | Includes                      | Best For               |
+| ----------------- | ----------------------------- | ---------------------- |
+| 🐛 Bug Fix        | Changed files + related code  | Fixing specific issues |
+| ✨ New Feature    | Core modules + architecture   | Adding functionality   |
+| 👀 Code Review    | Full context with tests       | Reviewing PRs          |
+| ♻️ Refactoring    | Target modules + dependencies | Code improvements      |
+| 🔒 Security Audit | Security-critical files       | Security review        |
+| 📚 Documentation  | Code + existing docs          | Writing docs           |
+| ⚙️ Custom         | Full customization            | Special cases          |
 
 #### Step 2: Select Target AI Model
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  Which AI model will you use?                           │
@@ -122,11 +128,13 @@ ctxman --wizard
 ```
 
 **Why this matters:**
+
 - Wizard optimizes output to fit token limits
 - Suggests chunking for large projects
 - Recommends best format for your model
 
 #### Step 3: Choose What to Include
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  What should be included in the context?                │
@@ -143,11 +151,13 @@ ctxman --wizard
 ```
 
 **Controls:**
+
 - `Space` - Toggle selection (◯ ↔ ◉)
 - `Enter` - Continue to next step
 - `Esc` - Go back
 
 #### Step 4: Select Output Format
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  Choose output format:                                  │
@@ -162,15 +172,16 @@ ctxman --wizard
 
 **Format Comparison:**
 
-| Format | Token Efficiency | Readability | Use Case |
-|--------|------------------|-------------|----------|
-| TOON | ⭐⭐⭐⭐⭐ (best) | ⭐⭐⭐ | Most efficient, LLM-optimized |
-| JSON | ⭐⭐⭐ | ⭐⭐⭐⭐ | Standard, widely supported |
-| YAML | ⭐⭐ | ⭐⭐⭐⭐⭐ | Human-readable configs |
-| GitIngest | ⭐⭐⭐⭐ | ⭐⭐⭐ | Single-file digest |
-| Markdown | ⭐⭐ | ⭐⭐⭐⭐⭐ | Documentation |
+| Format    | Token Efficiency  | Readability | Use Case                      |
+| --------- | ----------------- | ----------- | ----------------------------- |
+| TOON      | ⭐⭐⭐⭐⭐ (best) | ⭐⭐⭐      | Most efficient, LLM-optimized |
+| JSON      | ⭐⭐⭐            | ⭐⭐⭐⭐    | Standard, widely supported    |
+| YAML      | ⭐⭐              | ⭐⭐⭐⭐⭐  | Human-readable configs        |
+| GitIngest | ⭐⭐⭐⭐          | ⭐⭐⭐      | Single-file digest            |
+| Markdown  | ⭐⭐              | ⭐⭐⭐⭐⭐  | Documentation                 |
 
 #### Step 5: Review & Confirm
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  📊 Configuration Summary                               │
@@ -215,6 +226,7 @@ Files included: 45
 ### What is the Dashboard?
 
 The dashboard provides **real-time visual feedback** during analysis. Features:
+
 - Live progress bars
 - File-by-file status
 - Token counting in real-time
@@ -280,14 +292,14 @@ After analysis completes:
 
 ### Dashboard Controls
 
-| Key | Action | Description |
-|-----|--------|-------------|
-| `R` | Refresh | Re-run analysis (in watch mode) |
-| `S` | Save | Save current report to file |
-| `E` | Export | Export to different format |
-| `Q` | Quit | Exit dashboard |
-| `↑↓` | Navigate | Scroll through file list |
-| `Space` | Toggle | Expand/collapse sections |
+| Key     | Action   | Description                     |
+| ------- | -------- | ------------------------------- |
+| `R`     | Refresh  | Re-run analysis (in watch mode) |
+| `S`     | Save     | Save current report to file     |
+| `E`     | Export   | Export to different format      |
+| `Q`     | Quit     | Exit dashboard                  |
+| `↑↓`    | Navigate | Scroll through file list        |
+| `Space` | Toggle   | Expand/collapse sections        |
 
 ### Watch Mode
 
@@ -304,6 +316,7 @@ ctxman --dashboard --watch
 ```
 
 **Perfect for:**
+
 - Live coding sessions
 - Watching token count while editing
 - Monitoring large refactors
@@ -316,11 +329,13 @@ ctxman --dashboard --watch
 ### Wizard/Dashboard Not Starting
 
 **Symptom:**
+
 ```
 ⚠️  Interactive wizard requires additional dependencies.
 ```
 
 **Solution:**
+
 ```bash
 # Install all dependencies
 npm install
@@ -334,11 +349,13 @@ npm install ink react ink-select-input ink-text-input ink-spinner
 **Symptom:** Weird characters, broken layout, no colors
 
 **Possible Causes:**
+
 1. Terminal doesn't support ANSI colors
 2. Old terminal emulator
 3. SSH session without proper TTY
 
 **Solutions:**
+
 ```bash
 # Option 1: Use simple mode
 ctxman --simple
@@ -357,12 +374,14 @@ echo $TERM
 ### React/Ink Errors
 
 **Symptom:**
+
 ```
 Error: Cannot find module 'react'
 Error: Cannot find module 'ink'
 ```
 
 **Solution:**
+
 ```bash
 # Clear node_modules and reinstall
 rm -rf node_modules package-lock.json
@@ -374,6 +393,7 @@ npm install
 **Symptom:** Wizard starts but becomes unresponsive
 
 **Solutions:**
+
 1. Press `Esc` to cancel
 2. Use `Ctrl+C` to force quit
 3. Check terminal size (min 80x24)
@@ -431,6 +451,7 @@ fi
 ### 3. Custom Terminal Theme
 
 Dashboard adapts to your terminal theme automatically. For best experience:
+
 - Use dark theme for better contrast
 - Ensure 256-color support
 - Use monospace font (Fira Code, JetBrains Mono)
@@ -472,6 +493,7 @@ If wizard/dashboard still don't work after installing dependencies:
 3. Open issue: https://github.com/hakkisagdic/ctxman/issues
 
 Include:
+
 - Node.js version
 - Terminal app & version
 - OS & version

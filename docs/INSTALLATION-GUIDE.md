@@ -32,11 +32,13 @@ ctxman --help
 ### One-Line Installers
 
 #### macOS / Linux
+
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/hakkisagdic/ctxman/main/scripts/install.sh)
 ```
 
 #### Windows (PowerShell)
+
 ```powershell
 irm https://raw.githubusercontent.com/hakkisagdic/ctxman/main/scripts/install.ps1 | iex
 ```
@@ -48,6 +50,7 @@ irm https://raw.githubusercontent.com/hakkisagdic/ctxman/main/scripts/install.ps
 ### macOS
 
 #### Option 1: Homebrew (Recommended)
+
 ```bash
 # Add tap (once)
 brew tap hakkisagdic/ctxman
@@ -60,11 +63,13 @@ brew upgrade ctxman
 ```
 
 #### Option 2: NPM
+
 ```bash
 npm install -g ctxman
 ```
 
 #### Option 3: Installation Script
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hakkisagdic/ctxman/main/scripts/install.sh | bash
 ```
@@ -72,6 +77,7 @@ curl -fsSL https://raw.githubusercontent.com/hakkisagdic/ctxman/main/scripts/ins
 ### Linux
 
 #### Option 1: Debian/Ubuntu (APT)
+
 ```bash
 # Download DEB package
 wget https://github.com/hakkisagdic/ctxman/releases/download/v2.3.5/ctxman_2.3.5_all.deb
@@ -84,6 +90,7 @@ sudo apt-get install -f
 ```
 
 #### Option 2: Red Hat/Fedora (YUM/DNF)
+
 ```bash
 # Coming soon - RPM package
 # For now, use NPM:
@@ -91,11 +98,13 @@ npm install -g ctxman
 ```
 
 #### Option 3: NPM (Universal)
+
 ```bash
 npm install -g ctxman
 ```
 
 #### Option 4: Installation Script
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hakkisagdic/ctxman/main/scripts/install.sh | bash
 ```
@@ -103,11 +112,13 @@ curl -fsSL https://raw.githubusercontent.com/hakkisagdic/ctxman/main/scripts/ins
 ### Windows
 
 #### Option 1: NPM (Recommended)
+
 ```powershell
 npm install -g ctxman
 ```
 
 #### Option 2: PowerShell Script
+
 ```powershell
 # Run as Administrator
 Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -115,6 +126,7 @@ irm https://raw.githubusercontent.com/hakkisagdic/ctxman/main/scripts/install.ps
 ```
 
 #### Option 3: Manual Download
+
 1. Download from: https://github.com/hakkisagdic/ctxman/releases
 2. Extract to: `C:\Program Files\ctxman`
 3. Add to PATH: `C:\Program Files\ctxman\bin`
@@ -237,12 +249,14 @@ npm install -g ctxman
 ```
 
 **Features Enabled:**
+
 - ✨ Interactive Wizard (`--wizard`)
 - 📊 Live Dashboard (`--dashboard`)
 - 🎨 Progress bars and spinners
 - ⌨️ Keyboard navigation
 
 **Without these dependencies:**
+
 - Tool still works perfectly
 - Uses simple text-based output
 - All core features available
@@ -256,9 +270,11 @@ npm install -g tiktoken
 ```
 
 **With tiktoken:**
+
 - ✅ Exact token counts (100% accuracy)
 
 **Without tiktoken:**
+
 - ✅ Smart estimation (~95% accuracy)
 
 ---
@@ -305,6 +321,7 @@ Remove-Item -Path $env:USERPROFILE\.ctxman -Recurse
 ### "command not found: ctxman"
 
 **Solution:**
+
 ```bash
 # Check PATH
 echo $PATH
@@ -317,6 +334,7 @@ source ~/.bashrc  # or ~/.zshrc
 ### Permission Denied
 
 **Linux/macOS:**
+
 ```bash
 # Use sudo for global install
 sudo npm install -g ctxman
@@ -326,6 +344,7 @@ npm install ctxman
 ```
 
 **Windows:**
+
 ```powershell
 # Run PowerShell as Administrator
 ```
@@ -400,30 +419,36 @@ brew upgrade ctxman
 ## 🎯 Installation Types
 
 ### Global Installation
+
 ```bash
 npm install -g ctxman
 ```
+
 ✅ Available system-wide
 ✅ Use from any directory
 ✅ Simple `ctxman` command
 ❌ Requires admin/sudo (sometimes)
 
 ### Local Installation
+
 ```bash
 npm install ctxman
 ```
+
 ✅ No admin rights needed
 ✅ Project-specific version
 ❌ Use via `npx` or npm scripts
 ❌ Not in system PATH
 
 ### Source Installation (Developers)
+
 ```bash
 git clone https://github.com/hakkisagdic/ctxman.git
 cd ctxman
 npm install
 npm link  # Make globally available
 ```
+
 ✅ Latest development version
 ✅ Easy to contribute
 ❌ Manual updates required

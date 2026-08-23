@@ -9,6 +9,7 @@
 </cite>
 
 ## İçindekiler
+
 1. [LLM Context Optimizasyonu](#llm-context-optimizasyonu)
 2. [Kod Tabanı Analizi](#kod-tabanı-analizi)
 3. [CI/CD Entegrasyonu](#cicd-entegrasyonu)
@@ -24,6 +25,7 @@ LLM context export'u için araç iki format sağlar: ultra-compact format (~2.3k
 Method seviyesinde filtreleme, `.methodinclude` ve `.methodignore` konfigürasyon dosyaları aracılığıyla context optimizasyonunu daha da geliştirir. Bunlar, geliştiricilerin adlandırma desenlerine dayalı olarak belirli methodları dahil etmesine veya hariç tutmasına izin vererek son derece hedeflenmiş analizi mümkün kılar. Örneğin, `.methodinclude`'da `*Handler`, `*Validator` veya `TokenCalculator.*` belirtmek context'i kritik iş mantığı bileşenlerine odaklar.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L1-L865)
 
@@ -32,6 +34,7 @@ Method seviyesinde filtreleme, `.methodinclude` ve `.methodignore` konfigürasyo
 ctxman aracı, kod tabanı genelinde token dağılımı hakkında kapsamlı içgörüler sağlar, büyük dosya ve methodları tanımlar ve karmaşıklığı zaman içinde izler. tiktoken aracılığıyla kesin token sayımı kullanarak (GPT-4 uyumlu), optimal kod sağlığını korumaya yardımcı olan doğru metrikler sunar. tiktoken yokluğunda, araç ~%95 doğrulukla akıllı tahmine geri döner.
 
 Temel analitik özellikler şunları içerir:
+
 - **Dosya türüne göre token dağılımı**: Uzantı başına tokenlerin detaylı dökümü
 - **En büyük dosyaların tanımlanması**: Token sayısına göre sıralanmış ilk 5 en büyük dosya
 - **Dizin seviyesinde istatistikler**: Üst düzey dizinlere göre toplanmış token kullanımı
@@ -40,6 +43,7 @@ Temel analitik özellikler şunları içerir:
 Araç, analiz edilen toplam dosyaları, toplam tokenleri, dosya başına ortalama tokenleri ve `.gitignore` veya calculator kuralları nedeniyle göz ardı edilen dosyaları gösteren detaylı bir rapor oluşturur. Bu bilgi, proje karmaşıklığını anlamak ve potansiyel refactoring fırsatlarını belirlemek için kritiktir. `--save-report` seçeneği bu verileri `token-analysis-report.json`'a export eder, geçmiş izleme ve trend analizini mümkün kılar.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L1-L865)
 
@@ -48,6 +52,7 @@ Araç, analiz edilen toplam dosyaları, toplam tokenleri, dosya başına ortalam
 ctxman aracı, otomatik kod boyutu izleme, kalite kapıları ve dokümantasyon oluşturma için CI/CD pipeline'larına sorunsuzca entegre edilebilir. Komut satırı arayüzü, interactive olmayan yürütmeyi destekler, pre-commit hook'larında, günlük izleme scriptlerinde ve sürekli entegrasyon iş akışlarında kullanım için uygundur.
 
 Yaygın entegrasyon desenleri şunları içerir:
+
 - **Pre-commit hook'ları**: AI incelemesi için yalnızca gerekli kodun dikkate alındığından emin olmak için commit'lerden önce `ctxman --context-clipboard` çalıştırma
 - **Günlük izleme scriptleri**: Trend takibi için günlük analiz raporları oluşturmak üzere `ctxman --save-report` çalıştırma
 - **Kalite kapıları**: Scriptable çıktı kullanarak pipeline'larda token bütçesi kontrollerini uygulama (örneğin, maksimum token limitlerini uygulamak için JSON çıktısını parse etme)
@@ -56,6 +61,7 @@ Yaygın entegrasyon desenleri şunları içerir:
 Interactive export seçimi özelliği, kullanıcılardan detaylı JSON raporu kaydetme, LLM context dosyası oluşturma, context'i panoya kopyalama veya export'u atlama arasında seçim yapmalarını ister—farklı kullanım senaryolarında esneklik sağlar.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 - [bin/cli.js](file://bin/cli.js#L1-L67)
 
@@ -74,6 +80,7 @@ ctxman aracını kullanırken, özellikle konfigürasyon ve filtreleme davranı�
 **Pano Fonksiyonelliği Başarısızlıkları**: Linux sistemlerinde, pano işlemleri için `xclip` veya `xsel`'in yüklü olduğundan emin olun. Araç, biri başarısız olursa otomatik olarak her iki yardımcı programı dener.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L1-L865)
 
@@ -94,5 +101,6 @@ ctxman aracını kullanırken verimliliği maksimize etmek için şu en iyi uygu
 **Method Seviyesinde Filtreleme**: Hata ayıklama veya kod incelemeleri sırasında temel iş mantığına odaklanmak, bilişsel yükü azaltmak ve analiz alaka düzeyini artırmak için `.methodinclude` ve `.methodignore` dosyalarını kullanın.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L1-L865)

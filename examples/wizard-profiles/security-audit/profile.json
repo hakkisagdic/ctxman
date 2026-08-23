@@ -10,7 +10,13 @@
   },
   "includes": {
     "files": ["Auth modules", "API endpoints", "Middleware", "Database code", "Security configs"],
-    "methods": ["Authentication", "Validation", "Cryptography", "Database queries", "File operations"]
+    "methods": [
+      "Authentication",
+      "Validation",
+      "Cryptography",
+      "Database queries",
+      "File operations"
+    ]
   },
   "excludes": {
     "files": ["Tests", "Documentation", "Build artifacts"],

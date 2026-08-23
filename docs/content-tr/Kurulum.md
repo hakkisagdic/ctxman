@@ -9,6 +9,7 @@
 </cite>
 
 ## İçindekiler
+
 1. [Gereksinimler](#gereksinimler)
 2. [Kurulum Yöntemleri](#kurulum-yontemleri)
 3. [Token Sayım Yapılandırması](#token-sayim-yapılandırması)
@@ -27,6 +28,7 @@ ctxman aracını kurmadan önce, sisteminizin aşağıdaki gereksinimleri karş�
 Bu gereksinimler, paketin hem global hem de yerel kurulumları için gereklidir. Araç, Node.js'in çapraz platform yeteneklerinden yararlanarak tutarlı davranış için macOS, Linux ve Windows dahil farklı işletim sistemlerinde çalışacak şekilde tasarlanmıştır.
 
 **Bölüm kaynakları**
+
 - [package.json](file://package.json#L15-L17)
 
 ## Kurulum Yöntemleri
@@ -60,6 +62,7 @@ npx ctxman --help
 Yerel kurulum, tüm ekip üyelerinin projenin package-lock.json dosyasında tanımlandığı gibi aynı araç sürümünü kullanmasını sağlayarak geliştirme ortamları arasında tutarlılığı destekler.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L235-L245)
 
 ## Token Sayım Yapılandırması
@@ -89,6 +92,7 @@ tiktoken kurulu değilse, araç otomatik olarak yaklaşık %95 doğrulukla akıl
 Araç önce tiktoken'ı yüklemeye çalışır ve başarısız olursa tahmini yöntemi kullanır. Bu, TokenCalculator sınıfının `calculateTokens` metodunda uygulanmıştır; tiktoken'ı require etmeye çalışır ve tahmini yönteme geri dönmek için hataları yakalar.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L219-L223)
 - [ctxman.js](file://ctxman.js#L287-L317)
 
@@ -99,7 +103,9 @@ ctxman aracı, dosya ve metod dahil etme/hariç tutma kontrolü için tanımlı 
 ### Dosya Seviyesi Yapılandırma
 
 #### .contextignore (EXCLUDE Modu)
+
 Bu dosya, analizden hariç tutulacak dosyalar için desenler içerir. gitignore-tarzı sözdizimi kullanır:
+
 ```bash
 **/*.md              # Tüm dokümantasyon
 **/*.json            # Tüm yapılandırma dosyaları
@@ -107,7 +113,9 @@ infrastructure/**    # Altyapı kodu
 ```
 
 #### .contextinclude (INCLUDE Modu)
+
 Bu dosya, analize dahil edilecek dosyalar için desenler belirtir ve .contextignore'dan önceliklidir:
+
 ```bash
 utility-mcp/src/**/*.js
 !utility-mcp/src/workflows/**
@@ -116,7 +124,9 @@ utility-mcp/src/**/*.js
 ### Metod Seviyesi Yapılandırma
 
 #### .methodinclude
+
 Metod seviyesi analizine dahil edilecek metodları tanımlar:
+
 ```bash
 calculateTokens
 *Handler
@@ -124,7 +134,9 @@ TokenCalculator.*
 ```
 
 #### .methodignore
+
 Analizden hariç tutulacak metodları belirtir:
+
 ```bash
 *test*
 *debug*
@@ -144,6 +156,7 @@ Araç, hangi dosya ve metodların analiz edileceğini belirlerken katı bir önc
 Hem .contextinclude hem de .contextignore mevcut olduğunda, include dosyası önceliklidir ve ignore dosyası göz ardı edilir. Bu, analiz kapsamı üzerinde hassas kontrol sağlar.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L145-L184)
 - [ctxman.js](file://ctxman.js#L108-L218)
 
@@ -164,12 +177,15 @@ Bu, CLI seçeneklerini ve kullanım bilgilerini görüntülemeli, aracın düzg�
 ### Temel Kullanım Örnekleri
 
 #### İnteraktif Analiz
+
 Aracı argümansız çalıştırmak, export seçenekleriyle interaktif modu başlatır:
+
 ```bash
 ctxman
 ```
 
 #### Doğrudan Export Seçenekleri
+
 ```bash
 # Detaylı JSON raporu kaydet
 ctxman --save-report
@@ -182,6 +198,7 @@ ctxman --context-clipboard
 ```
 
 #### Metod Seviyesi Analiz
+
 ```bash
 # Sadece belirli metodları analiz et
 ctxman --method-level --context-clipboard
@@ -190,6 +207,7 @@ ctxman --method-level --context-clipboard
 Araç, yürütme sırasında anında geri bildirim sağlar; kesin token sayımı (tiktoken ile) veya tahmin kullanıp kullanmadığını, analiz modunu (INCLUDE/EXCLUDE) ve tamamlanma sonrasında özet istatistikleri gösterir.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L247-L255)
 - [bin/cli.js](file://bin/cli.js#L35-L65)
 
@@ -198,7 +216,9 @@ Araç, yürütme sırasında anında geri bildirim sağlar; kesin token sayımı
 ctxman aracı, LLM context kullanımını optimize etmek ve kod tabanı karmaşıklığını izlemek için çeşitli geliştirme iş akışlarına entegre edilebilir.
 
 ### Package.json Scriptleri
+
 Projenizin package.json dosyasına özel scriptler ekleyin:
+
 ```json
 "scripts": {
   "analyze": "ctxman",
@@ -208,13 +228,16 @@ Projenizin package.json dosyasına özel scriptler ekleyin:
 ```
 
 Ardından bunları şu şekilde kullanın:
+
 ```bash
 npm run analyze
 npm run llm-context
 ```
 
 ### CI/CD Entegrasyonu
+
 Kod tabanı büyümesini izlemek için aracı sürekli entegrasyon pipeline'larına dahil edin:
+
 ```bash
 # CI script'inde
 ctxman --save-report
@@ -226,16 +249,20 @@ fi
 ```
 
 ### Pre-commit Hook'ları
+
 Değişiklikleri push etmeden önce kodun token bütçeleri içinde kalmasını sağlamak için pre-commit hook olarak kullanın.
 
 ### LLM Context Hazırlama
+
 Araç, LLM tüketimi için iki formatta optimize edilmiş dosya listeleri oluşturur:
+
 - **Compact format** (~2.3k karakter): Sık AI etkileşimleri için minimal JSON yapısı
 - **Detailed format** (~8.6k karakter): İlk proje analizi için kapsamlı context
 
 Bu çıktılar, AI destekli geliştirme iş akışlarına otomatik olarak beslenebilir ve geliştiricilerin en alakalı kod context'i ile çalışmasını sağlar.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L201-L217)
 - [package.json](file://package.json#L7-L13)
 
@@ -244,19 +271,24 @@ Bu çıktılar, AI destekli geliştirme iş akışlarına otomatik olarak beslen
 ctxman aracının kurulumu ve kullanımı sırasında ortaya çıkabilecek yaygın sorunları çözün.
 
 ### İzin Hataları (Global Kurulum)
+
 Global kurulum yaparken izin hatalarıyla karşılaşabilirsiniz:
+
 ```bash
 npm install -g ctxman
 # Error: EACCES: permission denied
 ```
 
 **Çözümler:**
+
 - Node.js'i home dizininize kuran nvm gibi bir Node.js sürüm yöneticisi kullanın
 - İzin sorunlarından kaçınmak için npm'in varsayılan dizinini değiştirin
 - sudo kullanın (güvenlik nedenleriyle önerilmez): `sudo npm install -g ctxman`
 
 ### Eksik Bağımlılıklar
+
 tiktoken kurulumu başarısız olursa, araç otomatik olarak tahmin moduna geri döner. Kurulum sorunlarını çözmek için:
+
 ```bash
 # npm önbelleğini temizle
 npm cache clean --force
@@ -266,17 +298,22 @@ npm install tiktoken
 ```
 
 ### Yapılandırma Sorunları
+
 #### Include vs Exclude Mod Karışıklığı
+
 - **Problem**: Beklenmeyen dosyalar dahil edildi/hariç tutuldu
 - **Çözüm**: .contextinclude dosyasının varlığını kontrol edin, çünkü .contextignore'dan önceliklidir
 
 #### Desen Eşleştirme Sorunları
+
 - Desenlerin satır içi yorumları olmadığından emin olun
 - Özyinelemeli eşleştirme için `**`, tek seviye için `*` kullanın
 - Eşleştirme davranışını görmek için verbose mod ile desenleri test edin
 
 ### Platforma Özgü Sorunlar
+
 Uygun pano araçları olmayan Linux sistemlerinde:
+
 ```bash
 # Gerekli pano yardımcı programlarını kurun
 sudo apt-get install xclip xsel  # Debian/Ubuntu
@@ -286,5 +323,6 @@ sudo yum install xclip           # CentOS/RHEL
 Araç, birincil komut başarısız olursa otomatik olarak alternatif pano komutlarını dener ve çapraz platform uyumluluğu için geri dönüş mekanizmaları sağlar.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L257-L284)
 - [ctxman.js](file://ctxman.js#L565-L585)

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Ctxman JetBrains Plugin
+  
+  Provides LLM context generation directly from JetBrains IDEs.
+  Supported IDEs: IntelliJ IDEA, PyCharm, WebStorm, PhpStorm, GoLand, Rider, CLion
+  
+  @version 1.0.0
+-->
+<idea-plugin>
+    <id>com.ctxman.intellij</id>
+    <name>Ctxman</name>
+    <vendor email="support@ctxman.dev" url="https://github.com/hakkisagdic/ctxman">Ctxman Team</vendor>
+    
+    <description><![CDATA[
+    <p>Generate optimized LLM context from your codebase directly in JetBrains IDEs.</p>
+    
+    <h2>Features</h2>
+    <ul>
+        <li>Generate context for current file, selection, or entire project</li>
+        <li>Token count display in status bar</li>
+        <li>Template support for different use cases</li>
+        <li>Multiple output formats (JSON, Markdown, GitIngest, TOON)</li>
+        <li>Model-aware token estimation</li>
+    </ul>
+    
+    <h2>Supported IDEs</h2>
+    <ul>
+        <li>IntelliJ IDEA</li>
+        <li>PyCharm</li>
+        <li>WebStorm</li>
+        <li>PhpStorm</li>
+        <li>GoLand</li>
+        <li>Rider</li>
+        <li>CLion</li>
+    </ul>
+    ]]></description>
+    
+    <change-notes><![CDATA[
+    <h2>1.0.0</h2>
+    <ul>
+        <li>Initial release</li>
+        <li>Generate context for file, selection, project</li>
+        <li>Token count status bar integration</li>
+        <li>Template support</li>
+    </ul>
+    ]]></change-notes>
+    
+    <!-- Compatibility range -->
+    <idea-version since-build="223.0" until-build="242.*"/>
+    
+    <!-- Supported products -->
+    <depends>com.intellij.modules.platform</depends>
+    
+    <!-- Optional dependencies for language-specific support -->
+    <depends optional="true" config-file="java.xml">com.intellij.modules.java</depends>
+    <depends optional="true" config-file="python.xml">com.intellij.modules.python</depends>
+    <depends optional="true" config-file="javascript.xml">JavaScript</depends>
+    <depends optional="true" config-file="go.xml">org.jetbrains.plugins.go</depends>
+    <depends optional="true" config-file="php.xml">com.jetbrains.php</depends>
+    
+    <!-- Actions -->
+    <actions>
+        <!-- Group in Editor Context Menu -->
+        <group id="Ctxman.EditorMenu" text="Ctxman" popup="true">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            
+            <action id="Ctxman.GenerateSelection" 
+                    class="com.ctxman.actions.GenerateSelectionAction"
+                    text="Generate Context for Selection"
+                    description="Generate LLM context for selected code">
+            </action>
+            
+            <action id="Ctxman.GenerateFile"
+                    class="com.ctxman.actions.GenerateFileAction"
+                    text="Generate Context for File"
+                    description="Generate LLM context for current file">
+            </action>
+            
+            <action id="Ctxman.GenerateProject"
+                    class="com.ctxman.actions.GenerateProjectAction"
+                    text="Generate Context for Project"
+                    description="Generate LLM context for entire project">
+            </action>
+            
+            <separator/>
+            
+            <action id="Ctxman.ShowTokenCount"
+                    class="com.ctxman.actions.ShowTokenCountAction"
+                    text="Show Token Count"
+                    description="Display token count statistics">
+            </action>
+        </group>
+        
+        <!-- Main Menu Actions -->
+        <action id="Ctxman.GenerateContext" 
+                class="com.ctxman.actions.GenerateContextAction"
+                text="Generate LLM Context"
+                description="Generate optimized context for LLMs">
+            <add-to-group group-id="ToolsMenu" anchor="first"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt C"/>
+        </action>
+    </actions>
+    
+    <!-- Tool Window -->
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Ctxman"
+                    secondary="true"
+                    icon="AllIcons.FileTypes.Text"
+                    anchor="right"
+                    factoryClass="com.ctxman.ui.CtxmanToolWindowFactory"/>
+        
+        <!-- Application Service -->
+        <applicationService serviceImplementation="com.ctxman.services.CtxmanService"/>
+        
+        <!-- Project Service -->
+        <projectService serviceImplementation="com.ctxman.services.TokenCounterService"/>
+        
+        <!-- Status Bar Widget -->
+        <statusBarWidgetFactory id="CtxmanStatusBar"
+                                implementation="com.ctxman.ui.CtxmanStatusBarWidgetFactory"
+                                order="after Encoding"/>
+        
+        <!-- Settings -->
+        <applicationConfigurable displayName="Ctxman"
+                                 groupId="tools"
+                                 id="CtxmanConfigurable"
+                                 instance="com.ctxman.settings.CtxmanConfigurable"/>
+        
+        <!-- CodeInsight (Intentions) -->
+        <intentionAction>
+            <className>com.ctxman.intentions.AddToContextIntention</className>
+            <category>Ctxman</category>
+        </intentionAction>
+        
+        <intentionAction>
+            <className>com.ctxman.intentions.GenerateContextIntention</className>
+            <category>Ctxman</category>
+        </intentionAction>
+    </extensions>
+    
+    <!-- Listeners -->
+    <applicationListeners>
+        <listener class="com.ctxman.listeners.FileEditorListener"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+    </applicationListeners>
+</idea-plugin>

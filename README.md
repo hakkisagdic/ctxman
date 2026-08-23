@@ -1,9 +1,35 @@
 # ctxman
 
+[![CI](https://github.com/hakkisagdic/ctxman/actions/workflows/ci.yml/badge.svg)](https://github.com/hakkisagdic/ctxman/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/hakkisagdic/ctxman/actions/workflows/codeql.yml/badge.svg)](https://github.com/hakkisagdic/ctxman/actions/workflows/codeql.yml)
+[![npm version](https://badge.fury.io/js/ctxman.svg)](https://www.npmjs.com/package/ctxman)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/node/v/ctxman.svg)](https://nodejs.org)
+[![codecov](https://codecov.io/gh/hakkisagdic/ctxman/branch/main/graph/badge.svg)](https://codecov.io/gh/hakkisagdic/ctxman)
+[![Documentation](https://img.shields.io/badge/docs-complete-brightgreen)](docs/)
 
 **AI Development Platform** with plugin architecture, Git integration, REST API, and watch mode. Supporting 14+ programming languages with method-level filtering, automatic LLM optimization, and real-time analysis. Perfect for AI-assisted development workflows.
 
 **v3.0.0** - Platform Foundation Release 🚀
+
+**Languages**: [English](README.md) | [Türkçe](README-tr.md)
+
+## Table of Contents
+
+- [Support This Project](#-support-this-project)
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [API Server](#api-server)
+- [Git Integration](#-git-integration-v300)
+- [Watch Mode](#-watch-mode-v300)
+- [LLM Optimization](#-llm-optimization-v237)
+- [Export Options](#-export-options)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## ☕ Support This Project
 
@@ -19,6 +45,22 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 
 ---
 
+## Documentation
+
+| Document                                           | Description                                             |
+| -------------------------------------------------- | ------------------------------------------------------- |
+| [API Documentation](docs/API.md)                   | REST API endpoints and usage                            |
+| [Architecture](docs/ARCHITECTURE.md)               | Plugin system, core modules, data flow                  |
+| [Performance Benchmarks](docs/PERFORMANCE.md)      | Performance metrics and optimization tips               |
+| [Changelog](CHANGELOG.md)                          | Version history and release notes                       |
+| [Contributing](CONTRIBUTING.md)                    | Development setup and guidelines                        |
+| [Security Policy](SECURITY.md)                     | Security policy and vulnerability reporting             |
+| [Code of Conduct](CODE_OF_CONDUCT.md)              | Community guidelines                                    |
+| [API Dokümantasyonu](docs/API-tr.md)               | REST API dokümantasyonu (Türkçe)                        |
+| [Mimari](docs/ARCHITECTURE-tr.md)                  | Plugin sistemi, çekirdek modüller (Türkçe)              |
+| [Performans Kıyaslamaları](docs/PERFORMANCE-tr.md) | Performans metrikleri ve optimizasyon ipuçları (Türkçe) |
+| [Katkı Rehberi](CONTRIBUTING-tr.md)                | Geliştirme kurulumu ve yönergeler (Türkçe)              |
+
 ## Files
 
 - **`ctxman.js`** - Main LLM context analysis script with exact token counting
@@ -30,6 +72,7 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 ## Features
 
 ### 🚀 Platform Features (v3.0.0)
+
 - 🔌 **Plugin Architecture** - Modular, extensible system for languages and exporters
 - 🔀 **Git Integration** - Analyze only changed files, diff analysis, author tracking
 - 👁️ **Watch Mode** - Real-time file monitoring and auto-analysis
@@ -38,23 +81,27 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 - 🏗️ **Modular Core** - Scanner, Analyzer, ContextBuilder, Reporter
 
 ### 🎨 User Interface
+
 - 🧙 **Interactive Wizard Mode** - User-friendly guided setup (default)
 - 💻 **CLI Mode** - Traditional command-line interface (--cli flag)
 - 📤 **Interactive export** - Prompts for export choice when no options specified
 
 ### 🔢 Token Analysis
+
 - ✅ **Exact token counting** using tiktoken (GPT-4 compatible)
 - 🌍 **Multi-language support** - 14+ languages: JavaScript, TypeScript, Python, PHP, Ruby, Java, Kotlin, C#, Go, Rust, Swift, C/C++, Scala
 - 🎯 **Method-level analysis** - Analyze tokens per function/method
 - 📊 **Detailed reporting** - by file type, largest files, statistics
 
 ### 🎯 Filtering & Configuration
+
 - 🚫 **Dual ignore system** - respects both `.gitignore` and context ignore rules
 - 📋 **Include/Exclude modes** - `.contextinclude` takes priority over `.contextignore`
 - 🔍 **Method filtering** - `.methodinclude` and `.methodignore` for granular control
 - 🎯 **Core application focus** - configured to analyze only essential code files
 
 ### 📤 Export Options
+
 - 🤖 **LLM context export** - generate optimized file lists for LLM consumption
 - 📋 **Clipboard integration** - copy context directly to clipboard
 - 💾 **JSON/YAML/CSV/XML exports** - multiple format options
@@ -65,12 +112,14 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 ## Quick Start
 
 ### 🧙 Interactive Wizard Mode (Default)
+
 ```bash
 # Launch interactive wizard (guides you through options)
 ctxman
 ```
 
 The wizard provides a user-friendly interface to:
+
 - Select your use case (Bug Fix, Feature, Code Review, etc.)
 - Choose target LLM (Claude, GPT-4, Gemini, etc.)
 - Pick output format (TOON, JSON, YAML, etc.)
@@ -78,6 +127,7 @@ The wizard provides a user-friendly interface to:
 **Note:** Wizard mode uses Ink terminal UI. If you experience visual artifacts, use CLI mode with `--cli` flag.
 
 ### 💻 CLI Mode
+
 ```bash
 # Use CLI mode instead of wizard
 ctxman --cli
@@ -98,6 +148,7 @@ ctxman --cli -g -s  # GitIngest digest + detailed report
 ```
 
 ### 🤖 LLM Optimization (v2.3.7)
+
 ```bash
 # Auto-detect LLM from environment
 export ANTHROPIC_API_KEY=sk-...
@@ -122,6 +173,7 @@ ctxman --cli --target-model claude-sonnet-4.5
 ```
 
 Supported LLM models (9+ models):
+
 - **Anthropic**: Claude Sonnet 4.5, Claude Opus 4
 - **OpenAI**: GPT-4 Turbo, GPT-4o, GPT-4o Mini
 - **Google**: Gemini 1.5 Pro, Gemini 2.0 Flash
@@ -130,6 +182,7 @@ Supported LLM models (9+ models):
 Custom models supported via `.ctxman/custom-profiles.json`
 
 ### 🔀 Git Integration (v3.0.0)
+
 ```bash
 # Analyze only uncommitted changes
 ctxman --changed-only
@@ -151,6 +204,7 @@ ctxman --changed-only --with-authors
 ```
 
 ### 👁️ Watch Mode (v3.0.0)
+
 ```bash
 # Start watch mode
 ctxman watch
@@ -169,6 +223,7 @@ ctxman watch --debounce 2000
 ```
 
 ### 🌐 API Server (v3.0.0)
+
 ```bash
 # Start API server
 ctxman serve
@@ -191,6 +246,7 @@ curl http://localhost:3000/api/v1/diff?since=main
 ```
 
 ### Wrapper Script Usage
+
 ```bash
 # Using the NPM package globally
 ctxman
@@ -225,6 +281,7 @@ See [test-repos/README.md](test-repos/README.md) for complete testing guide.
 Complete manual testing guide available at [docs/MANUAL-TESTING-v3.0.md](docs/MANUAL-TESTING-v3.0.md)
 
 Includes:
+
 - ✅ 50+ test scenarios for all v3.0.0 features
 - ✅ API endpoint validation
 - ✅ Git integration testing
@@ -250,6 +307,7 @@ npm run test:watch
 The tool is configured to focus on **core application logic only**:
 
 ### ✅ Included (64 JS files, ~181k tokens)
+
 - Core MCP server implementation (`utility-mcp/src/`)
 - Authentication and security layers
 - Request handlers and routing
@@ -259,6 +317,7 @@ The tool is configured to focus on **core application logic only**:
 - Error handling and monitoring
 
 ### 🚫 Excluded via context ignore rules
+
 - Documentation files (`.md`, `.txt`)
 - Configuration files (`.json`, `.yml`)
 - Infrastructure and deployment files
@@ -271,6 +330,7 @@ The tool is configured to focus on **core application logic only**:
 ## Usage
 
 ### Basic Analysis
+
 ```bash
 # Interactive analysis with export selection
 ctxman
@@ -302,7 +362,7 @@ ctxman
 # 2) Generate LLM context file (llm-context.json)
 # 3) Copy LLM context to clipboard
 # 4) No export (skip)
-# 
+#
 # 🤔 Which export option would you like? (1-4):
 ```
 
@@ -313,22 +373,26 @@ This interactive mode ensures you never miss the opportunity to export your anal
 The token calculator supports two complementary filtering modes:
 
 ### EXCLUDE Mode (.contextignore)
+
 - **Default mode** when only `.contextignore` exists
 - Includes all files **except** those matching ignore patterns
 - Traditional gitignore-style exclusion logic
 
-### INCLUDE Mode (.contextinclude) 
+### INCLUDE Mode (.contextinclude)
+
 - **Priority mode** - when `.contextinclude` exists, `.contextignore` is ignored
 - Includes **only** files matching include patterns
 - More precise control for specific file selection
 - Perfect for creating focused analysis sets
 
 ### Mode Priority
+
 1. If `.contextinclude` exists → **INCLUDE mode** (ignore `.contextignore`)
 2. If only `.contextignore` exists → **EXCLUDE mode**
 3. If neither exists → Include all files (respect `.gitignore` only)
 
 ### Example Usage
+
 ```bash
 # EXCLUDE mode: Include everything except patterns in .contextignore
 rm .contextinclude  # Remove include file
@@ -340,11 +404,13 @@ ctxman
 ```
 
 ### Help and Options
+
 ```bash
 ctxman --help
 ```
 
 ### Available Options
+
 - `--save-report`, `-s` - Save detailed JSON report
 - `--no-verbose` - Disable file listing (verbose is default)
 - `--context-export` - Generate LLM context file list (saves as llm-context.json)
@@ -357,6 +423,7 @@ ctxman --help
 The token calculator can generate optimized file lists for LLM consumption, with two format options:
 
 ### Ultra-Compact Format (Default)
+
 - **Size**: ~2.3k characters (structured JSON)
 - **Content**: Project metadata and organized file paths without token counts
 - **Format**: Identical to llm-context.json file - complete JSON structure
@@ -364,12 +431,14 @@ The token calculator can generate optimized file lists for LLM consumption, with
 - **Usage**: `--context-clipboard` or `--context-export`
 
 ### Detailed Format (Legacy)
+
 - **Size**: ~8.6k characters (comprehensive)
 - **Content**: Full paths, categories, importance scores, directory stats
 - **Perfect for**: Initial project analysis, comprehensive documentation
 - **Usage**: `--detailed-context --context-clipboard`
 
 ### Features
+
 - **Smart file selection** - Top files by token count and importance
 - **Directory grouping** - Common prefix compression saves space
 - **Token abbreviation** - "12k" instead of "12,388 tokens"
@@ -396,6 +465,7 @@ ctxman --save-report --context-clipboard
 ### Output Format Examples
 
 **Compact Format (JSON - 2.3k chars):**
+
 ```json
 {
   "project": {
@@ -404,25 +474,20 @@ ctxman --save-report --context-clipboard
     "totalTokens": 181480
   },
   "paths": {
-    "utility-mcp/src/server/": [
-      "CloudStackUtilityMCP.js"
-    ],
+    "utility-mcp/src/server/": ["CloudStackUtilityMCP.js"],
     "utility-mcp/src/handlers/": [
       "workflow-handlers.js",
       "tool-handlers.js",
       "analytics-handler.js"
     ],
-    "utility-mcp/src/utils/": [
-      "security.js",
-      "usage-tracker.js",
-      "cache-warming.js"
-    ]
+    "utility-mcp/src/utils/": ["security.js", "usage-tracker.js", "cache-warming.js"]
   }
 }
 ```
 
 **Detailed Format (8.6k chars):**
-```
+
+````
 # cloudstack-go-mcp-proxy Codebase Context
 
 **Project:** 64 files, 181,480 tokens
@@ -435,23 +500,26 @@ ctxman --save-report --context-clipboard
 **All Files:**
 ```json
 [{"path": "file.js", "t": 1234, "c": "core", "i": 85}]
-```
+````
 
 **Use Cases**
 
 **Compact Format (2.3k chars JSON):**
+
 1. **LLM Integration** - Structured data for AI assistants with complete project context
-2. **Programmatic Processing** - JSON format for automated tools and scripts  
+2. **Programmatic Processing** - JSON format for automated tools and scripts
 3. **Context Sharing** - Identical format in clipboard and file exports
 4. **Development Workflows** - Consistent structure for CI/CD and automation
 
 **Detailed Format (8.6k chars):**
+
 1. **Architecture Planning** - Comprehensive project overview for major decisions
 2. **New Team Member Onboarding** - Complete codebase understanding
 3. **Documentation Generation** - Full project structure analysis
 4. **Code Review Preparation** - Detailed file relationships and importance
 
 **General Use Cases:**
+
 - Development workflow integration
 - CI/CD pipeline context generation
 - Automated documentation updates
@@ -464,6 +532,7 @@ Context-manager now supports generating GitIngest-style digest files - a single,
 ### What is GitIngest Format?
 
 GitIngest format consolidates your entire codebase into a single text file with:
+
 - Project summary and statistics
 - Visual directory tree structure
 - Complete file contents with clear separators
@@ -495,6 +564,7 @@ ctxman --gitingest-from-context my-context.json
 ```
 
 **Why use JSON-based digest?**
+
 - ⚡ **Performance**: Instant digest generation without re-scanning
 - 🔄 **Reusability**: Generate multiple digests from one analysis
 - 📦 **Workflow**: Separate analysis from export steps
@@ -591,6 +661,7 @@ utility-mcp/src/**/*.js
 ### Creating Custom Configurations
 
 **For EXCLUDE mode** (edit `.contextignore`):
+
 ```bash
 # Remove lines to include more file types
 # Add patterns to exclude specific files
@@ -604,6 +675,7 @@ specific-directory/**
 ```
 
 **For INCLUDE mode** (create `.contextinclude`):
+
 ```bash
 # Include specific files or patterns
 src/**/*.js          # All JS files in src
@@ -664,6 +736,7 @@ Extension         Files      Tokens   Size (KB)     Lines
 ## Context Management
 
 Perfect for LLM context window optimization:
+
 - **181k tokens** = Core application logic only
 - **Clean analysis** = No noise from docs, configs, or build files
 - **Focused development** = Essential code for AI-assisted development
@@ -675,6 +748,7 @@ Perfect for LLM context window optimization:
 ## Integration
 
 You can integrate this tool into:
+
 - CI/CD pipelines for code size monitoring
 - Pre-commit hooks for token budget checks
 - Documentation generation workflows
@@ -685,22 +759,26 @@ You can integrate this tool into:
 ## Troubleshooting
 
 ### Include vs Exclude Mode Issues
+
 - **INCLUDE mode active**: Remove `.contextinclude` to use EXCLUDE mode
 - **Wrong files included**: Check if `.contextinclude` exists (takes priority)
 - **Mode confusion**: Use verbose mode to see which mode is active
 
 ### Patterns Not Working
+
 - Ensure no inline comments in ignore/include pattern files
 - Use file patterns (`docs/**`) instead of directory patterns (`docs/`)
 - Test specific patterns with verbose mode
 - Check pattern syntax: `**` for recursive, `*` for single level
 
 ### Token Count Issues
+
 - **Too high**: Review included files with verbose mode, add exclusion patterns
 - **Too low**: Check if important files are excluded, review patterns
 - **Inconsistent**: Verify which mode is active (include vs exclude)
 
 ### Missing Expected Files
+
 - Check if files are excluded by `.gitignore` (always respected)
 - Verify calculator ignore/include patterns
 - Ensure files are recognized as text files
@@ -710,7 +788,7 @@ You can integrate this tool into:
 
 LLM context manager with method-level filtering and token optimization. The ultimate tool for AI-assisted development.
 
-*Created by Hakkı Sağdıç*
+_Created by Hakkı Sağdıç_
 
 ## 🚀 Features
 
@@ -722,11 +800,12 @@ LLM context manager with method-level filtering and token optimization. The ulti
 📤 **Multiple export formats** - JSON reports, clipboard, file exports  
 📦 **NPM package** - Use programmatically or as global CLI tool  
 🔍 **Pattern matching** - Wildcards and regex support for flexible filtering  
-⚡ **Performance optimized** - 36% smaller codebase with enhanced functionality  
+⚡ **Performance optimized** - 36% smaller codebase with enhanced functionality
 
 ## 📦 Installation
 
 ### Option 1: NPM Package (Recommended)
+
 ```bash
 # Local installation
 npm install ctxman
@@ -739,6 +818,7 @@ ctxman --help
 ```
 
 ### Option 2: Direct Usage
+
 ```bash
 # Clone and use directly
 git clone <repository>
@@ -749,6 +829,7 @@ node token-calculator.js --help
 ## 🎯 Quick Start
 
 ### Basic Analysis
+
 ```bash
 # Interactive analysis with export selection
 ctxman
@@ -764,6 +845,7 @@ ctxman --method-level --save-report --verbose
 ```
 
 ### Advanced Usage
+
 ```bash
 # Focus on specific methods only
 echo "calculateTokens\nhandleRequest\n*Validator" > .methodinclude
@@ -802,14 +884,14 @@ const { TokenAnalyzer } = require('ctxman');
 
 // Basic file-level analysis
 const analyzer = new TokenAnalyzer('./src', {
-    methodLevel: false,
-    verbose: true
+  methodLevel: false,
+  verbose: true,
 });
 
 // Method-level analysis
 const methodAnalyzer = new TokenAnalyzer('./src', {
-    methodLevel: true,
-    saveReport: true
+  methodLevel: true,
+  saveReport: true,
 });
 
 analyzer.run();
@@ -820,11 +902,13 @@ analyzer.run();
 ### File-Level Filtering
 
 **Priority Order:**
+
 1. `.gitignore` (project root) - Standard git exclusions (always respected)
 2. `.contextinclude` - INCLUDE mode (highest priority for files)
 3. `.contextignore` - EXCLUDE mode (fallback for files)
 
 **`.contextinclude`** - Include only these files:
+
 ```bash
 # Include only core JavaScript files
 utility-mcp/src/**/*.js
@@ -832,7 +916,8 @@ utility-mcp/src/**/*.js
 !utility-mcp/src/workflows/**
 ```
 
-**`.contextignore`** - Exclude these files:  
+**`.contextignore`** - Exclude these files:
+
 ```bash
 # Exclude documentation and config
 **/*.md
@@ -846,6 +931,7 @@ test/
 ### Method-Level Filtering
 
 **`.methodinclude`** - Include only these methods:
+
 ```bash
 # Core business logic methods
 calculateTokens
@@ -863,6 +949,7 @@ TokenCalculator.* # All methods in TokenCalculator class
 ```
 
 **`.methodignore`** - Exclude these methods:
+
 ```bash
 # Utility and debug methods
 console
@@ -879,17 +966,18 @@ utils.debugLog
 
 ### Pattern Syntax
 
-| Pattern | Description | Example |
-|---------|-------------|----------|
-| `methodName` | Exact match | `calculateTokens` |
-| `*pattern*` | Contains pattern | `*Handler` matches `requestHandler` |
-| `Class.*` | All methods in class | `TokenCalculator.*` |
-| `file.method` | Specific file method | `server.handleRequest` |
-| `!pattern` | Negation (exclude) | `!*test*` |
+| Pattern       | Description          | Example                             |
+| ------------- | -------------------- | ----------------------------------- |
+| `methodName`  | Exact match          | `calculateTokens`                   |
+| `*pattern*`   | Contains pattern     | `*Handler` matches `requestHandler` |
+| `Class.*`     | All methods in class | `TokenCalculator.*`                 |
+| `file.method` | Specific file method | `server.handleRequest`              |
+| `!pattern`    | Negation (exclude)   | `!*test*`                           |
 
 ## 📤 Output Formats
 
 ### 1. File-Level Context (Default)
+
 **Use case:** General codebase analysis, file organization
 
 ```json
@@ -907,6 +995,7 @@ utils.debugLog
 ```
 
 ### 2. Method-Level Context (`--method-level`)
+
 **Use case:** Focused analysis, debugging specific methods, LLM context optimization
 
 ```json
@@ -918,12 +1007,10 @@ utils.debugLog
   },
   "methods": {
     "src/server.js": [
-      {"name": "handleRequest", "line": 15, "tokens": 234},
-      {"name": "validateInput", "line": 45, "tokens": 156}
+      { "name": "handleRequest", "line": 15, "tokens": 234 },
+      { "name": "validateInput", "line": 45, "tokens": 156 }
     ],
-    "src/utils.js": [
-      {"name": "processData", "line": 12, "tokens": 89}
-    ]
+    "src/utils.js": [{ "name": "processData", "line": 12, "tokens": 89 }]
   },
   "methodStats": {
     "totalMethods": 150,
@@ -934,6 +1021,7 @@ utils.debugLog
 ```
 
 ### 3. Detailed Report (JSON)
+
 **Use case:** Comprehensive analysis, CI/CD integration, historical tracking
 
 ```json
@@ -956,18 +1044,19 @@ utils.debugLog
 
 ## CLI Options
 
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--save-report` | `-s` | Save detailed JSON report |
-| `--verbose` | `-v` | Show included files and directories |
-| `--context-export` | | Generate LLM context file |
-| `--context-clipboard` | | Copy context to clipboard |
-| `--method-level` | `-m` | Enable method-level analysis |
-| `--help` | `-h` | Show help message |
+| Option                | Short | Description                         |
+| --------------------- | ----- | ----------------------------------- |
+| `--save-report`       | `-s`  | Save detailed JSON report           |
+| `--verbose`           | `-v`  | Show included files and directories |
+| `--context-export`    |       | Generate LLM context file           |
+| `--context-clipboard` |       | Copy context to clipboard           |
+| `--method-level`      | `-m`  | Enable method-level analysis        |
+| `--help`              | `-h`  | Show help message                   |
 
 ## 📊 Use Cases & Examples
 
 ### 1. 🤖 LLM Context Optimization
+
 **Goal:** Generate minimal context for AI assistants
 
 ```bash
@@ -981,7 +1070,8 @@ ctxman --method-level --context-export
 
 **Result:** 89% smaller context compared to full codebase
 
-### 2. 📊 Codebase Analysis  
+### 2. 📊 Codebase Analysis
+
 **Goal:** Understand project complexity and structure
 
 ```bash
@@ -993,6 +1083,7 @@ ctxman --method-level --save-report
 ```
 
 ### 3. 🔍 Method-Level Debugging
+
 **Goal:** Focus on specific problematic methods
 
 ```bash
@@ -1006,6 +1097,7 @@ ctxman --method-level
 ```
 
 ### 4. 🚀 CI/CD Integration
+
 **Goal:** Monitor codebase growth and complexity
 
 ```bash
@@ -1017,6 +1109,7 @@ ctxman --method-level --save-report
 ```
 
 ### 5. 📈 Code Quality Gates
+
 **Goal:** Ensure code stays within token budgets
 
 ```bash
@@ -1032,14 +1125,14 @@ fi
 
 ### Core Options
 
-| Option | Short | Description | Example |
-|--------|-------|-------------|----------|
-| `--save-report` | `-s` | Save detailed JSON report | `ctxman -s` |
-| `--verbose` | `-v` | Show included files/methods | `ctxman -v` |
-| `--context-export` | | Generate LLM context file | `ctxman --context-export` |
-| `--context-clipboard` | | Copy context to clipboard | `ctxman --context-clipboard` |
-| `--method-level` | `-m` | Enable method-level analysis | `ctxman -m` |
-| `--help` | `-h` | Show help message | `ctxman -h` |
+| Option                | Short | Description                  | Example                      |
+| --------------------- | ----- | ---------------------------- | ---------------------------- |
+| `--save-report`       | `-s`  | Save detailed JSON report    | `ctxman -s`                  |
+| `--verbose`           | `-v`  | Show included files/methods  | `ctxman -v`                  |
+| `--context-export`    |       | Generate LLM context file    | `ctxman --context-export`    |
+| `--context-clipboard` |       | Copy context to clipboard    | `ctxman --context-clipboard` |
+| `--method-level`      | `-m`  | Enable method-level analysis | `ctxman -m`                  |
+| `--help`              | `-h`  | Show help message            | `ctxman -h`                  |
 
 ### Usage Patterns
 
@@ -1070,7 +1163,7 @@ const { TokenAnalyzer } = require('ctxman');
 // File-level analysis
 const analyzer = new TokenAnalyzer('./src', {
   verbose: true,
-  saveReport: true
+  saveReport: true,
 });
 
 analyzer.run();
@@ -1085,7 +1178,7 @@ const { TokenAnalyzer, MethodAnalyzer } = require('ctxman');
 const analyzer = new TokenAnalyzer('./src', {
   methodLevel: true,
   contextExport: true,
-  verbose: false
+  verbose: false,
 });
 
 analyzer.run();
@@ -1101,17 +1194,17 @@ const methods = methodAnalyzer.extractMethods(fileContent, 'server.js');
 const analyzer = new TokenAnalyzer('./src', {
   // Enable method-level analysis
   methodLevel: true,
-  
+
   // Output options
   saveReport: true,
   contextExport: true,
   contextToClipboard: true,
-  
+
   // Verbosity
   verbose: true,
-  
+
   // Compact context (for LLM optimization)
-  compactContext: true
+  compactContext: true,
 });
 
 // Access results
@@ -1125,17 +1218,14 @@ console.log('Analysis complete!');
 const { MethodAnalyzer, MethodFilterParser } = require('ctxman');
 
 // Create custom method filter
-const filter = new MethodFilterParser(
-  './custom-methods.include',
-  './custom-methods.ignore'
-);
+const filter = new MethodFilterParser('./custom-methods.include', './custom-methods.ignore');
 
 // Analyze specific file
 const methodAnalyzer = new MethodAnalyzer();
 const methods = methodAnalyzer.extractMethods(content, filePath);
 
 // Filter methods
-const filteredMethods = methods.filter(method => 
+const filteredMethods = methods.filter((method) =>
   filter.shouldIncludeMethod(method.name, fileName)
 );
 ```
@@ -1164,4 +1254,4 @@ MIT License - see LICENSE file for details
 
 ---
 
-*Created with ❤️ by Hakkı Sağdıç*
+_Created with ❤️ by Hakkı Sağdıç_

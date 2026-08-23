@@ -11,29 +11,29 @@ describe('PRFailureAgent', () => {
     mockScanner = {
       scan: () => [
         { relativePath: 'src/utils.js', path: '/abs/src/utils.js', name: 'utils.js' },
-        { relativePath: 'src/main.js', path: '/abs/src/main.js', name: 'main.js' }
-      ]
+        { relativePath: 'src/main.js', path: '/abs/src/main.js', name: 'main.js' },
+      ],
     };
-    
+
     mockAnalyzer = {
       analyze: async () => ({
         files: [],
-        stats: {}
-      })
+        stats: {},
+      }),
     };
-    
+
     mockContextBuilder = {
       build: () => ({
         files: {},
-        metadata: {}
+        metadata: {},
       }),
-      getSummary: () => 'Context Summary Mock'
+      getSummary: () => 'Context Summary Mock',
     };
 
     agent = new PRFailureAgent('/root', {
       scanner: mockScanner,
       analyzer: mockAnalyzer,
-      contextBuilder: mockContextBuilder
+      contextBuilder: mockContextBuilder,
     });
   });
 
@@ -61,11 +61,17 @@ describe('PRFailureAgent', () => {
     // Track calls
     let scanCalled = false;
     const originalScan = mockScanner.scan;
-    mockScanner.scan = () => { scanCalled = true; return originalScan(); };
+    mockScanner.scan = () => {
+      scanCalled = true;
+      return originalScan();
+    };
 
     let analyzeCalled = false;
     const originalAnalyze = mockAnalyzer.analyze;
-    mockAnalyzer.analyze = async (files) => { analyzeCalled = true; return originalAnalyze(files); };
+    mockAnalyzer.analyze = async (files) => {
+      analyzeCalled = true;
+      return originalAnalyze(files);
+    };
 
     const fix = await agent.run(ciLog, diff);
 
@@ -75,24 +81,24 @@ describe('PRFailureAgent', () => {
   });
 
   it('should identify relevant files from error', () => {
-    const error = "Error in src/components/Button.tsx caused by ...";
-    const files = agent.identifyRelevantFiles(error, "");
+    const error = 'Error in src/components/Button.tsx caused by ...';
+    const files = agent.identifyRelevantFiles(error, '');
     expect(files).toContain('src/components/Button.tsx');
   });
 
   it('should identify relevant files from diff', () => {
-    const diff = "+++ b/src/new-feature.js";
-    const files = agent.identifyRelevantFiles("", diff);
+    const diff = '+++ b/src/new-feature.js';
+    const files = agent.identifyRelevantFiles('', diff);
     expect(files).toContain('src/new-feature.js');
   });
-  
+
   it('should extract error from log', () => {
-      const log = `
+    const log = `
 Some info
 Error: Something went wrong
 More info
       `;
-      const error = agent.extractError(log);
-      expect(error).toContain('Error: Something went wrong');
+    const error = agent.extractError(log);
+    expect(error).toContain('Error: Something went wrong');
   });
 });

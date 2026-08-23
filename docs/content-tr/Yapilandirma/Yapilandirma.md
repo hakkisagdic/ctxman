@@ -9,7 +9,9 @@
 </cite>
 
 ## Güncelleme Özeti
+
 **Yapılan Değişiklikler**
+
 - Method Filtreleme Sistemi bölümü yeni dosyalardan uygulama detayları ile güncellendi
 - Pattern Syntax Rehberi, gerçek kod uygulamasına dayanarak güncellendi
 - Yapılandırma Örnekleri, doğru method filtreleme senaryoları ile geliştirildi
@@ -17,6 +19,7 @@
 - Gerçek analiz edilen kod dosyalarını yansıtan yeni bölüm kaynakları eklendi
 
 ## İçindekiler
+
 1. [Dosya Filtreleme Sistemi](#dosya-filtreleme-sistemi)
 2. [Method Filtreleme Sistemi](#method-filtreleme-sistemi)
 3. [Pattern Syntax Rehberi](#pattern-syntax-rehberi)
@@ -37,6 +40,7 @@ INCLUDE modunda (`.contextinclude` mevcut olduğunda), araç yalnızca `.context
 Tam yapilandirma dosyası öncelik sırası şöyledir: 1) `.gitignore` (her zaman saygı gösterilir), 2) `.contextinclude` (en yüksek öncelik), 3) `.contextignore` (include dosyası olmadığında fallback). Bu katmanlı yaklaşım, standart git hariç tutmalarının her zaman uygulanmasını sağlarken, esnek, projeye özel filtreleme seçenekleri sunar.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L121-L150)
 - [README.md](file://README.md#L294-L356)
 - [ctxman.js](file://ctxman.js#L128-L151)
@@ -54,6 +58,7 @@ Method filtreleme sistemi birkaç pattern türünü destekler: tam method isimle
 Filtreleme mantığı, yapilandirma dosyalarını yükleyen, pattern'leri regular expression'lara ayrıştıran ve her methodu bu pattern'lere karşı değerlendiren `MethodFilterParser` class'ında uygulanır. INCLUDE modu için, bir method `.methodinclude` dosyasındaki herhangi bir pattern ile eşleşirse dahil edilir. EXCLUDE modu için, bir method yalnızca `.methodignore` dosyasındaki herhangi bir pattern ile eşleşmiyorsa dahil edilir. Sistem ayrıca, daha geniş dahil etme kurallarından belirli methodları hariç tutmak için `!` ile öneklenmiş negasyon pattern'lerini destekler.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L544-L610)
 - [ctxman.js](file://ctxman.js#L69-L96)
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
@@ -72,6 +77,7 @@ Pattern değerlendirme belirli kurallara uyar: pattern'ler sırayla işlenir ve 
 Pattern satırları içinde satır içi yorumların desteklenmediğini unutmamak önemlidir; yorumlar ayrı satırlarda olmalıdır. Pattern sözdizimi dikkatle doğrulanmalıdır, çünkü yanlış pattern'ler beklenmedik dosya dahil edilmelerine veya hariç tutulmalara yol açabilir. Araç, hangi modun etkin olduğunu gösteren ve pattern eşleştirme sorunlarını teşhis etmeye yardımcı olabilecek verbose çıktı sağlar.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L544-L610)
 - [README.md](file://README.md#L418)
 - [ctxman.js](file://ctxman.js#L153-L173)
@@ -84,6 +90,7 @@ ctxman aracı, core uygulama mantığına nasıl odaklanılacağını veya test 
 EXCLUDE modu için, kullanıcılar analiz kapsamını genişletmek veya kısıtlamak için `.contextignore` dosyasını değiştirebilir. Normalde hariç tutulan dokümantasyon dosyalarını dahil etmek için, kullanıcılar `.contextignore` dosyasından `**/*.md` satırını yorumlayabilir veya kaldırabilir. Belirli büyük dosyaları veya dizinleri hariç tutmak için, `your-large-file.js` veya `specific-directory/**` gibi ek pattern'ler eklenebilir. Varsayılan `.contextignore` yapılandırması, dokümantasyon, yapilandirma dosyaları, altyapı kodu, workflow'lar ve testing utilities'i hariç tutarak core uygulama mantığına odaklanır.
 
 INCLUDE modu için, kullanıcılar tam olarak hangi dosyaların analiz edilmesi gerektiğini belirtmek için bir `.contextinclude` dosyası oluşturur. Yaygın bir pattern, bir kaynak dizinindeki tüm JavaScript dosyalarını dahil ederken negasyon kullanarak belirli alt dizinleri hariç tutmaktır. Örneğin:
+
 ```
 # src'deki tüm JS dosyalarını dahil et
 src/**/*.js
@@ -92,7 +99,9 @@ src/**/*.js
 # Test dosyalarını hariç tut
 !src/**/*.test.js
 ```
+
 Bu yapilandirma, legacy alt dizinindeki veya `.test.js` uzantılı olanlar hariç src dizinindeki tüm JavaScript dosyalarını dahil eder. Başka bir örnek, belirli giriş noktalarını ve kaynak dosyalarını dahil ederek core business logic'e odaklanır:
+
 ```
 # Ana giriş noktasını dahil et
 utility-mcp/index.js
@@ -103,6 +112,7 @@ utility-mcp/src/**/*.js
 ```
 
 Method seviyesinde filtreleme için, `.methodinclude` dosyası core business logic methodlarına odaklanacak şekilde yapılandırılabilir. Örnekler:
+
 ```
 # Core business logic methodları
 calculateTokens
@@ -120,6 +130,7 @@ TokenCalculator.* # TokenCalculator class'ındaki tüm methodlar
 ```
 
 Tersine, `.methodignore` dosyası utility ve debug methodlarını hariç tutabilir:
+
 ```
 # Utility ve debug methodlarını hariç tut
 console
@@ -135,6 +146,7 @@ utils.debugLog
 ```
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L294-L356)
 - [README.md](file://README.md#L544-L610)
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L37-L45)
@@ -152,6 +164,7 @@ Farklı filtre dosyaları arasındaki etkileşim de karışıklığa neden olabi
 Diğer yaygın sorunlar arasında dizin pattern'lerini uygun sözdizimi olmadan kullanma (pattern'ler `docs/` yerine `docs/**` kullanmalıdır), pattern dosyalarında satır içi yorumlar bulundurma (yorumlar `#` ile başlayan ayrı satırlarda olmalıdır) ve method pattern'lerinde dosya uzantılarını hesaba katmama sayılabilir. Kullanıcılar ayrıca escape edilmesi gereken özel regex karakterleri içeren pattern'lerle karşılaşabilirler, ancak araç pattern dönüşümünde çoğu özel karakteri otomatik olarak işler.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L418)
 - [README.md](file://README.md#L378-L408)
 - [ctxman.js](file://ctxman.js#L175-L211)
@@ -173,6 +186,7 @@ Yapilandirma dosyalarını her pattern'in amacını açıklayan net yorumlarla d
 Son olarak, farklı filtreleme yaklaşımlarının performans etkilerini göz önünde bulundurun. INCLUDE modu hassas kontrol sağlarken, kod tabanı geliştikçe dikkatli bakım gerektirir. EXCLUDE modu, istikrarlı proje yapıları için daha sürdürülebilir olabilir ancak yeni dizinler eklendikçe istenmeyen dosyaları dahil etme riski taşır. Projenin analiz ihtiyaçlarını karşılamaya devam ettiklerinden emin olmak için filtre yapılandırmalarını düzenli olarak gözden geçirin ve güncelleyin.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L30-L103)
 - [README.md](file://README.md#L253-L293)
 - [ctxman.js](file://ctxman.js#L408-L447)

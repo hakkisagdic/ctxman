@@ -10,44 +10,44 @@
 
 ### ✅ Implemented Features
 
-| Feature | Spec v1.3 | Ctxman | Notes |
-|---------|-----------|-----------------|-------|
-| **Basic Encoding** | ✅ | ✅ | Objects, primitives, strings |
-| **Nested Objects** | ✅ | ✅ | Indentation-based structure |
-| **Tabular Arrays** | ✅ | ✅ | `{field1,field2}:` header format |
-| **Empty Arrays** | ✅ | ✅ | `[]` representation |
-| **Empty Objects** | ✅ | ✅ | Empty output |
-| **String Escaping** | ✅ | ✅ | Backslash escaping |
-| **Quote Detection** | ✅ | ⚠️ | Basic implementation |
-| **Token Estimation** | ✅ | ✅ | ~4 chars/token estimation |
-| **Validation** | ✅ | ✅ | Brace/bracket balancing |
-| **Optimization** | ✅ | ✅ | Whitespace removal |
-| **Minification** | ✅ | ✅ | Ultra-compact mode |
-| **compareWithJSON** | ✅ | ✅ | Token savings calculation |
+| Feature              | Spec v1.3 | Ctxman | Notes                            |
+| -------------------- | --------- | ------ | -------------------------------- |
+| **Basic Encoding**   | ✅        | ✅     | Objects, primitives, strings     |
+| **Nested Objects**   | ✅        | ✅     | Indentation-based structure      |
+| **Tabular Arrays**   | ✅        | ✅     | `{field1,field2}:` header format |
+| **Empty Arrays**     | ✅        | ✅     | `[]` representation              |
+| **Empty Objects**    | ✅        | ✅     | Empty output                     |
+| **String Escaping**  | ✅        | ✅     | Backslash escaping               |
+| **Quote Detection**  | ✅        | ⚠️     | Basic implementation             |
+| **Token Estimation** | ✅        | ✅     | ~4 chars/token estimation        |
+| **Validation**       | ✅        | ✅     | Brace/bracket balancing          |
+| **Optimization**     | ✅        | ✅     | Whitespace removal               |
+| **Minification**     | ✅        | ✅     | Ultra-compact mode               |
+| **compareWithJSON**  | ✅        | ✅     | Token savings calculation        |
 
 ### ⚠️ Partially Implemented
 
-| Feature | Spec v1.3 | Ctxman | Gap |
-|---------|-----------|-----------------|-----|
-| **Array Length Markers** | `items[3]` | `{field1,field2}:` only | Missing `[N]` prefix |
-| **Delimiter Options** | `,`, `\t`, `\|` | `,` only | Tab and pipe delimiters missing |
-| **Length Marker Option** | `[#3]` | ❌ | `#` prefix not supported |
-| **String Quoting Rules** | Comprehensive | Basic | Missing smart quoting logic |
-| **Type Conversions** | Full spec | Partial | Missing Date, BigInt handling |
-| **List Format** | `- item` | ❌ | Non-uniform arrays not optimal |
+| Feature                  | Spec v1.3       | Ctxman                  | Gap                             |
+| ------------------------ | --------------- | ----------------------- | ------------------------------- |
+| **Array Length Markers** | `items[3]`      | `{field1,field2}:` only | Missing `[N]` prefix            |
+| **Delimiter Options**    | `,`, `\t`, `\|` | `,` only                | Tab and pipe delimiters missing |
+| **Length Marker Option** | `[#3]`          | ❌                      | `#` prefix not supported        |
+| **String Quoting Rules** | Comprehensive   | Basic                   | Missing smart quoting logic     |
+| **Type Conversions**     | Full spec       | Partial                 | Missing Date, BigInt handling   |
+| **List Format**          | `- item`        | ❌                      | Non-uniform arrays not optimal  |
 
 ### ❌ Missing Features
 
-| Feature | Spec v1.3 | Priority | Impact |
-|---------|-----------|----------|--------|
-| **Decoder** | ✅ Required | 🔴 High | Can't parse TOON back to JSON |
-| **Delimiter Customization** | `\t`, `\|` | 🟡 Medium | Additional 5-10% token savings |
-| **Length Marker `#`** | `[#3]` | 🟢 Low | Clarity for LLMs |
-| **Smart Quoting** | Context-aware | 🟡 Medium | Optimize quote usage |
-| **Date/BigInt Normalization** | ISO strings | 🟢 Low | Type safety |
-| **List Format for Non-Uniform** | `- field: value` | 🟡 Medium | Better non-uniform handling |
-| **Root Arrays** | `[3]: a,b,c` | 🟢 Low | Edge case support |
-| **Strict Mode Validation** | Full spec | 🟡 Medium | Production safety |
+| Feature                         | Spec v1.3        | Priority  | Impact                         |
+| ------------------------------- | ---------------- | --------- | ------------------------------ |
+| **Decoder**                     | ✅ Required      | 🔴 High   | Can't parse TOON back to JSON  |
+| **Delimiter Customization**     | `\t`, `\|`       | 🟡 Medium | Additional 5-10% token savings |
+| **Length Marker `#`**           | `[#3]`           | 🟢 Low    | Clarity for LLMs               |
+| **Smart Quoting**               | Context-aware    | 🟡 Medium | Optimize quote usage           |
+| **Date/BigInt Normalization**   | ISO strings      | 🟢 Low    | Type safety                    |
+| **List Format for Non-Uniform** | `- field: value` | 🟡 Medium | Better non-uniform handling    |
+| **Root Arrays**                 | `[3]: a,b,c`     | 🟢 Low    | Edge case support              |
+| **Strict Mode Validation**      | Full spec        | 🟡 Medium | Production safety              |
 
 ---
 
@@ -56,6 +56,7 @@
 ### Core Syntax
 
 #### 1. Objects ✅ Implemented
+
 ```toon
 id: 123
 name: Ada
@@ -63,6 +64,7 @@ active: true
 ```
 
 #### 2. Nested Objects ✅ Implemented
+
 ```toon
 user:
   id: 123
@@ -70,27 +72,35 @@ user:
 ```
 
 #### 3. Primitive Arrays ⚠️ Partial
+
 **Spec:**
+
 ```toon
 tags[3]: admin,ops,dev
 ```
 
 **Our Implementation:**
+
 ```toon
 tags: [admin,ops,dev]
 ```
+
 ❌ Missing `[N]` length marker
 
 #### 4. Tabular Arrays ✅ Implemented
+
 ```toon
 items[2]{sku,qty,price}:
   A1,2,9.99
   B2,1,14.5
 ```
+
 ✅ Working correctly
 
 #### 5. Mixed Arrays ❌ Not Implemented
+
 **Spec:**
+
 ```toon
 items[3]:
   - 1
@@ -99,44 +109,53 @@ items[3]:
 ```
 
 **Our Implementation:**
+
 ```toon
 items: [1, {a: 1}, "text"]
 ```
+
 ❌ Falls back to JSON-like syntax
 
 #### 6. Delimiter Options ❌ Not Implemented
 
 **Tab Delimiter:**
+
 ```toon
 items[2\t]{sku\tname\tqty\tprice}:
   A1\tWidget\t2\t9.99
   B2\tGadget\t1\t14.5
 ```
+
 ❌ Not supported - only comma delimiter
 
 **Pipe Delimiter:**
+
 ```toon
 items[2|]{sku|name|qty|price}:
   A1|Widget|2|9.99
   B2|Gadget|1|14.5
 ```
+
 ❌ Not supported
 
 #### 7. Length Marker Option ❌ Not Implemented
+
 ```toon
 tags[#3]: reading,gaming,coding
 items[#2]{sku,qty,price}:
   A1,2,9.99
   B2,1,14.5
 ```
+
 ❌ `#` prefix not supported
 
 ### Advanced Features
 
 #### 8. Decoder ❌ Critical Missing
+
 ```javascript
 // Spec has:
-const data = decode(toonString)
+const data = decode(toonString);
 
 // We have:
 // ❌ No decoder implemented
@@ -145,6 +164,7 @@ const data = decode(toonString)
 #### 9. Smart Quoting ⚠️ Partial
 
 **Spec Rules:**
+
 - Empty string: `""`
 - Leading/trailing spaces: `" padded "`
 - Contains delimiter/colon/quote: `"a,b"`, `"a:b"`
@@ -153,6 +173,7 @@ const data = decode(toonString)
 - Looks structural: `"[5]"`, `"{key}"`
 
 **Our Implementation:**
+
 - Basic escaping ✅
 - Quote when contains: `[\s,:{}\[\]]` ✅
 - Missing: Context-aware quoting ❌
@@ -160,13 +181,13 @@ const data = decode(toonString)
 
 #### 10. Type Conversions ⚠️ Partial
 
-| Type | Spec Behavior | Our Implementation |
-|------|---------------|-------------------|
-| `NaN`, `Infinity` | `null` | ❌ String representation |
-| `BigInt` | Number or quoted string | ❌ Not handled |
-| `Date` | ISO string in quotes | ❌ Not handled |
-| `undefined` | `null` | ✅ Implemented |
-| `function` | `null` | ✅ Implicit (ignored) |
+| Type              | Spec Behavior           | Our Implementation       |
+| ----------------- | ----------------------- | ------------------------ |
+| `NaN`, `Infinity` | `null`                  | ❌ String representation |
+| `BigInt`          | Number or quoted string | ❌ Not handled           |
+| `Date`            | ISO string in quotes    | ❌ Not handled           |
+| `undefined`       | `null`                  | ✅ Implemented           |
+| `function`        | `null`                  | ✅ Implicit (ignored)    |
 
 ---
 
@@ -175,6 +196,7 @@ const data = decode(toonString)
 ### 1. 🔴 CRITICAL: Missing Decoder
 
 **What's Missing:**
+
 ```javascript
 const { decode } = require('@toon-format/toon');
 const data = decode('users[2]{id,name}:\n  1,Alice\n  2,Bob');
@@ -182,6 +204,7 @@ const data = decode('users[2]{id,name}:\n  1,Alice\n  2,Bob');
 ```
 
 **Impact:**
+
 - ❌ Cannot parse TOON back to JSON
 - ❌ One-way conversion only
 - ❌ Limited utility for round-trip workflows
@@ -191,21 +214,23 @@ const data = decode('users[2]{id,name}:\n  1,Alice\n  2,Bob');
 ### 2. 🟡 MEDIUM: Delimiter Options
 
 **What's Missing:**
+
 ```javascript
 // Tab delimiter (more efficient)
-encode(data, { delimiter: '\t' })
+encode(data, { delimiter: '\t' });
 // items[2\t]{sku\tqty}:
 //   A1\t2
 //   B2\t1
 
 // Pipe delimiter
-encode(data, { delimiter: '|' })
+encode(data, { delimiter: '|' });
 // items[2|]{sku|qty}:
 //   A1|2
 //   B2|1
 ```
 
 **Impact:**
+
 - Missing 5-10% additional token savings
 - Less flexibility for different data types
 - Cannot handle comma-heavy data optimally
@@ -215,6 +240,7 @@ encode(data, { delimiter: '|' })
 ### 3. 🟡 MEDIUM: Array Length Markers
 
 **What's Missing:**
+
 ```javascript
 // Current:
 tags: [a,b,c]
@@ -224,6 +250,7 @@ tags[3]: a,b,c
 ```
 
 **Impact:**
+
 - LLMs can't validate array count
 - Less self-documenting
 - Misses TOON's key feature
@@ -233,6 +260,7 @@ tags[3]: a,b,c
 ### 4. 🟡 MEDIUM: List Format for Non-Uniform Arrays
 
 **What's Missing:**
+
 ```toon
 // Current: Falls back to JSON-like
 items: [1, {a: 1}, "text"]
@@ -245,6 +273,7 @@ items[3]:
 ```
 
 **Impact:**
+
 - Non-uniform arrays less efficient
 - Not spec-compliant
 - Can't represent complex mixed arrays
@@ -254,6 +283,7 @@ items[3]:
 ### 5. 🟢 LOW: Length Marker `#` Prefix
 
 **What's Missing:**
+
 ```toon
 tags[#3]: a,b,c
 items[#2]{id,name}:
@@ -262,6 +292,7 @@ items[#2]{id,name}:
 ```
 
 **Impact:**
+
 - Minor clarity improvement for LLMs
 - Optional feature in spec
 - Low priority
@@ -271,12 +302,14 @@ items[#2]{id,name}:
 ### 6. 🟢 LOW: Type Normalizations
 
 **What's Missing:**
+
 - `NaN` → `null`
 - `Infinity` → `null`
 - `BigInt` → number or quoted string
 - `Date` → ISO string
 
 **Impact:**
+
 - Edge case handling
 - Mostly affects exotic data types
 - Low priority for typical use cases
@@ -297,31 +330,34 @@ TOTAL PARITY:         ████████░░░░░░░░░░░�
 
 ### By Category
 
-| Category | Implemented | Missing | Score |
-|----------|-------------|---------|-------|
-| **Encoding** | 6/10 features | 4 features | 60% |
-| **Decoding** | 0/1 feature | Decoder | 0% |
-| **Optimization** | 4/4 features | None | 100% |
-| **Validation** | 1/2 features | Strict mode | 50% |
-| **Delimiters** | 1/3 options | Tab, pipe | 33% |
+| Category         | Implemented   | Missing     | Score |
+| ---------------- | ------------- | ----------- | ----- |
+| **Encoding**     | 6/10 features | 4 features  | 60%   |
+| **Decoding**     | 0/1 feature   | Decoder     | 0%    |
+| **Optimization** | 4/4 features  | None        | 100%  |
+| **Validation**   | 1/2 features  | Strict mode | 50%   |
+| **Delimiters**   | 1/3 options   | Tab, pipe   | 33%   |
 
 ---
 
 ## 🚀 Recommended Implementation Roadmap
 
 ### Phase 1 (Quick Wins - v2.3.6)
+
 - ✅ Add `[N]` length markers to arrays
 - ✅ Implement delimiter options (`,`, `\t`, `|`)
 - ✅ Add `lengthMarker: '#'` option
 - Estimated effort: 2-3 hours
 
 ### Phase 2 (Core Features - v2.4.0)
+
 - ✅ Implement TOON decoder
 - ✅ Add list format for non-uniform arrays
 - ✅ Implement smart quoting rules
 - Estimated effort: 1-2 days
 
 ### Phase 3 (Polish - v2.5.0)
+
 - ✅ Type normalizations (Date, BigInt, NaN, Infinity)
 - ✅ Strict validation mode
 - ✅ Conformance test suite
@@ -356,16 +392,18 @@ Despite missing features, our implementation is **production-ready** for common 
 ### Simple Tabular Data ✅ WORKS
 
 **Input:**
+
 ```javascript
 {
   users: [
     { id: 1, name: 'Alice', role: 'admin' },
-    { id: 2, name: 'Bob', role: 'user' }
-  ]
+    { id: 2, name: 'Bob', role: 'user' },
+  ];
 }
 ```
 
 **Official TOON Spec:**
+
 ```toon
 users[2]{id,name,role}:
   1,Alice,admin
@@ -373,6 +411,7 @@ users[2]{id,name,role}:
 ```
 
 **Ctxman Output:**
+
 ```toon
 {
   users: {id,name,role}:
@@ -386,11 +425,15 @@ users[2]{id,name,role}:
 ### Complex Mixed Arrays ❌ INCOMPLETE
 
 **Input:**
+
 ```javascript
-{ items: [1, { a: 1 }, 'text'] }
+{
+  items: [1, { a: 1 }, 'text'];
+}
 ```
 
 **Official TOON Spec:**
+
 ```toon
 items[3]:
   - 1
@@ -399,6 +442,7 @@ items[3]:
 ```
 
 **Ctxman Output:**
+
 ```toon
 items: [1,{a: 1},"text"]
 ```
@@ -412,12 +456,14 @@ items: [1,{a: 1},"text"]
 ### Current Status: **Functional but Incomplete**
 
 **Strengths:**
+
 - ✅ Core tabular format works (main use case)
 - ✅ Achieves 15-30% token savings
 - ✅ Production-ready for uniform data
 - ✅ Unique optimization features
 
 **Limitations:**
+
 - ❌ No decoder (one-way only)
 - ❌ Missing spec-compliant array syntax
 - ❌ No delimiter options
@@ -426,11 +472,13 @@ items: [1,{a: 1},"text"]
 ### Recommendation
 
 **For Current Use:**
+
 - ✅ Use for uniform tabular data (works great!)
 - ⚠️ Avoid for mixed/complex arrays
 - ⚠️ Decoder needed for round-trip
 
 **For Full Compliance:**
+
 - Implement missing features in Phase 2
 - Follow official spec v1.3
 - Add conformance test suite
@@ -439,14 +487,17 @@ items: [1,{a: 1},"text"]
 ### Alternative Approach
 
 **Option 1:** Continue custom implementation
+
 - Add missing features incrementally
 - Maintain control and customization
 - More development effort
 
 **Option 2:** Integrate official package
+
 ```bash
 npm install @toon-format/toon
 ```
+
 - Full spec compliance
 - Professional decoder
 - Regular updates

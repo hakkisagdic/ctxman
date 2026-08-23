@@ -9,7 +9,9 @@
 </cite>
 
 ## Update Summary
-**Changes Made**   
+
+**Changes Made**
+
 - Updated Method Filtering System section with implementation details from new files
 - Added Pattern Syntax Guide updates based on actual code implementation
 - Enhanced Configuration Examples with accurate method filtering scenarios
@@ -17,6 +19,7 @@
 - Added new section sources reflecting actual code files analyzed
 
 ## Table of Contents
+
 1. [File Filtering System](#file-filtering-system)
 2. [Method Filtering System](#method-filtering-system)
 3. [Pattern Syntax Guide](#pattern-syntax-guide)
@@ -37,6 +40,7 @@ In INCLUDE mode (when `.contextinclude` exists), the tool includes only files ma
 The complete configuration file priority order is: 1) `.gitignore` (always respected), 2) `.contextinclude` (highest priority), 3) `.contextignore` (fallback when no include file exists). This layered approach ensures that standard git exclusions are always applied while providing flexible, project-specific filtering options.
 
 **Section sources**
+
 - [README.md](file://README.md#L121-L150)
 - [README.md](file://README.md#L294-L356)
 - [ctxman.js](file://ctxman.js#L128-L151)
@@ -54,6 +58,7 @@ The method filtering system supports several pattern types: exact method names (
 The filtering logic is implemented in the `MethodFilterParser` class, which loads the configuration files, parses the patterns into regular expressions, and evaluates each method against these patterns. For INCLUDE mode, a method is included if it matches any pattern in the `.methodinclude` file. For EXCLUDE mode, a method is included only if it does not match any pattern in the `.methodignore` file. The system also supports negation patterns prefixed with `!` to exclude specific methods from broader inclusion rules.
 
 **Section sources**
+
 - [README.md](file://README.md#L544-L610)
 - [ctxman.js](file://ctxman.js#L69-L96)
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
@@ -72,6 +77,7 @@ The pattern evaluation follows specific rules: patterns are processed in order, 
 It's important to note that inline comments within pattern lines are not supported; comments must be on separate lines. Pattern syntax should be carefully validated, as incorrect patterns may lead to unexpected file inclusions or exclusions. The tool provides verbose output that shows which mode is active and can help diagnose pattern matching issues.
 
 **Section sources**
+
 - [README.md](file://README.md#L544-L610)
 - [README.md](file://README.md#L418)
 - [ctxman.js](file://ctxman.js#L153-L173)
@@ -84,6 +90,7 @@ The ctxman tool provides practical configuration examples that demonstrate how t
 For EXCLUDE mode, users can modify the `.contextignore` file to expand or restrict the analysis scope. To include documentation files that are normally excluded, users can comment out or remove the `**/*.md` line from the `.contextignore` file. To exclude specific large files or directories, additional patterns can be added, such as `your-large-file.js` or `specific-directory/**`. The default `.contextignore` configuration focuses on core application logic by excluding documentation, configuration files, infrastructure code, workflows, and testing utilities.
 
 For INCLUDE mode, users create a `.contextinclude` file to specify exactly which files should be analyzed. A common pattern is to include all JavaScript files in a source directory while excluding specific subdirectories using negation. For example:
+
 ```
 # Include all JS files in src
 src/**/*.js
@@ -92,7 +99,9 @@ src/**/*.js
 # Exclude test files
 !src/**/*.test.js
 ```
+
 This configuration includes all JavaScript files in the src directory except those in the legacy subdirectory or with a `.test.js` extension. Another example focuses on core business logic by including specific entry points and source files:
+
 ```
 # Include main entry point
 utility-mcp/index.js
@@ -103,6 +112,7 @@ utility-mcp/src/**/*.js
 ```
 
 For method-level filtering, the `.methodinclude` file can be configured to focus on core business logic methods. Examples include:
+
 ```
 # Core business logic methods
 calculateTokens
@@ -120,6 +130,7 @@ TokenCalculator.* # All methods in TokenCalculator class
 ```
 
 Conversely, the `.methodignore` file can exclude utility and debug methods:
+
 ```
 # Exclude utility and debug methods
 console
@@ -135,6 +146,7 @@ utils.debugLog
 ```
 
 **Section sources**
+
 - [README.md](file://README.md#L294-L356)
 - [README.md](file://README.md#L544-L610)
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L37-L45)
@@ -152,6 +164,7 @@ Interaction between different filter files can also cause confusion. The tool re
 Other common issues include using directory patterns without proper syntax (patterns should use `docs/**` rather than `docs/`), having inline comments in pattern files (comments must be on separate lines starting with `#`), and not accounting for file extensions in method patterns. Users may also encounter issues when patterns contain special regex characters that need to be escaped, though the tool automatically handles most special characters in pattern conversion.
 
 **Section sources**
+
 - [README.md](file://README.md#L418)
 - [README.md](file://README.md#L378-L408)
 - [ctxman.js](file://ctxman.js#L175-L211)
@@ -173,6 +186,7 @@ Organize configuration files with clear comments explaining the purpose of each 
 Finally, consider the performance implications of different filtering approaches. While INCLUDE mode provides precise control, it requires careful maintenance as the codebase evolves. EXCLUDE mode may be more maintainable for stable project structures but risks including unwanted files as new directories are added. Regularly review and update filter configurations to ensure they continue to meet the project's analysis needs.
 
 **Section sources**
+
 - [README.md](file://README.md#L30-L103)
 - [README.md](file://README.md#L253-L293)
 - [ctxman.js](file://ctxman.js#L408-L447)

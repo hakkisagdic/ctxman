@@ -1,0 +1,27 @@
+{
+  "id": "FEAT-003",
+  "type": "docs",
+  "description": "Update TypeScript migration spec with detailed incremental migration guide including implementation steps, code examples, and verification procedures.",
+  "status": "completed",
+  "steps": [
+    "Read existing docs/specs/modernization/003-typescript-migration.md",
+    "Add detailed implementation section with step-by-step migration guide for each phase",
+    "Add code examples for migrating specific files (Scanner.js, Analyzer.js, etc.)",
+    "Add verification steps for each migration phase",
+    "Add rollback procedures in case of issues",
+    "Add compatibility notes for ES modules and NodeNext moduleResolution",
+    "Add testing strategy during migration",
+    "Add CI/CD integration guidance for TypeScript checks"
+  ],
+  "acceptance_criteria": [
+    "docs/specs/modernization/003-typescript-migration.md is updated with detailed implementation guide",
+    "Each phase has specific file-by-file migration steps",
+    "Code examples show before/after for key files",
+    "Verification steps are included for each phase",
+    "Rollback procedures are documented",
+    "CI/CD integration guidance is included"
+  ],
+  "verification": ["Read the updated spec file and verify it contains all required sections"],
+  "blocked_reason": null,
+  "findings": "Successfully updated TypeScript migration spec with: (1) Detailed implementation guide for all 4 phases, (2) Before/after code examples for Scanner.js, method-analyzer.js, token-calculator.js, and logger.js, (3) Verification steps for each phase, (4) Rollback procedures with git tags and per-file rollback options, (5) ES modules compatibility notes including NodeNext moduleResolution, (6) Testing strategy during migration with type tests, (7) CI/CD integration with GitHub Actions workflow examples and pre-commit hooks."
+}

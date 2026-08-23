@@ -25,8 +25,8 @@
         </div>
 
         <nav class="nav">
-          <button 
-            v-for="tab in tabs" 
+          <button
+            v-for="tab in tabs"
             :key="tab.id"
             :class="['nav-btn', { active: activeTab === tab.id }]"
             @click="activeTab = tab.id"
@@ -42,9 +42,9 @@
         <div v-if="activeTab === 'project'" class="tab-content">
           <div class="split-view">
             <div class="left-panel">
-              <FileBrowser 
+              <FileBrowser
                 ref="fileBrowser"
-                v-if="projectPath" 
+                v-if="projectPath"
                 :key="refreshKey"
                 :root-path="projectPath"
                 @select="handleFileSelect"
@@ -54,8 +54,8 @@
 
             <div class="right-panel">
               <div class="action-bar">
-                <button 
-                  @click="analyzeProject" 
+                <button
+                  @click="analyzeProject"
                   :disabled="!projectPath || analyzing"
                   class="btn-primary"
                 >
@@ -65,7 +65,7 @@
 
               <StatsPanel v-if="analysis" :stats="analysis.stats" />
 
-              <CodeViewer 
+              <CodeViewer
                 v-if="selectedFile"
                 :file-path="selectedFile.relativePath"
                 :code="selectedFile.code"
@@ -77,32 +77,18 @@
 
         <!-- Resources Tab -->
         <div v-if="activeTab === 'resources'" class="tab-content">
-          <ResourceList 
-            ref="resourceList"
-            @select="handleResourceSelect"
-          />
+          <ResourceList ref="resourceList" @select="handleResourceSelect" />
         </div>
 
         <!-- Prompts Tab -->
         <div v-if="activeTab === 'prompts'" class="tab-content">
-          <PromptList 
-            v-if="!selectedPrompt"
-            ref="promptList"
-            @select="handlePromptSelect"
-          />
-          <PromptTemplate
-            v-else
-            :prompt="selectedPrompt"
-            @back="selectedPrompt = null"
-          />
+          <PromptList v-if="!selectedPrompt" ref="promptList" @select="handlePromptSelect" />
+          <PromptTemplate v-else :prompt="selectedPrompt" @back="selectedPrompt = null" />
         </div>
 
         <!-- Context Wizard Tab -->
         <div v-if="activeTab === 'context'" class="tab-content">
-          <ContextWizard 
-            @generate="handleContextGeneration"
-            @cancel="activeTab = 'project'"
-          />
+          <ContextWizard @generate="handleContextGeneration" @cancel="activeTab = 'project'" />
         </div>
 
         <!-- Settings Tab -->
@@ -146,15 +132,9 @@
     </main>
 
     <footer class="footer">
-      <span class="footer-item">
-        {{ stats.filesAnalyzed }} files analyzed
-      </span>
-      <span class="footer-item">
-        {{ stats.totalTokens.toLocaleString() }} tokens
-      </span>
-      <span class="footer-item">
-        Ctxman Desktop v3.3.0
-      </span>
+      <span class="footer-item"> {{ stats.filesAnalyzed }} files analyzed </span>
+      <span class="footer-item"> {{ stats.totalTokens.toLocaleString() }} tokens </span>
+      <span class="footer-item"> Ctxman Desktop v3.3.0 </span>
     </footer>
   </div>
 </template>
@@ -181,12 +161,12 @@ const settings = reactive({
   autoConnect: true,
   methodLevel: false,
   verbose: false,
-  autoRefresh: true
+  autoRefresh: true,
 });
 
 const stats = reactive({
   filesAnalyzed: 0,
-  totalTokens: 0
+  totalTokens: 0,
 });
 
 const tabs = [
@@ -194,7 +174,7 @@ const tabs = [
   { id: 'context', label: 'Context', icon: '🧙' },
   { id: 'resources', label: 'Resources', icon: '📦' },
   { id: 'prompts', label: 'Prompts', icon: '💡' },
-  { id: 'settings', label: 'Settings', icon: '⚙️' }
+  { id: 'settings', label: 'Settings', icon: '⚙️' },
 ];
 
 // Refs to child components
@@ -223,10 +203,10 @@ async function selectProject() {
     // Reset state
     analysis.value = null;
     selectedFile.value = null;
-    
+
     // Start watcher
     await window.api.watcher.start(path);
-    
+
     // Initial refresh
     refreshFileBrowser();
   }
@@ -234,12 +214,12 @@ async function selectProject() {
 
 async function analyzeProject() {
   if (!projectPath.value || analyzing.value) return;
-  
+
   analyzing.value = true;
   try {
     const result = await window.api.cli.analyze(projectPath.value, {
       methodLevel: settings.methodLevel,
-      verbose: settings.verbose
+      verbose: settings.verbose,
     });
 
     if (result.success) {
@@ -262,7 +242,7 @@ async function handleFileSelect(file) {
     const code = await window.api.fs.readFile(file.path);
     selectedFile.value = {
       ...file,
-      code
+      code,
     };
   } catch (error) {
     console.error('Failed to read file:', error);
@@ -284,13 +264,13 @@ function handlePromptSelect(prompt) {
 // Context Wizard Handling
 async function handleContextGeneration(config) {
   console.log('Generating context with config:', config);
-  
+
   try {
     const result = await window.api.cli.generateContext(projectPath.value, {
       template: config.format === 'toon' ? 'toon' : undefined,
-      maxTokens: config.maxTokens
+      maxTokens: config.maxTokens,
     });
-    
+
     if (result.success) {
       // Show success notification or switch to result view
       console.log('Context generated:', result.data);
@@ -317,7 +297,7 @@ async function connectMcp() {
   try {
     await window.api.mcp.connect({ cwd: projectPath.value || process.cwd() });
     mcpConnected.value = true;
-    
+
     // Auto-load resources and prompts
     if (resourceList.value) await resourceList.value.refresh();
     if (promptList.value) await promptList.value.refresh();
@@ -557,7 +537,7 @@ function truncatePath(path) {
   cursor: pointer;
 }
 
-.setting-item input[type="checkbox"] {
+.setting-item input[type='checkbox'] {
   width: 18px;
   height: 18px;
   cursor: pointer;

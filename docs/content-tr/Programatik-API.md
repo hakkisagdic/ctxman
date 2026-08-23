@@ -11,7 +11,9 @@
 </cite>
 
 ## Güncelleme Özeti
+
 **Yapılan Değişiklikler**
+
 - TokenAnalyzer sınıfı dokümantasyonu TokenCalculator ile alias ilişkisini yansıtacak şekilde güncellendi
 - GitIngestFormatter ve MethodFilterParser sınıfları için yeni bölümler eklendi
 - Yapılandırma seçenekleri yeni gitingest seçeneğini içerecek şekilde güncellendi
@@ -20,6 +22,7 @@
 - Core bileşenler diyagramı yeni ilişkileri gösterecek şekilde geliştirildi
 
 ## İçindekiler
+
 1. [Giriş](#giriş)
 2. [Core Bileşenler](#core-bileşenler)
 3. [TokenAnalyzer Sınıfı](#tokenanalyzer-sınıfı)
@@ -37,6 +40,7 @@ ctxman aracı, kod tabanlarını analiz etmek ve LLM (Large Language Model) tük
 Araç, geliştiricilerin kod tabanı karmaşıklığını anlamalarına, LLM context kullanımını optimize etmelerine ve geliştirme pipeline'larında analiz görevlerini otomatikleştirmelerine yardımcı olmak üzere tasarlanmıştır. Filtreleme ve çıktı formatları için esnek konfigürasyon seçenekleriyle hem dosya seviyesinde hem de method seviyesinde analizi destekler.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L1-L100)
 
 ## Core Bileşenler
@@ -44,6 +48,7 @@ Araç, geliştiricilerin kod tabanı karmaşıklığını anlamalarına, LLM con
 ctxman aracı, kapsamlı analiz yetenekleri sağlamak için kompozisyon yoluyla birlikte çalışan birkaç core bileşen etrafında inşa edilmiştir. TokenAnalyzer sınıfı, analiz sürecinin farklı yönleri için özel bileşenler arasındaki etkileşimleri düzenleyen birincil arayüz olarak hizmet eder.
 
 Mimari, her bileşenin belirli bir sorumluluğa sahip olduğu modüler bir tasarımı takip eder:
+
 - GitIgnoreParser, .gitignore ve özel ignore kurallarına dayalı dosya hariç tutmayı yönetir
 - MethodAnalyzer, kod dosyalarından method tanımlarını çıkarır
 - MethodFilterParser, methodlara dahil etme/hariç tutma kurallarını uygular
@@ -85,12 +90,14 @@ GitIngestFormatter --> MethodFilterParser : "method filtreleme için kullanır"
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L14-L109)
 - [ctxman.js](file://ctxman.js#L118-L223)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L14-L223)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264)
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
@@ -159,9 +166,11 @@ TokenAnalyzer->>Application : Sonuçları çıktıla
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L225-L790)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L225-L790)
 - [index.js](file://index.js#L1-L8)
 
@@ -171,13 +180,13 @@ TokenAnalyzer sınıfı, constructor'ındaki options object parametresi aracıl�
 
 ### Kullanılabilir Seçenekler
 
-| Seçenek | Tip | Varsayılan | Açıklama |
-|--------|------|---------|-------------|
-| methodLevel | boolean | false | Method seviyesinde analizi etkinleştirir, kod dosyalarından bireysel methodları çıkarır |
-| verbose | boolean | false | Analiz sırasında detaylı bilgilerin görüntülenip görüntülenmeyeceğini kontrol eder |
-| saveReport | boolean | false | Analizin detaylı JSON raporunu token-analysis-report.json'a kaydeder |
-| contextExport | boolean | false | Optimize edilmiş dosya listeleriyle bir LLM context dosyası (llm-context.json) oluşturur |
-| contextClipboard | boolean | false | LLM context'ini doğrudan sistem panosuna kopyalar |
+| Seçenek          | Tip     | Varsayılan | Açıklama                                                                                 |
+| ---------------- | ------- | ---------- | ---------------------------------------------------------------------------------------- |
+| methodLevel      | boolean | false      | Method seviyesinde analizi etkinleştirir, kod dosyalarından bireysel methodları çıkarır  |
+| verbose          | boolean | false      | Analiz sırasında detaylı bilgilerin görüntülenip görüntülenmeyeceğini kontrol eder       |
+| saveReport       | boolean | false      | Analizin detaylı JSON raporunu token-analysis-report.json'a kaydeder                     |
+| contextExport    | boolean | false      | Optimize edilmiş dosya listeleriyle bir LLM context dosyası (llm-context.json) oluşturur |
+| contextClipboard | boolean | false      | LLM context'ini doğrudan sistem panosuna kopyalar                                        |
 
 ### Seçenek Etkileşimleri
 
@@ -191,6 +200,7 @@ Bu seçenekler farklı analiz iş akışları elde etmek için birleştirilebili
 Hiçbir export seçeneği belirtilmediğinde, araç analiz tamamlandıktan sonra kullanıcıdan bir export seçeneği seçmesini isteyecektir.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L100-L300)
 - [ctxman.js](file://ctxman.js#L225-L232)
 
@@ -204,13 +214,13 @@ FileInfo modeli, analiz edilmiş bir dosya hakkındaki bilgileri temsil eder:
 
 ```typescript
 interface FileInfo {
-    path: string;           // Dosyaya mutlak yol
-    relativePath: string;   // Proje köküne göre göreceli yol
-    sizeBytes: number;      // Byte cinsinden dosya boyutu
-    tokens: number;         // Hesaplanan token sayısı
-    lines: number;          // Dosyadaki satır sayısı
-    extension: string;      // Dosya uzantısı
-    methods?: MethodInfo[]; // Method dizisi (methodLevel etkinse)
+  path: string; // Dosyaya mutlak yol
+  relativePath: string; // Proje köküne göre göreceli yol
+  sizeBytes: number; // Byte cinsinden dosya boyutu
+  tokens: number; // Hesaplanan token sayısı
+  lines: number; // Dosyadaki satır sayısı
+  extension: string; // Dosya uzantısı
+  methods?: MethodInfo[]; // Method dizisi (methodLevel etkinse)
 }
 ```
 
@@ -220,10 +230,10 @@ MethodInfo modeli, çıkarılmış bir method hakkındaki bilgileri temsil eder:
 
 ```typescript
 interface MethodInfo {
-    name: string;           // Method adı
-    line: number;           // Method'un tanımlandığı satır numarası
-    tokens: number;         // Method içeriği için token sayısı
-    file: string;           // Method'u içeren dosyaya göreceli yol
+  name: string; // Method adı
+  line: number; // Method'un tanımlandığı satır numarası
+  tokens: number; // Method içeriği için token sayısı
+  file: string; // Method'u içeren dosyaya göreceli yol
 }
 ```
 
@@ -232,6 +242,7 @@ Bu modeller analiz sonuçlarını yapılandırmak için kullanılır ve oluştur
 Veri modelleri hafif olacak ve token analizi ve LLM context optimizasyonu için gereken temel bilgilere odaklanacak şekilde tasarlanmıştır.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L400-L420)
 - [ctxman.js](file://ctxman.js#L480-L500)
 
@@ -246,8 +257,8 @@ const { TokenAnalyzer } = require('ctxman');
 
 // Temel dosya seviyesinde analiz
 const analyzer = new TokenAnalyzer('./src', {
-    verbose: true,
-    saveReport: true
+  verbose: true,
+  saveReport: true,
 });
 
 analyzer.run();
@@ -258,10 +269,10 @@ analyzer.run();
 ```javascript
 // Tüm çıktılarla method seviyesinde analiz
 const methodAnalyzer = new TokenAnalyzer('./src', {
-    methodLevel: true,
-    saveReport: true,
-    contextExport: true,
-    verbose: true
+  methodLevel: true,
+  saveReport: true,
+  contextExport: true,
+  verbose: true,
 });
 
 methodAnalyzer.run();
@@ -272,8 +283,8 @@ methodAnalyzer.run();
 ```javascript
 // LLM tüketimi için optimize edilmiş context oluştur
 const llmAnalyzer = new TokenAnalyzer('./src', {
-    methodLevel: true,
-    contextClipboard: true
+  methodLevel: true,
+  contextClipboard: true,
 });
 
 llmAnalyzer.run();
@@ -284,8 +295,8 @@ llmAnalyzer.run();
 ```javascript
 // CI/CD pipeline'ında entegrasyon
 const ciAnalyzer = new TokenAnalyzer('./src', {
-    saveReport: true,
-    contextExport: true
+  saveReport: true,
+  contextExport: true,
 });
 
 ciAnalyzer.run();
@@ -294,6 +305,7 @@ ciAnalyzer.run();
 Bu örnekler TokenAnalyzer'ın temel analizden LLM'e optimize edilmiş context oluşturmaya kadar farklı kullanım senaryoları için nasıl yapılandırılabileceğini gösterir. Seçeneklerin esnekliği, geliştiricilerin analizi geliştirme, hata ayıklama veya otomatik iş akışları için olsun, kendi özel ihtiyaçlarına göre uyarlamalarına olanak tanır.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L700-L800)
 
 ## Hata Yönetimi
@@ -309,6 +321,7 @@ Konfigürasyon sorunları için, araç hangi konfigürasyon dosyalarının kulla
 Hata yönetim stratejisi, ilk hatada durmak yerine analizi tamamlamayı önceliklendirir, kullanıcıların sürecin bazı bölümleri sorunlarla karşılaşsa bile mümkün olduğunca fazla bilgi almasını sağlar.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L400-L415)
 - [ctxman.js](file://ctxman.js#L700-L730)
 
@@ -319,10 +332,12 @@ ctxman API'sini programatik olarak kullanırken, birkaç performans değerlendir
 ### Token Sayım Methodları
 
 Araç, token sayımı için iki methodu destekler:
+
 - tiktoken kütüphanesini kullanarak **Kesin sayım** (yükleme gerektirir)
 - Karakter tabanlı sezgisel yöntemler kullanarak **Tahmin** (tiktoken mevcut olmadığında fallback)
 
 Optimal doğruluk için tiktoken paketini yükleyin:
+
 ```bash
 npm install tiktoken
 ```
@@ -330,6 +345,7 @@ npm install tiktoken
 ### Analiz Kapsamı
 
 Analizin performansı, analiz edilen kod tabanının boyutuyla doğrudan ilgilidir. Performansı optimize etmek için:
+
 - Mümkün olduğunda analizi belirli dizinlerle sınırlayın
 - İlgisiz dosyaları hariç tutmak için konfigürasyon dosyalarını (.contextignore, .contextinclude) kullanın
 - Analiz derinliği ile yürütme süresi arasındaki dengeyi göz önünde bulundurun
@@ -345,6 +361,7 @@ Method seviyesinde analizi etkinleştirmek, kodu bireysel methodları tanımlama
 Araç önbelleğe alma ve verimli dosya sistemi işlemleriyle performans için optimize edilmiştir, ancak çok büyük kod tabanları hala önemli işlem süresi gerektirebilir.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L300-L350)
 - [README.md](file://README.md#L500-L600)
 
@@ -367,6 +384,7 @@ Gerekli bağımlılıkların, özellikle kesin token sayımı için tiktoken'ın
 ### Test
 
 Yükseltme yaptıktan sonra, beklenen davranışı sağlamak için analizi tipik kod tabanlarınızla test edin. Özellikle şunlara dikkat edin:
+
 - Dosya dahil etme/hariç tutma desenleri
 - Token sayısı doğruluğu
 - Export fonksiyonelliği
@@ -375,4 +393,5 @@ Yükseltme yaptıktan sonra, beklenen davranışı sağlamak için analizi tipik
 Aracın JSON raporları ve context export'ları için çıktı formatı istikrarlı olacak şekilde tasarlanmıştır, bu çıktıları tüketen downstream süreçler üzerindeki yükseltmelerin etkisini en aza indirir.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L800-L891)

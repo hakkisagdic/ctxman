@@ -55,13 +55,13 @@ Test ekranını başlattığınızda şu menü gelecek:
 
 ### Keyboard Kontrolleri
 
-| Tuş | Aksiyon |
-|-----|---------|
-| `↑` | Yukarı git |
-| `↓` | Aşağı git |
-| `Enter` | Seç |
-| `Q` | Çıkış |
-| `Esc` | Çıkış |
+| Tuş     | Aksiyon    |
+| ------- | ---------- |
+| `↑`     | Yukarı git |
+| `↓`     | Aşağı git  |
+| `Enter` | Seç        |
+| `Q`     | Çıkış      |
+| `Esc`   | Çıkış      |
 
 ---
 
@@ -85,6 +85,7 @@ Tüm renk paleti ve text stilleri:
 ```
 
 **Test Edilen:**
+
 - Color options: red, green, yellow, blue, magenta, cyan
 - Text styles: bold, dim, italic, underline
 - Color combinations
@@ -102,6 +103,7 @@ Progress: 67%
 ```
 
 **Özellikler:**
+
 - Real-time progress (0% → 100%)
 - Visual bar with filled/empty states
 - Auto-completes in ~4 seconds
@@ -120,6 +122,7 @@ Multiple spinner types:
 ```
 
 **Spinner Types:**
+
 - Dots spinner (⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏)
 - Line spinner (-\|/)
 - Status indicators (○ ⏳ ✓ ✗)
@@ -138,6 +141,7 @@ Hello, Hakki! 👋
 ```
 
 **Test Edilen:**
+
 - Live typing
 - onChange events
 - Placeholder text
@@ -159,6 +163,7 @@ What are you working on today?
 ```
 
 **Steps:**
+
 1. Use Case Selection → 7 options
 2. Target Model → 6 AI models
 3. Output Format → 6 formats
@@ -188,6 +193,7 @@ Largest Files:
 ```
 
 **Özellikler:**
+
 - Real-time stats
 - Visual graphs with bars
 - Language distribution
@@ -201,6 +207,7 @@ Largest Files:
 ### "Raw mode is not supported"
 
 **Sorun:**
+
 ```
 ERROR Raw mode is not supported on the current process.stdin
 ```
@@ -209,6 +216,7 @@ ERROR Raw mode is not supported on the current process.stdin
 Bu hata **automated test environment**'ta normal. Interactive terminal'de çalışmayacak.
 
 **Nerede Çalışır:**
+
 - ✅ iTerm2 (macOS)
 - ✅ Terminal.app (macOS)
 - ✅ gnome-terminal (Linux)
@@ -216,6 +224,7 @@ Bu hata **automated test environment**'ta normal. Interactive terminal'de çalı
 - ✅ PowerShell (Windows)
 
 **Nerede Çalışmaz:**
+
 - ❌ VSCode integrated terminal
 - ❌ CI/CD pipelines
 - ❌ SSH sessions (bazı durumlarda)
@@ -287,6 +296,7 @@ npm run test:ink
 ## 🎯 Ne Test Ediliyor?
 
 ### Component'ler
+
 - ✅ Box (layout, flexbox, borders, padding)
 - ✅ Text (colors, styles, formatting)
 - ✅ SelectInput (navigation, selection)
@@ -295,6 +305,7 @@ npm run test:ink
 - ✅ Newline, Spacer
 
 ### Features
+
 - ✅ State management (useState)
 - ✅ Effects (useEffect for animations)
 - ✅ Input handling (useInput)
@@ -303,6 +314,7 @@ npm run test:ink
 - ✅ Props injection (ESM workaround)
 
 ### Custom Components
+
 - ✅ Wizard (3-step flow)
 - ✅ Dashboard (live stats)
 - ✅ ProgressBar (with components prop)
@@ -311,14 +323,14 @@ npm run test:ink
 
 ## 📚 İlgili Dosyalar
 
-| Dosya | Açıklama |
-|-------|----------|
-| `test/test-ink-ui.js` | Interactive demo app |
-| `test/INK-UI-TEST-README.md` | Kullanım kılavuzu |
-| `lib/ui/wizard.js` | Wizard component |
-| `lib/ui/dashboard.js` | Dashboard component |
-| `lib/ui/progress-bar.js` | Progress bar component |
-| `docs/WIZARD-DASHBOARD-SETUP.md` | Setup guide |
+| Dosya                            | Açıklama               |
+| -------------------------------- | ---------------------- |
+| `test/test-ink-ui.js`            | Interactive demo app   |
+| `test/INK-UI-TEST-README.md`     | Kullanım kılavuzu      |
+| `lib/ui/wizard.js`               | Wizard component       |
+| `lib/ui/dashboard.js`            | Dashboard component    |
+| `lib/ui/progress-bar.js`         | Progress bar component |
+| `docs/WIZARD-DASHBOARD-SETUP.md` | Setup guide            |
 
 ---
 

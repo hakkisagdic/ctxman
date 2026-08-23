@@ -28,7 +28,7 @@ const project = {
   name: 'ctxman',
   version: '2.3.5',
   totalFiles: 64,
-  totalTokens: 181480
+  totalTokens: 181480,
 };
 
 const toon = formatter.encode(project);
@@ -36,6 +36,7 @@ console.log(toon);
 ```
 
 **Output:**
+
 ```toon
 {
   name: ctxman
@@ -51,7 +52,7 @@ console.log(toon);
 const methods = [
   { name: 'handleRequest', line: 15, tokens: 234 },
   { name: 'validateInput', line: 45, tokens: 156 },
-  { name: 'processData', line: 72, tokens: 189 }
+  { name: 'processData', line: 72, tokens: 189 },
 ];
 
 const tabular = formatter.encodeTabular(methods);
@@ -59,6 +60,7 @@ console.log(tabular);
 ```
 
 **Output:**
+
 ```toon
 {line,name,tokens}:
   15,handleRequest,234
@@ -91,7 +93,7 @@ const minified = formatter.minify(toonString);
 const data = {
   project: 'ctxman',
   files: 64,
-  tokens: 181480
+  tokens: 181480,
 };
 
 const comparison = formatter.compareWithJSON(data);
@@ -104,6 +106,7 @@ console.log('JSON tokens:', comparison.jsonTokens);
 ```
 
 **Example Output:**
+
 ```
 TOON size: 86 chars
 JSON size: 101 chars
@@ -148,7 +151,7 @@ ctxman convert data.json --from json --to yaml --output config.yaml
 const converter = new FormatConverter();
 const files = ['data1.json', 'data2.json', 'data3.json'];
 
-files.forEach(file => {
+files.forEach((file) => {
   const input = fs.readFileSync(file, 'utf8');
   const result = converter.convert(input, 'json', 'toon');
   const outputFile = file.replace('.json', '.toon');
@@ -175,13 +178,13 @@ const GitIngestFormatter = require('./lib/formatters/gitingest-formatter');
 const formatter = new GitIngestFormatter(projectRoot, stats, results, {
   chunking: {
     enabled: true,
-    strategy: 'smart',        // smart, size, file, directory
+    strategy: 'smart', // smart, size, file, directory
     maxTokensPerChunk: 100000,
-    overlap: 500,             // v2.3.3
+    overlap: 500, // v2.3.3
     preserveContext: true,
-    includeMetadata: true,    // v2.3.3
-    crossReferences: true     // v2.3.3
-  }
+    includeMetadata: true, // v2.3.3
+    crossReferences: true, // v2.3.3
+  },
 });
 
 const chunks = formatter.generateChunkedDigest();
@@ -191,33 +194,41 @@ console.log(`Generated ${chunks.length} chunks`);
 ### Chunking Strategies
 
 #### 1. Smart Chunking (Directory-Aware)
+
 ```bash
 ctxman --gitingest --chunk --chunk-strategy smart
 ```
+
 - Groups related files by directory structure
 - Preserves logical code relationships
 - Best for: Most projects
 
 #### 2. Size-Based Chunking
+
 ```bash
 ctxman --gitingest --chunk --chunk-strategy size --chunk-size 50000
 ```
+
 - Fixed token size chunks
 - Splits at file boundaries when possible
 - Best for: Strict token limits
 
 #### 3. File-Based Chunking
+
 ```bash
 ctxman --gitingest --chunk --chunk-strategy file
 ```
+
 - One file per chunk
 - Includes directory context
 - Best for: Large individual files
 
 #### 4. Directory-Based Chunking
+
 ```bash
 ctxman --gitingest --chunk --chunk-strategy directory
 ```
+
 - One directory per chunk
 - Complete module/package isolation
 - Best for: Modular projects
@@ -228,13 +239,14 @@ ctxman --gitingest --chunk --chunk-strategy directory
 const formatter = new GitIngestFormatter(root, stats, results, {
   chunking: {
     enabled: true,
-    overlap: 500,  // 500 tokens overlap between chunks
-    preserveContext: true
-  }
+    overlap: 500, // 500 tokens overlap between chunks
+    preserveContext: true,
+  },
 });
 ```
 
 **Why overlap?**
+
 - Maintains context across chunk boundaries
 - Prevents information loss at chunk edges
 - Improves LLM understanding of cross-chunk relationships
@@ -254,6 +266,7 @@ ctxman --wizard
 The wizard guides you through 5 steps:
 
 #### Step 1: What are you working on?
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  Context Generation Wizard                              │
@@ -274,6 +287,7 @@ The wizard guides you through 5 steps:
 ```
 
 **Navigation:**
+
 - Use `↑↓` arrow keys to move
 - Press `Enter` to select
 - Press `Esc` to cancel
@@ -289,6 +303,7 @@ The wizard guides you through 5 steps:
 - **⚙️ Custom**: Customize all options
 
 #### Step 2: Target LLM Selection
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  Which AI model will you use?                           │
@@ -303,11 +318,13 @@ The wizard guides you through 5 steps:
 ```
 
 **Auto-Optimization:**
+
 - Wizard adjusts output to fit token limits
 - Suggests chunking for large projects
 - Recommends best format for your LLM
 
 #### Step 3: What to Include?
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  What should be included in the context?                │
@@ -324,10 +341,12 @@ The wizard guides you through 5 steps:
 ```
 
 **Navigation:**
+
 - `Space` to toggle selection
 - `Enter` to continue
 
 #### Step 4: Output Format
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  Choose output format:                                  │
@@ -341,6 +360,7 @@ The wizard guides you through 5 steps:
 ```
 
 #### Step 5: Confirmation & Export
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  📊 Configuration Summary                               │
@@ -536,6 +556,7 @@ ctxman --list-formats
 ## 🎯 Common Use Cases
 
 ### 1. Bug Fix Context
+
 ```bash
 # Use wizard for guided setup
 ctxman --wizard
@@ -546,6 +567,7 @@ ctxman --changed-only --output toon --context-clipboard
 ```
 
 ### 2. Code Review
+
 ```bash
 # Full project context
 ctxman --output gitingest --chunk --chunk-strategy smart
@@ -555,6 +577,7 @@ ctxman --dashboard
 ```
 
 ### 3. Documentation Generation
+
 ```bash
 # Markdown format for docs
 ctxman --output markdown --context-export
@@ -564,6 +587,7 @@ ctxman --method-level --output markdown
 ```
 
 ### 4. Multi-Format Export
+
 ```bash
 # Export to multiple formats
 ctxman --output toon > context.toon
@@ -572,6 +596,7 @@ ctxman --output yaml > context.yaml
 ```
 
 ### 5. Large Project Analysis
+
 ```bash
 # Use chunking for repos > 100k tokens
 ctxman --gitingest --chunk --chunk-size 100000 --chunk-strategy smart
@@ -593,15 +618,18 @@ ctxman --gitingest --chunk --chunk-size 100000 --chunk-strategy smart
 ## 🐛 Troubleshooting
 
 ### Wizard Not Showing
+
 - Make sure Ink dependencies are installed: `npm install`
 - Use `--simple` flag if terminal doesn't support Ink
 
 ### Dashboard Not Rendering
+
 - Check terminal supports ANSI colors
 - Try `--simple` mode for basic text output
 - Update terminal emulator
 
 ### Chunking Not Working
+
 - Verify `--chunk` flag is present
 - Check chunk size isn't too small
 - Use `--verbose` to see chunk details

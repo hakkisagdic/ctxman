@@ -10,17 +10,13 @@
       <p class="description">{{ prompt.description }}</p>
 
       <form @submit.prevent="executePrompt" class="prompt-form">
-        <div 
-          v-for="arg in prompt.arguments" 
-          :key="arg.name"
-          class="form-group"
-        >
+        <div v-for="arg in prompt.arguments" :key="arg.name" class="form-group">
           <label :for="arg.name">
             {{ arg.name }}
             <span v-if="arg.required" class="required">*</span>
           </label>
-          
-          <input 
+
+          <input
             v-if="!arg.type || arg.type === 'string'"
             type="text"
             :id="arg.name"
@@ -29,7 +25,7 @@
             :required="arg.required"
             class="form-input"
           />
-          
+
           <textarea
             v-else-if="arg.type === 'text'"
             :id="arg.name"
@@ -66,7 +62,7 @@
 import { ref, reactive } from 'vue';
 
 const props = defineProps({
-  prompt: Object
+  prompt: Object,
 });
 
 const emit = defineEmits(['back']);
@@ -76,17 +72,17 @@ const executing = ref(false);
 const result = ref(null);
 
 // Initialize form data
-props.prompt.arguments.forEach(arg => {
+props.prompt.arguments.forEach((arg) => {
   formData[arg.name] = '';
 });
 
 async function executePrompt() {
   executing.value = true;
   result.value = null;
-  
+
   try {
     const response = await window.api.mcp.getPrompt(props.prompt.name, formData);
-    
+
     // Handle different response formats
     if (response.messages && response.messages.length > 0) {
       result.value = response.messages[0].content.text;

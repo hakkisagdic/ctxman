@@ -7,6 +7,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Dual-Mode Filtering System](#dual-mode-filtering-system)
 3. [Pattern Syntax and Examples](#pattern-syntax-and-examples)
@@ -20,6 +21,7 @@
 The ctxman tool implements a sophisticated file filtering mechanism designed to optimize code analysis for LLM (Large Language Model) context generation. This system enables precise control over which files are included or excluded from analysis through a dual-mode approach using `.contextignore` and `.contextinclude` configuration files. The filtering system respects existing `.gitignore` rules while providing additional layers of control for focused analysis of specific code components. This documentation details the implementation, usage, and best practices for configuring the file filtering system to achieve optimal results in code analysis and token calculation.
 
 **Section sources**
+
 - [README.md](file://README.md#L544-L610)
 - [ctxman.js](file://ctxman.js#L124-L270)
 
@@ -49,10 +51,12 @@ E --> H[Process All Files Except Those Matching<br>.contextignore Patterns]
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L134-L149)
 - [README.md](file://README.md#L544-L610)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L134-L149)
 - [README.md](file://README.md#L544-L610)
 
@@ -77,6 +81,7 @@ Patterns can be specified as relative paths from the project root or as file ext
 The README provides concrete examples of effective configuration patterns:
 
 For INCLUDE mode focusing on core JavaScript files while excluding test and workflow components:
+
 ```bash
 # Include only core JavaScript files
 utility-mcp/src/**/*.js
@@ -85,6 +90,7 @@ utility-mcp/src/**/*.js
 ```
 
 For EXCLUDE mode to filter out documentation, configuration, and test files:
+
 ```bash
 # Exclude documentation and config
 **/*.md
@@ -119,10 +125,12 @@ Output --> End([Pattern Ready for Matching])
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L159-L179)
 - [README.md](file://README.md#L544-L610)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L159-L179)
 - [README.md](file://README.md#L544-L610)
 
@@ -160,10 +168,12 @@ F --> |Not Matched or Negated| I[Include File]
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L181-L206)
 - [ctxman.js](file://ctxman.js#L134-L149)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L134-L149)
 - [ctxman.js](file://ctxman.js#L181-L206)
 
@@ -217,9 +227,11 @@ TokenCalculator --> MethodFilterParser : "uses for method filtering"
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L124-L270)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L124-L270)
 
 ## Common Issues and Troubleshooting
@@ -249,6 +261,7 @@ Prefer specific patterns over broad wildcards when possible. Instead of using `*
 ### Leverage Negation Effectively
 
 Use negation patterns to refine broad inclusion rules. For example, include all JavaScript files in a source directory but exclude test files:
+
 ```bash
 src/**/*.js
 !src/**/*.test.js

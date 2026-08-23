@@ -1,0 +1,27 @@
+{
+  "id": "FEAT-003",
+  "type": "refactor",
+  "description": "Fix ESLint no-unused-vars warnings across the codebase (191 warnings in lib/, bin/, test/, scripts/) and enable strict linting with --max-warnings 0.",
+  "status": "completed",
+  "steps": [
+    "1. Updated ESLint config to use argsIgnorePattern, varsIgnorePattern, and caughtErrorsIgnorePattern for underscore-prefixed variables",
+    "2. Fixed all 191 no-unused-vars warnings by adding underscore prefix to genuinely unused variables",
+    "3. Removed unused imports across all files",
+    "4. Fixed catch blocks to use underscore prefix for unused error variables",
+    "5. Verified npm run lint:strict passes with zero warnings",
+    "6. Verified npm test passes all 1211 tests"
+  ],
+  "acceptance_criteria": [
+    "Running npm run lint produces zero warnings",
+    "Running npm run lint:strict (with --max-warnings 0) passes",
+    "All tests still pass after fixes (npm test)",
+    "No functionality is broken by removing unused variables/imports"
+  ],
+  "verification": [
+    "npm run lint:strict exits with code 0",
+    "npm test passes all 1211 tests",
+    "npm run format:check still passes"
+  ],
+  "blocked_reason": null,
+  "findings": "The codebase had 191 ESLint no-unused-vars warnings. Most were: (1) unused catch block parameters (error, e, err), (2) unused function parameters in base classes/interfaces, (3) unused imports. Fixed by: (1) Adding underscore prefix convention to ESLint config, (2) Adding underscore prefix to unused variables, (3) Removing unused imports that were never used."
+}

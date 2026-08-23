@@ -1,0 +1,36 @@
+# CODEOWNERS - Repository ownership rules
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+* @hakkisagdic
+
+# CI/CD configuration
+/.github/ @hakkisagdic
+
+# Core library
+/lib/ @hakkisagdic
+
+# CLI and entry points
+/bin/ @hakkisagdic
+/index.js @hakkisagdic
+/ctxman.js @hakkisagdic
+
+# Documentation
+/README.md @hakkisagdic
+/docs/ @hakkisagdic
+
+# Tests
+/test/ @hakkisagdic
+/vitest.config.js @hakkisagdic
+
+# Desktop app
+/desktop-app/ @hakkisagdic
+
+# Configuration files
+/package.json @hakkisagdic
+/eslint.config.js @hakkisagdic
+/.prettierrc @hakkisagdic
+
+# Security-sensitive files
+/.github/workflows/codeql.yml @hakkisagdic
+/.github/workflows/security* @hakkisagdic

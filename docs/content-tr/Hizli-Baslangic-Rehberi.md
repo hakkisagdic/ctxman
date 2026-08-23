@@ -8,6 +8,7 @@
 </cite>
 
 ## İçindekiler
+
 1. [Giriş](#giris)
 2. [Temel İş Akışı](#temel-is-akisi)
 3. [Aracı İnteraktif Olarak Çalıştırma](#araci-interaktif-olarak-calistirma)
@@ -24,6 +25,7 @@
 ctxman CLI aracı, kesin token sayımı, metod seviyesi filtreleme ve akıllı dosya seçimi sağlayarak LLM context'ini optimize etmek için tasarlanmıştır. Bu hızlı başlangıç rehberi, aracı çalışır hale getirmenize, temel işlevselliğini anlamanıza ve özelliklerini AI destekli geliştirme iş akışları için etkili bir şekilde kullanmanıza yardımcı olacaktır.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L0-L891)
 
 ## Temel İş Akışı
@@ -53,10 +55,12 @@ NoExport --> End
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L793-L813)
 - [README.md](file://README.md#L0-L891)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L793-L813)
 - [README.md](file://README.md#L0-L891)
 
@@ -73,6 +77,7 @@ Bu, analiz sürecini başlatır, .gitignore kurallarına ve calculator'a özgü 
 İnteraktif mod, ilk kez kullanıcılar ve analiz sonuçlarına göre farklı export seçeneklerini keşfetmek isteyenler için idealdir. Araç, süreç boyunca net rehberlik sağlar ve hangi dosyaların analiz edildiğini ve token sayılarının nasıl hesaplandığını anlamayı kolaylaştırır.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L0-L891)
 - [ctxman.js](file://ctxman.js#L793-L813)
 
@@ -81,6 +86,7 @@ Bu, analiz sürecini başlatır, .gitignore kurallarına ve calculator'a özgü 
 ctxman aracını çalıştırdığınızda, çeşitli önemli bilgi parçalarını içeren detaylı bir analiz raporu üretir. Çıktı, proje kök dizini, yapılandırma modu (INCLUDE veya EXCLUDE) ve token hesaplama yöntemi (tiktoken kullanarak kesin veya tahmini) dahil olmak üzere analiz süreci hakkında metadata ile başlar.
 
 Ana rapor şunları içerir:
+
 - Analiz edilen toplam dosya sayısı ve toplam token sayısı
 - MB cinsinden toplam boyut ve toplam kod satırı sayısı
 - Dosya başına ortalama token sayısı
@@ -103,10 +109,12 @@ LargestDirectories --> Tip["Usage Tip\nSave detailed report option"]
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L683-L703)
 - [README.md](file://README.md#L0-L891)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L683-L703)
 - [README.md](file://README.md#L0-L891)
 
@@ -122,6 +130,7 @@ ctxman aracı, farklı kullanım durumlarına uyum sağlamak için birden fazla 
 İnteraktif export seçimi, kullanıcıların analiz sonuçlarını ihtiyaç duydukları formatta export etme fırsatını asla kaçırmamasını sağlar. Bu özellik, tüm mevcut export seçeneklerine aşina olmayan yeni başlayanlar için özellikle yararlıdır.
 
 Otomatik iş akışları için, interaktif istemi atlayarak export seçeneklerini doğrudan komut satırı bayrakları aracılığıyla belirtebilirsiniz. Mevcut bayraklar:
+
 - `--save-report` veya `-s`: Detaylı bir JSON raporu kaydet
 - `--context-export`: Bir LLM context dosyası oluştur
 - `--context-clipboard`: Context'i doğrudan panoya kopyala
@@ -146,10 +155,12 @@ Complete --> [*]
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L575-L616)
 - [bin/cli.js](file://bin/cli.js#L4-L25)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L575-L616)
 - [bin/cli.js](file://bin/cli.js#L4-L25)
 
@@ -184,6 +195,7 @@ ctxman --method-level --save-report --context-export
 Araç ayrıca, tüm dahil edilen dosyaları gösteren verbose çıktıyı (varsayılan olarak etkin) veya dosya listesini bastıran `--no-verbose` ile sessiz modu da destekler.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L0-L891)
 - [ctxman.js](file://ctxman.js#L793-L813)
 
@@ -200,6 +212,7 @@ ctxman --method-level
 Metod seviyesi analiz etkinleştirildiğinde, araç fonksiyon bildirimleri, metod atamaları ve arrow fonksiyonlar için desen eşleştirme kullanarak JavaScript/TypeScript dosyalarından metodları çıkarır. Analiz, her metodun adı, satır numarası ve token sayısı hakkında bilgi içerir.
 
 Araç, yapılandırma dosyaları aracılığıyla metod filtrelemeyi destekler:
+
 - `.methodinclude`: Yalnızca belirtilen metodları dahil et (önceliklidir)
 - `.methodignore`: Belirtilen metodları hariç tut
 
@@ -226,10 +239,12 @@ ContextGeneration --> ExportOptions["Export via specified method\nreport, file, 
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L14-L67)
 - [ctxman.js](file://ctxman.js#L118-L223)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L14-L67)
 - [ctxman.js](file://ctxman.js#L118-L223)
 
@@ -274,10 +289,12 @@ end
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L541-L567)
 - [README.md](file://README.md#L0-L891)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L541-L567)
 - [README.md](file://README.md#L0-L891)
 
@@ -286,10 +303,12 @@ end
 ctxman aracı, hangi dosya ve metodların analize dahil edileceğini kontrol etmek için birkaç yapılandırma dosyası kullanır. Bu dosyaları anlamak, aracı özel ihtiyaçlarınıza göre özelleştirmek için gereklidir.
 
 Dosya seviyesi filtreleme için birincil yapılandırma dosyaları:
+
 - `.contextinclude`: Yalnızca belirtilen desenlere uyan dosyaları dahil et (önceliklidir)
 - `.contextignore`: Belirtilen desenlere uyan dosyaları hariç tut
 
 Araç, yapılandırma dosyaları için bir öncelik sırası izler:
+
 1. `.gitignore` (her zaman geçerlidir)
 2. `.contextinclude` (dosyalar için en yüksek öncelik)
 3. `.contextignore` (include dosyası yokken kullanılır)
@@ -297,6 +316,7 @@ Araç, yapılandırma dosyaları için bir öncelik sırası izler:
 `.contextinclude` mevcut olduğunda, araç INCLUDE modunda çalışır, yani yalnızca include desenlerine uyan dosyalar analiz edilir (.gitignore tarafından hariç tutulanlar hariç). Yalnızca `.contextignore` mevcut olduğunda, araç EXCLUDE modunda çalışır ve ignore desenlerine uyan dosyalar hariç tüm dosyaları analiz eder.
 
 Metod seviyesi analiz için araç şunları kullanır:
+
 - `.methodinclude`: Yalnızca belirtilen metodları dahil et
 - `.methodignore`: Belirtilen metodları hariç tut
 
@@ -327,10 +347,12 @@ style Analysis fill:#9f9,stroke:#333
 ```
 
 **Diagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L118-L223)
 - [README.md](file://README.md#L0-L891)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L118-L223)
 - [README.md](file://README.md#L0-L891)
 
@@ -341,6 +363,7 @@ ctxman aracına başlarken birkaç yaygın sorunla karşılaşabilirsiniz. Bunla
 **Verbose çıktıyı anlama**: Aracın verbose çıktısı (varsayılan olarak etkin) yeni başlayanlar için bunaltıcı olabilir. Tüm dahil edilen dosyaları, token sayılarını ve detaylı istatistikleri gösterir. Çıktıyı azaltmak için `--no-verbose` bayrağını kullanın, ancak hangi dosyaların analiz edildiği konusunda şeffaflığı azalttığı için bu önerilmez.
 
 **Token sayılarını yorumlama**: Araç, mevcut olduğunda kesin token sayımı için tiktoken kullanır. tiktoken'ı kurmadıysanız, araç tahmin moduna geri döner. Kesin sayımları sağlamak için tiktoken'ı kurun:
+
 ```bash
 npm install tiktoken
 ```
@@ -352,5 +375,6 @@ npm install tiktoken
 **Metod seviyesi analiz sorunları**: Metod seviyesi analiz kullanırken, `.methodinclude` veya `.methodignore` dosyalarınızın doğru konumda (proje kök dizini veya araç dizini) olduğundan ve doğru desen sözdizimini kullandığından emin olun. Araç, hangi modun etkin olduğunu çıktıda belirtir.
 
 **Bölüm kaynakları**
+
 - [README.md](file://README.md#L0-L891)
 - [ctxman.js](file://ctxman.js#L793-L813)

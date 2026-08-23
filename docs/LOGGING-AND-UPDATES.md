@@ -46,32 +46,32 @@ logger.trace('Detailed trace');
 
 // Create custom logger
 const customLogger = createLogger({
-    level: 'debug',
-    logToFile: true,
-    logDir: './custom-logs',
-    silent: false
+  level: 'debug',
+  logToFile: true,
+  logDir: './custom-logs',
+  silent: false,
 });
 ```
 
 #### Log Levels
 
-| Level | Priority | Use Case | Example |
-|-------|----------|----------|---------|
+| Level     | Priority    | Use Case          | Example                    |
+| --------- | ----------- | ----------------- | -------------------------- |
 | **error** | 0 (highest) | Critical failures | Database connection failed |
-| **warn** | 1 | Warnings | Deprecated API usage |
-| **info** | 2 (default) | General info | Analysis complete |
-| **debug** | 3 | Debugging | File processed: x.js |
-| **trace** | 4 (lowest) | Detailed traces | Token count: 1234 |
+| **warn**  | 1           | Warnings          | Deprecated API usage       |
+| **info**  | 2 (default) | General info      | Analysis complete          |
+| **debug** | 3           | Debugging         | File processed: x.js       |
+| **trace** | 4 (lowest)  | Detailed traces   | Token count: 1234          |
 
 #### Configuration
 
 ```javascript
 const logger = createLogger({
-    level: 'info',              // Minimum level to log
-    logToFile: true,            // Write to file
-    logDir: '.ctxman/logs',  // Log directory
-    logFile: 'ctxman-2025-11-03.log', // Log file name
-    silent: false               // Suppress console output
+  level: 'info', // Minimum level to log
+  logToFile: true, // Write to file
+  logDir: '.ctxman/logs', // Log directory
+  logFile: 'ctxman-2025-11-03.log', // Log file name
+  silent: false, // Suppress console output
 });
 ```
 
@@ -116,7 +116,7 @@ logger.clearOldLogs(30);
 ```javascript
 // Get last 100 log entries
 const recentLogs = logger.getRecentLogs(100);
-recentLogs.forEach(log => console.log(log));
+recentLogs.forEach((log) => console.log(log));
 ```
 
 ### Advanced Features
@@ -170,6 +170,7 @@ npm run update:check
 ```
 
 Output:
+
 ```
 🔍 Checking for updates...
 
@@ -233,6 +234,7 @@ ctxman update info
 ```
 
 Output:
+
 ```
 ℹ️  Update Configuration
 
@@ -259,14 +261,14 @@ Channels:
 const Updater = require('ctxman').Updater;
 
 const updater = new Updater({
-    channel: 'stable',
-    autoUpdate: false
+  channel: 'stable',
+  autoUpdate: false,
 });
 
 // Check for updates
 const updateInfo = await updater.checkForUpdates();
 if (updateInfo.available) {
-    console.log(`Update available: ${updateInfo.latestVersion}`);
+  console.log(`Update available: ${updateInfo.latestVersion}`);
 }
 
 // Install update
@@ -324,6 +326,7 @@ npm run install:local
 The script offers two installation methods:
 
 **1. Global Installation (Recommended)**
+
 ```bash
 # Installs via npm globally
 npm install -g ctxman
@@ -333,6 +336,7 @@ ctxman --help
 ```
 
 **2. Local Installation**
+
 ```bash
 # Installs to ~/.ctxman
 # Creates symlink to /usr/local/bin
@@ -363,11 +367,13 @@ npm run uninstall:local
 #### Uninstall Options
 
 **Keep Configuration** (default):
+
 - Removes binaries
 - Keeps `~/.ctxman` with settings and logs
 - Easy to reinstall with same settings
 
 **Full Removal**:
+
 - Removes everything
 - Deletes all configuration
 - Deletes all logs
@@ -440,7 +446,7 @@ const logger = getLogger({ level: 'debug' });
 logger.info('Starting analysis...');
 
 const analyzer = new TokenCalculator(process.cwd(), {
-    verbose: true
+  verbose: true,
 });
 
 logger.time('Analysis');
@@ -448,8 +454,8 @@ const results = analyzer.run();
 logger.timeEnd('Analysis');
 
 logger.info('Analysis complete', {
-    files: results.totalFiles,
-    tokens: results.totalTokens
+  files: results.totalFiles,
+  tokens: results.totalTokens,
 });
 ```
 
@@ -462,13 +468,13 @@ const logger = getLogger();
 const updater = new Updater({ channel: 'stable' });
 
 // Check for updates (once per day)
-updater.checkAndNotify().then(updateInfo => {
-    if (updateInfo && updateInfo.available) {
-        logger.info('Update available', {
-            from: updateInfo.currentVersion,
-            to: updateInfo.latestVersion
-        });
-    }
+updater.checkAndNotify().then((updateInfo) => {
+  if (updateInfo && updateInfo.available) {
+    logger.info('Update available', {
+      from: updateInfo.currentVersion,
+      to: updateInfo.latestVersion,
+    });
+  }
 });
 
 // Continue with main application...
@@ -480,10 +486,10 @@ updater.checkAndNotify().then(updateInfo => {
 const { createLogger } = require('ctxman');
 
 const logger = createLogger({
-    level: 'debug',
-    silent: true,    // No console output
-    logToFile: true, // File logging only
-    logDir: './analysis-logs'
+  level: 'debug',
+  silent: true, // No console output
+  logToFile: true, // File logging only
+  logDir: './analysis-logs',
 });
 
 // All logs go to file only
@@ -505,6 +511,7 @@ console.log(logs);
 **Symptom:** No log files in `~/.ctxman/logs/`
 
 **Solutions:**
+
 1. Check permissions: `ls -la ~/.ctxman/logs/`
 2. Verify directory exists: `mkdir -p ~/.ctxman/logs`
 3. Check logToFile setting: `logger.logToFile === true`
@@ -514,6 +521,7 @@ console.log(logs);
 **Symptom:** "Could not check for updates"
 
 **Solutions:**
+
 1. Check internet connection
 2. Verify GitHub API access
 3. Check firewall/proxy settings
@@ -524,6 +532,7 @@ console.log(logs);
 **Symptom:** Install script errors
 
 **Solutions:**
+
 1. Ensure Node.js 14+ installed: `node --version`
 2. Check npm is available: `npm --version`
 3. Verify write permissions: `/usr/local/bin` or `~/.ctxman`
@@ -537,18 +546,18 @@ console.log(logs);
 
 ```typescript
 class Logger {
-    constructor(options: LoggerOptions)
-    error(message: string, meta?: object): void
-    warn(message: string, meta?: object): void
-    info(message: string, meta?: object): void
-    debug(message: string, meta?: object): void
-    trace(message: string, meta?: object): void
-    time(label: string): void
-    timeEnd(label: string): void
-    group(title: string): void
-    groupEnd(): void
-    clearOldLogs(daysToKeep: number): void
-    getRecentLogs(lines: number): string[]
+  constructor(options: LoggerOptions);
+  error(message: string, meta?: object): void;
+  warn(message: string, meta?: object): void;
+  info(message: string, meta?: object): void;
+  debug(message: string, meta?: object): void;
+  trace(message: string, meta?: object): void;
+  time(label: string): void;
+  timeEnd(label: string): void;
+  group(title: string): void;
+  groupEnd(): void;
+  clearOldLogs(daysToKeep: number): void;
+  getRecentLogs(lines: number): string[];
 }
 ```
 
@@ -556,11 +565,11 @@ class Logger {
 
 ```typescript
 class Updater {
-    constructor(options: UpdaterOptions)
-    checkForUpdates(): Promise<UpdateInfo>
-    installUpdate(updateInfo: UpdateInfo): Promise<InstallResult>
-    switchChannel(channel: 'stable' | 'insider'): Promise<UpdateInfo>
-    checkAndNotify(): Promise<UpdateInfo>
+  constructor(options: UpdaterOptions);
+  checkForUpdates(): Promise<UpdateInfo>;
+  installUpdate(updateInfo: UpdateInfo): Promise<InstallResult>;
+  switchChannel(channel: 'stable' | 'insider'): Promise<UpdateInfo>;
+  checkAndNotify(): Promise<UpdateInfo>;
 }
 ```
 

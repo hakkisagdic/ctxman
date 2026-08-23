@@ -1,0 +1,31 @@
+{
+  "id": "FEAT-005",
+  "type": "ci",
+  "description": "CI/CD Workflow Fixes and Enhancements - Fix any issues with existing CI workflows (PR Labeler, CI tests), enhance workflow reliability.",
+  "status": "completed",
+  "steps": [
+    "Analyze .github/workflows/label.yml for potential issues - the workflow uses actions/labeler@v5 with sync-labels which should work",
+    "Verify .github/labeler.yml syntax matches actions/labeler@v5 format (already using correct 'changed-files' and 'any-glob-to-any-file' syntax)",
+    "Review .github/workflows/ci.yml - check if npm run format -- --check is correct or if it should be npm run format:check",
+    "Add format:check script to package.json if it doesn't exist: \"format:check\": \"prettier --check .\"",
+    "Review .github/workflows/codeql.yml for proper configuration",
+    "Review .github/workflows/npm-publish.yml for proper npm publishing setup",
+    "Review .github/workflows/release.yml for proper release automation",
+    "Add workflow dispatch triggers where missing for manual runs",
+    "Ensure all workflows have proper concurrency groups to cancel duplicate runs"
+  ],
+  "acceptance_criteria": [
+    "CI workflow can run npm run format:check or equivalent",
+    "All workflows have proper syntax",
+    "All workflows have concurrency groups",
+    "All workflows have workflow_dispatch for manual triggers",
+    "PR Labeler workflow is correctly configured"
+  ],
+  "verification": [
+    "npm run format:check or npm run format -- --check",
+    "Review workflow YAML syntax",
+    "Test npm run scripts referenced in CI"
+  ],
+  "blocked_reason": null,
+  "findings": "CI/CD workflows fixed and enhanced: (1) Added format:check script to package.json for proper formatting verification in CI, (2) Updated ci.yml to use npm run format:check instead of npm run format -- --check which was incorrectly modifying files during CI, (3) Removed NODE_OPTIONS: --experimental-vm-modules from release.yml and npm-publish.yml (this flag was causing Node 20 failures). All workflows already have proper concurrency groups and workflow_dispatch triggers. PR Labeler configuration (.github/labeler.yml) is correctly configured for actions/labeler@v5 format with changed-files and any-glob-to-any-file syntax. All 1211 tests pass. Lint passes with 0 errors (191 warnings). Format check passes."
+}

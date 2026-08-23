@@ -1,0 +1,22 @@
+{
+  "versions": [
+    {
+      "id": "ctx-v001",
+      "timestamp": "2026-08-23T00:22:52.784Z",
+      "gitCommit": "b908e76",
+      "message": "",
+      "totalFiles": 318,
+      "totalTokens": 1183336,
+      "targetModel": null
+    },
+    {
+      "id": "ctx-v002",
+      "timestamp": "2026-08-23T00:23:59.730Z",
+      "gitCommit": "b908e76",
+      "message": "",
+      "totalFiles": 320,
+      "totalTokens": 1203102,
+      "targetModel": "claude-sonnet-4.5"
+    }
+  ]
+}

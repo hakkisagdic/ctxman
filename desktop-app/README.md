@@ -42,20 +42,20 @@ desktop-app/
 
 ```javascript
 // CLI operations
-window.api.cli.analyze(projectPath, options)
-window.api.cli.generateContext(projectPath, options)
-window.api.cli.listFormats()
-window.api.cli.getVersion()
+window.api.cli.analyze(projectPath, options);
+window.api.cli.generateContext(projectPath, options);
+window.api.cli.listFormats();
+window.api.cli.getVersion();
 
 // MCP operations
-window.api.mcp.connect()
-window.api.mcp.listResources()
-window.api.mcp.listPrompts()
-window.api.mcp.callTool(name, args)
+window.api.mcp.connect();
+window.api.mcp.listResources();
+window.api.mcp.listPrompts();
+window.api.mcp.callTool(name, args);
 
 // File system
-window.api.fs.selectDirectory()
-window.api.fs.readFile(path)
+window.api.fs.selectDirectory();
+window.api.fs.readFile(path);
 ```
 
 ## Next Steps (Phase 3)

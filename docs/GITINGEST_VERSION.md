@@ -34,11 +34,13 @@ FILE: [relative-path]
 ## Implementation Details
 
 ### Key Files
+
 - **GitIngestFormatter class**: `ctxman.js` (lines 16-174)
 - **CLI flag**: `--gitingest` or `-g`
 - **Output file**: `digest.txt` (in project root)
 
 ### Features Implemented
+
 - ✅ Summary header with project info
 - ✅ File count statistics
 - ✅ Token count estimation (formatted as k/M)
@@ -56,9 +58,9 @@ FILE: [relative-path]
 
 ## Version History
 
-| Date | GitIngest Version | Notes |
-|------|-------------------|-------|
-| 2025-10-13 | v0.3.1 | Initial implementation based on GitIngest format |
+| Date       | GitIngest Version | Notes                                            |
+| ---------- | ----------------- | ------------------------------------------------ |
+| 2025-10-13 | v0.3.1            | Initial implementation based on GitIngest format |
 
 ## Future Updates
 

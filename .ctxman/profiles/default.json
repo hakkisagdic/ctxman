@@ -1,0 +1,12 @@
+{
+  "name": "Default Profile",
+  "description": "Standard configuration for general development",
+  "createdBy": "ctxman",
+  "createdAt": "2025-01-15T10:00:00Z",
+  "config": {
+    "exclude": ["**/*.test.js", "**/*.spec.js", "node_modules/**", "coverage/**"],
+    "include": ["src/**", "lib/**"],
+    "targetModel": "claude-sonnet-4.5",
+    "methodLevel": false
+  }
+}

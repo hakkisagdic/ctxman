@@ -1,0 +1,17 @@
+{
+  "name": "Bug Fix Context",
+  "description": "Optimized for debugging and fixing bugs",
+  "include": ["src/**/*.js", "lib/**/*.js", "!src/**/*.test.js", "!lib/**/*.test.js"],
+  "exclude": [
+    "docs/**",
+    "*.md",
+    "*.json",
+    "examples/**",
+    "test/**",
+    "**/*.test.js",
+    "**/*.spec.js"
+  ],
+  "methodInclude": ["*Handler", "*Service", "*Controller", "*Manager"],
+  "methodExclude": ["*test*", "console*", "debug*", "log*"],
+  "targetModel": "claude-sonnet-4.5"
+}

@@ -13,7 +13,9 @@
 </cite>
 
 ## Update Summary
-**Changes Made**   
+
+**Changes Made**
+
 - Updated Method Filtering Mechanism section to reflect GitIngest-style formatter integration
 - Added new content about auto-detection of method filtering configuration
 - Enhanced diagram to show GitIngestFormatter integration
@@ -21,6 +23,7 @@
 - Added new diagram sources for the updated architecture visualization
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Method Extraction Process](#method-extraction-process)
 3. [Method Analysis Integration](#method-analysis-integration)
@@ -34,6 +37,7 @@
 The ctxman tool provides method-level analysis capabilities that enable granular examination of JavaScript and TypeScript codebases. This feature allows developers to extract, analyze, and filter individual methods from source files, creating optimized representations for LLM context generation. The method-level analysis is controlled through the `methodLevel` option and integrates with the TokenCalculator to process method content and generate detailed statistics.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L234-L238)
 - [bin/cli.js](file://bin/cli.js#L17-L18)
 
@@ -61,10 +65,12 @@ The extraction process begins with the `extractMethods` function, which applies 
 To retrieve the complete content of a method, the `extractMethodContent` function uses dynamically constructed regex patterns that match the full method body, including nested braces. This allows the tool to extract not just the method signature but the entire implementation for token calculation.
 
 **Diagram sources**
+
 - [lib/analyzers/method-analyzer.js](file://lib/analyzers/method-analyzer.js#L7-L92)
 - [ctxman.js](file://ctxman.js#L61-L72)
 
 **Section sources**
+
 - [lib/analyzers/method-analyzer.js](file://lib/analyzers/method-analyzer.js#L7-L92)
 
 ## Method Analysis Integration
@@ -107,10 +113,12 @@ The integration process begins in the `analyzeFile` method of TokenCalculator, w
 For each included method, the system extracts the method content and calculates tokens using the same mechanism as for entire files. The token calculation uses the tiktoken library for exact GPT-4 compatible counts when available, falling back to estimation based on character counts per file type when tiktoken is not installed.
 
 **Diagram sources**
+
 - [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L82-L107)
 - [ctxman.js](file://ctxman.js#L234-L238)
 
 **Section sources**
+
 - [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L82-L107)
 
 ## Method Filtering Mechanism
@@ -171,12 +179,14 @@ The system searches for these configuration files in two locations: the script d
 The GitIngestFormatter class now automatically detects method filtering configuration through the `detectMethodFilters` method in ConfigUtils, which checks for the presence of `.methodinclude` or `.methodignore` files. When method filtering is enabled, the formatter uses the MethodAnalyzer and MethodFilterParser to generate filtered file content that includes only the methods that pass the filter criteria.
 
 **Diagram sources**
+
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
 - [lib/analyzers/method-analyzer.js](file://lib/analyzers/method-analyzer.js#L7-L92)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L2-L268)
 - [lib/utils/config-utils.js](file://lib/utils/config-utils.js#L48-L52)
 
 **Section sources**
+
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
 - [README.md](file://README.md#L481-L500)
 - [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L2-L268)
@@ -205,6 +215,7 @@ ANALYSIS_RESULTS ||--o{ METHOD_STATS : "references"
 ```
 
 The methodStats object contains three properties:
+
 - `totalMethods`: The total number of methods found across all analyzed files
 - `includedMethods`: The number of methods that passed the filtering criteria
 - `methodTokens`: An object mapping method identifiers (filename.methodname) to their token counts
@@ -214,10 +225,12 @@ These statistics are updated during the method analysis process. The `totalMetho
 The statistics are incorporated into the final LLM context when method-level analysis is enabled, providing a summary of the method analysis results alongside the detailed method information.
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L239-L239)
 - [ctxman.js](file://ctxman.js#L491-L519)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L239-L239)
 - [ctxman.js](file://ctxman.js#L491-L519)
 
@@ -245,10 +258,12 @@ The context also includes `methodStats` with aggregate information about the tot
 The compact representation significantly reduces the token count of the context while preserving important structural information, making it ideal for LLM consumption where context window size is limited.
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L491-L519)
 - [ctxman.js](file://ctxman.js#L614-L643)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L491-L519)
 
 ## Common Issues and Best Practices
@@ -256,12 +271,14 @@ The compact representation significantly reduces the token count of the context 
 ### Common Issues
 
 **Inaccurate Method Extraction**: The regex-based extraction may fail with complex syntax such as:
+
 - Methods with template literals in parameters
 - Methods with complex destructuring patterns
 - Minified or obfuscated code
 - Unconventional formatting that breaks pattern matching
 
 **Pattern Matching Issues**: Users may encounter problems with filter patterns due to:
+
 - Case sensitivity (patterns are case-insensitive but exact matching may be needed)
 - Special characters in method names
 - Conflicting include/exclude rules
@@ -270,18 +287,21 @@ The compact representation significantly reduces the token count of the context 
 ### Best Practices for Method Filter Patterns
 
 **Effective Include Patterns**:
+
 - Use specific method names for critical business logic: `calculateTokens`, `handleRequest`
 - Use wildcards for method categories: `*Handler`, `*Validator`, `*Manager`
 - Use class-based patterns: `TokenCalculator.*` to include all methods in a class
 - Combine multiple patterns in `.methodinclude` to capture related functionality
 
 **Effective Ignore Patterns**:
+
 - Exclude test methods: `*test*`, `*spec*`
 - Exclude debug methods: `*debug*`, `console`, `logger`
 - Exclude utility methods: `*helper*`, `*util*`
 - Exclude lifecycle methods if not needed: `componentDidMount`, `ngOnInit`
 
 **Configuration Management**:
+
 - Place `.methodinclude` and `.methodignore` in the project root for project-specific rules
 - Use comments (lines starting with #) to document pattern purposes
 - Test patterns with a small codebase before applying to large projects
@@ -290,5 +310,6 @@ The compact representation significantly reduces the token count of the context 
 The method-level analysis feature provides powerful capabilities for optimizing LLM context generation, but requires careful configuration to ensure accurate and useful results. By following these best practices, users can create effective filter patterns that capture the most important methods while excluding noise and boilerplate code.
 
 **Section sources**
+
 - [README.md](file://README.md#L481-L500)
 - [CLAUDE.md](file://CLAUDE.md#L101-L127)

@@ -12,7 +12,9 @@
 </cite>
 
 ## Update Summary
-**Changes Made**   
+
+**Changes Made**
+
 - Updated Method-Level Analysis section to include new GitIngest-style digest formatter and method filtering capabilities
 - Added new section on GitIngest Digest Generation to cover the new formatter functionality
 - Enhanced Token Counting section with updated context on GitIngest integration
@@ -20,6 +22,7 @@
 - Updated Feature Integration section to reflect new export options and formatter integration
 
 ## Table of Contents
+
 1. [File-Level Analysis](#file-level-analysis)
 2. [Method-Level Analysis](#method-level-analysis)
 3. [Token Counting](#token-counting)
@@ -36,6 +39,7 @@ The file scanning process is implemented in the `scanDirectory` method of the `T
 The filtering system prioritizes configuration files in a specific order: `.gitignore` rules are always respected, followed by `.contextinclude` (which takes precedence in INCLUDE mode), and then `.contextignore` (used in EXCLUDE mode when no include file exists). This multi-layered approach ensures that developers can precisely control which files are analyzed, allowing for focused examination of core application logic while excluding documentation, configuration, and test files.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L376-L406)
 - [ctxman.js](file://ctxman.js#L288-L315)
 - [README.md](file://README.md#L294-L356)
@@ -49,12 +53,13 @@ The `MethodAnalyzer` class uses a series of regular expressions to identify vari
 Method filtering is controlled by `.methodinclude` and `.methodignore` configuration files, which allow developers to include or exclude specific methods using pattern matching. The `MethodFilterParser` class processes these files, converting glob patterns to regular expressions for efficient matching. When an include file is present, only methods matching the specified patterns are included; otherwise, the tool excludes methods matching patterns in the ignore file. This system supports various pattern types including exact matches, wildcards, class-specific methods (using `Class.*` syntax), and file-specific methods (using `file.method` syntax).
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L14-L67)
 - [ctxman.js](file://ctxman.js#L69-L109)
 - [ctxman.js](file://ctxman.js#L357-L377)
 - [README.md](file://README.md#L544-L610)
-- [lib/analyzers/method-analyzer.js](file://lib/analyzers/method-analyzer.js#L7-L92) - *Updated in recent commit*
-- [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47) - *Added in recent commit*
+- [lib/analyzers/method-analyzer.js](file://lib/analyzers/method-analyzer.js#L7-L92) - _Updated in recent commit_
+- [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47) - _Added in recent commit_
 
 ## Token Counting
 
@@ -65,6 +70,7 @@ The token counting process is implemented in the `calculateTokens` method of the
 The tool also tracks token statistics at multiple levels, including per-file, per-extension, and per-directory counts, providing detailed insights into the codebase composition. When method-level analysis is enabled, the tool additionally counts tokens for individual methods, allowing developers to identify particularly large or complex functions that might need refactoring.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L253-L286)
 - [ctxman.js](file://ctxman.js#L288-L315)
 - [README.md](file://README.md#L356)
@@ -80,11 +86,12 @@ The generated digest includes several components: a summary header with project 
 The formatter supports multiple generation methods: direct creation from live analysis, generation from existing `token-analysis-report.json` files, and creation from `llm-context.json` files. This flexibility allows users to generate digests quickly from previously saved analysis results without re-scanning the entire codebase. The `--gitingest-from-report` and `--gitingest-from-context` CLI flags enable these alternative generation methods.
 
 **Section sources**
-- [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264) - *Added in recent commit*
-- [ctxman.js](file://ctxman.js#L524-L597) - *Updated in recent commit*
-- [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L524-L597) - *Updated in recent commit*
-- [test/test-gitingest.js](file://test/test-gitingest.js#L0-L172) - *Added in recent commit*
-- [test/test-gitingest-json.js](file://test/test-gitingest-json.js#L0-L224) - *Added in recent commit*
+
+- [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264) - _Added in recent commit_
+- [ctxman.js](file://ctxman.js#L524-L597) - _Updated in recent commit_
+- [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L524-L597) - _Updated in recent commit_
+- [test/test-gitingest.js](file://test/test-gitingest.js#L0-L172) - _Added in recent commit_
+- [test/test-gitingest-json.js](file://test/test-gitingest-json.js#L0-L224) - _Added in recent commit_
 
 ## Feature Integration
 
@@ -97,10 +104,11 @@ The results are aggregated in comprehensive statistics that track files, tokens,
 Additionally, the tool now supports direct generation of GitIngest-style digests through the `saveGitIngestDigest` method, which creates an instance of `GitIngestFormatter` and saves the formatted digest to `digest.txt`. This integration allows users to generate comprehensive code summaries with a single command.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L213-L251)
 - [ctxman.js](file://ctxman.js#L498-L539)
 - [ctxman.js](file://ctxman.js#L774-L813)
-- [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L13-L642) - *Updated in recent commit*
+- [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L13-L642) - _Updated in recent commit_
 
 ## Common Issues and Performance
 
@@ -113,7 +121,8 @@ Inaccurate token counts can occur when the `tiktoken` library is not installed, 
 When using the GitIngest digest generation feature, users should be aware that generating from existing JSON files (`token-analysis-report.json` or `llm-context.json`) is significantly faster than scanning the entire codebase, especially for large projects. However, this approach relies on the freshness of the JSON files, so users should ensure their analysis data is up-to-date before generating digests.
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L253-L286)
 - [ctxman.js](file://ctxman.js#L376-L406)
 - [README.md](file://README.md#L544-L610)
-- [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264) - *Added in recent commit*
+- [lib/formatters/gitingest-formatter.js](file://lib/formatters/gitingest-formatter.js#L13-L264) - _Added in recent commit_

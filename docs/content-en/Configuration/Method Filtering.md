@@ -9,7 +9,9 @@
 </cite>
 
 ## Update Summary
-**Changes Made**   
+
+**Changes Made**
+
 - Updated all sections to reflect the actual implementation of the method filtering system
 - Added accurate source references for all sections based on code analysis
 - Corrected the configuration file loading mechanism to show proper initialization through ConfigUtils
@@ -19,6 +21,7 @@
 - Updated practical examples to align with current README content
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Configuration Files](#configuration-files)
 3. [Pattern Syntax](#pattern-syntax)
@@ -33,6 +36,7 @@
 The ctxman tool provides a sophisticated method-level filtering system that enables granular control over which methods are included in LLM context generation. This system operates through two configuration files: `.methodinclude` and `.methodignore`, which work in conjunction with the `MethodFilterParser` class to determine which methods should be analyzed and included in the final context output. The filtering system is designed to help developers optimize token usage by focusing on core business logic while excluding utility, test, and debugging methods that add noise to LLM context.
 
 **Section sources**
+
 - [README.md](file://README.md#L544-L610)
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js)
 
@@ -60,10 +64,12 @@ F --> I[Include all methods]
 ```
 
 **Diagram sources**
+
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
 - [lib/utils/config-utils.js](file://lib/utils/config-utils.js#L28-L41)
 
 **Section sources**
+
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
 - [lib/utils/config-utils.js](file://lib/utils/config-utils.js#L28-L41)
 
@@ -71,16 +77,17 @@ F --> I[Include all methods]
 
 The method filtering system supports several pattern types that provide flexible matching capabilities:
 
-| Pattern Type | Syntax | Description | Example |
-|--------------|--------|-------------|---------|
-| Exact Match | `methodName` | Matches methods with the exact name | `calculateTokens` matches only the method named "calculateTokens" |
-| Wildcard | `*pattern*` | Matches methods containing the pattern | `*Handler` matches "requestHandler", "responseHandler" |
-| Class Methods | `Class.*` | Matches all methods within a specific class | `TokenCalculator.*` matches all methods in the TokenCalculator class |
-| File Methods | `filename.methodName` | Matches specific methods in specific files | `server.handleRequest` matches only the handleRequest method in server.js |
+| Pattern Type  | Syntax                | Description                                 | Example                                                                   |
+| ------------- | --------------------- | ------------------------------------------- | ------------------------------------------------------------------------- |
+| Exact Match   | `methodName`          | Matches methods with the exact name         | `calculateTokens` matches only the method named "calculateTokens"         |
+| Wildcard      | `*pattern*`           | Matches methods containing the pattern      | `*Handler` matches "requestHandler", "responseHandler"                    |
+| Class Methods | `Class.*`             | Matches all methods within a specific class | `TokenCalculator.*` matches all methods in the TokenCalculator class      |
+| File Methods  | `filename.methodName` | Matches specific methods in specific files  | `server.handleRequest` matches only the handleRequest method in server.js |
 
 The pattern matching is case-insensitive and supports the use of the `*` wildcard character to match any sequence of characters. This allows for powerful filtering rules that can target specific categories of methods based on naming conventions, which is particularly useful for excluding test, debug, or utility methods that follow predictable naming patterns.
 
 **Section sources**
+
 - [README.md](file://README.md#L588-L610)
 
 ## Filtering Logic
@@ -113,10 +120,12 @@ TokenCalculator --> MethodFilterParser : "uses"
 ```
 
 **Diagram sources**
+
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
 - [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L82-L107)
 
 **Section sources**
+
 - [lib/parsers/method-filter-parser.js](file://lib/parsers/method-filter-parser.js#L7-L47)
 
 ## Integration with TokenCalculator
@@ -151,10 +160,12 @@ TC->>TC : generateLLMContext()
 ```
 
 **Diagram sources**
+
 - [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L82-L107)
 - [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L231-L800)
 
 **Section sources**
+
 - [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L82-L107)
 - [lib/analyzers/token-calculator.js](file://lib/analyzers/token-calculator.js#L231-L800)
 
@@ -163,6 +174,7 @@ TC->>TC : generateLLMContext()
 The README provides several practical examples demonstrating how to use method filtering for different scenarios:
 
 **Including Core Business Logic:**
+
 ```bash
 # .methodinclude
 calculateTokens
@@ -180,6 +192,7 @@ TokenCalculator.*
 This configuration focuses on core application logic by including specific business methods and all methods ending with common suffixes like "Handler", "Validator", and "Manager", which typically indicate important business components.
 
 **Excluding Utility Methods:**
+
 ```bash
 # .methodignore
 console
@@ -197,6 +210,7 @@ This configuration removes noise from the LLM context by excluding common utilit
 These examples demonstrate how developers can create focused contexts that highlight the most important parts of their codebase while minimizing token usage, making LLM interactions more efficient and effective.
 
 **Section sources**
+
 - [README.md](file://README.md#L577-L587)
 
 ## Configuration Pitfalls
@@ -212,6 +226,7 @@ When configuring method filtering, developers should be aware of several common 
 **Overly Broad Patterns**: Using patterns like `*` or `*.*` can lead to unintended matches. Developers should be specific with their patterns to avoid including methods that don't align with their intended filtering goals.
 
 **Section sources**
+
 - [README.md](file://README.md#L544-L576)
 
 ## Best Practices
@@ -233,4 +248,5 @@ To optimize method filtering for LLM context generation, consider the following 
 By following these practices, developers can create optimized LLM contexts that balance comprehensiveness with efficiency, ensuring that AI assistants have access to the most relevant code while operating within token limitations.
 
 **Section sources**
+
 - [README.md](file://README.md#L544-L610)

@@ -7,6 +7,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Configuration File Priority](#configuration-file-priority)
 3. [Custom Filter Patterns](#custom-filter-patterns)
@@ -21,6 +22,7 @@
 The ctxman tool provides sophisticated configuration options for controlling which files and methods are included in token analysis and LLM context generation. This document details advanced configuration techniques for specialized use cases, focusing on custom filter patterns, priority hierarchies, and performance optimization strategies.
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 
 ## Configuration File Priority
@@ -30,7 +32,7 @@ The ctxman tool implements a well-defined priority hierarchy for configuration f
 The priority order from highest to lowest is:
 
 1. **`.contextinclude`** - INCLUDE mode (highest priority)
-2. **`.contextignore`** - EXCLUDE mode 
+2. **`.contextignore`** - EXCLUDE mode
 3. **`.gitignore`** - Standard git exclusions (always respected)
 
 When `.contextinclude` exists, the tool operates in INCLUDE mode, meaning only files matching the patterns in this file will be analyzed, and `.contextignore` is completely ignored. When only `.contextignore` exists, the tool operates in EXCLUDE mode, analyzing all files except those matching the ignore patterns. The `.gitignore` file is always respected regardless of the mode.
@@ -51,10 +53,12 @@ I --> J
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L124-L229)
 - [ctxman.js](file://ctxman.js#L231-L800)
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L124-L229)
 
@@ -94,7 +98,7 @@ src/**/*.js
 Method-level filtering allows even more granular control through `.methodinclude` and `.methodignore` files. These support pattern matching for method names:
 
 - `*Handler` - Include all methods ending with 'Handler'
-- `*Validator` - Include all methods ending with 'Validator' 
+- `*Validator` - Include all methods ending with 'Validator'
 - `TokenCalculator.*` - Include all methods in TokenCalculator class
 - `server.printStatus` - Include specific file method
 - `*test*` - Exclude all methods containing 'test'
@@ -117,10 +121,12 @@ TokenCalculator --> MethodFilterParser : "uses"
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L75-L115)
 - [ctxman.js](file://ctxman.js#L231-L800)
 
 **Section sources**
+
 - [README.md](file://README.md#L1-L891)
 - [ctxman.js](file://ctxman.js#L75-L115)
 
@@ -160,9 +166,11 @@ N --> O
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L159-L179)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L159-L179)
 
 ### Complex Negation Rules
@@ -240,10 +248,12 @@ P --> |No| Q[Complete]
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L272-L278)
 - [ctxman.js](file://ctxman.js#L380-L400)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L272-L278)
 
 ## Integration and Scripting
@@ -258,9 +268,9 @@ The tool can be used programmatically by importing the TokenAnalyzer class:
 const { TokenAnalyzer } = require('ctxman');
 
 const analyzer = new TokenAnalyzer('./src', {
-    methodLevel: true,
-    saveReport: true,
-    verbose: true
+  methodLevel: true,
+  saveReport: true,
+  verbose: true,
 });
 
 analyzer.run();
@@ -307,9 +317,11 @@ SUMMARY ||--o{ FILE : contains
 ```
 
 **Diagram sources**
+
 - [ctxman.js](file://ctxman.js#L784-L799)
 
 **Section sources**
+
 - [ctxman.js](file://ctxman.js#L784-L799)
 
 ## Best Practices

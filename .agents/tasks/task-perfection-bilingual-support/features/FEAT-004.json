@@ -1,0 +1,30 @@
+{
+  "id": "FEAT-004",
+  "type": "chore",
+  "description": "GitHub Templates and Community Standards - Create PR template, issue templates (bug report, feature request), and verify CODEOWNERS file.",
+  "status": "completed",
+  "steps": [
+    "Create .github/PULL_REQUEST_TEMPLATE.md with sections for: Description, Type of Change, Testing, Checklist, Screenshots (if applicable)",
+    "Create .github/ISSUE_TEMPLATE/ directory",
+    "Create .github/ISSUE_TEMPLATE/bug_report.md with sections for: Description, Steps to Reproduce, Expected Behavior, Actual Behavior, Environment, Screenshots",
+    "Create .github/ISSUE_TEMPLATE/feature_request.md with sections for: Problem Statement, Proposed Solution, Alternatives Considered, Additional Context",
+    "Create .github/ISSUE_TEMPLATE/config.yml with blank_issues_enabled and contact_links",
+    "Verify .github/CODEOWNERS file exists and is properly configured (already exists, just verify)",
+    "Create .github/ISSUE_TEMPLATE/bug_report-tr.md and feature_request-tr.md Turkish translations (or include Turkish sections in templates)"
+  ],
+  "acceptance_criteria": [
+    ".github/PULL_REQUEST_TEMPLATE.md exists with comprehensive template",
+    ".github/ISSUE_TEMPLATE/bug_report.md exists",
+    ".github/ISSUE_TEMPLATE/feature_request.md exists",
+    ".github/ISSUE_TEMPLATE/config.yml exists",
+    "CODEOWNERS is properly configured",
+    "Turkish translations exist or templates include Turkish sections"
+  ],
+  "verification": [
+    "ls -la .github/PULL_REQUEST_TEMPLATE.md",
+    "ls -la .github/ISSUE_TEMPLATE/",
+    "cat .github/ISSUE_TEMPLATE/config.yml"
+  ],
+  "blocked_reason": null,
+  "findings": "Successfully created all GitHub templates with bilingual support (English and Turkish). Created PR template with comprehensive sections, bug report template, feature request template, and config.yml with contact links. Turkish translations provided as separate template files (bug_report-tr.md, feature_request-tr.md). CODEOWNERS file verified as properly configured with proper ownership rules for all key directories."
+}

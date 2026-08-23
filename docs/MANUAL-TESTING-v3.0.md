@@ -11,6 +11,7 @@ Complete manual testing guide for Ctxman v3.0.0 Platform Foundation release.
 ## 🎯 Test Objectives
 
 Validate all v3.0.0 features:
+
 - ✅ Modular Core Architecture
 - ✅ Plugin System
 - ✅ Git Integration
@@ -54,6 +55,7 @@ ls test-repos/express
 ### Section 1: Basic Functionality (Backward Compatibility)
 
 #### Test 1.1: Basic Analysis
+
 ```bash
 cd test-repos/express
 ctxman --cli
@@ -66,6 +68,7 @@ Expected Output:
 ```
 
 #### Test 1.2: Method-Level Analysis
+
 ```bash
 cd test-repos/express
 ctxman --cli -m --output json
@@ -77,6 +80,7 @@ Expected Output:
 ```
 
 #### Test 1.3: TOON Format
+
 ```bash
 cd test-repos/express
 ctxman --cli --output toon
@@ -92,6 +96,7 @@ Expected Output:
 ### Section 2: LLM Optimization (v2.3.7)
 
 #### Test 2.1: Auto-Detect LLM
+
 ```bash
 cd test-repos/express
 
@@ -108,6 +113,7 @@ Expected Output:
 ```
 
 #### Test 2.2: Explicit Model Selection
+
 ```bash
 cd test-repos/express
 ctxman --cli --target-model gpt-4o
@@ -121,6 +127,7 @@ Expected Output:
 ```
 
 #### Test 2.3: List LLMs
+
 ```bash
 ctxman --list-llms
 
@@ -134,6 +141,7 @@ Expected Output:
 ### Section 3: Git Integration (v3.0.0) ⭐
 
 #### Test 3.1: Changed Files Only
+
 ```bash
 cd test-repos/express
 
@@ -151,6 +159,7 @@ Expected Output:
 ```
 
 #### Test 3.2: Changed Since Commit
+
 ```bash
 cd test-repos/express
 
@@ -165,6 +174,7 @@ Expected Output:
 ```
 
 #### Test 3.3: Changed Since Branch
+
 ```bash
 cd test-repos/express
 
@@ -183,6 +193,7 @@ Expected Output:
 ### Section 4: Watch Mode (v3.0.0) ⭐
 
 #### Test 4.1: Basic Watch Mode
+
 ```bash
 cd test-repos/express
 
@@ -204,6 +215,7 @@ Expected Output:
 ```
 
 #### Test 4.2: Watch with Method-Level
+
 ```bash
 cd test-repos/express
 ctxman watch -m
@@ -218,6 +230,7 @@ Expected Output:
 ```
 
 #### Test 4.3: Watch with Custom Debounce
+
 ```bash
 cd test-repos/express
 ctxman watch --debounce 2000
@@ -232,6 +245,7 @@ Expected Output:
 ```
 
 #### Test 4.4: Stop Watch Mode
+
 ```bash
 # In watch mode terminal
 Press Ctrl+C
@@ -246,6 +260,7 @@ Expected Output:
 ### Section 5: REST API Server (v3.0.0) ⭐
 
 #### Test 5.1: Start API Server
+
 ```bash
 # Terminal 1: Start server
 cd /Users/hakki.sagdic/Documents/GitHub/ctxman
@@ -259,6 +274,7 @@ Expected Output:
 ```
 
 #### Test 5.2: API Endpoint - Analyze
+
 ```bash
 # Terminal 2: Test analyze endpoint
 curl "http://localhost:3000/api/v1/analyze?path=./test-repos/express&methods=true"
@@ -269,6 +285,7 @@ Expected Output:
 ```
 
 #### Test 5.3: API Endpoint - Methods
+
 ```bash
 curl "http://localhost:3000/api/v1/methods?file=test-repos/express/lib/router/index.js"
 
@@ -281,6 +298,7 @@ Expected Output:
 ```
 
 #### Test 5.4: API Endpoint - Stats
+
 ```bash
 curl "http://localhost:3000/api/v1/stats?path=./test-repos/express"
 
@@ -294,6 +312,7 @@ Expected Output:
 ```
 
 #### Test 5.5: API Endpoint - Diff
+
 ```bash
 curl "http://localhost:3000/api/v1/diff?path=./test-repos/express&since=v5.0.0"
 
@@ -306,6 +325,7 @@ Expected Output:
 ```
 
 #### Test 5.6: API Endpoint - Context (POST)
+
 ```bash
 curl -X POST http://localhost:3000/api/v1/context \
   -H "Content-Type: application/json" \
@@ -326,6 +346,7 @@ Expected Output:
 ```
 
 #### Test 5.7: API Endpoint - Docs
+
 ```bash
 curl http://localhost:3000/api/v1/docs
 
@@ -337,6 +358,7 @@ Expected Output:
 ```
 
 #### Test 5.8: Custom Port
+
 ```bash
 # Stop previous server (Ctrl+C)
 ctxman serve --port 8080
@@ -346,6 +368,7 @@ Expected Output:
 ```
 
 #### Test 5.9: Authentication
+
 ```bash
 ctxman serve --port 3000 --auth-token my-secret
 
@@ -370,6 +393,7 @@ Expected Output:
 ### Section 6: Performance & Caching
 
 #### Test 6.1: First Run (Cold Cache)
+
 ```bash
 cd test-repos/express
 ctxman --cli
@@ -379,6 +403,7 @@ Expected Output:
 ```
 
 #### Test 6.2: Second Run (Warm Cache)
+
 ```bash
 # Run again immediately
 ctxman --cli
@@ -389,6 +414,7 @@ Expected Output:
 ```
 
 #### Test 6.3: Parallel Processing
+
 ```bash
 cd test-repos/express
 ctxman --cli --verbose
@@ -403,6 +429,7 @@ Expected Output:
 ### Section 7: Error Handling
 
 #### Test 7.1: Invalid LLM Model
+
 ```bash
 ctxman --cli --target-model invalid-model
 
@@ -412,6 +439,7 @@ Expected Output:
 ```
 
 #### Test 7.2: Non-Git Repository
+
 ```bash
 cd /tmp
 mkdir test-no-git
@@ -424,6 +452,7 @@ Expected Output:
 ```
 
 #### Test 7.3: Invalid API Port
+
 ```bash
 # Port already in use
 ctxman serve --port 3000 &
@@ -440,25 +469,25 @@ Try a different port: ctxman serve --port 3001
 
 ### Performance Targets
 
-| Metric | Target | Pass/Fail |
-|--------|--------|-----------|
-| Scan 150 files | <100ms | ⬜ |
-| Analyze 150 files | <5s | ⬜ |
-| Plugin load | <50ms | ⬜ |
-| Cache hit rate | >80% | ⬜ |
-| API response | <200ms | ⬜ |
-| Watch latency | <500ms | ⬜ |
+| Metric            | Target | Pass/Fail |
+| ----------------- | ------ | --------- |
+| Scan 150 files    | <100ms | ⬜        |
+| Analyze 150 files | <5s    | ⬜        |
+| Plugin load       | <50ms  | ⬜        |
+| Cache hit rate    | >80%   | ⬜        |
+| API response      | <200ms | ⬜        |
+| Watch latency     | <500ms | ⬜        |
 
 ### Feature Completeness
 
-| Feature | Status | Pass/Fail |
-|---------|--------|-----------|
-| Git Integration | ✅ Implemented | ⬜ |
-| Watch Mode | ✅ Implemented | ⬜ |
-| REST API | ✅ Implemented | ⬜ |
-| Plugin System | ✅ Implemented | ⬜ |
-| Caching | ✅ Implemented | ⬜ |
-| Core Modules | ✅ Implemented | ⬜ |
+| Feature         | Status         | Pass/Fail |
+| --------------- | -------------- | --------- |
+| Git Integration | ✅ Implemented | ⬜        |
+| Watch Mode      | ✅ Implemented | ⬜        |
+| REST API        | ✅ Implemented | ⬜        |
+| Plugin System   | ✅ Implemented | ⬜        |
+| Caching         | ✅ Implemented | ⬜        |
+| Core Modules    | ✅ Implemented | ⬜        |
 
 ---
 
@@ -488,6 +517,7 @@ _Document any bugs found here with reproduction steps_
 **Environment:** macOS / Linux / Windows
 
 **Results:**
+
 - Section 1 (Basic): ⬜ Pass / ⬜ Fail
 - Section 2 (LLM): ⬜ Pass / ⬜ Fail
 - Section 3 (Git): ⬜ Pass / ⬜ Fail
@@ -506,6 +536,7 @@ _Add any observations or issues here_
 ## 🔧 Troubleshooting
 
 ### Watch Mode Doesn't Detect Changes
+
 ```bash
 # Check file watcher limits (Linux)
 cat /proc/sys/fs/inotify/max_user_watches
@@ -515,6 +546,7 @@ sudo sysctl fs.inotify.max_user_watches=524288
 ```
 
 ### API Server Won't Start
+
 ```bash
 # Check if port is in use
 lsof -i :3000
@@ -527,6 +559,7 @@ ctxman serve --port 3001
 ```
 
 ### Submodule Not Loaded
+
 ```bash
 # Initialize and update submodule
 git submodule update --init --recursive
@@ -574,6 +607,7 @@ echo "\n✅ Quick tests complete!"
 ```
 
 Save as `scripts/quick-test-v3.sh` and run:
+
 ```bash
 chmod +x scripts/quick-test-v3.sh
 ./scripts/quick-test-v3.sh
@@ -584,6 +618,7 @@ chmod +x scripts/quick-test-v3.sh
 ## 📸 Expected Screenshots
 
 ### 1. Watch Mode in Action
+
 ```
 👁️ Watch mode active
 Press Ctrl+C to stop
@@ -594,6 +629,7 @@ Press Ctrl+C to stop
 ```
 
 ### 2. API Server Running
+
 ```
 🌐 Ctxman API Server
    Listening on: http://localhost:3000
@@ -602,6 +638,7 @@ Press Ctrl+C to stop
 ```
 
 ### 3. Git Integration Output
+
 ```
 🔀 Git Integration - Analyzing Changed Files
 ══════════════════════════════════════════════════════════

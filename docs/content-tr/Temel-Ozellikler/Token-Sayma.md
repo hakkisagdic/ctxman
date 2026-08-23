@@ -9,6 +9,7 @@
 </cite>
 
 ## İçindekiler
+
 1. [Giriş](#giriş)
 2. [Token Hesaplama Yöntemleri](#token-hesaplama-yöntemleri)
 3. [tiktoken ile Tam Token Sayımı](#tiktoken-ile-tam-token-sayımı)
@@ -25,6 +26,7 @@
 ctxman aracı, LLM context yönetimi ve kod analizini desteklemek için sofistike token sayma işlevselliği sağlar. Sistem, tam GPT-4 uyumlu hesaplamaları akıllı tahmin yöntemleriyle birleştirerek token sayımına ikili bir yaklaşım uygular. Bu dokümantasyon, ctxman aracı içindeki token sayma sisteminin implementasyonunu, kullanımını ve entegrasyonunu detaylandırır.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L7-L8)
 - [README.md](file://README.md#L294-L356)
 
@@ -46,9 +48,11 @@ ReturnEstimate --> End
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L280-L292)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L280-L292)
 
 ## tiktoken ile Tam Token Sayımı
@@ -77,10 +81,12 @@ end
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L280-L292)
 - [package.json](file://package.json#L35-L38)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L280-L292)
 - [package.json](file://package.json#L35-L38)
 
@@ -89,6 +95,7 @@ end
 tiktoken kütüphanesi mevcut olmadığında, ctxman aracı uzantıya özgü karakter-başına-token oranları kullanan bir tahmin methoduna geri döner. Bu yaklaşım, performansı korurken ve bağımlılıkları azaltırken makul derecede doğru tahminler (~%95 doğruluk) sağlar.
 
 Tahmin algoritması şu adımları izler:
+
 1. filePath parametresinden dosya uzantısını belirle
 2. Uzantıya dayalı uygun karakter-başına-token oranını ara
 3. Whitespace'i normalize ederek metni temizle
@@ -104,6 +111,7 @@ Calculate --> Return["Tahmini token sayısını döndür"]
 ```
 
 Implementasyon, yaygın dosya türleri için spesifik karakter-başına-token oranlarını içerir:
+
 - JavaScript/TypeScript: Token başına 3.2 karakter
 - JSON: Token başına 2.5 karakter
 - Markdown/Text: Token başına 4.0 karakter
@@ -111,9 +119,11 @@ Implementasyon, yaygın dosya türleri için spesifik karakter-başına-token or
 - HTML/XML: Token başına 2.8 karakter
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L294-L304)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L294-L304)
 
 ## Dosya Türüne Özgü Örnekler
@@ -127,6 +137,7 @@ JSON, YAML ve XML gibi yapılandırma dosyaları, yapısal özelliklerini yansı
 Sistem, bir dosyanın metin dosyası olarak analiz edilip edilmeyeceğini, hem dosya uzantılarını hem de "readme", "license" ve "changelog" gibi yaygın metin dosyası adlarını kontrol eden `isTextFile` methodu aracılığıyla belirler.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L294-L304)
 - [ctxman.js](file://ctxman.js#L306-L321)
 
@@ -135,6 +146,7 @@ Sistem, bir dosyanın metin dosyası olarak analiz edilip edilmeyeceğini, hem d
 Token sayıları, codebase boyutu ve karmaşıklığının kapsamlı analizini sağlayan dosya ve proje istatistik sistemi boyunca entegre edilir. `analyzeFile` methodu, her dosya için `calculateTokens`'ı çağırır ve sonuçları ayrıntılı istatistiklere dahil eder.
 
 Sistem, birden fazla istatistiksel toplama seviyesini tutar:
+
 - Token sayısı, byte cinsinden boyut ve satır sayısı dahil dosya başına istatistikler
 - Aynı türdeki tüm dosyalarda sayıları toplayan uzantı seviyesi istatistikler
 - Üst düzey dizine göre token dağılımını gösteren dizin seviyesi istatistikler
@@ -187,10 +199,12 @@ StatsObject --> DirStats : "içerir"
 ```
 
 **Diyagram kaynakları**
+
 - [ctxman.js](file://ctxman.js#L323-L351)
 - [ctxman.js](file://ctxman.js#L455-L480)
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L323-L351)
 - [ctxman.js](file://ctxman.js#L455-L480)
 
@@ -201,12 +215,14 @@ Token sayıları, AI tüketimi için optimize edilmiş dosya listeleri oluştura
 Method seviyesi analiz etkinleştirildiğinde, sistem bireysel methodlar için token sayıları dahil olmak üzere ayrıntılı method context'i oluşturur. Bu, hangi kod öğelerinin LLM context'ine dahil edileceği üzerinde ince ayarlı kontrol sağlar.
 
 Context oluşturma iki formatı destekler:
+
 - Kompakt format: Token sayıları olmadan düzenlenmiş dosya yolları (~2.3k karakter)
 - Detaylı format: Token sayılarıyla tam method seviyesi bilgisi (~8.6k karakter)
 
 Format seçimi, kompakt format dosya organizasyonuna odaklanırken ve detaylı format her method için kapsamlı token bilgisi sağlarken, token sayılarının çıktıda nasıl sunulduğunu etkiler.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L482-L503)
 
 ## Performans Etkileri
@@ -214,6 +230,7 @@ Format seçimi, kompakt format dosya organizasyonuna odaklanırken ve detaylı f
 Token sayma sistemi, ikili method yaklaşımı aracılığıyla doğruluk ve performansı dengeler. tiktoken ile tam sayım, kesin GPT-4 uyumlu sonuçlar sağlar ancak kütüphane yükleme ve encoding işlemlerinden ek yük getirir. Tahmini sayım daha hızlıdır ve harici bağımlılığı yoktur ancak yaklaşık sonuçlar sağlar.
 
 Her methodun performans etkileri şunlardır:
+
 - **Tam sayım**: Daha yüksek doğruluk (%100), daha yavaş performans, tiktoken bağımlılığı gerektirir
 - **Tahmini sayım**: Daha düşük doğruluk (~%95), daha hızlı performans, harici bağımlılık gerektirmez
 
@@ -222,6 +239,7 @@ Sistem, mevcut olduğunda tam sayımı tercih edecek şekilde tasarlanmıştır;
 Büyük codebase'ler için performans farkı daha önemli hale gelir ve mutlak hassasiyet gerekli olmadığında tahmini sayımı tercih edilir kılar. Tahmin methodunun metin temizleme ve basit bölme için O(n) karmaşıklığı, büyük dosyalar için bile oldukça verimli olmasını sağlar.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L659-L659)
 - [README.md](file://README.md#L294-L356)
 
@@ -240,6 +258,7 @@ ctxman aracındaki token sayımıyla ilgili yaygın sorunlar genellikle standart
 Token sayma sorunlarını gidermek için kullanıcılar önce tiktoken kurulumunu doğrulamalı ve tam veya tahmini sayımın kullanılıp kullanılmadığını onaylamak için başlangıç mesajını kontrol etmelidir.
 
 **Bölüm kaynakları**
+
 - [package.json](file://package.json#L35-L38)
 - [README.md](file://README.md#L294-L356)
 
@@ -248,6 +267,7 @@ Token sayma sorunlarını gidermek için kullanıcılar önce tiktoken kurulumun
 Tam token sayımını sağlamak için tiktoken kütüphanesinin düzgün şekilde yüklenmesi gerekir. ctxman aracı, tiktoken'ı package.json'da hem dependency hem de optionalDependency olarak listeler; bu, tam sayım için kurulumu teşvik ederken aracın onsuz çalışmasına izin verir.
 
 Kurulum npm aracılığıyla gerçekleştirilir:
+
 ```bash
 npm install tiktoken
 ```
@@ -256,12 +276,15 @@ Implementasyon, tiktoken'ı yüklemek için bir try-catch bloğu kullanır ve k�
 
 ```javascript
 let tiktoken = null;
-try { tiktoken = require('tiktoken'); } catch {}
+try {
+  tiktoken = require('tiktoken');
+} catch {}
 ```
 
 Bu kalıp, aracın tiktoken kurulumu başarısız olsa veya gerçekleştirilmese bile işlevsel kalmasını sağlarken, istendiğinde tam sayım seçeneğini hala sağlar. Başlangıç dizisi, kullanılan token hesaplama methodunu görüntüleyerek kullanıcıların kurulum durumlarını doğrulamalarına yardımcı olur.
 
 **Bölüm kaynakları**
+
 - [ctxman.js](file://ctxman.js#L7-L9)
 - [package.json](file://package.json#L35-L38)
 - [README.md](file://README.md#L294-L356)

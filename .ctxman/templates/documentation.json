@@ -1,0 +1,9 @@
+{
+  "name": "Documentation Context",
+  "description": "Optimized for writing documentation",
+  "include": ["src/**/*.js", "lib/**/*.js", "index.js"],
+  "exclude": ["**/*.test.js", "**/*.spec.js", "test/**", "examples/**", "node_modules/**"],
+  "methodInclude": ["*"],
+  "methodExclude": ["_*", "*test*", "*internal*"],
+  "targetModel": "claude-sonnet-4.5"
+}

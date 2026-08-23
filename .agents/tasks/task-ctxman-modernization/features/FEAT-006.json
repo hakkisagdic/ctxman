@@ -1,0 +1,34 @@
+{
+  "id": "FEAT-006",
+  "type": "feature",
+  "description": "Multi-Repository Context - Generate combined context from multiple repositories for monorepo or microservices analysis",
+  "status": "completed",
+  "steps": [
+    "Create lib/utils/multi-repo-manager.js with MultiRepoManager class",
+    "Add --multi-repo flag to CLI for multi-repo analysis mode",
+    "Add --add-repo <path> command to add repository to config",
+    "Add --remove-repo <path> command to remove repository from config",
+    "Add --list-repos command to list configured repositories",
+    "Create .ctxman/repos.json configuration format",
+    "Implement per-repo token counting",
+    "Implement combined token count and breakdown",
+    "Add test file test/multi-repo-manager.test.js"
+  ],
+  "acceptance_criteria": [
+    "--multi-repo flag enables multi-repo mode",
+    "--add-repo <path> adds a repository to configuration",
+    "--remove-repo <path> removes a repository from configuration",
+    "--list-repos lists all configured repositories",
+    "Each repo shows separate token count",
+    "Combined total shows token breakdown by repo",
+    ".ctxman/repos.json stores repo configuration"
+  ],
+  "verification": [
+    "Run npm test to verify all tests pass",
+    "Test CLI: node bin/cli.js --multi-repo --cli",
+    "Test CLI: node bin/cli.js --add-repo ../test-repo",
+    "Test CLI: node bin/cli.js --list-repos"
+  ],
+  "blocked_reason": null,
+  "findings": "All acceptance criteria met: 1) --multi-repo flag enables multi-repo analysis mode, 2) --add-repo adds repos to .ctxman/repos.json, 3) --remove-repo removes repos, 4) --list-repos shows configured repos with status indicators, 5) Per-repo token counts displayed with percentage breakdown, 6) Combined total shows aggregated file and token counts, 7) Configuration persisted in .ctxman/repos.json with version, id, path, alias, exclude, and weight fields. Tests pass (1039 total). CLI commands work correctly."
+}

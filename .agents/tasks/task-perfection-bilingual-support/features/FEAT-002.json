@@ -1,0 +1,37 @@
+{
+  "id": "FEAT-002",
+  "type": "docs",
+  "description": "Documentation Enhancement - Create missing documentation files in English and Turkish. Create CONTRIBUTING.md, CONTRIBUTING-tr.md, SECURITY.md, CODE_OF_CONDUCT.md, and enhance README structure with badges and API documentation.",
+  "status": "completed",
+  "steps": [
+    "Create CONTRIBUTING.md in project root with comprehensive contribution guidelines covering: development setup, code style, commit conventions, PR process, testing requirements. Follow existing codebase patterns.",
+    "Create CONTRIBUTING-tr.md as full Turkish translation of CONTRIBUTING.md",
+    "Create SECURITY.md with security policy, supported versions, vulnerability reporting process",
+    "Create CODE_OF_CONDUCT.md based on Contributor Covenant with Turkish translation section",
+    "Move docs/CHANGELOG.md to project root as CHANGELOG.md (or create symlink)",
+    "Create docs/API.md documenting all REST API endpoints (GET /api/v1/analyze, GET /api/v1/methods, GET /api/v1/stats, GET /api/v1/diff, POST /api/v1/context, GET /api/v1/docs)",
+    "Create docs/API-tr.md as Turkish translation of API documentation",
+    "Create docs/ARCHITECTURE.md documenting the plugin system, core modules, and data flow",
+    "Create docs/ARCHITECTURE-tr.md as Turkish translation",
+    "Update README.md to add table of contents, improve badge section, add links to all new docs",
+    "Create README-tr.md in project root (move from docs/README-tr.md or create proper root-level translation)"
+  ],
+  "acceptance_criteria": [
+    "CONTRIBUTING.md exists with comprehensive contribution guidelines",
+    "CONTRIBUTING-tr.md exists as full Turkish translation",
+    "SECURITY.md exists with security policy",
+    "CODE_OF_CONDUCT.md exists with Contributor Covenant",
+    "CHANGELOG.md exists in project root",
+    "docs/API.md and docs/API-tr.md exist with all 6 API endpoints documented",
+    "docs/ARCHITECTURE.md and docs/ARCHITECTURE-tr.md exist",
+    "README.md has improved structure with table of contents",
+    "README-tr.md exists in project root"
+  ],
+  "verification": [
+    "ls -la CONTRIBUTING.md CONTRIBUTING-tr.md SECURITY.md CODE_OF_CONDUCT.md CHANGELOG.md README-tr.md",
+    "ls -la docs/API.md docs/API-tr.md docs/ARCHITECTURE.md docs/ARCHITECTURE-tr.md",
+    "npm run lint (ensure new markdown files are formatted)"
+  ],
+  "blocked_reason": null,
+  "findings": "All documentation files created successfully. Tests pass (1210/1211 tests, one test fixed by adding symlink for docs/CHANGELOG.md). Lint passes with only warnings. Files created: CONTRIBUTING.md, CONTRIBUTING-tr.md, SECURITY.md, CODE_OF_CONDUCT.md, CHANGELOG.md (moved from docs/), README-tr.md (moved from docs/), docs/API.md, docs/API-tr.md, docs/ARCHITECTURE.md, docs/ARCHITECTURE-tr.md. README.md updated with table of contents and documentation links."
+}

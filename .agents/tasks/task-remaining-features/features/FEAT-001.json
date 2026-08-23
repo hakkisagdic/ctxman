@@ -1,0 +1,31 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Implement Performance Dashboard with text-based ASCII charts for terminal output. Create a new text-based dashboard module that provides performance metrics visualization without requiring Ink/React, making it more portable and lightweight.",
+  "status": "completed",
+  "steps": [
+    "Create lib/analyzers/performance-dashboard.js with text-based dashboard class that generates ASCII charts for terminal output",
+    "Implement metrics collection: analysis duration, file counts, token counts, cache hit rates",
+    "Implement ASCII chart generation for trends (bar charts, line charts using characters like ▓, ░, │, ─)",
+    "Implement bottleneck identification that identifies slow analysis phases",
+    "Implement optimization recommendations generation",
+    "Add --perf-dashboard CLI flag to bin/cli.js that displays the text-based dashboard",
+    "Create test/performance-dashboard.test.js with comprehensive tests for dashboard functionality",
+    "Ensure all new tests pass with npm test"
+  ],
+  "acceptance_criteria": [
+    "lib/analyzers/performance-dashboard.js exists and exports PerformanceDashboard class",
+    "Dashboard displays total analyses count, average duration, cache hit rate",
+    "Dashboard includes ASCII trend charts (bar charts, sparklines)",
+    "Dashboard shows top bottlenecks and optimization recommendations",
+    "--perf-dashboard CLI flag works and displays the dashboard",
+    "test/performance-dashboard.test.js exists with passing tests covering all major functions",
+    "All 1121+ existing tests continue to pass"
+  ],
+  "verification": [
+    "Run npm test and verify all tests pass including new tests",
+    "Run node bin/cli.js --perf-dashboard to verify dashboard displays correctly"
+  ],
+  "blocked_reason": null,
+  "findings": "All 1154 tests pass (33 new tests for performance dashboard). CLI flag --perf-dashboard works with --period option (7d, 30d, all) and --save-report option. Dashboard displays ASCII charts with sparklines, bar charts, phase breakdown, bottlenecks, and recommendations."
+}
