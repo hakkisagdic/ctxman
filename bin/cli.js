@@ -14,6 +14,7 @@ import ProfileManager from '../lib/utils/profile-manager.js';
 import { AISuggester } from '../lib/analyzers/ai-suggester.js';
 import MultiRepoManager from '../lib/utils/multi-repo-manager.js';
 import SnapshotManager from '../lib/utils/snapshot-manager.js';
+import ContextVersioning from '../lib/utils/context-versioning.js';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
@@ -127,6 +128,22 @@ async function main() {
 
     if (args.includes('--snapshot-trend')) {
         await runSnapshotTrend(args);
+        return;
+    }
+
+    // Check for context versioning commands (FEAT-012)
+    if (args.includes('--list-versions')) {
+        await listVersions();
+        return;
+    }
+
+    if (args.includes('--restore-version')) {
+        await restoreVersion(args);
+        return;
+    }
+
+    if (args.includes('--compare-versions')) {
+        await compareVersions(args);
         return;
     }
 
@@ -268,7 +285,12 @@ async function main() {
     printStartupInfo(options);
 
     const analyzer = new TokenAnalyzer(options.projectRoot, options);
-    analyzer.run();
+    const stats = analyzer.run();
+    
+    // Auto-create context version when using --cli (FEAT-012)
+    if (args.includes('--cli') && stats) {
+        await autoCreateVersion(stats, options);
+    }
 }
 
 function parseArguments(args) {
@@ -523,6 +545,13 @@ function printHelp() {
     console.log('  --snapshot-trend         Show token growth trend across snapshots');
     console.log('    --limit N              Limit snapshots to analyze (default: 10)');
     console.log('    --json                 Output in JSON format');
+    console.log();
+    console.log('Context Versioning (FEAT-012):');
+    console.log('  --cli                    Run analysis and auto-create context version');
+    console.log('  --list-versions          List all saved context versions');
+    console.log('  --restore-version <id>   Restore a previous context version');
+    console.log('  --compare-versions <id1> <id2>  Compare two context versions');
+    console.log('    --json                 Output in JSON format (for compare)');
     console.log();
     console.log('Multi-Repository (FEAT-006):');
     console.log('  --multi-repo             Analyze all configured repositories');
@@ -1448,6 +1477,116 @@ async function runSnapshotTrend(args) {
     } else {
         console.log(manager.formatTrend(trend));
     }
+}
+
+/**
+ * List all context versions (FEAT-012)
+ */
+async function listVersions() {
+    const manager = new ContextVersioning(process.cwd());
+    console.log(await manager.listVersions());
+}
+
+/**
+ * Restore a context version (FEAT-012)
+ * @param {string[]} args - Command line arguments
+ */
+async function restoreVersion(args) {
+    const restoreIndex = args.findIndex(arg => arg === '--restore-version');
+    const versionId = restoreIndex !== -1 && args[restoreIndex + 1] ? args[restoreIndex + 1] : null;
+
+    if (!versionId) {
+        console.error('❌ Version ID required');
+        console.error('   Usage: ctxman --restore-version <id>');
+        console.error('   Example: ctxman --restore-version ctx-v001');
+        process.exit(1);
+    }
+
+    const manager = new ContextVersioning(process.cwd());
+    const version = await manager.restoreVersion(versionId);
+
+    if (!version) {
+        console.error(`❌ Version not found: ${versionId}`);
+        console.error('   Use --list-versions to see available versions.');
+        process.exit(1);
+    }
+
+    console.log(`\n✅ Restored context version: ${versionId}`);
+    console.log(`   Created: ${version.timestamp}`);
+    console.log(`   Files: ${version.summary.totalFiles.toLocaleString()}`);
+    console.log(`   Tokens: ${version.summary.totalTokens.toLocaleString()}`);
+    if (version.config.targetModel) {
+        console.log(`   Model: ${version.config.targetModel}`);
+    }
+    if (version.gitCommit) {
+        console.log(`   Git: ${version.gitCommit}`);
+    }
+    console.log();
+
+    // Export restored context to file
+    const fs = await import('fs');
+    const outputPath = 'restored-context.json';
+    fs.writeFileSync(outputPath, JSON.stringify(version, null, 2));
+    console.log(`📁 Saved to: ${outputPath}\n`);
+}
+
+/**
+ * Compare two context versions (FEAT-012)
+ * @param {string[]} args - Command line arguments
+ */
+async function compareVersions(args) {
+    const compareIndex = args.findIndex(arg => arg === '--compare-versions');
+    const id1 = compareIndex !== -1 && args[compareIndex + 1] ? args[compareIndex + 1] : null;
+    const id2 = compareIndex !== -1 && args[compareIndex + 2] ? args[compareIndex + 2] : null;
+
+    if (!id1 || !id2) {
+        console.error('❌ Two version IDs required');
+        console.error('   Usage: ctxman --compare-versions <id1> <id2>');
+        console.error('   Example: ctxman --compare-versions ctx-v001 ctx-v002');
+        process.exit(1);
+    }
+
+    const manager = new ContextVersioning(process.cwd());
+    const comparison = await manager.compareVersions(id1, id2);
+
+    if (!comparison) {
+        console.error('❌ One or both versions not found');
+        console.error(`   ID1: ${id1}`);
+        console.error(`   ID2: ${id2}`);
+        process.exit(1);
+    }
+
+    const json = args.includes('--json');
+    if (json) {
+        console.log(JSON.stringify(comparison, null, 2));
+    } else {
+        console.log(manager.formatComparison(comparison));
+    }
+}
+
+/**
+ * Create a context version automatically after CLI analysis (FEAT-012)
+ * @param {object} stats - Analysis stats
+ * @param {object} options - CLI options
+ */
+async function autoCreateVersion(stats, options) {
+    const manager = new ContextVersioning(process.cwd());
+    
+    const config = {
+        exclude: options.exclude || [],
+        include: options.include || [],
+        targetModel: options.targetModel || null
+    };
+    
+    const { id, version } = await manager.createVersion(stats, config, '');
+    
+    console.log(`\n📜 Context version created: ${id}`);
+    console.log(`   Files: ${version.summary.totalFiles.toLocaleString()}`);
+    console.log(`   Tokens: ${version.summary.totalTokens.toLocaleString()}`);
+    if (version.gitCommit) {
+        console.log(`   Git: ${version.gitCommit}`);
+    }
+    console.log();
 }
 
 // ESM entry point
