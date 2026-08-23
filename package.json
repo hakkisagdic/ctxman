@@ -8,8 +8,12 @@
     "ctxman": "bin/cli.js"
   },
   "exports": {
-    ".": "./index.js"
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    }
   },
+  "types": "./index.d.ts",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
@@ -96,6 +100,7 @@
   },
   "files": [
     "index.js",
+    "index.d.ts",
     "ctxman.js",
     "lib/",
     "bin/",
