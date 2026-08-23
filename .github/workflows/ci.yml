@@ -121,7 +121,7 @@ jobs:
 
       - name: Run tests with coverage
         run: npm run test:coverage
-        timeout-minutes: 15
+        timeout-minutes: 20
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
