@@ -147,6 +147,12 @@ async function main() {
         return;
     }
 
+    // Check for performance dashboard (FEAT-001)
+    if (args.includes('--perf-dashboard')) {
+        await runPerfDashboard(args);
+        return;
+    }
+
     // Check for format conversion mode (v2.3.2)
     if (args.includes('convert')) {
         runFormatConversion(args);
@@ -552,6 +558,11 @@ function printHelp() {
     console.log('  --restore-version <id>   Restore a previous context version');
     console.log('  --compare-versions <id1> <id2>  Compare two context versions');
     console.log('    --json                 Output in JSON format (for compare)');
+    console.log();
+    console.log('Performance Dashboard (FEAT-001):');
+    console.log('  --perf-dashboard         Display text-based performance dashboard');
+    console.log('    --period <period>      Time period: 7d (default), 30d, all');
+    console.log('    --save-report          Save dashboard output to file');
     console.log();
     console.log('Multi-Repository (FEAT-006):');
     console.log('  --multi-repo             Analyze all configured repositories');
@@ -1561,6 +1572,57 @@ async function compareVersions(args) {
         console.log(JSON.stringify(comparison, null, 2));
     } else {
         console.log(manager.formatComparison(comparison));
+    }
+}
+
+/**
+ * Run performance dashboard (FEAT-001)
+ * @param {string[]} args - Command line arguments
+ */
+async function runPerfDashboard(args) {
+    console.log('📊 Ctxman Performance Dashboard');
+    console.log('═'.repeat(60));
+    console.log();
+
+    // Parse period argument
+    const periodIndex = args.findIndex(arg => arg === '--period');
+    const period = periodIndex !== -1 && args[periodIndex + 1]
+        ? args[periodIndex + 1]
+        : '7d';
+
+    // Dynamic import for PerformanceDashboard
+    const { PerformanceDashboard } = await import('../lib/analyzers/performance-dashboard.js');
+
+    const dashboard = new PerformanceDashboard({
+        projectRoot: process.cwd()
+    });
+
+    // Run current analysis first to collect fresh metrics
+    console.log('🔄 Running analysis to collect current metrics...');
+    console.log();
+
+    const originalLog = console.log;
+    const logs = [];
+    console.log = (...args) => logs.push(args);
+
+    try {
+        await dashboard.runAnalysis();
+    } catch (error) {
+        // Continue even if analysis fails - we may have historical data
+    }
+
+    console.log = originalLog;
+
+    // Display the dashboard
+    dashboard.display({ period });
+
+    // Save report if requested
+    if (args.includes('--save-report')) {
+        const reportPath = resolve(process.cwd(), 'performance-report.txt');
+        const fs = await import('fs');
+        fs.writeFileSync(reportPath, dashboard.render({ period }));
+        console.log(`💾 Report saved to: performance-report.txt`);
+        console.log();
     }
 }
 
