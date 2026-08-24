@@ -4,14 +4,22 @@
 
 import { describe, it, expect, beforeEach, afterEach, _vi } from 'vitest';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import MultiRepoManager from '../lib/utils/multi-repo-manager.js';
+
+const FIXTURE_FILES = [
+  ['index.js', 'export const answer = 42;\n'],
+  [path.join('src', 'util.js'), 'export function add(a, b) {\n  return a + b;\n}\n'],
+  ['README.md', '# Fixture repo\n\nA tiny repository used by the analyzer tests.\n'],
+];
 
 describe('MultiRepoManager', () => {
   let manager;
   let testConfigDir;
   let testConfigPath;
   let uniqueId;
+  let fixtureRepoDir;
 
   beforeEach(() => {
     // Create a unique temp config directory for each test
@@ -30,6 +38,14 @@ describe('MultiRepoManager', () => {
 
     // Start with a fresh empty config
     manager.config = { version: '1.0', repos: [] };
+
+    // A tiny repository of known size to analyze, outside the project tree
+    fixtureRepoDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-fixture-repo-'));
+    for (const [relativePath, contents] of FIXTURE_FILES) {
+      const filePath = path.join(fixtureRepoDir, relativePath);
+      fs.mkdirSync(path.dirname(filePath), { recursive: true });
+      fs.writeFileSync(filePath, contents);
+    }
   });
 
   afterEach(() => {
@@ -38,6 +54,12 @@ describe('MultiRepoManager', () => {
       if (fs.existsSync(testConfigDir)) {
         fs.rmSync(testConfigDir, { recursive: true, force: true });
       }
+    } catch (_e) {
+      // Ignore cleanup errors
+    }
+
+    try {
+      fs.rmSync(fixtureRepoDir, { recursive: true, force: true });
     } catch (_e) {
       // Ignore cleanup errors
     }
@@ -182,17 +204,16 @@ describe('MultiRepoManager', () => {
       expect(result.error).toBeDefined();
     });
 
-    it('should analyze existing repository', { timeout: 30000 }, async () => {
-      // Use current project as test repo, but mock the analyzer
+    it('should analyze existing repository', () => {
       const result = manager.analyzeRepo({
-        id: 'current',
-        path: '.',
-        alias: 'Current Project',
-        exclude: ['node_modules/**', 'coverage/**', 'dist/**', 'build/**'],
+        id: 'fixture',
+        path: fixtureRepoDir,
+        alias: 'Fixture Repo',
       });
 
-      expect(result.files).toBeGreaterThanOrEqual(0);
-      expect(result.tokens).toBeGreaterThanOrEqual(0);
+      expect(result.error).toBeUndefined();
+      expect(result.files).toBe(FIXTURE_FILES.length);
+      expect(result.tokens).toBeGreaterThan(0);
     });
   });
 
@@ -203,20 +224,19 @@ describe('MultiRepoManager', () => {
       expect(results.combined.totalFiles).toBe(0);
     });
 
-    it('should analyze all configured repos', { timeout: 30000 }, () => {
-      // Add current project as a repo
-      manager.addRepo('.', { alias: 'Current Project' });
+    it('should analyze all configured repos', () => {
+      manager.addRepo(fixtureRepoDir, { alias: 'Fixture Repo' });
 
       const results = manager.analyzeAll();
       expect(results.repos.length).toBe(1);
-      expect(results.combined.totalFiles).toBeGreaterThanOrEqual(0);
+      expect(results.combined.totalFiles).toBe(FIXTURE_FILES.length);
     });
 
-    it('should calculate percentages correctly', { timeout: 30000 }, () => {
-      manager.addRepo('.', { alias: 'Current Project' });
+    it('should calculate percentages correctly', () => {
+      manager.addRepo(fixtureRepoDir, { alias: 'Fixture Repo' });
 
       const results = manager.analyzeAll();
-      expect(results.repos[0].percentage).toBeDefined();
+      expect(results.repos[0].percentage).toBe('100.0');
     });
   });
 

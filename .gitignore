@@ -48,6 +48,9 @@ logs/
 # Ctxman user configs
 .ctxman/custom-profiles.json
 
+# Generated vector store for `ctxman ask` (rebuilt on demand, per project)
+.ctxman/self-knowledge/
+
 # v3.0.0 Cache directory
 .context-cache/
 
