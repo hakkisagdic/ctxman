@@ -118,7 +118,6 @@ jobs:
       - name: Run tests
         run: npm test
         timeout-minutes: 25
-        continue-on-error: true
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
@@ -179,12 +178,18 @@ jobs:
     steps:
       - name: Check all jobs passed
         run: |
-          # Note: test job uses continue-on-error temporarily, so we check its actual outcome
-          if [[ "${{ needs.test.result }}" == "failure" ]]; then
-            echo "::warning::Tests failed but CI was allowed to pass (continue-on-error is enabled)"
-          fi
-          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.codeql.result }}" != "success" ]]; then
-            echo "::error::One or more CI jobs failed"
+          for job in lint test codeql; do
+            case "$job" in
+              lint) result="${{ needs.lint.result }}" ;;
+              test) result="${{ needs.test.result }}" ;;
+              codeql) result="${{ needs.codeql.result }}" ;;
+            esac
+            if [[ "$result" != "success" ]]; then
+              echo "::error::CI job '$job' did not succeed (result: $result)"
+              failed=1
+            fi
+          done
+          if [[ -n "$failed" ]]; then
             exit 1
           fi
           echo "All CI checks passed!"
