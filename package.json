@@ -106,7 +106,11 @@
     "ctxman.js",
     "lib/",
     "bin/",
-    ".ctxman/",
+    ".ctxman/profiles/",
+    ".ctxman/templates/",
+    ".ctxman/wizard-profiles/",
+    ".ctxman/llm-profiles.json",
+    ".ctxman/custom-profiles.example.json",
     "examples/",
     "README.md",
     "LICENSE"
