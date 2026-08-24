@@ -93,6 +93,61 @@ updates:
       - dependency-name: electron
         update-types: [version-update:semver-major]
 
+  # Documentation website (VitePress)
+  - package-ecosystem: npm
+    directory: /website
+    schedule:
+      interval: weekly
+      day: thursday
+      time: '06:00'
+      timezone: UTC
+    open-pull-requests-limit: 5
+    groups:
+      website-dependencies:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+    labels:
+      - dependencies
+      - documentation
+      - automated
+    commit-message:
+      prefix: deps(website)
+      include: scope
+    reviewers:
+      - hakkisagdic
+
+  # VS Code extension
+  - package-ecosystem: npm
+    directory: /ide/vscode
+    schedule:
+      interval: weekly
+      day: friday
+      time: '06:00'
+      timezone: UTC
+    open-pull-requests-limit: 5
+    groups:
+      vscode-dependencies:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+    labels:
+      - dependencies
+      - automated
+    commit-message:
+      prefix: deps(vscode)
+      include: scope
+    reviewers:
+      - hakkisagdic
+    ignore:
+      # @types/vscode pins the minimum supported VS Code version
+      - dependency-name: '@types/vscode'
+        update-types: [version-update:semver-major]
+
   # GitHub Actions
   - package-ecosystem: github-actions
     directory: /
