@@ -158,7 +158,7 @@ describe('Wizard Profiles System', () => {
     const packagePath = path.join(PROJECT_ROOT, 'package.json');
     const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf-8'));
 
-    expect(pkg.files).toContain('.ctxman/');
+    expect(pkg.files).toContain('.ctxman/wizard-profiles/');
     expect(pkg.files).toContain('examples/');
   });
 
