@@ -1,3 +1,5 @@
+
+
 # ctxman
 
 [![CI](https://github.com/hakkisagdic/ctxman/actions/workflows/ci.yml/badge.svg)](https://github.com/hakkisagdic/ctxman/actions/workflows/ci.yml)
@@ -500,6 +502,7 @@ ctxman --save-report --context-clipboard
 **All Files:**
 ```json
 [{"path": "file.js", "t": 1234, "c": "core", "i": 85}]
+```
 ````
 
 **Use Cases**
@@ -1232,7 +1235,7 @@ const filteredMethods = methods.filter((method) =>
 
 ## Requirements
 
-- **Node.js**: >= 14.0.0
+- **Node.js**: >= 20.0.0
 - **tiktoken**: ^1.0.0 (optional, for exact token counts)
 
 ## License
