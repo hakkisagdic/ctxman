@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import GitUtils from '../lib/utils/git-utils.js';
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import fs from 'fs';
 import _path from 'path';
 import https from 'https';
@@ -91,9 +91,9 @@ describe('GitUtils Advanced Coverage', () => {
     });
 
     test('cloneRepository handles clone failure', () => {
-      execSync.mockImplementation((cmd) => {
-        if (cmd.includes('clone')) throw new Error('Clone failed');
-        return '';
+      execSync.mockReturnValue(''); // Git check passes
+      execFileSync.mockImplementationOnce(() => {
+        throw new Error('Clone failed');
       });
 
       expect(() =>

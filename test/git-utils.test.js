@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach, _afterEach } from 'vitest';
 import GitUtils from '../lib/utils/git-utils.js';
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import fs from 'fs';
 import https from 'https';
 import TokenCalculator from '../lib/analyzers/token-calculator.js';
@@ -87,11 +87,32 @@ describe('GitUtils', () => {
       const path = gitUtils.cloneRepository(repoInfo);
 
       expect(fs.mkdirSync).toHaveBeenCalled();
-      expect(execSync).toHaveBeenCalledWith(
-        expect.stringContaining('git clone'),
+      expect(execFileSync).toHaveBeenCalledWith(
+        'git',
+        [
+          'clone',
+          '--depth',
+          '1',
+          '--single-branch',
+          '--branch',
+          'main',
+          '--',
+          'https://github.com/owner/repo.git',
+          expect.stringContaining('owner-repo'),
+        ],
         expect.any(Object)
       );
       expect(path).toContain('owner-repo');
+    });
+
+    test('rejects an unsafe branch name without running git', () => {
+      expect(() => gitUtils.cloneRepository({ ...repoInfo, branch: 'main;touch x' })).toThrow(
+        'Invalid branch name'
+      );
+      expect(() => gitUtils.cloneRepository({ ...repoInfo, branch: '--upload-pack=x' })).toThrow(
+        'Invalid branch name'
+      );
+      expect(execFileSync).not.toHaveBeenCalled();
     });
 
     test('removes existing clone', () => {
@@ -111,9 +132,8 @@ describe('GitUtils', () => {
     });
 
     test('handles clone failure', () => {
-      execSync.mockImplementation((cmd) => {
-        if (cmd.includes('clone')) throw new Error('Clone failed');
-        return 'git version';
+      execFileSync.mockImplementationOnce(() => {
+        throw new Error('Clone failed');
       });
 
       expect(() => gitUtils.cloneRepository(repoInfo)).toThrow('Failed to clone repository');

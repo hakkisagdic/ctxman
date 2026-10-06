@@ -103,8 +103,19 @@ describe('MCPServer Tool Logic', () => {
       params: { name: 'git_diff', arguments: { path: '/test', branch: 'dev' } },
     });
 
-    expect(GitClient.prototype.exec).toHaveBeenCalledWith('diff dev');
+    expect(GitClient.prototype.exec).toHaveBeenCalledWith(['diff', 'dev', '--']);
     expect(result.content[0].text).toBe('diff output');
+  });
+
+  it('should reject an unsafe git_diff branch without running git', async () => {
+    const handler = server.server.setRequestHandler.mock.calls[6][1];
+    const result = await handler({
+      params: { name: 'git_diff', arguments: { path: '/test', branch: 'main; touch x' } },
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Invalid branch or ref');
+    expect(GitClient.prototype.exec).not.toHaveBeenCalled();
   });
 
   it('should handle search_code', async () => {
