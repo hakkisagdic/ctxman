@@ -91,11 +91,9 @@ describe('GitUtils', () => {
         'git',
         [
           'clone',
-          '--depth',
-          '1',
+          '--depth=1',
           '--single-branch',
-          '--branch',
-          'main',
+          '--branch=main',
           '--',
           'https://github.com/owner/repo.git',
           expect.stringContaining('owner-repo'),
