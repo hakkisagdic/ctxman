@@ -1,6 +1,17 @@
 # Release Workflow for ctxman
-# Automated release with changelog generation and semantic versioning
-# Triggers npm-publish.yml via release event for npm publishing with OIDC
+# Creates the GitHub Release for a version tag, with notes taken from CHANGELOG.md.
+#
+# How to cut a release:
+#   1. Bump "version" in package.json and add a "## [X.Y.Z] - YYYY-MM-DD" section
+#      to CHANGELOG.md, then merge to main.
+#   2. git tag vX.Y.Z && git push origin vX.Y.Z
+#
+# The same tag push also starts npm-publish.yml. A release created here with
+# GITHUB_TOKEN cannot trigger other workflows, so npm publishing does not depend
+# on this workflow.
+#
+# Use "Run workflow" (workflow_dispatch) only to (re)create the release for a tag
+# that already exists.
 
 name: Release
 
@@ -9,82 +20,68 @@ on:
     tags: ['v*']
   workflow_dispatch:
     inputs:
-      version_bump:
-        description: 'Version bump type'
+      tag:
+        description: 'Existing tag to create the GitHub Release for (e.g. v3.0.1)'
         required: true
-        default: 'patch'
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
+        type: string
 
-# Concurrency: only one release at a time
+# Concurrency: only one release per tag at a time
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 permissions:
-  contents: write
-  actions: read
-  pull-requests: write
+  contents: read
+
+env:
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:
-  # Validate version and prepare release
+  # Validate the tag and extract release notes before spending time on tests
   prepare:
     name: Prepare Release
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
       version: ${{ steps.version.outputs.version }}
-      changelog: ${{ steps.changelog.outputs.changelog }}
 
     steps:
-      - name: Checkout repository
+      - name: Checkout tag
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: refs/tags/${{ env.RELEASE_TAG }}
           persist-credentials: false
 
-      - name: Setup Node.js 22.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-
-      - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
-
-      - name: Extract version from package.json
+      - name: Check tag matches package.json version
         id: version
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Version: $VERSION"
+          if [ "$RELEASE_TAG" != "v$VERSION" ]; then
+            echo "::error::Tag $RELEASE_TAG does not match package.json version $VERSION (expected v$VERSION)"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Generate changelog
-        id: changelog
+      - name: Extract release notes from CHANGELOG.md
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          # Generate changelog from commits since last tag
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-
-          if [ -n "$LAST_TAG" ]; then
-            echo "## Changes since $LAST_TAG" > CHANGELOG.md
-            echo "" >> CHANGELOG.md
-            git log --pretty=format:"- %s (%h)" $LAST_TAG..HEAD >> CHANGELOG.md
-          else
-            echo "## Initial Release" > CHANGELOG.md
-            echo "" >> CHANGELOG.md
-            git log --pretty=format:"- %s (%h)" HEAD~10..HEAD >> CHANGELOG.md
+          awk -v v="$VERSION" '
+            index($0, "## [" v "]") == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          if ! grep -q '[^[:space:]]' release-notes.md; then
+            echo "::error::CHANGELOG.md has no '## [$VERSION]' section"
+            exit 1
           fi
 
-          # Store changelog for release notes
-          {
-            echo 'changelog<<EOF'
-            cat CHANGELOG.md
-            echo 'EOF'
-          } >> $GITHUB_OUTPUT
+      - name: Upload release notes
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-notes
+          path: release-notes.md
+          retention-days: 7
 
   # Run tests before release
   test:
@@ -94,9 +91,10 @@ jobs:
     needs: prepare
 
     steps:
-      - name: Checkout repository
+      - name: Checkout tag
         uses: actions/checkout@v4
         with:
+          ref: refs/tags/${{ env.RELEASE_TAG }}
           persist-credentials: false
 
       - name: Setup Node.js 22.x
@@ -109,52 +107,34 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
 
-      - name: Run tests
-        run: npm test
-
       - name: Run lint
         run: npm run lint
 
+      - name: Run tests
+        run: npm test
+
   # Create GitHub Release
-  # This triggers npm-publish.yml via the release: created event
   create-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [prepare, test]
+    permissions:
+      contents: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Download release notes
+        uses: actions/download-artifact@v4
         with:
-          fetch-depth: 0
-          persist-credentials: true
+          name: release-notes
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release v${{ needs.prepare.outputs.version }}
-          body: ${{ needs.prepare.outputs.changelog }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: v${{ needs.prepare.outputs.version }}
+          body_path: release-notes.md
           draft: false
-          prerelease: false
-          generate_release_notes: true
+          prerelease: ${{ contains(needs.prepare.outputs.version, '-') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # Summary job for branch protection
-  release-success:
-    name: Release Success
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: [prepare, test, create-release]
-    if: always()
-    steps:
-      - name: Check all jobs passed
-        run: |
-          if [[ "${{ needs.test.result }}" != "success" || "${{ needs.create-release.result }}" != "success" ]]; then
-            echo "::error::One or more release jobs failed"
-            exit 1
-          fi
-          echo "Release created successfully!"
-          echo "NPM publishing will be handled by npm-publish.yml workflow"
