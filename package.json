@@ -84,6 +84,14 @@
   ],
   "author": "Hakkı Sağdıç",
   "license": "MIT",
+  "homepage": "https://github.com/hakkisagdic/ctxman#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hakkisagdic/ctxman.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hakkisagdic/ctxman/issues"
+  },
   "engines": {
     "node": ">=20.0.0"
   },
