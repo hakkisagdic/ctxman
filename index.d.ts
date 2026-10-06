@@ -122,6 +122,8 @@ export class TokenCalculator {
   isCodeFile(filePath: string): boolean;
   analyzeFile(filePath: string): FileInfo;
   scanDirectory(dir: string): string[];
+  analyze(): FileInfo[];
+  analyzeFiles(files: string[]): FileInfo[];
   updateStats(fileInfo: FileInfo): void;
   generateLLMContext(analysisResults: FileInfo[] | { files: FileInfo[] }): LLMContext;
   exportContextToClipboard(context: LLMContext): void;

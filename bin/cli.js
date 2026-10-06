@@ -17,7 +17,7 @@ import { ImportTracker } from '../lib/analyzers/import-tracker.js';
 import MultiRepoManager from '../lib/utils/multi-repo-manager.js';
 import SnapshotManager from '../lib/utils/snapshot-manager.js';
 import ContextVersioning from '../lib/utils/context-versioning.js';
-import { execSync } from 'child_process';
+import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import { readFileSync } from 'fs';
@@ -177,7 +177,8 @@ async function main() {
   if (args.includes('github') || args.includes('git')) {
     const commandPath = resolve(__dirname, './cm-gitingest.js');
     const gitArgs = args.filter((arg) => arg !== 'github' && arg !== 'git');
-    execSync(`node "${commandPath}" ${gitArgs.join(' ')}`, { stdio: 'inherit' });
+    const result = spawnSync(process.execPath, [commandPath, ...gitArgs], { stdio: 'inherit' });
+    process.exitCode = result.status ?? 1;
     return;
   }
 
@@ -185,8 +186,9 @@ async function main() {
   if (args.includes('ask')) {
     const commandPath = resolve(__dirname, './cm-ask.js');
     const askArgs = args.filter((arg) => arg !== 'ask');
-    // Pass remaining args as the query
-    execSync(`node "${commandPath}" "${askArgs.join(' ')}"`, { stdio: 'inherit' });
+    // Pass remaining args as the query (cm-ask joins them)
+    const result = spawnSync(process.execPath, [commandPath, ...askArgs], { stdio: 'inherit' });
+    process.exitCode = result.status ?? 1;
     return;
   }
 
