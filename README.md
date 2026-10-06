@@ -1234,6 +1234,9 @@ const filteredMethods = methods.filter((method) =>
 
 - **Node.js**: 22 or newer (tested on 22 LTS and 24 LTS)
 - **tiktoken**: ^1.0.0 (optional, for exact token counts)
+- **@xenova/transformers** and **@lancedb/lancedb** (optional dependencies, used only by
+  `ctxman ask` for local semantic search). npm installs them by default; skip them with
+  `npm install -g ctxman --omit=optional` if you do not need `ask`.
 
 ## License
 

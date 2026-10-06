@@ -89,6 +89,7 @@ async function indexProject(store) {
 }
 
 main().catch((err) => {
-  console.error('❌ Error:', err);
+  // Message only: missing optional dependencies surface here with an install hint
+  console.error('❌ Error:', err.message);
   process.exit(1);
 });
