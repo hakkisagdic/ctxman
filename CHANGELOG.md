@@ -21,6 +21,8 @@ All notable changes to the Ctxman will be documented in this file.
 
 ### Fixed
 
+- **Security:** git commands run without a shell, and user-supplied refs (REST `?since=`, MCP
+  `git_diff`, `--changed-since`, `ctxman github` branches) are validated before reaching git.
 - `ctxman github` and the update scripts crashed on start (CommonJS `require` in ESM).
 - Watch mode failed on every changed file, and `GET /api/v1/methods` returned 500 (`path` not
   imported).
