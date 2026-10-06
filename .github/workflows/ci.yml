@@ -24,7 +24,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  # Security audit job - runs first and fails fast on vulnerabilities
+  # Security audit job - fails CI on advisories in production dependencies
   security-audit:
     name: Security Audit
     runs-on: ubuntu-latest
@@ -45,20 +45,23 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
 
-      - name: Run npm audit
-        run: npm audit --audit-level=moderate
-        continue-on-error: true
-        # Don't fail CI on audit - handled by Dependabot
+      # Blocking: what users install from npm
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=moderate
 
-      - name: Upload audit results
-        uses: actions/upload-artifact@v4
+      # Visible but not blocking: the dev toolchain (Dependabot opens the fix PRs)
+      - name: Audit all dependencies (report only)
         if: always()
-        with:
-          name: npm-audit-report
-          path: |
-            npm-audit.json
-          retention-days: 30
-          if-no-files-found: ignore
+        run: |
+          if ! npm audit --audit-level=moderate > npm-audit.txt; then
+            echo "::warning title=npm audit::Advisories found (dev-only ones do not fail CI); see the job summary"
+          fi
+          {
+            echo '### npm audit (all dependencies)'
+            echo '```'
+            cat npm-audit.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   # Lint job - fast feedback
   lint:
@@ -92,7 +95,8 @@ jobs:
     name: Test (Node ${{ matrix.node-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
-    needs: [security-audit, lint]
+    # Not gated on security-audit: a new advisory must not hide test results
+    needs: [lint]
     strategy:
       # Let every Node line finish so a failure on one is not masked by a cancel
       fail-fast: false
@@ -147,7 +151,6 @@ jobs:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: security-audit
     permissions:
       actions: read
       contents: read
@@ -175,13 +178,14 @@ jobs:
     name: CI Success
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [lint, test, codeql]
+    needs: [security-audit, lint, test, codeql]
     if: always()
     steps:
       - name: Check all jobs passed
         run: |
-          for job in lint test codeql; do
+          for job in security-audit lint test codeql; do
             case "$job" in
+              security-audit) result="${{ needs.security-audit.result }}" ;;
               lint) result="${{ needs.lint.result }}" ;;
               test) result="${{ needs.test.result }}" ;;
               codeql) result="${{ needs.codeql.result }}" ;;
