@@ -196,14 +196,13 @@ Tekrarlanan analizleri hızlandırın:
 - **Önbellek Geçersiz Kılma**: Manuel veya otomatik
 - **Bellek Verimli**: Düşük ek yük
 
-### Paralel İşleme
+### Ölçülen Hız
 
-Büyük kod tabanlarını verimli yönetin:
+Büyük kod tabanlarını verimli yönetin (4 vCPU'lu Linux VM, Node.js 22):
 
-- **Çok Çekirdek Kullanımı**: Tüm kullanılabilir çekirdekleri kullan
-- **Toplu İşleme**: Verimlilik için dosyaları grupla
+- **Hızlı Tarama**: ignore kurallarıyla ~1.900 dosya ~75 ms'de bulunur
+- **Token Sayımı**: 1.135 dosya / 2,6M token tiktoken ile ~6 sn'de sayılır
 - **İlerleme Raporlama**: Analiz ilerlemesini izle
-- **5-10 Kat Daha Hızlı**: Önemli hız iyileştirmeleri
 
 ## 🔧 Yapılandırma
 

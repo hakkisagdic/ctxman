@@ -196,14 +196,13 @@ Speed up repeated analyses:
 - **Cache Invalidation**: Manual or automatic
 - **Memory Efficient**: Low overhead
 
-### Parallel Processing
+### Measured Speed
 
-Handle large codebases efficiently:
+Handle large codebases efficiently (4-vCPU Linux VM, Node.js 22):
 
-- **Multi-Core Utilization**: Use all available cores
-- **Batch Processing**: Group files for efficiency
+- **Fast Scanning**: ~1,900 files discovered with ignore rules in ~75 ms
+- **Token Counting**: 1,135 files / 2.6M tokens counted with tiktoken in ~6 s
 - **Progress Reporting**: Track analysis progress
-- **5-10x Faster**: Significant speed improvements
 
 ## 🔧 Configuration
 

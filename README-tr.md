@@ -50,7 +50,7 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 - 🔀 **Git Entegrasyonu** - Sadece değişen dosyaları analiz et, diff analizi, yazar takibi
 - 👁️ **Watch Modu** - Gerçek zamanlı dosya izleme ve otomatik analiz
 - 🌐 **REST API** - Programatik erişim için HTTP serveri (6 endpoint)
-- ⚡ **Performans** - Önbellekleme sistemi, paralel işleme (5-10x daha hızlı)
+- ⚡ **Performans** - ~2.000 dosyayı 100 ms'nin altında tarar, tiktoken ile 2,6M token'ı yaklaşık 6 sn'de sayar; watch modu yalnızca değişen dosyaları yeniden analiz eder
 - 🏗️ **Modüler Çekirdek** - Scanner, Analyzer, ContextBuilder, Reporter
 
 ### 🔢 Token Analizi

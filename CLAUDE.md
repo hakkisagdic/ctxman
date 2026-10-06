@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Git Integration**: Analyze changed files, diff analysis, author tracking
 - **Watch Mode**: Real-time file monitoring and auto-analysis
 - **REST API**: HTTP server with 6 endpoints for programmatic access
-- **Performance**: Caching system and parallel processing (5-10x faster)
+- **Performance**: Fast scanning and a reused tiktoken encoder; watch mode re-analyzes only changed files (analysis runs single-threaded)
 - **LLM Optimization**: Auto-detect target LLM and optimize context
 - **Multi-language**: 14+ languages with method-level analysis
 - **Multiple Formats**: TOON (40-50% reduction), JSON, YAML, CSV, XML, GitIngest, Markdown
@@ -23,8 +23,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Core Modules** (`lib/core/`):
 
-- `Scanner.js` - File system scanning with ignore rules (2491 files in ~100ms)
-- `Analyzer.js` - Token & method analysis with parallel processing
+- `Scanner.js` - File system scanning with ignore rules (~1,900 text files of a 2,600-file tree in ~75 ms; discovery only)
+- `Analyzer.js` - Token & method analysis (sequential; the `parallel` option is not implemented)
 - `ContextBuilder.js` - Smart context generation with LLM optimization
 - `Reporter.js` - Multi-format report generation
 
@@ -51,7 +51,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Performance** (`lib/cache/`):
 
-- `CacheManager.js` - Disk/memory caching system (>80% hit rate)
+- `CacheManager.js` - Disk/memory caching system (not yet wired into the analysis pipeline)
 
 **Legacy Components** (backward compatible):
 
@@ -85,7 +85,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Token Counting
 
-Uses tiktoken library (cl100k_base encoding) for exact GPT-4 token counts. Falls back to smart estimation (~95% accuracy) based on file extension if tiktoken unavailable.
+Uses tiktoken library (cl100k_base encoding) for exact GPT-4 token counts. Falls back to smart estimation (~95% accuracy) based on file extension if tiktoken unavailable. tiktoken is a devDependency, so a plain `npm install ctxman` uses the estimate unless the user also installs tiktoken. The encoder is built once and reused (building it costs ~150 ms).
 
 ## Development Commands
 

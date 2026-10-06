@@ -5,7 +5,6 @@
 [![npm version](https://badge.fury.io/js/ctxman.svg)](https://www.npmjs.com/package/ctxman)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/ctxman.svg)](https://nodejs.org)
-[![codecov](https://codecov.io/gh/hakkisagdic/ctxman/branch/main/graph/badge.svg)](https://codecov.io/gh/hakkisagdic/ctxman)
 [![Documentation](https://img.shields.io/badge/docs-complete-brightgreen)](docs/)
 
 **AI Development Platform** with plugin architecture, Git integration, REST API, and watch mode. Supporting 14+ programming languages with method-level filtering, automatic LLM optimization, and real-time analysis. Perfect for AI-assisted development workflows.
@@ -77,7 +76,7 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 - 🔀 **Git Integration** - Analyze only changed files, diff analysis, author tracking
 - 👁️ **Watch Mode** - Real-time file monitoring and auto-analysis
 - 🌐 **REST API** - HTTP server for programmatic access (6 endpoints)
-- ⚡ **Performance** - Caching system, parallel processing (5-10x faster)
+- ⚡ **Performance** - Scans ~2,000 files in under 100 ms and counts 2.6M tokens in about 6 s with tiktoken; watch mode re-analyzes only changed files
 - 🏗️ **Modular Core** - Scanner, Analyzer, ContextBuilder, Reporter
 
 ### 🎨 User Interface

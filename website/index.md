@@ -36,7 +36,7 @@ features:
     details: HTTP server for programmatic access with 6 endpoints. Integrate with any tool or workflow.
   - icon: ⚡
     title: High Performance
-    details: Caching system, parallel processing for 5-10x faster analysis. Handle large codebases easily.
+    details: Scans ~2,000 files in under 100 ms and counts 2.6M tokens in about 6 seconds. Watch mode re-analyzes only what changed.
   - icon: 🎯
     title: Method-Level Analysis
     details: Analyze tokens per function/method. Get granular insights into your code.

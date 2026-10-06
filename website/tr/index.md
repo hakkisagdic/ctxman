@@ -36,7 +36,7 @@ features:
     details: 6 uç nokta ile programatik erişim için HTTP sunucusu. Herhangi bir araç veya iş akışıyla entegre edin.
   - icon: ⚡
     title: Yüksek Performans
-    details: Önbellek sistemi, paralel işleme ile 5-10 kat daha hızlı analiz. Büyük kod tabanlarını kolayca yönetin.
+    details: ~2.000 dosyayı 100 ms'nin altında tarar, 2,6M token'ı yaklaşık 6 saniyede sayar. Watch modu yalnızca değişenleri yeniden analiz eder.
   - icon: 🎯
     title: Yöntem Düzeyinde Analiz
     details: Fonksiyon/yöntem başına token analizi. Kodunuz hakkında ayrıntılı içgörüler elde edin.
