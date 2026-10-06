@@ -207,7 +207,7 @@ async function main() {
     try {
       await runDashboard();
       return;
-    } catch (_error) {
+    } catch (error) {
       console.error('⚠️  Live dashboard failed.');
       console.error('   Error:', error.message);
       console.error('   Falling back to standard mode...\n');
@@ -226,7 +226,7 @@ async function main() {
     try {
       await runWizard();
       return;
-    } catch (_error) {
+    } catch (error) {
       // If wizard fails, fall through to normal mode
       console.error('⚠️  Interactive wizard mode failed.');
       console.error('   Error:', error.message);
@@ -253,7 +253,7 @@ async function main() {
         // Use template's target model if not explicitly set
         targetModel: options.targetModel || templateConfig.targetModel,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error(`❌ Template error: ${error.message}`);
       process.exit(1);
     }
@@ -275,7 +275,7 @@ async function main() {
         targetModel: options.targetModel || profileConfig.targetModel,
         methodLevel: options.methodLevel || profileConfig.methodLevel,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error(`❌ Profile error: ${error.message}`);
       process.exit(1);
     }
@@ -740,7 +740,7 @@ function createProfile(args) {
     console.log(`\n✅ Created profile '${profileName}'`);
     console.log(`   Location: ${filePath}\n`);
     console.log('   Edit the file to customize your team configuration.\n');
-  } catch (_error) {
+  } catch (error) {
     console.error(`❌ Failed to create profile: ${error.message}`);
     process.exit(1);
   }
@@ -761,7 +761,7 @@ function exportProfile(args) {
   try {
     const profile = manager.export(profileName);
     console.log(JSON.stringify(profile, null, 2));
-  } catch (_error) {
+  } catch (error) {
     console.error(`❌ Failed to export profile: ${error.message}`);
     process.exit(1);
   }
@@ -908,7 +908,7 @@ async function runWizard() {
         },
       })
     );
-  } catch (_error) {
+  } catch (error) {
     throw error; // Re-throw to be caught by main()
   }
 }
@@ -953,7 +953,7 @@ async function runDashboard() {
         },
       })
     );
-  } catch (_error) {
+  } catch (error) {
     throw error; // Re-throw to be caught by main()
   }
 }
@@ -1033,7 +1033,7 @@ async function runInitWizard(args) {
         },
       })
     );
-  } catch (_error) {
+  } catch (error) {
     console.error('❌ Init wizard failed:', error.message);
     console.error(error.stack);
     process.exit(1);
@@ -1107,7 +1107,7 @@ function addRepo(args) {
     console.log(`\n✅ Added repository: ${repo.alias}`);
     console.log(`   Path: ${repo.path}`);
     console.log(`   ID: ${repo.id}\n`);
-  } catch (_error) {
+  } catch (error) {
     console.error(`❌ Failed to add repository: ${error.message}`);
     process.exit(1);
   }
@@ -1332,7 +1332,7 @@ function runFormatConversion(args) {
     console.log(`   Output size: ${result.outputSize.toLocaleString()} chars`);
     console.log(`   Savings:     ${result.savingsPercent} (${result.savings} chars)`);
     console.log(`   Output file: ${result.outputFile}`);
-  } catch (_error) {
+  } catch (error) {
     console.error('❌ Conversion failed:', error.message);
     process.exit(1);
   }
@@ -1731,7 +1731,7 @@ async function runDependencyScan(args) {
       }
       console.log();
     }
-  } catch (_error) {
+  } catch (error) {
     console.error('❌ Dependency scan failed:', error.message);
     console.error();
     console.error('Make sure you are in a Node.js project with package.json and node_modules.');
