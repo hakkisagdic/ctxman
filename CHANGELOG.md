@@ -2,6 +2,34 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- GitIngest digests mask known credential formats (cloud/API keys, tokens, PEM private keys) as
+  `[REDACTED:<type>]` by default; `--no-redact` keeps them.
+- `TokenCalculator.analyze()` for scan + analysis without console output or exports.
+
+### Changed
+
+- Node.js 22 or newer is required (Node 20 reached end of life on 2026-04-30); CI tests 22.x and
+  24.x.
+- `@xenova/transformers` and `@lancedb/lancedb` are optional dependencies, loaded only by
+  `ctxman ask`; install with `--omit=optional` to skip them (451 MB → 55 MB).
+- `@toon-format/toon` 4.1.1: `ToonFormatter.encodeAsync()` now writes an empty array as `key: []`.
+- Token counting reuses one tiktoken encoder: ~20-25x faster analysis when tiktoken is installed.
+
+### Fixed
+
+- `ctxman github` and the update scripts crashed on start (CommonJS `require` in ESM).
+- Watch mode failed on every changed file, and `GET /api/v1/methods` returned 500 (`path` not
+  imported).
+- Error and fallback paths in the CLI, init wizard, LSP server and updater threw
+  `ReferenceError`.
+- npm audit advisories (proxy-addr, sharp, @modelcontextprotocol/sdk, qs, hono and others).
+- The release workflow validates the tag against `package.json` and takes notes from this file.
+- Added the missing LICENSE file and repository metadata.
+
 ## [3.0.0] - 2025-11-05
 
 ### 🚀 MAJOR: Platform Foundation - Plugin Architecture & Git Integration
