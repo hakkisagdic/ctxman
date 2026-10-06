@@ -318,6 +318,7 @@ function parseArguments(args) {
     // Analysis options
     methodLevel: args.includes('--method-level') || args.includes('-m'),
     gitingest: args.includes('--gitingest') || args.includes('-g'),
+    redactSecrets: !args.includes('--no-redact'),
     aiSuggest: args.includes('--ai-suggest'), // FEAT-005: AI suggestions
 
     // Profile options (FEAT-004)
@@ -534,6 +535,7 @@ function printHelp() {
   console.log('  -v, --verbose            Show all included files');
   console.log('  -m, --method-level       Enable method-level analysis');
   console.log('  -g, --gitingest          Generate GitIngest-style digest');
+  console.log('  --no-redact              Keep API keys/tokens/private keys in the digest');
   console.log('  --ai-suggest             Get AI-powered context optimization suggestions');
   console.log();
   console.log('Output Options (v2.3.0):');

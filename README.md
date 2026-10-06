@@ -604,6 +604,9 @@ FILE: src/utils.js
 - **Token Estimates**: Formatted as "1.2k" or "1.5M"
 - **Sorted Output**: Files sorted by token count (largest first)
 - **Filter Compatible**: Respects all `.gitignore` and context ignore rules
+- **Secret Redaction**: Known credential formats (AWS access key IDs, GitHub/GitLab/npm/Slack
+  tokens, Stripe live keys, Google/OpenAI/Anthropic API keys, PEM private keys) are replaced
+  with `[REDACTED:<type>]` and counted in the console output. Pass `--no-redact` to keep them.
 
 ### Use Cases
 
