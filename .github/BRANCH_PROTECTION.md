@@ -12,7 +12,7 @@ Require the following status checks to pass before merging:
 
 1. **CI Workflow**
    - `lint` - Code style and formatting checks
-   - `test` - Unit tests (Node 20.x and 22.x)
+   - `test` - Unit tests (Node 22.x and 24.x)
    - `codeql` - Security analysis
 
 2. **Coverage Requirements**
@@ -34,8 +34,8 @@ required_status_checks:
   strict: true # Require branches to be up to date
   contexts:
     - 'lint'
-    - 'test (Node 20.x, ubuntu-latest)'
     - 'test (Node 22.x, ubuntu-latest)'
+    - 'test (Node 24.x, ubuntu-latest)'
     - 'codeql'
 
 # Require conversation resolution
@@ -88,7 +88,7 @@ gh api repos/:owner/:repo/branches/main/protection \
 {
   "required_status_checks": {
     "strict": true,
-    "contexts": ["lint", "test (Node 20.x, ubuntu-latest)", "test (Node 22.x, ubuntu-latest)", "codeql"]
+    "contexts": ["lint", "test (Node 22.x, ubuntu-latest)", "test (Node 24.x, ubuntu-latest)", "codeql"]
   },
   "enforce_admins": true,
   "required_pull_request_reviews": {

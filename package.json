@@ -92,7 +92,7 @@
     "url": "https://github.com/hakkisagdic/ctxman/issues"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "dependencies": {
     "@lancedb/lancedb": "^0.23.0",

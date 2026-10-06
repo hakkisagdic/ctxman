@@ -1232,7 +1232,7 @@ const filteredMethods = methods.filter((method) =>
 
 ## Requirements
 
-- **Node.js**: >= 14.0.0
+- **Node.js**: 22 or newer (tested on 22 LTS and 24 LTS)
 - **tiktoken**: ^1.0.0 (optional, for exact token counts)
 
 ## License

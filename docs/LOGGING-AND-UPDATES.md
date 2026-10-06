@@ -533,7 +533,7 @@ console.log(logs);
 
 **Solutions:**
 
-1. Ensure Node.js 14+ installed: `node --version`
+1. Ensure Node.js 22 or newer is installed: `node --version`
 2. Check npm is available: `npm --version`
 3. Verify write permissions: `/usr/local/bin` or `~/.ctxman`
 4. Run with sudo if needed: `sudo bash scripts/install.sh`

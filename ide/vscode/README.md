@@ -84,7 +84,7 @@ Configure the extension in VS Code settings:
 ## Requirements
 
 - VS Code 1.85.0 or higher
-- Node.js 20.0.0 or higher
+- Node.js 22 or newer
 - Ctxman CLI installed globally or accessible via npx
 
 ## Keyboard Shortcuts

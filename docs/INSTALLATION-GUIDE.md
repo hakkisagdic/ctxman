@@ -203,7 +203,7 @@ ctxman --simple
 ### Verify Dependencies
 
 ```bash
-# Check Node.js version (14+ required)
+# Check Node.js version (22+ required)
 node --version
 
 # Check npm

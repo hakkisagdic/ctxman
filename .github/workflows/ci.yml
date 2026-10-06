@@ -94,9 +94,11 @@ jobs:
     timeout-minutes: 30
     needs: [security-audit, lint]
     strategy:
-      fail-fast: true
+      # Let every Node line finish so a failure on one is not masked by a cancel
+      fail-fast: false
       matrix:
-        node-version: [22.x]
+        # Minimum supported (package.json engines) and the current Active LTS
+        node-version: [22.x, 24.x]
         os: [ubuntu-latest]
 
     steps:

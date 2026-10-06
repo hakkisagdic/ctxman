@@ -386,7 +386,7 @@ console.log('Tokens:', result.stats.totalTokens);
 
 We track performance regressions across versions. If you notice significant slowdowns:
 
-1. Check Node.js version (v20+ recommended)
+1. Check Node.js version (v22+ required)
 2. Clear cache: `ctxman --clear-cache`
 3. Verify tiktoken installation
 4. Report issue with benchmark data

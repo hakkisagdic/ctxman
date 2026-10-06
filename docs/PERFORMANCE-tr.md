@@ -386,7 +386,7 @@ console.log('Token:', result.stats.totalTokens);
 
 Sürümler arası performans gerilemelerini takip ediyoruz. Önemli yavaşlamalar fark ederseniz:
 
-1. Node.js sürümünü kontrol edin (v20+ önerilir)
+1. Node.js sürümünü kontrol edin (v22+ gerekli)
 2. Önbelleği temizleyin: `ctxman --clear-cache`
 3. tiktoken kurulumunu doğrulayın
 4. Kıyaslama verileriyle sorun bildirin

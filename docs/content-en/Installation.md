@@ -22,7 +22,7 @@
 
 Before installing the ctxman tool, ensure your system meets the following requirements:
 
-- **Node.js**: Version 14.0.0 or higher (specified in package.json under "engines")
+- **Node.js**: Version 22 or newer (specified in package.json under "engines")
 - **npm**: Node Package Manager, typically installed with Node.js
 
 These prerequisites are essential for both global and local installations of the package. The tool is designed to work across different operating systems including macOS, Linux, and Windows, leveraging Node.js's cross-platform capabilities for consistent behavior.

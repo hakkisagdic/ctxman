@@ -21,7 +21,7 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 ### Prerequisites
 
-- **Node.js**: Version 20.0.0 or higher
+- **Node.js**: Version 22 or newer (tested on 22 LTS and 24 LTS; see `.nvmrc`)
 - **npm**: Comes with Node.js
 - **Git**: For version control
 

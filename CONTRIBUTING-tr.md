@@ -21,7 +21,7 @@ Bu projeye katılarak [Davranış Kuralları](CODE_OF_CONDUCT.md) maddelerine uy
 
 ### Ön Gereksinimler
 
-- **Node.js**: Sürüm 20.0.0 veya üzeri
+- **Node.js**: Sürüm 22 veya üzeri (22 LTS ve 24 LTS ile test edilir; bkz. `.nvmrc`)
 - **npm**: Node.js ile birlikte gelir
 - **Git**: Sürüm kontrolü için
 

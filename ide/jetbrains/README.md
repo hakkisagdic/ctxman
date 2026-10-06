@@ -111,7 +111,7 @@ Configure the plugin in Settings → Tools → Ctxman:
 ## Requirements
 
 - JetBrains IDE 2022.3 or later
-- Node.js 20.0.0 or higher (for ctxman CLI)
+- Node.js 22 or newer (for ctxman CLI)
 - Ctxman CLI installed globally
 
 ## Project Structure
