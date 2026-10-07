@@ -1,0 +1,190 @@
+{
+  "meta": {
+    "commit": "2a97d88",
+    "commitDate": "2026-10-07T10:30:53+00:00",
+    "ctxmanVersion": "3.0.0",
+    "node": "v22.22.0",
+    "exactTokens": true
+  },
+  "stats": {
+    "rawTokens": 1430646,
+    "focusedTokens": 175294,
+    "reduction": 88,
+    "toonSaving": 64,
+    "methods": 862,
+    "scannedFiles": 396,
+    "scanMs": 21
+  },
+  "examples": {
+    "raw": {
+      "command": "ctxman --cli",
+      "output": "📊 Total files analyzed: 397\n🔢 Total tokens: 1,430,646\n💾 Total size: 4.92 MB\n📄 Total lines: 163,331\n\n🏆 TOP 5 LARGEST FILES BY TOKEN COUNT:\n--------------------------------------------------------------------------------\n 1.  357,327 tokens (25.0%) - html/assets/index-BUCFJtth.js\n    💾   1217.9 KB, 📄 40,666 lines\n 2.  115,920 tokens (8.1%) - package-lock.json\n    💾    285.0 KB, 📄  8,376 lines\n 3.  103,364 tokens (7.2%) - desktop-app/package-lock.json\n    💾    252.7 KB, 📄  7,454 lines\n 4.   98,301 tokens (6.9%) - docs/coderamp-labs-gitingest-8a5edab282632443.txt\n    💾    413.1 KB, 📄 12,586 lines\n 5.   37,380 tokens (2.6%) - html/assets/index-DlhE0rqZ.css\n    💾     92.1 KB, 📄  3,591 lines",
+      "files": 397,
+      "tokens": 1430646
+    },
+    "contextignore": {
+      "config": "# Build output and lockfiles: large, generated, nothing for a model to learn\nhtml/\n**/package-lock.json\ndesktop-app/\ndocs/*.txt\ntest-repos/",
+      "command": "ctxman --cli",
+      "output": "📊 Total files analyzed: 379\n🔢 Total tokens: 677,986\n💾 Total size: 2.61 MB\n📄 Total lines: 87,393\n📈 Average tokens per file: 1,789\n🚫 Files ignored by .gitignore: 0\n📋 Files ignored by context rules: 18",
+      "files": 379,
+      "tokens": 677986
+    },
+    "contextinclude": {
+      "config": "lib/**\nbin/**\n/index.js\n/index.d.ts\n/package.json\n/README.md",
+      "command": "ctxman --cli --target-model claude-sonnet-4.5",
+      "output": "📊 Total files analyzed: 81\n🔢 Total tokens: 175,294\n💾 Total size: 0.69 MB\n📄 Total lines: 25,993\n\n📊 Context Window Analysis:\n════════════════════════════════════════════════════\n   Target Model: Claude Sonnet 4.5\n   Available Context: 200,000 tokens\n   Your Repository: 175,294 tokens (87.6%)\n\n   ⚠️  WARNING: You're using 80%+ of context window\n\n   💡 Consider excluding these large files:\n      - bin/cli.js (15,068 tokens, 8.6%)\n      - README.md (8,862 tokens, 5.1%)\n      - lib/analyzers/method-analyzer.js (7,023 tokens, 4.0%)\n      ... and 5 more\n\n   Repository requires 2 chunks. Enable chunking with --chunk flag.",
+      "files": 81,
+      "tokens": 175294
+    },
+    "formats": {
+      "command": "ctxman --cli --context-export -o toon",
+      "files": {
+        "json": 779,
+        "toon": 567,
+        "saving": 27
+      },
+      "methods": {
+        "json": 23745,
+        "toon": 8580,
+        "saving": 64
+      },
+      "totalMethods": 862,
+      "excerpt": "project:\n  root: ctxman\n  totalFiles: 81\n  totalTokens: 175294\npaths:\n  \"bin/\"[5]: cli.js,cm-gitingest.js,cm-update.js,cm-ask.js,mcp-server.js\n  \"/\"[4]: README.md,index.d.ts,package.json,index.js\n  \"lib/analyzers/\"[9]: method-analyzer.js,token-calculator.js,performance-dashboard.js,dependency-scanner.js,ai-suggester.js,import-tracker.js,unused-exports-detector.js,duplicate-detector.js,go-method-analyzer.js\n  \"lib/formatters/\"[4]: gitingest-formatter.js,toon-formatter-v1.3.js,format-registry.js,toon-formatter.js\n  \"lib/utils/\"[19]: snapshot-manager.js,llm-detector.js,updater.js,context-versioning.js,format-converter.js,template-manager.js,tokenizer-adapter.js,git-utils.js,profile-manager.js,messages.js,multi-repo-manager.js,llm-cost-estimator.js,logger.js,token-utils.js,file-utils.js,error-handler.js,config-utils.js,secret-redactor.js,clipboard-utils.js\n  \"lib/ui/\"[7]: init-wizard-ui.js,wizard.js,dashboard.js,progress-bar.js,template-selector.js,select-input.js,index.js\n  \"lib/wizards/\"[2]: project-detector.js,config-generator.js\n  \"lib/api/rest/\"[1]: server.js\n  \"lib/api/mcp/\"[3]: server.js,prompts.js,resources.js\n  \"lib/integrations/git/\"[3]: GitClient.js,DiffAnalyzer.js,BlameTracker.js\n  \"lib/cache/\"[1]: CacheManager.js\n  \"lib/core/\"[4]: ContextBuilder.js,Reporter.js,Analyzer.js,Scanner.js\n  \"lib/lsp/\"[1]: server.js\n…"
+    },
+    "methods": {
+      "config": "lib/core/**",
+      "command": "ctxman --cli -m --context-export -o toon",
+      "output": "project:\n  root: ctxman\n  totalFiles: 4\n  totalTokens: 5919\nmethods:\n  \"lib/core/Analyzer.js\"[10]{name,line,tokens}:\n    constructor,15,6\n    initStats,27,64\n    analyze,40,87\n    analyzeSequential,57,61\n    analyzeFile,71,253\n    updateStats,110,218\n    detectLanguage,142,162\n    getStats,167,14\n    reset,171,14\n    getLanguageDistribution,175,67\n  \"lib/core/ContextBuilder.js\"[12]{name,line,tokens}:\n    constructor,19,6\n    build,36,161\n    buildMetadata,68,97\n    buildFileList,89,125\n    buildMethodList,118,92\n    applySmartFiltering,141,201\n    prioritizeFiles,173,235\n    calculateCoreScore,211,171\n    calculateBalancedScore,237,50\n    optimizeForLLM,248,192\n    generateCompactPaths,282,58\n    getSummary,298,150\n  \"lib/core/Reporter.js\"[9]{name,line,tokens}:\n    constructor,21,6\n    report,38,91\n…",
+      "tokens": 417
+    },
+    "changed": {
+      "command": "ctxman --cli --changed-since HEAD~10",
+      "output": "📝 Found 23 changed files\n   Since: HEAD~10\n   Impact: CRITICAL (score: 112)\n\n📊 Total files analyzed: 23\n🔢 Total tokens: 63,503\n💾 Total size: 0.25 MB\n📄 Total lines: 8,241",
+      "files": 23,
+      "tokens": 63503
+    },
+    "redaction": {
+      "source": "// Left here during a late-night debugging session\nexport const s3 = { region: 'eu-west-1', accessKeyId: 'AKIAABCDEFGHIJKLMNOP' };\nexport const github = { token: 'ghp_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8' };",
+      "command": "ctxman --cli --gitingest",
+      "output": "🔒 Redacted secrets: 1 aws-access-key-id, 1 github-token (disable with --no-redact)\n\n📜 Context version created: ctx-v001\n   Files: 2\n   Tokens: 109",
+      "digest": "================================================\nFILE: src/config.js\n================================================\n// Left here during a late-night debugging session\nexport const s3 = { region: 'eu-west-1', accessKeyId: '[REDACTED:aws-access-key-id]' };\nexport const github = { token: '[REDACTED:github-token]' };"
+    },
+    "mcp": {
+      "tools": [
+        "analyze_codebase",
+        "generate_context",
+        "git_diff",
+        "search_code",
+        "list_methods"
+      ],
+      "request": {
+        "name": "list_methods",
+        "arguments": {
+          "path": "~/ctxman",
+          "file": "lib/core/ContextBuilder.js"
+        }
+      },
+      "response": [
+        {
+          "file": "lib/core/ContextBuilder.js",
+          "methods": [
+            {
+              "name": "constructor",
+              "line": 19,
+              "tokens": 6
+            },
+            {
+              "name": "build",
+              "line": 36,
+              "tokens": 161
+            },
+            {
+              "name": "buildMetadata",
+              "line": 68,
+              "tokens": 97
+            },
+            {
+              "name": "buildFileList",
+              "line": 89,
+              "tokens": 125
+            },
+            {
+              "name": "buildMethodList",
+              "line": 118,
+              "tokens": 92
+            },
+            {
+              "name": "applySmartFiltering",
+              "line": 141,
+              "tokens": 201
+            },
+            {
+              "name": "prioritizeFiles",
+              "line": 173,
+              "tokens": 235
+            },
+            {
+              "name": "calculateCoreScore",
+              "line": 211,
+              "tokens": 171
+            },
+            {
+              "name": "calculateBalancedScore",
+              "line": 237,
+              "tokens": 50
+            },
+            {
+              "name": "optimizeForLLM",
+              "line": 248,
+              "tokens": 192
+            },
+            {
+              "name": "generateCompactPaths",
+              "line": 282,
+              "tokens": 58
+            },
+            {
+              "name": "getSummary",
+              "line": 298,
+              "tokens": 150
+            }
+          ]
+        }
+      ],
+      "cleanStdout": true
+    },
+    "budget": {
+      "request": "curl -s localhost:3000/api/v1/context -H 'Content-Type: application/json' \\\n  -d '{\"path\": \"~/ctxman\", \"targetTokens\": 30000}'",
+      "projectFiles": 81,
+      "projectTokens": 175294,
+      "keptFiles": 11,
+      "keptTokens": 29989,
+      "sample": [
+        {
+          "path": "lib/core/ContextBuilder.js",
+          "tokens": 2050
+        },
+        {
+          "path": "lib/core/Reporter.js",
+          "tokens": 1996
+        },
+        {
+          "path": "lib/core/Analyzer.js",
+          "tokens": 1079
+        },
+        {
+          "path": "lib/core/Scanner.js",
+          "tokens": 794
+        },
+        {
+          "path": "lib/utils/snapshot-manager.js",
+          "tokens": 5193
+        },
+        {
+          "path": "lib/utils/llm-detector.js",
+          "tokens": 3876
+        }
+      ]
+    }
+  }
+}
