@@ -80,11 +80,16 @@ async function indexProject(store) {
   indexer.registerSource(fileSource);
 
   console.log('⏳ Indexing files (this may take a moment)...');
-  await indexer.index('local-files', {
-    targetDir: process.cwd(),
-    include: ['.js', '.md', '.ts', '.json'], // Configurable?
-    exclude: ['node_modules', '.git', 'dist', 'coverage', '.ctxman'],
-  });
+  try {
+    await indexer.index('local-files', {
+      targetDir: process.cwd(),
+      include: ['.js', '.md', '.ts', '.json'], // Configurable?
+      exclude: ['node_modules', '.git', 'dist', 'coverage', '.ctxman'],
+    });
+  } catch (error) {
+    console.error(`❌ ${error.message}`);
+    process.exit(1);
+  }
   console.log('✅ Indexing complete.');
 }
 
