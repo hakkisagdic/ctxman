@@ -127,6 +127,31 @@ const loaded = (opts.path ? import(
       expect(result.map((m) => m.name)).toEqual(['method', 'asyncMethod']);
     });
 
+    test('extracts typescript class methods with a return type', () => {
+      const content = `
+class UserService {
+  getUser(id: string): User {
+    return this.users[id];
+  }
+  private save(): void {}
+  async load(ids: string[]): Promise<Map<string, User>> {
+    return new Map();
+  }
+}
+`;
+      const result = analyzer.extractMethods(content, 'test.ts');
+      expect(result.map((m) => m.name)).toEqual(['getUser', 'save', 'load']);
+    });
+
+    test('does not take ternaries or template text for typed methods', () => {
+      const content = `
+const extra = enabled ? pick(options) : {};
+const message = \`Format error (\${format}): \${error.message}\`;
+`;
+      const result = analyzer.extractMethods(content, 'test.ts');
+      expect(result.map((m) => m.name)).toEqual([]);
+    });
+
     test('ignores keywords', () => {
       const content = `
                 if (true) {}
