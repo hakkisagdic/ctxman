@@ -103,6 +103,22 @@ describe('GitIgnoreParser Coverage', () => {
       expect(result.regex.test('src/lib/node_modules')).toBe(true);
     });
 
+    test('double-star crosses directory levels', () => {
+      const trailing = parser.convertToRegex('src/**');
+      expect(trailing.regex.test('src/lib/deep/util.js')).toBe(true);
+      expect(trailing.regex.test('docs/a.md')).toBe(false);
+
+      const leading = parser.convertToRegex('**/*.test.js');
+      expect(leading.regex.test('a.test.js')).toBe(true);
+      expect(leading.regex.test('x/y/a.test.js')).toBe(true);
+      expect(leading.regex.test('x/a.js')).toBe(false);
+
+      const middle = parser.convertToRegex('a/**/b');
+      expect(middle.regex.test('a/b')).toBe(true);
+      expect(middle.regex.test('a/x/y/b')).toBe(true);
+      expect(middle.regex.test('a/xb')).toBe(false);
+    });
+
     test('converts directory pattern', () => {
       const result = parser.convertToRegex('build/');
       expect(result.isDirectory).toBe(true);
