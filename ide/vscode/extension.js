@@ -161,7 +161,7 @@ async function generateContext(mode, filePath, options = {}) {
 
         const model = config.get('targetModel');
         if (model) {
-          args.push('--target-llm', model);
+          args.push('--target-model', model);
         }
 
         // Run ctxman
@@ -219,6 +219,9 @@ function runCtxman(cwd, args) {
       cwd,
       shell: true,
       timeout: 60000,
+      // Without an export flag the CLI asks which export to run; with no stdin it gets EOF
+      // and finishes instead of waiting for an answer nobody can give
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
 
     let output = '';
@@ -236,9 +239,9 @@ function runCtxman(cwd, args) {
       if (code !== 0 && !output) {
         reject(new Error(error || `ctxman exited with code ${code}`));
       } else {
-        // Try to parse token count from output
-        const tokenMatch = output.match(/Total tokens: (\d+)/);
-        const tokenCount = tokenMatch ? parseInt(tokenMatch[1], 10) : 0;
+        // The CLI prints the count with locale digit grouping, e.g. "Total tokens: 12,345"
+        const tokenMatch = output.match(/Total tokens: (\d[^\n]*)/);
+        const tokenCount = tokenMatch ? parseInt(tokenMatch[1].replace(/\D/g, ''), 10) : 0;
         resolve({ output, tokenCount });
       }
     });
