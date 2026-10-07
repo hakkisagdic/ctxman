@@ -65,3 +65,38 @@ describe('YAML round-trip', () => {
     });
   });
 });
+
+describe('YAML scalar quoting', () => {
+  const registry = new FormatRegistry();
+  const converter = new FormatConverter();
+
+  test('strings that look like other types or hold YAML syntax read back unchanged', () => {
+    const data = {
+      numeric: '42',
+      float: '1.5',
+      bool: 'true',
+      nul: 'null',
+      empty: '',
+      quoted: '"q"',
+      multiline: 'line one\nline two',
+      padded: ' x ',
+      escapes: 'a\\nb: c',
+      dash: '- x',
+      braces: '{}',
+      list: ['007', 'false', ''],
+      42: 'numeric key',
+      'a: b': 'key with a colon',
+      '#hash': 'key that looks like a comment',
+      '- dash': 'key that looks like a list item',
+    };
+
+    expect(converter.parse(registry.encode('yaml', data), 'yaml')).toEqual(data);
+  });
+
+  test('plain strings and keys stay unquoted', () => {
+    const yaml = registry.encode('yaml', { 'src/': ['app.js'], root: 'my project' });
+    expect(yaml).toContain('src/:');
+    expect(yaml).toContain('- app.js');
+    expect(yaml).toContain('root: my project');
+  });
+});
