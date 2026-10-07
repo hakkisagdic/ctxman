@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress';
 export default defineConfig({
   title: 'Ctxman',
   description:
-    'AI Development Platform with plugin architecture, Git integration, REST API, and watch mode',
+    'Code context that fits: exact token counts, method maps in 14 languages and compact exports for LLMs',
 
   // Base URL for GitHub Pages deployment
   base: '/ctxman/',
@@ -17,37 +17,32 @@ export default defineConfig({
   // Head tags for SEO and meta
   head: [
     ['meta', { name: 'theme-color', content: '#646cff' }],
-    ['meta', { name: 'og:type', content: 'website' }],
-    ['meta', { name: 'og:title', content: 'Ctxman - AI Development Platform' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: 'Ctxman' }],
+    ['meta', { property: 'og:title', content: 'Ctxman — code context that fits' }],
     [
       'meta',
       {
-        name: 'og:description',
+        property: 'og:description',
         content:
-          'AI Development Platform with plugin architecture, Git integration, REST API, and watch mode. Supporting 14+ programming languages.',
+          'Exact token counts, method maps in 14 languages and compact exports for LLMs — from the CLI, an MCP server or a REST API.',
       },
     ],
-    ['meta', { name: 'og:image', content: '/ctxman/og-image.png' }],
+    [
+      'meta',
+      { property: 'og:image', content: 'https://hakkisagdic.github.io/ctxman/og-image.png' },
+    ],
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
-    ['meta', { name: 'twitter:title', content: 'Ctxman - AI Development Platform' }],
+    ['meta', { name: 'twitter:title', content: 'Ctxman — code context that fits' }],
     [
       'meta',
       {
         name: 'twitter:description',
         content:
-          'AI Development Platform with plugin architecture, Git integration, REST API, and watch mode.',
+          'Exact token counts, method maps in 14 languages and compact exports for LLMs — from the CLI, an MCP server or a REST API.',
       },
     ],
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/ctxman/logo.svg' }],
-    ['script', { async: '', src: 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX' }],
-    [
-      'script',
-      {},
-      `window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX');`,
-    ],
   ],
 
   // Internationalization configuration
@@ -57,13 +52,13 @@ export default defineConfig({
       lang: 'en',
       title: 'Ctxman',
       description:
-        'AI Development Platform with plugin architecture, Git integration, REST API, and watch mode',
+        'Code context that fits: exact token counts, method maps in 14 languages and compact exports for LLMs',
       themeConfig: {
         nav: [
-          { text: 'Home', link: '/' },
+          { text: 'Showcase', link: '/showcase' },
           { text: 'Features', link: '/features' },
           { text: 'Getting Started', link: '/getting-started' },
-          { text: 'API Reference', link: '/api-reference' },
+          { text: 'API', link: '/api-reference' },
           { text: 'Demo', link: '/demo' },
           { text: 'Changelog', link: '/changelog' },
         ],
@@ -73,6 +68,7 @@ export default defineConfig({
               text: 'Introduction',
               items: [
                 { text: 'What is Ctxman?', link: '/' },
+                { text: 'Showcase', link: '/showcase' },
                 { text: 'Quick Start', link: '/getting-started' },
                 { text: 'Features', link: '/features' },
               ],
@@ -136,13 +132,13 @@ export default defineConfig({
       lang: 'tr',
       title: 'Ctxman',
       description:
-        'Plugin mimarisi, Git entegrasyonu, REST API ve izleme modu ile AI Geliştirme Platformu',
+        'Modele sığan kod bağlamı: birebir token sayımı, 14 dilde metot haritası ve LLM için kompakt dışa aktarım',
       themeConfig: {
         nav: [
-          { text: 'Ana Sayfa', link: '/tr/' },
+          { text: 'Vitrin', link: '/tr/showcase' },
           { text: 'Özellikler', link: '/tr/features' },
           { text: 'Başlangıç', link: '/tr/getting-started' },
-          { text: 'API Referansı', link: '/tr/api-reference' },
+          { text: 'API', link: '/tr/api-reference' },
           { text: 'Demo', link: '/tr/demo' },
           { text: 'Değişiklikler', link: '/tr/changelog' },
         ],
@@ -152,6 +148,7 @@ export default defineConfig({
               text: 'Giriş',
               items: [
                 { text: 'Ctxman Nedir?', link: '/tr/' },
+                { text: 'Vitrin', link: '/tr/showcase' },
                 { text: 'Hızlı Başlangıç', link: '/tr/getting-started' },
                 { text: 'Özellikler', link: '/tr/features' },
               ],
