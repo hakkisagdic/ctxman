@@ -10,6 +10,12 @@ const apiKey = args.find((arg) => arg.startsWith('--api-key='))?.split('=')[1];
 const host = args.find((arg) => arg.startsWith('--host='))?.split('=')[1] || '127.0.0.1';
 const corsEnabled = args.includes('--cors');
 
+// With the stdio transport stdout is the JSON-RPC channel, so anything printed with
+// console.log (logger lines, ignore-rule notices) would corrupt it; send it to stderr.
+if (transportType === 'stdio') {
+  console.log = console.info = console.debug = console.error;
+}
+
 const server = new MCPServer();
 
 async function main() {
