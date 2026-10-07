@@ -43,6 +43,13 @@ async function main() {
     return;
   }
 
+  // Digest from an existing report/context file, handled by the legacy entry point's code
+  if (args.includes('--gitingest-from-report') || args.includes('--gitingest-from-context')) {
+    const { main: runLegacy } = await import('../ctxman.js');
+    await runLegacy(args);
+    return;
+  }
+
   // Check for profile listing (FEAT-004)
   if (args.includes('--list-profiles')) {
     listProfiles();
