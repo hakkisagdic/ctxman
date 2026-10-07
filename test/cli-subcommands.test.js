@@ -113,6 +113,43 @@ if (/cm-(ask|update|gitingest)\\.js$/.test(script)) {
   });
 });
 
+describe('ctxman without an interactive terminal', () => {
+  let project;
+
+  beforeEach(() => {
+    project = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-notty-'));
+    fs.writeFileSync(path.join(project, 'a.js'), 'export const a = 1;\n');
+  });
+
+  afterEach(() => {
+    fs.rmSync(project, { recursive: true, force: true });
+  });
+
+  const cli = (...args) =>
+    spawnSync(process.execPath, [path.join(BIN, 'cli.js'), ...args], {
+      cwd: project,
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: { ...process.env, HOME: project, USERPROFILE: project },
+    });
+
+  it('falls back from the wizard to the CLI analysis', () => {
+    const result = cli();
+
+    expect(result.status).toBe(0);
+    expect(result.stderr).toContain('Falling back to CLI mode');
+    expect(result.stdout).toContain('a.js');
+  });
+
+  it('asks for --yes instead of starting the interactive init wizard', () => {
+    const result = cli('init');
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('--yes');
+    expect(fs.existsSync(path.join(project, '.contextignore'))).toBe(false);
+  });
+});
+
 describe('TokenCalculator.analyze', () => {
   let tempDir;
 

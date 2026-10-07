@@ -905,8 +905,18 @@ async function runWatchMode(args) {
   });
 }
 
+// Ink needs raw mode on a terminal; without one it prints an error and exits 0 having done
+// nothing, so the callers' fallbacks never ran
+function assertInteractiveTerminal() {
+  if (!process.stdin.isTTY) {
+    throw new Error('stdin is not an interactive terminal');
+  }
+}
+
 async function runWizard() {
   try {
+    assertInteractiveTerminal();
+
     // Dynamic imports for ESM modules
     const ReactModule = await import('react');
     const React = ReactModule.default || ReactModule;
@@ -958,6 +968,8 @@ async function runWizard() {
 
 async function runDashboard() {
   try {
+    assertInteractiveTerminal();
+
     // Dynamic imports for ESM modules
     const ReactModule = await import('react');
     const React = ReactModule.default || ReactModule;
@@ -1012,6 +1024,13 @@ async function runInitWizard(args) {
       minimal: args.includes('--minimal'),
       yes: args.includes('--yes') || args.includes('-y'),
     };
+
+    if (!options.yes && !options.minimal && !process.stdin.isTTY) {
+      console.error('❌ The init wizard needs an interactive terminal.');
+      console.error('   Use --yes for the detected defaults or --minimal for a minimal config.');
+      process.exitCode = 1;
+      return;
+    }
 
     // Dynamic imports for ESM modules
     const ReactModule = await import('react');
