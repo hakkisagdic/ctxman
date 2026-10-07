@@ -110,3 +110,56 @@ describe('ctxman --changed-since', () => {
     expect(report.files.map((file) => file.relativePath)).toEqual([path.join('src', 'b.js')]);
   });
 });
+
+describe('ctxman export options', () => {
+  let project;
+
+  const cli = (...args) =>
+    spawnSync(process.execPath, [path.join(BIN, 'cli.js'), '--cli', ...args], {
+      cwd: project,
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: { ...process.env, HOME: project, USERPROFILE: project },
+    });
+
+  beforeEach(() => {
+    project = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-export-'));
+    fs.mkdirSync(path.join(project, 'src'));
+    for (let i = 1; i <= 6; i++) {
+      fs.writeFileSync(
+        path.join(project, 'src', `m${i}.js`),
+        `export function f${i}(a, b) {\n  return a + b + ${i};\n}\n`
+      );
+    }
+  });
+
+  afterEach(() => {
+    fs.rmSync(project, { recursive: true, force: true });
+  });
+
+  it('writes the context as JSON by default', () => {
+    expect(cli('--context-export').status).toBe(0);
+
+    const context = JSON.parse(fs.readFileSync(path.join(project, 'llm-context.json'), 'utf-8'));
+    expect(context.project.totalFiles).toBeGreaterThanOrEqual(6);
+  });
+
+  it('writes the context in the -o format', async () => {
+    expect(cli('--context-export', '-o', 'toon').status).toBe(0);
+
+    const { decode } = await import('@toon-format/toon');
+    const context = decode(fs.readFileSync(path.join(project, 'llm-context.toon'), 'utf-8'));
+    expect(context.project.totalFiles).toBeGreaterThanOrEqual(6);
+  });
+
+  it('splits the GitIngest digest into chunk files with --chunk', () => {
+    const result = cli('--chunk', '--chunk-size', '60');
+
+    expect(result.status).toBe(0);
+    const chunks = fs
+      .readdirSync(project)
+      .filter((name) => /^digest-chunk-\d+-of-\d+\.txt$/.test(name));
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(fs.existsSync(path.join(project, 'digest.txt'))).toBe(false);
+  });
+});

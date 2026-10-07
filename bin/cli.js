@@ -363,7 +363,7 @@ function getOutputFormat(args) {
   if (formatIndex !== -1 && args[formatIndex + 1]) {
     return args[formatIndex + 1];
   }
-  return 'toon'; // Default to TOON format in v2.3.0
+  return null; // Not set: context exports stay JSON (llm-context.json)
 }
 
 function getChunkStrategy(args) {
@@ -539,7 +539,9 @@ function printHelp() {
   console.log('  --ai-suggest             Get AI-powered context optimization suggestions');
   console.log();
   console.log('Output Options (v2.3.0):');
-  console.log('  -o, --output FORMAT      Output format (default: toon)');
+  console.log(
+    '  -o, --output FORMAT      Format of --context-export/--context-clipboard (default: json)'
+  );
   console.log(
     '                           Formats: toon, json, yaml, csv, xml, markdown, gitingest'
   );
