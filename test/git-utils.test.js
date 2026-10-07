@@ -144,19 +144,41 @@ describe('GitUtils', () => {
       vi.spyOn(gitUtils, 'cloneRepository').mockReturnValue('/tmp/repo');
       TokenCalculator.prototype.analyze = vi.fn().mockReturnValue([]);
       TokenCalculator.prototype.stats = { totalFiles: 10, totalTokens: 100, totalLines: 50 };
-      GitIngestFormatter.prototype.generateDigest = vi.fn().mockReturnValue('digest content');
+      GitIngestFormatter.prototype.saveToFile = vi.fn(function () {
+        this.chunkFiles = [];
+        return 'digest content'.length;
+      });
 
       const result = await gitUtils.generateFromGitHub('owner/repo', { outputFile: 'out.txt' });
 
-      expect(gitUtils.cloneRepository).toHaveBeenCalled();
+      expect(gitUtils.cloneRepository).toHaveBeenCalledWith(
+        expect.objectContaining({ fullName: 'owner/repo', branch: null }),
+        expect.any(Object)
+      );
       expect(TokenCalculator).toHaveBeenCalled();
       expect(GitIngestFormatter).toHaveBeenCalled();
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        expect.stringContaining('out.txt'),
-        'digest content',
-        'utf8'
+      expect(GitIngestFormatter.prototype.saveToFile).toHaveBeenCalledWith(
+        expect.stringContaining('out.txt')
       );
       expect(result.tokens).toBe(100);
+      expect(result.digestSize).toBe('digest content'.length);
+    });
+
+    test('clones the branch passed in options', async () => {
+      vi.spyOn(gitUtils, 'cloneRepository').mockReturnValue('/tmp/repo');
+      TokenCalculator.prototype.analyze = vi.fn().mockReturnValue([]);
+      TokenCalculator.prototype.stats = { totalFiles: 1, totalTokens: 1, totalLines: 1 };
+      GitIngestFormatter.prototype.saveToFile = vi.fn(function () {
+        this.chunkFiles = [];
+        return 1;
+      });
+
+      await gitUtils.generateFromGitHub('owner/repo', { outputFile: 'out.txt', branch: 'dev' });
+
+      expect(gitUtils.cloneRepository).toHaveBeenCalledWith(
+        expect.objectContaining({ branch: 'dev' }),
+        expect.any(Object)
+      );
     });
   });
 

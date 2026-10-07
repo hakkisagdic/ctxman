@@ -27,7 +27,7 @@ async function main() {
   const outputFile = outputIndex !== -1 ? args[outputIndex + 1] : null;
 
   const branchIndex = args.findIndex((arg) => arg === '--branch' || arg === '-b');
-  const branch = branchIndex !== -1 ? args[branchIndex + 1] : 'main';
+  const branch = branchIndex !== -1 ? args[branchIndex + 1] : null;
 
   const chunkSize = args.includes('--chunk-size')
     ? parseInt(args[args.findIndex((arg) => arg === '--chunk-size') + 1])
@@ -43,22 +43,26 @@ async function main() {
       outputDir: 'docs',
     });
 
-    // Get repository info first
+    // Repository info is informational: an API error (rate limit, renamed repo) must not
+    // stop the clone
     console.log('📋 Fetching repository information...');
     const repoInfo = gitUtils.parseGitHubURL(url);
-    repoInfo.branch = branch; // Override branch if specified
-
-    const repoData = await gitUtils.getRepositoryInfo(repoInfo);
-    console.log(`\n📊 Repository Info:`);
-    console.log(`   Name: ${repoData.fullName}`);
-    console.log(`   Description: ${repoData.description || 'N/A'}`);
-    console.log(`   Stars: ⭐ ${repoData.stars.toLocaleString()}`);
-    console.log(`   Language: ${repoData.language || 'Multiple'}`);
-    console.log(`   Default Branch: ${repoData.defaultBranch}`);
+    try {
+      const repoData = await gitUtils.getRepositoryInfo(repoInfo);
+      console.log(`\n📊 Repository Info:`);
+      console.log(`   Name: ${repoData.fullName}`);
+      console.log(`   Description: ${repoData.description || 'N/A'}`);
+      console.log(`   Stars: ⭐ ${(repoData.stars ?? 0).toLocaleString()}`);
+      console.log(`   Language: ${repoData.language || 'Multiple'}`);
+      console.log(`   Default Branch: ${repoData.defaultBranch}`);
+    } catch (error) {
+      console.log(`⚠️  Could not fetch repository info (${error.message}); continuing`);
+    }
 
     // Generate GitIngest
     const options = {
       outputFile,
+      branch,
       cleanup: !keepClone,
       shallow,
       formatterOptions: chunkSize
@@ -104,7 +108,9 @@ function printHelp() {
   console.log(
     '  -o, --output FILE        Output file path (default: docs/{repo}-gitingest-{hash}.txt)'
   );
-  console.log('  -b, --branch BRANCH      Branch to clone (default: main)');
+  console.log(
+    "  -b, --branch BRANCH      Branch to clone (default: the repository's default branch)"
+  );
   console.log('  -v, --verbose            Verbose output');
   console.log("  --keep-clone             Keep cloned repository (don't cleanup)");
   console.log('  --full-clone             Full clone (default: shallow)');
