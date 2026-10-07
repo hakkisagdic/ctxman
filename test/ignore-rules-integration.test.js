@@ -5,6 +5,7 @@ import path from 'path';
 import { Scanner } from '../lib/core/Scanner.js';
 import { FileWatcher } from '../lib/watch/FileWatcher.js';
 import { IncrementalAnalyzer } from '../lib/watch/IncrementalAnalyzer.js';
+import TokenCalculator from '../lib/analyzers/token-calculator.js';
 
 // Real files on disk: Scanner and FileWatcher both go through GitIgnoreParser,
 // whose include mode needs to stat the path it is given.
@@ -44,6 +45,16 @@ describe('ignore rules on a real project', () => {
     fs.writeFileSync(path.join(root, '.contextinclude'), 'src/**\n');
 
     expect(scannedPaths()).toEqual(['src/app.js', 'src/lib/util.js']);
+  });
+
+  it('TokenCalculator counts .gitignore and .contextignore exclusions separately', () => {
+    fs.writeFileSync(path.join(root, '.contextignore'), 'docs/\n');
+    const calculator = new TokenCalculator(root);
+
+    calculator.analyze();
+
+    expect(calculator.stats.ignoredFiles).toBe(1); // build/out.js
+    expect(calculator.stats.calculatorIgnoredFiles).toBe(1); // docs/guide.md
   });
 
   it('FileWatcher.shouldIgnore applies the same rules, including for deleted files', () => {

@@ -418,6 +418,9 @@ npm run uninstall:local
 }
 ```
 
+An optional `"targetModel"` key (e.g. `"claude-sonnet-4.5"`) is used by `--auto-detect-llm` when
+no LLM API key environment variable identifies the model.
+
 ### Update Cache (update-cache.json)
 
 ```json

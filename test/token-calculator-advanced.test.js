@@ -61,9 +61,9 @@ describe('TokenCalculator Advanced Coverage', () => {
 
   describe('Ignored Files Counting', () => {
     test('countIgnoredFiles tracks calculator-specific ignores', () => {
-      // Mock gitIgnore to simulate calculator ignore reason
+      // Mock gitIgnore to simulate a .contextignore match (the reason GitIgnoreParser sets)
       calculator.gitIgnore = {
-        _lastIgnoreReason: 'calculator',
+        _lastIgnoreReason: 'context',
         isIgnored: () => true,
       };
 
