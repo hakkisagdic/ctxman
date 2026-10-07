@@ -1261,14 +1261,17 @@ async function generateMultiRepoDigest(results, _options) {
  * @param {string[]} args - Command line arguments
  */
 async function runAISuggest(args) {
-  console.log('🤖 AI Context Suggestions');
-  console.log('═'.repeat(60));
-  console.log();
-  console.log('📊 Analyzing repository for optimization opportunities...');
-  console.log();
+  const json = args.includes('--json');
+  // With --json, stdout carries only the JSON document
+  const info = json ? console.error : console.log;
+
+  info('🤖 AI Context Suggestions');
+  info('═'.repeat(60));
+  info();
+  info('📊 Analyzing repository for optimization opportunities...');
+  info();
 
   const verbose = args.includes('--verbose') || args.includes('-v');
-  const json = args.includes('--json');
 
   // Run analyzer silently (no console output)
   const originalLog = console.log;
@@ -1299,8 +1302,10 @@ async function runAISuggest(args) {
     json,
   });
 
-  // Run analysis and get suggestions
+  // Run analysis and get suggestions; the suggester's logger writes through console.log
+  console.log = info;
   const result = await suggester.analyze(stats, files);
+  console.log = originalLog;
 
   // Display formatted output
   console.log(suggester.formatOutput(result));
@@ -1310,7 +1315,7 @@ async function runAISuggest(args) {
     const reportPath = resolve(process.cwd(), 'ai-suggestions-report.json');
     const fs = await import('fs');
     fs.writeFileSync(reportPath, JSON.stringify(result, null, 2));
-    console.log(`💾 Report saved to: ai-suggestions-report.json`);
+    info(`💾 Report saved to: ai-suggestions-report.json`);
   }
 }
 
@@ -1423,11 +1428,13 @@ async function listSnapshots() {
  * @param {string[]} args - Command line arguments
  */
 async function runDiffLast(args) {
-  console.log('📊 Comparing with Last Snapshot');
-  console.log('═'.repeat(60));
-  console.log();
-
   const json = args.includes('--json');
+  // With --json, stdout carries only the JSON document
+  const info = json ? console.error : console.log;
+
+  info('📊 Comparing with Last Snapshot');
+  info('═'.repeat(60));
+  info();
 
   // Run current analysis
   const originalLog = console.log;
@@ -1453,8 +1460,8 @@ async function runDiffLast(args) {
   const comparison = await manager.compareWithLast(stats);
 
   if (!comparison) {
-    console.log('\n⚠️  No previous snapshots found.');
-    console.log('   Create one with: ctxman --snapshot "message"\n');
+    info('\n⚠️  No previous snapshots found.');
+    info('   Create one with: ctxman --snapshot "message"\n');
     return;
   }
 
@@ -1505,11 +1512,14 @@ async function runDiffSnapshot(args) {
  * @param {string[]} args - Command line arguments
  */
 async function runSnapshotTrend(args) {
-  console.log('📈 Snapshot Trend Analysis');
-  console.log('═'.repeat(60));
-  console.log();
-
   const json = args.includes('--json');
+  // With --json, stdout carries only the JSON document
+  const info = json ? console.error : console.log;
+
+  info('📈 Snapshot Trend Analysis');
+  info('═'.repeat(60));
+  info();
+
   const limitIndex = args.findIndex((arg) => arg === '--limit');
   const limit = limitIndex !== -1 && args[limitIndex + 1] ? parseInt(args[limitIndex + 1], 10) : 10;
 
@@ -1517,8 +1527,8 @@ async function runSnapshotTrend(args) {
   const trend = await manager.getTrend(limit);
 
   if (!trend) {
-    console.log('\n⚠️  Need at least 2 snapshots for trend analysis.');
-    console.log('   Create snapshots with: ctxman --snapshot "message"\n');
+    info('\n⚠️  Need at least 2 snapshots for trend analysis.');
+    info('   Create snapshots with: ctxman --snapshot "message"\n');
     return;
   }
 
