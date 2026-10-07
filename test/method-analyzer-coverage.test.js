@@ -296,22 +296,29 @@ const loaded = (opts.path ? import(
     });
 
     test('extracts init', () => {
-      const content = `
-                init() {}
-                convenience init() {}
-            `;
-      const _result = analyzer.extractMethods(content, 'test.swift');
-      // The regex for init captures nothing in group 1 because 'init' is the keyword itself
-      // Wait, looking at regex: `init\\s*\\(`, type: 'init'
-      // processPatterns expects match[1] for methodName.
-      // The regex for init does NOT have a capturing group for the name (since name is init).
-      // This might be a bug or intended behavior where name is undefined?
-      // Let's check processPatterns logic.
-      // if (type === 'accessor') ... else methodName = match[1];
-      // If match[1] is undefined, methodName is undefined.
-      // if (methodName && keywordCheck) ...
-      // So 'init' might be skipped!
-      // Let's verify this behavior.
+      const content = `class View: UIView {
+    init() {}
+    convenience init(name: String) { self.init() }
+    required init?(coder: NSCoder) { super.init(coder: coder) }
+    public init<T>(value: T) {}
+}
+`;
+      const result = analyzer.extractMethods(content, 'test.swift');
+      expect(result.map((m) => `${m.name}@${m.line}`)).toEqual([
+        'init@2',
+        'init@3',
+        'init@4',
+        'init@5',
+      ]);
+    });
+
+    test('does not report init calls or names ending in init as initializers', () => {
+      const content = `func reinit() {}
+let view = View.init(frame: .zero)
+super.init(coder: coder)
+`;
+      const result = analyzer.extractMethods(content, 'test.swift');
+      expect(result.map((m) => m.name)).toEqual(['reinit']);
     });
 
     test('ignores keywords', () => {
