@@ -67,6 +67,15 @@ describe('ignore rules on a real project', () => {
     expect(watcher.shouldIgnore(path.join('src', 'gone.js'))).toBe(false);
   });
 
+  it('FileWatcher.shouldIgnore skips node_modules and build output without a .gitignore', () => {
+    fs.rmSync(path.join(root, '.gitignore'));
+    const watcher = new FileWatcher(root);
+
+    expect(watcher.shouldIgnore(path.join('node_modules', 'pkg', 'index.js'))).toBe(true);
+    expect(watcher.shouldIgnore(path.join('dist', 'bundle.js'))).toBe(true);
+    expect(watcher.shouldIgnore(path.join('src', 'app.js'))).toBe(false);
+  });
+
   it('watch mode analyzes a changed file end to end', async () => {
     const watcher = new FileWatcher(root, { debounce: 50 });
     const analyzer = new IncrementalAnalyzer();
