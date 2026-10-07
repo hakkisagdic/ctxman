@@ -191,8 +191,8 @@ ctxman --changed-since main
 ctxman --changed-since HEAD~5
 ctxman --changed-since v2.3.0
 
-# With author information
-ctxman --changed-only --with-authors
+# Only the uncommitted changes
+ctxman --changed-only
 
 # Output:
 # 🔀 Git Integration - Analyzing Changed Files
@@ -334,8 +334,8 @@ The tool is configured to focus on **core application logic only**:
 # Interactive analysis with export selection
 ctxman
 
-# Quiet mode (no file listing)
-ctxman --no-verbose
+# List every analysed file with its token count
+ctxman --cli --verbose
 
 # With detailed JSON report
 ctxman --save-report
@@ -411,39 +411,30 @@ ctxman --help
 ### Available Options
 
 - `--save-report`, `-s` - Save detailed JSON report
-- `--no-verbose` - Disable file listing (verbose is default)
+- `--verbose`, `-v` - List every analysed file with its token count
 - `--context-export` - Generate LLM context file list (saves as llm-context.json)
 - `--context-clipboard` - Copy LLM context directly to clipboard
-- `--detailed-context` - Use detailed context format (8.6k chars, default is compact 1.2k)
+- `-o`, `--output FORMAT` - Context format: json (default), toon, yaml, markdown, csv, xml
 - `--help`, `-h` - Show help message
 
 ## LLM Context Export
 
-The token calculator can generate optimized file lists for LLM consumption, with two format options:
+The token calculator can generate optimized file lists for LLM consumption.
 
-### Ultra-Compact Format (Default)
+### Context Format
 
-- **Size**: ~2.3k characters (structured JSON)
-- **Content**: Project metadata and organized file paths without token counts
-- **Format**: Identical to llm-context.json file - complete JSON structure
-- **Perfect for**: LLM consumption, programmatic processing, structured data needs
+- **Content**: Project metadata and file paths grouped by directory; `-m` lists methods with
+  line numbers and token counts instead
+- **Format**: JSON by default; `-o toon|yaml|markdown|csv|xml` picks another encoding
+- **Same everywhere**: The clipboard gets exactly what `llm-context.<format>` contains
 - **Usage**: `--context-clipboard` or `--context-export`
-
-### Detailed Format (Legacy)
-
-- **Size**: ~8.6k characters (comprehensive)
-- **Content**: Full paths, categories, importance scores, directory stats
-- **Perfect for**: Initial project analysis, comprehensive documentation
-- **Usage**: `--detailed-context --context-clipboard`
 
 ### Features
 
-- **Smart file selection** - Top files by token count and importance
-- **Directory grouping** - Common prefix compression saves space
-- **Token abbreviation** - "12k" instead of "12,388 tokens"
-- **Extension removal** - ".js" removed to save characters
-- **Cross-platform clipboard** - Works on macOS, Linux, and Windows
-- **Multiple output formats** - JSON file or clipboard ready text
+- **Directory grouping** - Each directory is listed once with its file names
+- **TOON encoding** - `-o toon` uses the official TOON encoder: fewer tokens than JSON
+- **Method level** - `-m` adds every method with its line number and token count
+- **Cross-platform clipboard** - Works on macOS, Linux, and Windows, and falls back to a file
 
 ### Usage
 
@@ -454,16 +445,13 @@ ctxman --context-export
 # Copy minimal context directly to clipboard (2.3k chars JSON - identical to file)
 ctxman --context-clipboard
 
-# Copy detailed context to clipboard (8.6k chars)
-ctxman --detailed-context --context-clipboard
-
 # Combine with regular analysis
 ctxman --save-report --context-clipboard
 ```
 
 ### Output Format Examples
 
-**Compact Format (JSON - 2.3k chars):**
+**JSON (default):**
 
 ```json
 {
@@ -484,38 +472,12 @@ ctxman --save-report --context-clipboard
 }
 ```
 
-**Detailed Format (8.6k chars):**
-
-````
-# cloudstack-go-mcp-proxy Codebase Context
-
-**Project:** 64 files, 181,480 tokens
-
-**Core Files (Top 20):**
-1. `utility-mcp/src/server/CloudStackUtilityMCP.js` (12,388 tokens, server)
-2. `utility-mcp/src/handlers/workflow-handlers.js` (11,007 tokens, handler)
-...
-
-**All Files:**
-```json
-[{"path": "file.js", "t": 1234, "c": "core", "i": 85}]
-````
-
 **Use Cases**
-
-**Compact Format (2.3k chars JSON):**
 
 1. **LLM Integration** - Structured data for AI assistants with complete project context
 2. **Programmatic Processing** - JSON format for automated tools and scripts
 3. **Context Sharing** - Identical format in clipboard and file exports
 4. **Development Workflows** - Consistent structure for CI/CD and automation
-
-**Detailed Format (8.6k chars):**
-
-1. **Architecture Planning** - Comprehensive project overview for major decisions
-2. **New Team Member Onboarding** - Complete codebase understanding
-3. **Documentation Generation** - Full project structure analysis
-4. **Code Review Preparation** - Detailed file relationships and importance
 
 **General Use Cases:**
 
@@ -744,8 +706,7 @@ Perfect for LLM context window optimization:
 - **Focused development** = Essential code for AI-assisted development
 - **Context efficiency** = Maximum useful code per token
 - **Dual mode flexibility** = Precise include/exclude control
-- **Ultra-minimal export** = 1k chars (89% reduction) for frequent AI interactions
-- **Detailed export** = 8.6k chars for comprehensive analysis when needed
+- **Compact export** = Paths grouped by directory, in JSON or TOON, for frequent AI interactions
 
 ## Integration
 

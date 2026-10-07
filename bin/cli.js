@@ -353,8 +353,6 @@ function parseArguments(args) {
     // Git options (v3.0.0)
     changedOnly: args.includes('--changed-only'),
     changedSince: getChangedSince(args),
-    withAuthors: args.includes('--with-authors'),
-    withHistory: args.includes('--with-history'),
 
     // Multi-repo options (FEAT-006)
     multiRepo: args.includes('--multi-repo'),
@@ -619,8 +617,6 @@ function printHelp() {
   console.log('Git Integration (v3.0.0):');
   console.log('  --changed-only           Analyze only files with uncommitted changes');
   console.log('  --changed-since REF      Analyze files changed since commit/branch');
-  console.log('  --with-authors           Include author information');
-  console.log('  --with-history           Include commit history');
   console.log();
   console.log('Platform Features (v3.0.0):');
   console.log('  serve [options]          Start REST API server');
