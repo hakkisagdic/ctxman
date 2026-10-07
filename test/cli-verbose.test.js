@@ -51,8 +51,9 @@ describe('CLI --verbose', () => {
     expect(r.status, r.stderr).toBe(0);
     const listing = r.stdout.split(`INCLUDED FILES (${FILES.length}):`)[1];
     expect(listing, 'no included-files section in stdout').toBeDefined();
+    const lines = listing.split('\n').map((line) => line.trimEnd());
     for (const file of FILES) {
-      expect(listing).toMatch(new RegExp(`tokens - ${file.replace(/\./g, '\\.')}$`, 'm'));
+      expect(lines.some((line) => line.endsWith(`tokens - ${file}`))).toBe(true);
     }
   });
 
