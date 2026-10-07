@@ -58,7 +58,7 @@ ctxman serve --port 3000 --auth-token your-secret-token
 | `--port`       | 3000      | Port number to listen on      |
 | `--host`       | localhost | Host address to bind          |
 | `--auth-token` | null      | Optional authentication token |
-| `--cors`       | true      | Enable CORS headers           |
+| `--cors`       | off       | Send CORS headers             |
 
 ## Authentication
 
@@ -613,13 +613,21 @@ const context = await generateContext({
 
 ## CORS
 
-CORS is enabled by default. The following headers are set:
+CORS is off by default: with CORS on, any web page open in your browser could read the
+server's responses. Pass `--cors` (ideally together with `--auth-token`) to send:
 
 ```
 Access-Control-Allow-Origin: *
 Access-Control-Allow-Methods: GET, POST, OPTIONS
 Access-Control-Allow-Headers: Content-Type, Authorization
 ```
+
+## Host Check
+
+While bound to a loopback address (the default `localhost`), the server only answers requests
+whose `Host` header is `localhost`, `127.0.0.1` or `[::1]`, and returns `403 Forbidden host`
+otherwise. This blocks DNS-rebinding attacks from web pages. Binding to another address with
+`--host` turns the check off; use `--auth-token` in that case.
 
 ## Rate Limiting
 

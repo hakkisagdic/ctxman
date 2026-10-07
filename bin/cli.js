@@ -608,6 +608,8 @@ function printHelp() {
   console.log('  serve [options]          Start REST API server');
   console.log('    --port PORT            Server port (default: 3000)');
   console.log('    --auth-token TOKEN     API authentication token');
+  console.log('    --host HOST            Address to bind (default: localhost)');
+  console.log('    --cors                 Send CORS headers (off by default)');
   console.log('  watch [options]          Watch mode with auto-analysis');
   console.log('    --debounce MS          Debounce delay (default: 1000ms)');
   console.log();
@@ -779,7 +781,20 @@ async function runAPIServer(args) {
   const authToken =
     authTokenIndex !== -1 && args[authTokenIndex + 1] ? args[authTokenIndex + 1] : null;
 
-  const server = new APIServer({ port, authToken });
+  const hostIndex = args.findIndex((arg) => arg === '--host');
+  const host = hostIndex !== -1 && args[hostIndex + 1] ? args[hostIndex + 1] : 'localhost';
+  const cors = args.includes('--cors');
+
+  if (!authToken && cors) {
+    console.warn('⚠️  --cors without --auth-token: any web page you open can read the responses.');
+  }
+  if (!authToken && !['localhost', '127.0.0.1', '::1'].includes(host)) {
+    console.warn(
+      `⚠️  Listening on ${host} without --auth-token: anyone on the network can query it.`
+    );
+  }
+
+  const server = new APIServer({ port, host, authToken, cors });
 
   // Handle shutdown
   process.on('SIGINT', () => {
