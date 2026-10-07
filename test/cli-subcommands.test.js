@@ -47,6 +47,72 @@ describe('CLI subcommand entry points', () => {
   });
 });
 
+describe('ctxman subcommand routing', () => {
+  let tempDir;
+  let trace;
+
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-routing-'));
+    trace = path.join(tempDir, 'trace.jsonl');
+    // Preloaded into every node process: records which cm-*.js script starts, with which
+    // arguments, and stops it before it does any work (no model download, no network)
+    fs.writeFileSync(
+      path.join(tempDir, 'trace.mjs'),
+      `import fs from 'node:fs';
+const script = process.argv[1] || '';
+if (/cm-(ask|update|gitingest)\\.js$/.test(script)) {
+  fs.appendFileSync(${JSON.stringify(trace)}, JSON.stringify(process.argv.slice(1)) + '\\n');
+  process.exit(0);
+}
+`
+    );
+  });
+
+  afterEach(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  const cli = (...args) =>
+    spawnSync(process.execPath, [path.join(BIN, 'cli.js'), ...args], {
+      cwd: tempDir,
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: {
+        ...process.env,
+        HOME: tempDir,
+        USERPROFILE: tempDir,
+        NODE_OPTIONS: `--import=${path.join(tempDir, 'trace.mjs')}`,
+      },
+    });
+  const started = () =>
+    fs
+      .readFileSync(trace, 'utf-8')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line))
+      .map(([script, ...rest]) => [path.basename(script), ...rest]);
+
+  it('passes an unquoted ask query through whole, even when it contains other command names', () => {
+    expect(cli('ask', 'how', 'do', 'I', 'convert', 'the', 'git', 'ask', 'output').status).toBe(0);
+
+    expect(started()).toEqual([
+      ['cm-ask.js', 'how', 'do', 'I', 'convert', 'the', 'git', 'ask', 'output'],
+    ]);
+  });
+
+  it('routes update and its arguments to the update command', () => {
+    expect(cli('update', 'channel', 'insider').status).toBe(0);
+
+    expect(started()).toEqual([['cm-update.js', 'channel', 'insider']]);
+  });
+
+  it('leaves --help of the github command to that command', () => {
+    expect(cli('github', '--help').status).toBe(0);
+
+    expect(started()).toEqual([['cm-gitingest.js', '--help']]);
+  });
+});
+
 describe('TokenCalculator.analyze', () => {
   let tempDir;
 

@@ -29,8 +29,25 @@ const __dirname = dirname(__filename);
 // Load package.json
 const pkg = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf-8'));
 
+// Run one of the bin/cm-*.js subcommand scripts with the remaining arguments
+function runSubcommand(script, scriptArgs) {
+  const result = spawnSync(process.execPath, [resolve(__dirname, script), ...scriptArgs], {
+    stdio: 'inherit',
+  });
+  process.exitCode = result.status ?? 1;
+}
+
 async function main() {
   const args = process.argv.slice(2);
+  // Subcommands count only in first position, so a word inside an unquoted `ask` query or
+  // an option value (`--profile serve`) does not switch commands
+  const command = args[0]?.startsWith('-') ? null : args[0];
+
+  // Before --help: the github command prints its own help
+  if (command === 'github' || command === 'git') {
+    runSubcommand('./cm-gitingest.js', args.slice(1));
+    return;
+  }
 
   if (args.includes('--help') || args.includes('-h')) {
     printHelp();
@@ -40,6 +57,17 @@ async function main() {
   // Check for version flag
   if (args.includes('--version')) {
     console.log(`Ctxman v${pkg.version}`);
+    return;
+  }
+
+  // Check for RAG 'ask' mode (v3.1.0); the rest of the arguments are the query
+  if (command === 'ask') {
+    runSubcommand('./cm-ask.js', args.slice(1));
+    return;
+  }
+
+  if (command === 'update') {
+    runSubcommand('./cm-update.js', args.slice(1));
     return;
   }
 
@@ -169,44 +197,25 @@ async function main() {
   }
 
   // Check for format conversion mode (v2.3.2)
-  if (args.includes('convert')) {
+  if (command === 'convert') {
     runFormatConversion(args);
     return;
   }
 
   // Check for init command (FEAT-001: Configuration Wizard)
-  if (args.includes('init')) {
+  if (command === 'init') {
     await runInitWizard(args);
     return;
   }
 
-  // Check for GitHub GitIngest mode (v2.3.6+)
-  if (args.includes('github') || args.includes('git')) {
-    const commandPath = resolve(__dirname, './cm-gitingest.js');
-    const gitArgs = args.filter((arg) => arg !== 'github' && arg !== 'git');
-    const result = spawnSync(process.execPath, [commandPath, ...gitArgs], { stdio: 'inherit' });
-    process.exitCode = result.status ?? 1;
-    return;
-  }
-
-  // Check for RAG 'ask' mode (v3.1.0)
-  if (args.includes('ask')) {
-    const commandPath = resolve(__dirname, './cm-ask.js');
-    const askArgs = args.filter((arg) => arg !== 'ask');
-    // Pass remaining args as the query (cm-ask joins them)
-    const result = spawnSync(process.execPath, [commandPath, ...askArgs], { stdio: 'inherit' });
-    process.exitCode = result.status ?? 1;
-    return;
-  }
-
   // Check for API server mode (v3.0.0)
-  if (args.includes('serve')) {
+  if (command === 'serve') {
     await runAPIServer(args);
     return;
   }
 
   // Check for watch mode (v3.0.0)
-  if (args.includes('watch')) {
+  if (command === 'watch') {
     await runWatchMode(args);
     return;
   }
@@ -512,7 +521,7 @@ function printStartupInfo(options) {
 
 function printHelp() {
   console.log(
-    'Ctxman v3.0.0 - AI Development Platform with Plugin Architecture and Git Integration'
+    `Ctxman v${pkg.version} - AI Development Platform with Plugin Architecture and Git Integration`
   );
   console.log();
   console.log('Usage: ctxman [options]');
@@ -654,6 +663,11 @@ function printHelp() {
   console.log('    ctxman github facebook/react');
   console.log('    ctxman github https://github.com/vercel/next.js --branch canary');
   console.log('    ctxman git angular/angular -o docs/angular.txt');
+  console.log();
+  console.log('Other Commands:');
+  console.log('  ask QUESTION             Answer a question from the indexed codebase');
+  console.log('  update [check|install|rollback|channel NAME|info]');
+  console.log('                           Check for and manage ctxman updates');
   console.log();
   console.log('Examples:');
   console.log('  ctxman                                  # Launch interactive wizard (DEFAULT)');
