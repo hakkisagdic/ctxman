@@ -63,6 +63,9 @@ dependency-context.json
 # Temporary config dirs created by test/multi-repo-manager.test.js
 .ctxman-test-*/
 
+# Working notes from AI agent sessions (kept out of the repo and out of ctxman's own context)
+.agents/
+
 # v3.0.0 Cache directory
 .context-cache/
 
