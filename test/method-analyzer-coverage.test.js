@@ -64,6 +64,47 @@ describe('MethodAnalyzer Coverage', () => {
       expect(result.map((m) => m.name)).toEqual(['arrow', 'asyncArrow']);
     });
 
+    test('extracts typed TypeScript arrow functions', () => {
+      const content = `export const tsArrow = (s: string): string => s;
+const sumValues = (values: number[]): number => values.reduce((a, b) => a + b, 0);
+const load = async (id: string): Promise<User | null> => {
+  return null;
+};
+export const handler: Handler<Req, Res> = async (event) => {};
+const multiLine = (
+  a: string,
+  b: number
+): { a: string } => ({ a });
+`;
+      const result = analyzer.extractMethods(content, 'test.ts');
+      expect(result.map((m) => `${m.name}@${m.line}`)).toEqual([
+        'tsArrow@1',
+        'sumValues@2',
+        'load@3',
+        'handler@6',
+        'multiLine@7',
+      ]);
+    });
+
+    test('does not report typed variables, calls or ternaries as arrow functions', () => {
+      const content = `if (ready) {
+  run();
+}
+const total: number = compute(a, b);
+const label = (flag) ? 'on' : 'off';
+let maybe: string | undefined;
+const typed: Map<string, number> = new Map();
+items.map((item): Item => item);
+const loaded = (opts.path ? import(
+  opts.path
+) : Promise.resolve()).catch((cause) => {
+  throw cause;
+});
+`;
+      const result = analyzer.extractMethods(content, 'test.ts');
+      expect(result.map((m) => m.name)).toEqual([]);
+    });
+
     test('extracts accessors', () => {
       const content = `
                 class Foo {
