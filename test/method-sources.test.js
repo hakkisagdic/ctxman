@@ -5,6 +5,7 @@ import path from 'path';
 import MethodAnalyzer from '../lib/analyzers/method-analyzer.js';
 import { Analyzer } from '../lib/core/Analyzer.js';
 import { Scanner } from '../lib/core/Scanner.js';
+import TokenCalculator from '../lib/analyzers/token-calculator.js';
 
 const sources = (content, file) => {
   const analyzer = new MethodAnalyzer();
@@ -86,5 +87,29 @@ describe('Analyzer method-level token counts', () => {
 
     const save = files[0].methods.find((method) => method.name === 'save');
     expect(save.tokens).toBeGreaterThan(5);
+  });
+});
+
+describe('TokenCalculator method-level token counts', () => {
+  let dir;
+
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-calc-method-tokens-'));
+    fs.writeFileSync(
+      path.join(dir, 'store.js'),
+      'export class Store {\n  save(item) {\n    return this.items.push(item);\n  }\n}\n'
+    );
+  });
+
+  afterEach(() => {
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('counts tokens for class methods in the CLI analyzer', () => {
+    const calculator = new TokenCalculator(dir, { methodLevel: true });
+
+    const [file] = calculator.analyze();
+
+    expect(file.methods.find((method) => method.name === 'save').tokens).toBeGreaterThan(5);
   });
 });

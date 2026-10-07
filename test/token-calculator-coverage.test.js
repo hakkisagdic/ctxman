@@ -64,6 +64,7 @@ describe('TokenCalculator Coverage', () => {
       // Mock MethodAnalyzer
       calculator.methodAnalyzer = {
         extractMethods: vi.fn().mockReturnValue([{ name: 'testMethod', line: 1 }]),
+        extractMethodSources: vi.fn().mockReturnValue(['method content']),
         extractMethodContent: vi.fn().mockReturnValue('method content'),
       };
 
@@ -80,6 +81,7 @@ describe('TokenCalculator Coverage', () => {
       calculator.methodFilter.shouldIncludeMethod.mockReturnValue(false);
       calculator.methodAnalyzer = {
         extractMethods: vi.fn().mockReturnValue([{ name: 'ignoredMethod' }]),
+        extractMethodSources: vi.fn().mockReturnValue(['']),
       };
 
       const result = calculator.analyzeFileMethods('content', 'test.js');
