@@ -19,7 +19,7 @@ import SnapshotManager from '../lib/utils/snapshot-manager.js';
 import ContextVersioning from '../lib/utils/context-versioning.js';
 import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+import { dirname, resolve, sep } from 'path';
 import { readFileSync } from 'fs';
 
 // ESM equivalents for __dirname and __filename
@@ -826,10 +826,11 @@ async function runChangedFilesAnalysis(options) {
     return;
   }
 
-  // Analyze only changed files
+  // Analyze only changed files; git reports them relative to the repository root
+  const changedFiles = new Set(changes.changedFiles);
   const analyzer = new TokenAnalyzer(options.projectRoot, {
     ...options,
-    fileFilter: (filePath) => changes.changedFiles.includes(filePath),
+    fileFilter: (relativePath) => changedFiles.has(relativePath.split(sep).join('/')),
   });
 
   analyzer.run();
