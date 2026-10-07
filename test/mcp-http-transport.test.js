@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import request from 'supertest';
 import MCPServer from '../lib/api/mcp/server.js';
 import { HttpSseTransport } from '../lib/api/mcp/transports/HttpSseTransport.js';
+import packageJson from '../package.json' with { type: 'json' };
 
 // The real SDK transport behind the Express app (test/mcp-transport.test.js mocks it)
 describe('MCP over HTTP', () => {
@@ -36,7 +37,9 @@ describe('MCP over HTTP', () => {
     const response = await initialize(await connect());
 
     expect(response.status).toBe(200);
-    expect(response.text).toContain('"name":"ctxman"');
+    expect(response.text).toContain(
+      `"serverInfo":{"name":"ctxman","version":"${packageJson.version}"}`
+    );
     expect(response.headers['mcp-session-id']).toBeTruthy();
   });
 
