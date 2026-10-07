@@ -85,8 +85,6 @@ describe('FormatConverter', () => {
       const result = converter.parseYAML(input);
       expect(result.items).toEqual(['item1', 'item2']);
     });
-
-    // Removed nested object test as the simple parser doesn't support indentation/nesting
   });
 
   describe('CSV Parsing Details', () => {
