@@ -70,6 +70,18 @@ describe('MCP server on a real project', () => {
       expect(result.contents[0].text).toContain('[REDACTED:aws-access-key-id]');
     });
 
+    it('keeps only the most recent cached analyses', async () => {
+      const provider = new ResourceProvider(root);
+      for (let id = 1; id <= 12; id++) provider.cacheAnalysis(String(id), { id });
+
+      const { resources } = await provider.listResources();
+      const analyses = resources.filter((r) => r.uri.startsWith('analysis://'));
+
+      expect(analyses.map((r) => r.uri)).toEqual(
+        Array.from({ length: 10 }, (_, i) => `analysis://recent/${i + 3}`)
+      );
+    });
+
     it('lists the files of the current project after a project switch', async () => {
       const other = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-mcp-b-'));
       fs.writeFileSync(path.join(other, 'only-here.js'), 'export const x = 1;\n');

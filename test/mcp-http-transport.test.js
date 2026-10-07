@@ -41,6 +41,9 @@ describe('MCP over HTTP', () => {
       `"serverInfo":{"name":"ctxman","version":"${packageJson.version}"}`
     );
     expect(response.headers['mcp-session-id']).toBeTruthy();
+    // Only capabilities the server implements: no resource subscriptions or list-change
+    // notifications
+    expect(response.text).toContain('"capabilities":{"tools":{},"resources":{},"prompts":{}}');
   });
 
   it('rejects a foreign Host header on the default loopback host', async () => {
