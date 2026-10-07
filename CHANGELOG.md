@@ -18,6 +18,12 @@ All notable changes to the Ctxman will be documented in this file.
   `ctxman ask`; install with `--omit=optional` to skip them (451 MB → 55 MB).
 - `@toon-format/toon` 4.1.1: `ToonFormatter.encodeAsync()` now writes an empty array as `key: []`.
 - Token counting reuses one tiktoken encoder: ~20-25x faster analysis when tiktoken is installed.
+- REST API (`ctxman serve`): CORS is off unless `--cors` is given, and on a loopback host requests
+  with a foreign `Host` header get 403 (DNS rebinding).
+- MCP HTTP transport (`bin/mcp-server.js --transport=sse`): binds to 127.0.0.1 with `Host`
+  validation, CORS only with `--cors`, `--host=` to bind elsewhere.
+- `-o/--output` sets the format of `--context-export`/`--context-clipboard` (JSON by default), and
+  TOON output uses the official `@toon-format/toon` encoder.
 
 ### Fixed
 
@@ -31,6 +37,19 @@ All notable changes to the Ctxman will be documented in this file.
 - npm audit advisories (proxy-addr, sharp, @modelcontextprotocol/sdk, qs, hono and others).
 - The release workflow validates the tag against `package.json` and takes notes from this file.
 - Added the missing LICENSE file and repository metadata.
+- `**` in `.gitignore`/`.contextignore`/`.contextinclude` patterns did not cross directories, and
+  `.contextinclude` (include mode) and watch-mode ignore checks did not apply.
+- `--changed-only`/`--changed-since` analyzed the whole repository instead of the changed files.
+- `--chunk` wrote a single digest instead of chunk files.
+- `ctxman github`: the branch from the URL or `--branch` is cloned, and a GitHub API error (rate
+  limit, private repository) no longer crashes the command.
+- The `targetModel` from `~/.ctxman/config.json` is read again, and files skipped by
+  `.contextignore`/`.contextinclude` are counted separately from `.gitignore`.
+- MCP: `file://` resources stay inside the project, refuse non-source files such as `.env` and
+  redact secrets; `search_code` and `list_methods` honour their documented options; the HTTP
+  transport answered every request with "Parse error"; the server reports the package version.
+- Context token budgets (`targetTokens`, MCP `maxTokens`) are no longer exceeded, and the
+  `changed-first` strategy orders by modification time.
 
 ## [3.0.0] - 2025-11-05
 
