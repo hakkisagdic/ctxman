@@ -173,6 +173,14 @@ describe('TokenCalculator.analyze', () => {
     expect(calculator.stats.totalFiles).toBe(2);
     expect(calculator.stats.totalTokens).toBe(results.reduce((sum, r) => sum + r.tokens, 0));
   });
+
+  it('groups files in the project root under one directory entry', () => {
+    const calculator = new TokenCalculator(tempDir);
+
+    calculator.analyze();
+
+    expect(Object.keys(calculator.stats.byDirectory).sort()).toEqual(['.', 'src']);
+  });
 });
 
 describe('ctxman --changed-since', () => {
