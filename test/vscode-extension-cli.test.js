@@ -22,6 +22,8 @@ function loadExtension(fakeVscode, onSpawn) {
     spawn(command, args, options) {
       expect(command).toBe('npx');
       expect(args[0]).toBe('ctxman');
+      // Editor file paths are arguments: no shell may interpret them
+      expect(options.shell).toBe(process.platform === 'win32');
       const child = childProcess.spawn(process.execPath, [CLI, ...args.slice(1)], {
         cwd: options.cwd,
         stdio: options.stdio,
@@ -129,4 +131,27 @@ describe('VS Code extension -> CLI contract', () => {
     expect(total).toBeGreaterThan(999);
     expect(messages).toContain(`Generated ${total.toLocaleString()} tokens`);
   }, 30000);
+});
+
+describe('VS Code extension command line', () => {
+  const { npxCommand } = loadExtension({}, () => {});
+
+  test('passes arguments without a shell outside Windows', () => {
+    const file = '/work/a$(touch pwned).js';
+
+    expect(npxCommand(['--cli', '--file', file], 'linux')).toEqual({
+      command: 'npx',
+      args: ['ctxman', '--cli', '--file', file],
+      shell: false,
+    });
+  });
+
+  test('quotes paths with spaces and refuses cmd.exe metacharacters on Windows', () => {
+    expect(npxCommand(['--file', 'C:\\My Project\\a.js'], 'win32').args).toEqual([
+      'ctxman',
+      '--file',
+      '"C:\\My Project\\a.js"',
+    ]);
+    expect(() => npxCommand(['--file', 'a&calc.js'], 'win32')).toThrow('Cannot pass');
+  });
 });
