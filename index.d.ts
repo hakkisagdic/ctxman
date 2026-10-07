@@ -318,7 +318,7 @@ export class ToonFormatter {
   encode(data: unknown, options?: ToonFormatterOptions): string;
   encodeAsync(data: unknown, options?: ToonFormatterOptions): Promise<string>;
   encodeSync(data: unknown, options?: ToonFormatterOptions): string;
-  decode(toonString: string, options?: ToonFormatterOptions): never;
+  decode(toonString: string, options?: ToonFormatterOptions): unknown;
   decodeAsync(toonString: string, options?: ToonFormatterOptions): Promise<unknown>;
   validate(toonString: string): { valid: boolean; errors: string[] };
   estimateTokens(toonString: string): number;
