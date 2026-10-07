@@ -48,7 +48,6 @@ describe('FormatConverter', () => {
     });
 
     test('throws on unsupported formats', () => {
-      expect(() => converter.parse('content', 'toon')).toThrow('not yet implemented');
       expect(() => converter.parse('content', 'xml')).toThrow('not yet implemented');
       expect(() => converter.parse('content', 'markdown')).toThrow('not yet implemented');
       expect(() => converter.parse('content', 'unknown')).toThrow('Unknown format');
