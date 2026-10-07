@@ -55,6 +55,15 @@ describe('REST API client errors', () => {
     expect(r.status).toBe(404);
   });
 
+  it('answers GET /api/v1/methods for a binary file with 400', async () => {
+    const image = path.join(projectDir, 'logo.png');
+    fs.writeFileSync(image, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+    const r = await request(port, 'GET', `/api/v1/methods?file=${encodeURIComponent(image)}`);
+
+    expect(r.status).toBe(400);
+    expect(r.json.error).toBe(`Not a text source file: ${image}`);
+  });
+
   it('answers a malformed JSON body to POST /api/v1/context with 400', async () => {
     const r = await request(port, 'POST', '/api/v1/context', '{not json');
 
