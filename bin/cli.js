@@ -59,6 +59,11 @@ async function main() {
     return;
   }
 
+  if (command === 'pr') {
+    runSubcommand('./cm-pr.js', args.slice(1));
+    return;
+  }
+
   if (args.includes('--help') || args.includes('-h')) {
     printHelp();
     return;
@@ -693,6 +698,9 @@ function printHelp() {
   console.log('  ask QUESTION             Answer a question from the indexed codebase');
   console.log('  update [check|install|rollback|channel NAME|info]');
   console.log('                           Check for and manage ctxman updates');
+  console.log('  pr [--base REF] [--head REF] [path]');
+  console.log('                           Review context for a branch: log, changed methods,');
+  console.log('                           diff, related tests (ctxman pr --help)');
   console.log();
   console.log('Examples:');
   console.log('  ctxman                                  # Launch interactive wizard (DEFAULT)');
