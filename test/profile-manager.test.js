@@ -119,7 +119,7 @@ describe('ProfileManager', () => {
       expect(config.profileName).toBe('Frontend Team Profile');
       expect(config.ignorePatterns).toBeDefined();
       expect(config.includePatterns).toBeDefined();
-      expect(config.targetModel).toBe('claude-sonnet-4.5');
+      expect(config.targetModel).toBe('claude-sonnet-5-5');
     });
 
     test('merges with additional options', () => {

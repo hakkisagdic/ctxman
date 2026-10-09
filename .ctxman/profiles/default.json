@@ -6,7 +6,7 @@
   "config": {
     "exclude": ["**/*.test.js", "**/*.spec.js", "node_modules/**", "coverage/**"],
     "include": ["src/**", "lib/**"],
-    "targetModel": "claude-sonnet-4.5",
+    "targetModel": "claude-sonnet-5-5",
     "methodLevel": false
   }
 }

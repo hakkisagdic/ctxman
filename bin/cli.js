@@ -3,7 +3,7 @@
 import { TokenAnalyzer } from '../index.js';
 import FormatRegistry from '../lib/formatters/format-registry.js';
 import FormatConverter from '../lib/utils/format-converter.js';
-import { LLMDetector } from '../lib/utils/llm-detector.js';
+import { LLMDetector, DEFAULT_TARGET_MODEL } from '../lib/utils/llm-detector.js';
 import { LLMCostEstimator } from '../lib/utils/llm-cost-estimator.js';
 import APIServer from '../lib/api/rest/server.js';
 import FileWatcher from '../lib/watch/FileWatcher.js';
@@ -110,7 +110,7 @@ async function main() {
 
   // Check for LLM model listing (v2.3.7)
   if (args.includes('--list-llms')) {
-    listLLMs();
+    listLLMs(args);
     return;
   }
 
@@ -415,11 +415,13 @@ function getTargetModel(args) {
   return null; // No model specified
 }
 
-function listLLMs() {
-  console.log('\n📋 Supported LLM Models (v2.3.7):\n');
-  console.log('═'.repeat(70));
+function listLLMs(args = []) {
+  const includeRetired = args.includes('--all');
+  const models = LLMDetector.getModelList({ includeRetired });
+  const checked = LLMDetector.getDataDate();
 
-  const models = LLMDetector.getModelList();
+  console.log(`\n📋 Supported LLM Models${checked ? ` (checked ${checked})` : ''}:\n`);
+  console.log('═'.repeat(78));
 
   // Group by vendor
   const byVendor = {};
@@ -430,24 +432,35 @@ function listLLMs() {
     byVendor[model.vendor].push(model);
   });
 
+  const size = (tokens) =>
+    !tokens
+      ? '-'
+      : tokens >= 1000000
+        ? `${+(tokens / 1000000).toFixed(2)}M`
+        : `${Math.floor(tokens / 1000)}K`;
+  const price = (pricing) => (pricing ? `$${pricing.input}/$${pricing.output}` : '-');
+
   // Display by vendor
   Object.entries(byVendor).forEach(([vendor, models]) => {
     console.log(`\n${vendor}:`);
+    console.log(
+      `  ${'ID'.padEnd(26)} ${'Context'.padStart(7)} ${'Output'.padStart(7)}  ${'$ in/out per 1M'.padEnd(16)} Status`
+    );
     models.forEach((model) => {
-      const contextDisplay =
-        model.contextWindow >= 1000000
-          ? `${(model.contextWindow / 1000000).toFixed(1)}M`
-          : `${Math.floor(model.contextWindow / 1000)}k`;
-      console.log(`  ${model.id.padEnd(25)} ${model.name.padEnd(25)} (${contextDisplay} context)`);
+      const status = model.status === 'active' ? '' : model.status;
+      console.log(
+        `  ${model.id.padEnd(26)} ${size(model.contextWindow).padStart(7)} ${size(model.outputWindow).padStart(7)}  ${price(model.pricing).padEnd(16)} ${status}`
+      );
     });
   });
 
-  console.log('\n' + '═'.repeat(70));
+  console.log('\n' + '═'.repeat(78));
   console.log('\nUsage:');
   console.log('  ctxman --target-model <MODEL_ID>');
   console.log('  ctxman --auto-detect-llm');
+  console.log('  ctxman --list-llms --all      Include models the provider has retired');
   console.log('\nExample:');
-  console.log('  ctxman --target-model claude-sonnet-4.5');
+  console.log(`  ctxman --target-model ${DEFAULT_TARGET_MODEL}`);
   console.log('  ctxman --auto-detect-llm --cli\n');
 }
 
@@ -574,7 +587,9 @@ function printHelp() {
   console.log('  --chunk-size TOKENS      Max tokens per chunk (default: 100000)');
   console.log();
   console.log('LLM Optimization (v2.3.7):');
-  console.log('  --target-model MODEL     Optimize for specific LLM (e.g., claude-sonnet-4.5)');
+  console.log(
+    '  --target-model MODEL     Optimize for specific LLM (e.g., claude-sonnet-5-5, gpt-5)'
+  );
   console.log('  --auto-detect-llm        Auto-detect LLM from environment variables');
   console.log('  --list-llms              List all supported LLM models');
   console.log();
@@ -755,7 +770,7 @@ function createProfile(args) {
     config: {
       exclude: ['**/*.test.js', '**/*.spec.js', 'node_modules/**'],
       include: ['src/**', 'lib/**'],
-      targetModel: 'claude-sonnet-4.5',
+      targetModel: DEFAULT_TARGET_MODEL,
       methodLevel: false,
     },
   };

@@ -41,7 +41,7 @@ describe('LLM Detector Coverage', () => {
       delete process.env.CTXMAN_LLM;
       process.env.ANTHROPIC_API_KEY = 'sk-ant-test';
       const detected = LLMDetector.detectFromEnv();
-      expect(detected).toBe('claude-sonnet-4.5');
+      expect(detected).toBe('claude-sonnet-5-5');
     });
 
     test('detects OpenAI API key', () => {
@@ -49,7 +49,7 @@ describe('LLM Detector Coverage', () => {
       delete process.env.ANTHROPIC_API_KEY;
       process.env.OPENAI_API_KEY = 'sk-test';
       const detected = LLMDetector.detectFromEnv();
-      expect(detected).toBe('gpt-4o');
+      expect(detected).toBe('gpt-6.1-sol');
     });
 
     test('detects Google API key', () => {
@@ -58,7 +58,7 @@ describe('LLM Detector Coverage', () => {
       delete process.env.OPENAI_API_KEY;
       process.env.GOOGLE_API_KEY = 'test-key';
       const detected = LLMDetector.detectFromEnv();
-      expect(detected).toBe('gemini-2.0-flash');
+      expect(detected).toBe('gemini-3.8-flash');
     });
 
     test('detects Gemini API key', () => {
@@ -68,7 +68,7 @@ describe('LLM Detector Coverage', () => {
       delete process.env.GOOGLE_API_KEY;
       process.env.GEMINI_API_KEY = 'test-key';
       const detected = LLMDetector.detectFromEnv();
-      expect(detected).toBe('gemini-2.0-flash');
+      expect(detected).toBe('gemini-3.8-flash');
     });
 
     test('detects DeepSeek API key', () => {
@@ -79,7 +79,7 @@ describe('LLM Detector Coverage', () => {
       delete process.env.GEMINI_API_KEY;
       process.env.DEEPSEEK_API_KEY = 'test-key';
       const detected = LLMDetector.detectFromEnv();
-      expect(detected).toBe('deepseek-chat');
+      expect(detected).toBe('deepseek-flash');
     });
 
     test('returns null when no API keys present', () => {
@@ -308,7 +308,7 @@ describe('LLM Detector Coverage', () => {
       ConfigUtils.loadUserConfig.mockReturnValue({ targetModel: 'claude-sonnet-4.5' });
 
       const detected = LLMDetector.detect();
-      expect(detected).toBe('gpt-4o'); // From env, not config
+      expect(detected).toBe('gpt-6.1-sol'); // From env, not config
     });
   });
 });
