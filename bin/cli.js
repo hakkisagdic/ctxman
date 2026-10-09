@@ -64,6 +64,11 @@ async function main() {
     return;
   }
 
+  if (command === 'search') {
+    runSubcommand('./cm-search.js', args.slice(1));
+    return;
+  }
+
   if (args.includes('--help') || args.includes('-h')) {
     printHelp();
     return;
@@ -696,6 +701,7 @@ function printHelp() {
   console.log('  map [path] [options]     Ranked repository map within a token budget');
   console.log('                           (ctxman map --help for options)');
   console.log('  ask QUESTION             Answer a question from the indexed codebase');
+  console.log('  search QUERY [path]      Ranked (BM25) search over methods and code chunks');
   console.log('  update [check|install|rollback|channel NAME|info]');
   console.log('                           Check for and manage ctxman updates');
   console.log('  pr [--base REF] [--head REF] [path]');
