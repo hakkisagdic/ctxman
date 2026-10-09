@@ -30,6 +30,9 @@ import GitUtils from './lib/utils/git-utils.js'; // v2.3.6+
 // Orchestrator functions
 import { generateDigestFromReport, generateDigestFromContext } from './ctxman.js';
 
+// Repository map (`ctxman map`)
+import { buildRepoGraph, rankFiles, renderRepoMap } from './lib/map/index.js';
+
 export {
   // Analyzers
   TokenCalculator,
@@ -62,6 +65,11 @@ export {
   // Functions
   generateDigestFromReport,
   generateDigestFromContext,
+
+  // Repository map
+  buildRepoGraph,
+  rankFiles,
+  renderRepoMap,
 };
 
 // Alias for backward compatibility

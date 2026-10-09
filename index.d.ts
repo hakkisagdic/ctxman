@@ -838,3 +838,162 @@ export function generateDigestFromReport(reportPath: string): void;
  * Generate GitIngest digest from llm-context.json
  */
 export function generateDigestFromContext(contextPath: string): void;
+
+// ============================================
+// Repository Map (ctxman map)
+// ============================================
+
+/**
+ * A function or method of a mapped file
+ */
+export interface RepoMapMethod {
+  name: string;
+  /** 1-based line of the declaration */
+  line: number;
+  /** Declaration on one line, secrets redacted unless `redact: false` */
+  signature: string;
+}
+
+/**
+ * A source file of the repository graph
+ */
+export interface RepoGraphNode {
+  /** Project-relative path with forward slashes */
+  path: string;
+  language: string;
+  bytes: number;
+  methods: RepoMapMethod[];
+  /** Mentions of this file's function names in other files (shared between definers) */
+  symbolRefs: number;
+  /** Imports that named no file of the project (packages, standard library) */
+  unresolvedImports: number;
+}
+
+/**
+ * Import edge, importer -> imported. A package-wide import (Go, Java wildcard, C# using)
+ * spreads weight 1 over the files of the package.
+ */
+export interface RepoGraphEdge {
+  from: string;
+  to: string;
+  weight: number;
+}
+
+export interface RepoGraph {
+  /** Absolute project root */
+  root: string;
+  nodes: RepoGraphNode[];
+  edges: RepoGraphEdge[];
+  history: {
+    available: boolean;
+    requested: number;
+    commits: number;
+    /** Commits touching each file */
+    counts: Record<string, number>;
+    reason?: string;
+  };
+  stats: {
+    scannedFiles: number;
+    files: number;
+    edges: number;
+    unresolvedImports: number;
+    skipped: Array<{ path: string; reason: string }>;
+    redactions: Record<string, number>;
+    timings: Record<string, number>;
+  };
+}
+
+export interface RepoGraphOptions {
+  /** Commits of git history to mine for change frequency (default 300, 0 disables) */
+  history?: number;
+  /** Mask secrets in signatures (default true) */
+  redact?: boolean;
+  /** Leave out larger files (default 512 KiB) */
+  maxFileBytes?: number;
+}
+
+export interface RankWeights {
+  pagerank?: number;
+  history?: number;
+  symbols?: number;
+}
+
+export interface RankOptions {
+  /** Files or folders (project-relative or absolute) to personalise PageRank toward */
+  focus?: string[];
+  /** Blend of the normalised components (default 0.70 / 0.25 / 0.05) */
+  weights?: RankWeights;
+  /** PageRank damping (default 0.85) */
+  damping?: number;
+}
+
+export interface RankedFile {
+  path: string;
+  /** 1 = best */
+  rank: number;
+  /** Blended score in [0, 1] */
+  score: number;
+  /** Raw PageRank (all files sum to 1) */
+  pagerank: number;
+  /** Commits touching the file among the mined history */
+  changes: number;
+  symbolRefs: number;
+  focus: boolean;
+  /** Each component scaled to [0, 1] */
+  components: { pagerank: number; history: number; symbols: number };
+}
+
+export interface RepoMapOptions extends RepoGraphOptions, RankOptions {
+  /** Token budget of the rendered map (default 2048) */
+  tokens?: number;
+  /** Order of the files in the output (default 'rank') */
+  order?: 'rank' | 'path';
+  /** Highest-ranked file last (rank order only) */
+  importantLast?: boolean;
+  style?: 'text' | 'markdown' | 'json' | 'dot';
+  /** Render the dependency edges instead of the map */
+  graph?: boolean;
+}
+
+export interface RepoMapFile {
+  path: string;
+  rank: number;
+  score: number;
+  /** Tokens of the whole file */
+  tokens: number;
+  methods: Array<RepoMapMethod & { tokens: number }>;
+}
+
+export interface RepoMapResult {
+  output: string;
+  style: string;
+  budget: number;
+  /** Tokens of the rendered map (for json: of the same map rendered as text) */
+  tokens: number;
+  /** Files in the map, in output order */
+  files: RepoMapFile[];
+  /** Every file, best first */
+  ranked: RankedFile[];
+  graph: RepoGraph;
+  /** Files that did not fit the budget */
+  skipped: number;
+  warnings: string[];
+  stats: RepoGraph['stats'];
+}
+
+/**
+ * Scan a project (respecting .gitignore/.contextignore/.contextinclude) and build its
+ * file dependency graph from imports
+ */
+export function buildRepoGraph(root: string, options?: RepoGraphOptions): RepoGraph;
+
+/**
+ * Rank the files of a graph, best first: PageRank blended with git change frequency and
+ * symbol references
+ */
+export function rankFiles(graph: RepoGraph, options?: RankOptions): RankedFile[];
+
+/**
+ * Build, rank and render the repository map of a project within a token budget
+ */
+export function renderRepoMap(root: string, options?: RepoMapOptions): RepoMapResult;
