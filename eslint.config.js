@@ -17,7 +17,7 @@ export default [
     ],
   },
   {
-    files: ['**/*.js'],
+    files: ['**/*.js', 'scripts/**/*.mjs'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -41,7 +41,14 @@ export default [
   {
     // Shipped code is ESM: CommonJS globals do not exist there, and an undefined
     // name is a ReferenceError at runtime (often on an error path no test reaches)
-    files: ['index.js', 'ctxman.js', 'bin/**/*.js', 'lib/**/*.js', 'scripts/**/*.js'],
+    files: [
+      'index.js',
+      'ctxman.js',
+      'bin/**/*.js',
+      'lib/**/*.js',
+      'scripts/**/*.js',
+      'scripts/**/*.mjs',
+    ],
     languageOptions: {
       globals: {
         require: 'off',
