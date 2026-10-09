@@ -80,8 +80,9 @@ describe('MCPServer', () => {
 
     const result = await listToolsHandler({});
     expect(result.tools).toBeDefined();
-    // Tools added later are appended after these five
+    // Tools added later are appended, so the first five keep their positions
     expect(result.tools.length).toBeGreaterThanOrEqual(5);
+    expect(result.tools.map((tool) => tool.name)).toContain('pr_context');
     expect(result.tools[0].name).toBe('analyze_codebase');
     expect(result.tools[1].name).toBe('generate_context');
     expect(result.tools[2].name).toBe('git_diff');
