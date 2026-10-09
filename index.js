@@ -27,6 +27,9 @@ import { Logger, getLogger, createLogger } from './lib/utils/logger.js'; // v2.3
 import Updater from './lib/utils/updater.js'; // v2.3.6+
 import GitUtils from './lib/utils/git-utils.js'; // v2.3.6+
 
+// Pull-request review context
+import { buildPrContext } from './lib/pr/pr-context.js';
+
 // Orchestrator functions
 import { generateDigestFromReport, generateDigestFromContext } from './ctxman.js';
 
@@ -70,6 +73,9 @@ export {
   buildRepoGraph,
   rankFiles,
   renderRepoMap,
+
+  // Pull-request context
+  buildPrContext,
 };
 
 // Alias for backward compatibility

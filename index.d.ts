@@ -997,3 +997,134 @@ export function rankFiles(graph: RepoGraph, options?: RankOptions): RankedFile[]
  * Build, rank and render the repository map of a project within a token budget
  */
 export function renderRepoMap(root: string, options?: RepoMapOptions): RepoMapResult;
+
+// ============================================
+// Pull-request review context
+// ============================================
+
+export type PrContextStyle = 'markdown' | 'xml' | 'json';
+
+export interface PrContextOptions {
+  /** Base revision (default: origin/HEAD, else main, else master; HEAD with staged/working) */
+  base?: string;
+  /** Head revision (default: HEAD) */
+  head?: string;
+  /** Compare the index instead of a head commit */
+  staged?: boolean;
+  /** Compare the working tree (untracked files included) instead of a head commit */
+  working?: boolean;
+  /** Context lines in the diff (default: 3) */
+  unified?: number;
+  /** Include the unified diff (default: true) */
+  diff?: boolean;
+  /** Include the related tests' contents */
+  withTests?: boolean;
+  /** Include the changed files' full contents */
+  withFiles?: boolean;
+  /** Question appended at the end */
+  ask?: string;
+  /** Instructions appended at the end */
+  instructions?: string;
+  /** Maximum tokens of the output; lower-priority material is dropped first */
+  budget?: number;
+  /** Output style (default: markdown) */
+  style?: PrContextStyle;
+  /** Mask secrets in contents, diff and commit messages (default: true) */
+  redact?: boolean;
+  /** Skip file contents larger than this for methods and full contents (default: 1 MiB) */
+  maxFileBytes?: number;
+  /** Most related tests to list (default: 50) */
+  maxRelatedTests?: number;
+}
+
+export interface PrRevision {
+  ref: string;
+  sha: string | null;
+  short: string | null;
+}
+
+export interface PrChangedFile {
+  /** A, M, D, R, C or T */
+  status: string;
+  path: string;
+  oldPath: string | null;
+  similarity: number | null;
+  additions: number;
+  deletions: number;
+  binary: boolean;
+  untracked: boolean;
+  /** Filter that keeps the file's content out (.contextignore, ...), or null */
+  excluded: string | null;
+}
+
+export interface PrMethod {
+  file: string;
+  name: string;
+  start: number;
+  end: number;
+}
+
+export interface PrChangedMethod extends PrMethod {
+  change: 'added' | 'modified';
+  changedLines: number;
+  source: string;
+  sourceDropped: boolean;
+}
+
+export interface PrCommit {
+  sha: string;
+  short: string;
+  author: string;
+  date: string;
+  subject: string;
+  body: string;
+}
+
+export interface PrRelatedTest {
+  path: string;
+  reasons: string[];
+  changed: boolean;
+  excluded: string | null;
+}
+
+export interface PrContextResult {
+  /** The rendered context */
+  output: string;
+  /** Tokens of `output` */
+  tokens: number;
+  style: PrContextStyle;
+  mode: 'range' | 'staged' | 'working';
+  base: PrRevision;
+  head: PrRevision;
+  mergeBase: { sha: string; short: string };
+  /** Directory the change was limited to ('' for the whole repository) */
+  scope: string;
+  stats: {
+    commits: number;
+    files: number;
+    byStatus: Record<string, number>;
+    additions: number;
+    deletions: number;
+    excluded: number;
+    changedMethods: number;
+    addedMethods: number;
+    deletedMethods: number;
+    relatedTests: number;
+  };
+  /** Tokens per rendered section */
+  sections: Record<string, number>;
+  budget: { limit: number; dropped: string[]; over: boolean } | null;
+  commits: PrCommit[];
+  files: PrChangedFile[];
+  methods: { changed: PrChangedMethod[]; deleted: PrMethod[] };
+  relatedTests: PrRelatedTest[];
+  /** Redacted matches per secret type */
+  redactions: Record<string, number>;
+  warnings: string[];
+}
+
+/**
+ * Build review context for a branch (merge base of base and head up to head), the staged
+ * changes or the working tree
+ */
+export function buildPrContext(root?: string, options?: PrContextOptions): Promise<PrContextResult>;
