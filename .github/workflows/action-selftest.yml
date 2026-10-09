@@ -1,0 +1,111 @@
+# Action Self-Test
+# Runs the ctxman GitHub Action from this checkout (uses: ./) on this repository and
+# checks its outputs, the budget failure and, on pull requests, changed-since.
+# The action itself is action.yml + scripts/action/; docs in docs/commands/ci.md.
+
+name: Action Self-Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+# Concurrency: cancel in-progress runs for same branch/PR
+concurrency:
+  group: action-selftest-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  selftest:
+    name: Run the action on this repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          # changed-since needs the pull request's base commit
+          fetch-depth: 0
+
+      - name: Whole repository, generous budget
+        id: whole
+        uses: ./
+        with:
+          max-tokens: 10000000
+          method-level: true
+          export: toon
+          upload-artifact: true
+          artifact-name: ctxman-selftest-context
+
+      - name: Check outputs (whole repository)
+        env:
+          TOTAL_TOKENS: ${{ steps.whole.outputs.total-tokens }}
+          TOTAL_FILES: ${{ steps.whole.outputs.total-files }}
+          FITS: ${{ steps.whole.outputs.fits }}
+          REPORT_PATH: ${{ steps.whole.outputs.report-path }}
+          CONTEXT_PATH: ${{ steps.whole.outputs.context-path }}
+        run: |
+          echo "tokens=$TOTAL_TOKENS files=$TOTAL_FILES fits=$FITS"
+          test "$TOTAL_TOKENS" -gt 100000
+          test "$TOTAL_FILES" -gt 100
+          test -z "$FITS"
+          test -s "$REPORT_PATH"
+          test "$(basename "$CONTEXT_PATH")" = llm-context.toon
+          node -e 'const r = require(process.argv[1]); if (r.summary.totalTokens !== Number(process.argv[2])) process.exit(1)' "$REPORT_PATH" "$TOTAL_TOKENS"
+          # The report and the context file went to RUNNER_TEMP, not into the checkout
+          test ! -e token-analysis-report.json
+          test ! -e llm-context.toon
+
+      - name: Subdirectory against a model window
+        id: lib
+        uses: ./
+        with:
+          path: lib
+          target-model: gemini-2.0-flash
+          node-version: ''
+
+      - name: Check outputs (lib)
+        env:
+          TOTAL_TOKENS: ${{ steps.lib.outputs.total-tokens }}
+          FITS: ${{ steps.lib.outputs.fits }}
+          WHOLE_TOKENS: ${{ steps.whole.outputs.total-tokens }}
+        run: |
+          test "$FITS" = true
+          test "$TOTAL_TOKENS" -gt 0
+          test "$TOTAL_TOKENS" -lt "$WHOLE_TOKENS"
+
+      - name: Files changed by the pull request
+        id: changed
+        if: github.event_name == 'pull_request'
+        uses: ./
+        with:
+          changed-since: ${{ github.event.pull_request.base.sha }}
+          max-tokens: 10000000
+          node-version: ''
+
+      - name: Check outputs (changed files)
+        if: github.event_name == 'pull_request'
+        env:
+          TOTAL_FILES: ${{ steps.changed.outputs.total-files }}
+          WHOLE_FILES: ${{ steps.whole.outputs.total-files }}
+        run: test "$TOTAL_FILES" -le "$WHOLE_FILES"
+
+      - name: Budget exceeded (expected to fail)
+        id: over
+        continue-on-error: true
+        uses: ./
+        with:
+          max-tokens: 1
+          node-version: ''
+
+      - name: Check the budget failure
+        env:
+          OUTCOME: ${{ steps.over.outcome }}
+        run: test "$OUTCOME" = failure
