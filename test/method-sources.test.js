@@ -36,6 +36,24 @@ describe('MethodAnalyzer.extractMethodSources', () => {
     expect(methods.load).toBe('  load(): Item {\n    return {};\n  }');
   });
 
+  it('does not take braces in the parameter list for the body', () => {
+    const content = [
+      'class Logger {',
+      '  log(level, meta = {}) {',
+      '    return level;',
+      '  }',
+      '}',
+      'const pick = ({ a, b }) => {',
+      '  return a + b;',
+      '};',
+    ].join('\n');
+
+    const methods = sources(content, 'logger.js');
+
+    expect(methods.log).toBe('  log(level, meta = {}) {\n    return level;\n  }');
+    expect(methods.pick).toBe('const pick = ({ a, b }) => {\n  return a + b;\n};');
+  });
+
   it('keeps an expression-bodied arrow function to its own line', () => {
     const methods = sources(
       'const twice = (n) => n * 2\nfunction next() {\n  return 1;\n}\n',
