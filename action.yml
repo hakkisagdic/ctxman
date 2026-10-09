@@ -1,0 +1,117 @@
+# ctxman context check: a composite GitHub Action
+#
+#   - uses: hakkisagdic/ctxman@<ref>
+#     with:
+#       max-tokens: 50000
+#
+# Counts the tokens of a project (or of the files a pull request changed) with ctxman,
+# checks them against a budget and a model's context window, writes a job summary and can
+# export the LLM context file as an artifact. Docs: docs/commands/ci.md
+#
+# Inputs reach the scripts through `env:` only; scripts/action/run.mjs validates them.
+
+name: ctxman context check
+description: Count the LLM tokens of your code with ctxman, enforce a token budget, check the fit in a model's context window and export the context.
+author: Hakkı Sağdıç
+
+branding:
+  icon: layers
+  color: blue
+
+inputs:
+  path:
+    description: Directory to analyze, relative to the workspace. Must stay inside the workspace.
+    required: false
+    default: '.'
+  target-model:
+    description: Model id to check the context window of (see `ctxman --list-llms`), e.g. claude-sonnet-4.5. Sets the `fits` output.
+    required: false
+    default: ''
+  max-tokens:
+    description: Token budget. The step fails when the analyzed files hold more tokens.
+    required: false
+    default: ''
+  changed-since:
+    description: Only analyze files changed since this commit, branch or tag, e.g. github.event.pull_request.base.sha. Needs `path` to be the repository root and the commit in the checkout (actions/checkout with fetch-depth 0).
+    required: false
+    default: ''
+  method-level:
+    description: Run method-level analysis (true or false).
+    required: false
+    default: 'false'
+  export:
+    description: Write the LLM context file in this format - none, json, toon, markdown or xml.
+    required: false
+    default: none
+  upload-artifact:
+    description: Upload the context file (when `export` is set) and the JSON report as a workflow artifact (true or false).
+    required: false
+    default: 'false'
+  artifact-name:
+    description: Name of the uploaded artifact. Must be unique within the workflow run.
+    required: false
+    default: ctxman-context
+  node-version:
+    description: Node.js version to set up (22 or newer). Empty uses the Node.js already on the runner.
+    required: false
+    default: '22'
+  version:
+    description: ctxman version or npm dist-tag to run, e.g. 3.0.0 or latest. Empty runs the action's own checkout.
+    required: false
+    default: ''
+
+outputs:
+  total-tokens:
+    description: Tokens of the analyzed files (0 when changed-since matched no files).
+    value: ${{ steps.check.outputs.total-tokens }}
+  total-files:
+    description: Number of analyzed files.
+    value: ${{ steps.check.outputs.total-files }}
+  fits:
+    description: true or false, whether the files fit the context window of target-model; empty without target-model.
+    value: ${{ steps.check.outputs.fits }}
+  report-path:
+    description: Path of the JSON report (token-analysis-report.json) under RUNNER_TEMP; empty when changed-since matched no files.
+    value: ${{ steps.check.outputs.report-path }}
+  context-path:
+    description: Path of the exported context file under RUNNER_TEMP; empty when export is none.
+    value: ${{ steps.check.outputs.context-path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      if: inputs.node-version != ''
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Install ctxman
+      id: install
+      shell: bash
+      env:
+        CTXMAN_VERSION: ${{ inputs.version }}
+      run: bash "$GITHUB_ACTION_PATH/scripts/action/install.sh"
+
+    - name: Check context
+      id: check
+      shell: bash
+      env:
+        CTXMAN_CLI: ${{ steps.install.outputs.cli }}
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_TARGET_MODEL: ${{ inputs.target-model }}
+        INPUT_MAX_TOKENS: ${{ inputs.max-tokens }}
+        INPUT_CHANGED_SINCE: ${{ inputs.changed-since }}
+        INPUT_METHOD_LEVEL: ${{ inputs.method-level }}
+        INPUT_EXPORT: ${{ inputs.export }}
+      run: node "$GITHUB_ACTION_PATH/scripts/action/run.mjs"
+
+    # Also after an exceeded budget, so the report of the failing run can be inspected
+    - name: Upload context artifact
+      if: ${{ !cancelled() && inputs.upload-artifact == 'true' && steps.check.outputs.output-dir != '' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ steps.check.outputs.output-dir }}
+        if-no-files-found: ignore
+        retention-days: 14
