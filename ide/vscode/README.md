@@ -65,7 +65,7 @@ Configure the extension in VS Code settings:
 
 | Setting                  | Type    | Default                       | Description                                     |
 | ------------------------ | ------- | ----------------------------- | ----------------------------------------------- |
-| `ctxman.targetModel`     | string  | `gpt-4`                       | Target LLM model for token estimation           |
+| `ctxman.targetModel`     | string  | `claude-sonnet-5-5`           | Any model id from `ctxman --list-llms`          |
 | `ctxman.budget`          | number  | `100000`                      | Token budget for alerts                         |
 | `ctxman.defaultTemplate` | string  | `feature`                     | Default context template                        |
 | `ctxman.excludePatterns` | array   | `["**/node_modules/**", ...]` | File patterns to exclude                        |
@@ -84,7 +84,7 @@ Configure the extension in VS Code settings:
 ## Requirements
 
 - VS Code 1.85.0 or higher
-- Node.js 20.0.0 or higher
+- Node.js 22 or newer
 - Ctxman CLI installed globally or accessible via npx
 
 ## Keyboard Shortcuts

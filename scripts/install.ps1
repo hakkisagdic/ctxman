@@ -27,14 +27,14 @@ try {
     Write-Host "✓ Node.js $nodeVersion detected" -ForegroundColor Green
 } catch {
     Write-Host "✗ Node.js is not installed!" -ForegroundColor Red
-    Write-Host "  Please install Node.js 14+ from: https://nodejs.org" -ForegroundColor Yellow
+    Write-Host "  Please install Node.js 22+ from: https://nodejs.org" -ForegroundColor Yellow
     exit 1
 }
 
 # Check Node.js version
 $versionNumber = $nodeVersion.TrimStart('v').Split('.')[0]
-if ([int]$versionNumber -lt 14) {
-    Write-Host "✗ Node.js version 14+ required (current: $nodeVersion)" -ForegroundColor Red
+if ([int]$versionNumber -lt 22) {
+    Write-Host "✗ Node.js version 22+ required (current: $nodeVersion)" -ForegroundColor Red
     exit 1
 }
 

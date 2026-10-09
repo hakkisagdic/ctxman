@@ -12,6 +12,7 @@ Ctxman projesine katkıda bulunma ilginiz için teşekkür ederiz! Bu belge, pro
 - [Pull Request Süreci](#pull-request-süreci)
 - [Test Gereksinimleri](#test-gereksinimleri)
 - [Dokümantasyon](#dokümantasyon)
+- [Sürüm Yayınlama](#sürüm-yayınlama)
 
 ## Davranış Kuralları
 
@@ -21,7 +22,7 @@ Bu projeye katılarak [Davranış Kuralları](CODE_OF_CONDUCT.md) maddelerine uy
 
 ### Ön Gereksinimler
 
-- **Node.js**: Sürüm 20.0.0 veya üzeri
+- **Node.js**: Sürüm 22 veya üzeri (22 LTS ve 24 LTS ile test edilir; bkz. `.nvmrc`)
 - **npm**: Node.js ile birlikte gelir
 - **Git**: Sürüm kontrolü için
 
@@ -378,6 +379,22 @@ test/
 2. `-tr` soneki ile Türkçe çeviri oluşturun
 3. Yeni dokümanlara link vermek için README.md'yi güncelleyin
 4. Mevcut doküman yapısını takip edin
+
+## Sürüm Yayınlama
+
+Sürümler `main` üzerinden bir sürüm etiketi push edilerek çıkarılır; yalnızca bakımcılar içindir.
+
+1. Bir dalda, etiket oluşturmadan sürümü artırın: `npm version minor --no-git-tag-version`
+   (veya `patch` / `major`).
+2. `CHANGELOG.md` içinde `## [Unreleased]` başlığını `## [X.Y.Z] - YYYY-MM-DD` olarak değiştirin ve
+   üstüne boş bir `## [Unreleased]` bölümü açın. PR açın, CI yeşil olunca birleştirin.
+3. Birleştirme commit'ini etiketleyip etiketi push edin: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+
+Etiket push'u iki iş akışını başlatır. `release.yml` etiketin `package.json` ile eşleştiğini
+denetler, lint ve testleri çalıştırır ve CHANGELOG'daki `## [X.Y.Z]` bölümünü not olarak kullanıp
+GitHub Release oluşturur. `npm-publish.yml` npm Trusted Publishing (OIDC) ile provenance'lı
+yayınlar; sürüm registry'de zaten varsa atlar. `ctxman update` GitHub Release'leri okuduğu için her
+npm sürümünün bir etiketi olmalıdır.
 
 ## Yardım Alma
 

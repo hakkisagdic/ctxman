@@ -83,9 +83,11 @@ describe('FormatRegistry Coverage', () => {
   });
 
   describe('Encoding', () => {
-    test('encode delegates to formatter', () => {
-      const result = registry.encode('toon', { data: 'test' });
-      expect(result).toBe('TOON_ENCODED');
+    test('encodes TOON with the official encoder', () => {
+      expect(registry.encode('toon', { data: 'test' })).toBe('data: test');
+      expect(registry.encode('toon', { paths: { 'src/': ['a.js', 'b.js'] } })).toBe(
+        'paths:\n  "src/"[2]: a.js,b.js'
+      );
     });
 
     test('encode JSON format', () => {

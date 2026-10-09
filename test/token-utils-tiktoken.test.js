@@ -19,23 +19,41 @@ describe('TokenUtils tiktoken Coverage', () => {
   });
 
   test('calculate falls back to estimate on tiktoken error', async () => {
-    // Import tiktoken to manipulate
+    // TokenUtils caches its encoder, so load a fresh copy that has not built one yet
+    vi.resetModules();
     const tiktoken = await import('tiktoken');
+    const { default: FreshTokenUtils } = await import('../lib/utils/token-utils.js');
+
     const originalGet = tiktoken.default.get_encoding;
 
     // Make tiktoken throw error
-    tiktoken.default.get_encoding = vi.fn(() => {
+    const failingGet = vi.fn(() => {
       throw new Error('tiktoken error');
     });
+    tiktoken.default.get_encoding = failingGet;
 
-    const text = 'fallback test content';
-    const tokens = TokenUtils.calculate(text, 'test.js');
+    try {
+      const text = 'fallback test content';
+      const tokens = FreshTokenUtils.calculate(text, 'test.js');
 
-    // Should fall back to estimate
-    expect(tokens).toBeGreaterThan(0);
+      // Should fall back to estimate
+      expect(failingGet).toHaveBeenCalled();
+      expect(tokens).toBe(FreshTokenUtils.estimate(text, 'test.js'));
+    } finally {
+      tiktoken.default.get_encoding = originalGet;
+    }
+  });
 
-    // Restore
-    tiktoken.default.get_encoding = originalGet;
+  test('calculate builds the tiktoken encoder once and reuses it', async () => {
+    vi.resetModules();
+    const tiktoken = await import('tiktoken');
+    const { default: FreshTokenUtils } = await import('../lib/utils/token-utils.js');
+    tiktoken.default.get_encoding.mockClear();
+
+    FreshTokenUtils.calculate('first file content', 'a.js');
+    FreshTokenUtils.calculate('second file content', 'b.js');
+
+    expect(tiktoken.default.get_encoding).toHaveBeenCalledTimes(1);
   });
 
   test('getMethodForModel handles unknown model gracefully', async () => {

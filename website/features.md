@@ -102,9 +102,11 @@ Traditional command-line interface for power users:
 
 Accurate token counting for LLM planning:
 
-- **tiktoken Integration**: GPT-4 compatible
-- **Multiple Models**: Support for various LLM tokenizers
-- **Exact Counts**: No estimation, actual token counts
+- **Per model**: `--target-model` picks the encoding (`o200k_base` for current OpenAI models,
+  `cl100k_base` otherwise); counts for models with their own tokenizer are marked approximate
+- **Exact for Claude**: `ctxman count --model claude-opus-5-5 --api` asks Anthropic's
+  count_tokens API (free; secrets are redacted first)
+- **Current models**: `ctxman --list-llms` lists windows, output limits and prices of 40+ models
 - **Per-File Analysis**: Detailed breakdown
 
 ### Multi-Language Support
@@ -196,14 +198,13 @@ Speed up repeated analyses:
 - **Cache Invalidation**: Manual or automatic
 - **Memory Efficient**: Low overhead
 
-### Parallel Processing
+### Measured Speed
 
-Handle large codebases efficiently:
+Handle large codebases efficiently (4-vCPU Linux VM, Node.js 22):
 
-- **Multi-Core Utilization**: Use all available cores
-- **Batch Processing**: Group files for efficiency
+- **Fast Scanning**: ~1,900 files discovered with ignore rules in ~75 ms
+- **Token Counting**: 1,135 files / 2.6M tokens counted with tiktoken in ~6 s
 - **Progress Reporting**: Track analysis progress
-- **5-10x Faster**: Significant speed improvements
 
 ## 🔧 Configuration
 

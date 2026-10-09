@@ -488,7 +488,7 @@ node bin/cli.js --dashboard
 
 If wizard/dashboard still don't work after installing dependencies:
 
-1. Check Node.js version: `node --version` (should be 14+)
+1. Check Node.js version: `node --version` (should be 22+)
 2. Check terminal: `echo $TERM`
 3. Open issue: https://github.com/hakkisagdic/ctxman/issues
 

@@ -102,9 +102,11 @@ Yeni başlayanlar için kullanıcı dostu rehberli kurulum:
 
 LLM planlaması için doğru token sayımı:
 
-- **tiktoken Entegrasyonu**: GPT-4 uyumlu
-- **Çoklu Model**: Çeşitli LLM tokenizer'ları için destek
-- **Kesin Sayılar**: Tahmin yok, gerçek token sayıları
+- **Modele göre**: `--target-model` kodlamayı seçer (güncel OpenAI modelleri için `o200k_base`,
+  diğerleri için `cl100k_base`); kendi tokenizer'ı olan modellerin sayıları yaklaşık olarak işaretlenir
+- **Claude için birebir**: `ctxman count --model claude-opus-5-5 --api`, Anthropic'in count_tokens
+  API'sine sorar (ücretsiz; sırlar önce maskelenir)
+- **Güncel modeller**: `ctxman --list-llms`, 40'tan fazla modelin pencere, çıktı sınırı ve fiyatını listeler
 - **Dosya Başı Analiz**: Ayrıntılı döküm
 
 ### Çoklu Dil Desteği
@@ -196,14 +198,13 @@ Tekrarlanan analizleri hızlandırın:
 - **Önbellek Geçersiz Kılma**: Manuel veya otomatik
 - **Bellek Verimli**: Düşük ek yük
 
-### Paralel İşleme
+### Ölçülen Hız
 
-Büyük kod tabanlarını verimli yönetin:
+Büyük kod tabanlarını verimli yönetin (4 vCPU'lu Linux VM, Node.js 22):
 
-- **Çok Çekirdek Kullanımı**: Tüm kullanılabilir çekirdekleri kullan
-- **Toplu İşleme**: Verimlilik için dosyaları grupla
+- **Hızlı Tarama**: ignore kurallarıyla ~1.900 dosya ~75 ms'de bulunur
+- **Token Sayımı**: 1.135 dosya / 2,6M token tiktoken ile ~6 sn'de sayılır
 - **İlerleme Raporlama**: Analiz ilerlemesini izle
-- **5-10 Kat Daha Hızlı**: Önemli hız iyileştirmeleri
 
 ## 🔧 Yapılandırma
 

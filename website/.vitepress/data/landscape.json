@@ -1,0 +1,171 @@
+{
+  "checked": "2026-10-09",
+  "roadmapUrl": "https://github.com/hakkisagdic/ctxman/issues/34",
+  "legend": {
+    "en": {
+      "yes": "Yes",
+      "partial": "Partly or limited",
+      "no": "No",
+      "unknown": "Not documented",
+      "note": "hover for details"
+    },
+    "tr": {
+      "yes": "Evet",
+      "partial": "Kısmen veya sınırlı",
+      "no": "Hayır",
+      "unknown": "Belgelenmemiş",
+      "note": "ayrıntı için üzerine gelin"
+    }
+  },
+  "columns": [
+    {
+      "id": "ctxman",
+      "name": "ctxman",
+      "kind": { "en": "open source, local", "tr": "açık kaynak, yerel" },
+      "landing": true,
+      "url": "https://github.com/hakkisagdic/ctxman"
+    }
+  ],
+  "groups": [
+    { "id": "context", "label": { "en": "Context", "tr": "Bağlam" } },
+    { "id": "interfaces", "label": { "en": "Interfaces", "tr": "Arayüzler" } },
+    { "id": "enterprise", "label": { "en": "Deployment and governance", "tr": "Kurulum ve yönetişim" } }
+  ],
+  "rows": [
+    {
+      "id": "local",
+      "group": "context",
+      "landing": true,
+      "label": { "en": "Code never leaves your machine", "tr": "Kod makinenizden çıkmaz" },
+      "values": { "ctxman": "yes" }
+    },
+    {
+      "id": "exact_tokens",
+      "group": "context",
+      "landing": true,
+      "label": { "en": "Exact token counts per file and method", "tr": "Dosya ve metot başına birebir token" },
+      "values": { "ctxman": "yes" }
+    },
+    {
+      "id": "budget",
+      "group": "context",
+      "landing": true,
+      "label": { "en": "Token budget and window-fit check", "tr": "Token bütçesi ve pencereye sığma kontrolü" },
+      "values": { "ctxman": "yes" }
+    },
+    {
+      "id": "rules",
+      "group": "context",
+      "landing": false,
+      "label": { "en": "Include/exclude rules in the repository", "tr": "Repoda include/exclude kuralları" },
+      "values": { "ctxman": "yes" }
+    },
+    {
+      "id": "redaction",
+      "group": "context",
+      "landing": true,
+      "label": { "en": "Secret redaction before export", "tr": "Dışa aktarmadan önce sır maskeleme" },
+      "values": { "ctxman": "yes" }
+    },
+    {
+      "id": "semantic",
+      "group": "context",
+      "landing": true,
+      "label": { "en": "Semantic search over the codebase", "tr": "Kod tabanında anlamsal arama" },
+      "values": { "ctxman": "partial" },
+      "notes": {
+        "ctxman": {
+          "en": "`ctxman ask` with optional dependencies; MCP search_code is regex or substring",
+          "tr": "İsteğe bağlı bağımlılıklarla `ctxman ask`; MCP search_code regex veya alt dize"
+        }
+      }
+    },
+    {
+      "id": "multi_repo",
+      "group": "context",
+      "landing": true,
+      "label": { "en": "Organisation-wide, multi-repository context", "tr": "Kurum çapında, çok repolu bağlam" },
+      "values": { "ctxman": "partial" },
+      "notes": {
+        "ctxman": {
+          "en": "--multi-repo combines configured local repositories; no shared index",
+          "tr": "--multi-repo yapılandırılmış yerel repoları birleştirir; ortak indeks yok"
+        }
+      }
+    },
+    {
+      "id": "mcp",
+      "group": "interfaces",
+      "landing": true,
+      "label": { "en": "MCP server", "tr": "MCP sunucusu" },
+      "values": { "ctxman": "yes" }
+    },
+    {
+      "id": "cli",
+      "group": "interfaces",
+      "landing": false,
+      "label": { "en": "CLI", "tr": "CLI" },
+      "values": { "ctxman": "yes" }
+    },
+    {
+      "id": "sso",
+      "group": "enterprise",
+      "landing": true,
+      "label": { "en": "SSO, SCIM and role-based access", "tr": "SSO, SCIM ve rol tabanlı erişim" },
+      "values": { "ctxman": "no" }
+    },
+    {
+      "id": "self_hosted",
+      "group": "enterprise",
+      "landing": true,
+      "label": { "en": "Self-hosted or air-gapped", "tr": "Kendi sunucunuzda veya internetsiz" },
+      "values": { "ctxman": "yes" }
+    },
+    {
+      "id": "open_source",
+      "group": "enterprise",
+      "landing": true,
+      "label": { "en": "Open source", "tr": "Açık kaynak" },
+      "values": { "ctxman": "yes" }
+    }
+  ],
+  "sources": {},
+  "roadmap": [
+    {
+      "id": "P7",
+      "landing": true,
+      "title": { "en": "One-step MCP setup", "tr": "Tek adımda MCP kurulumu" },
+      "body": {
+        "en": "`ctxman mcp` and `ctxman mcp install` write the Claude Desktop and Claude Code configuration for you.",
+        "tr": "`ctxman mcp` ve `ctxman mcp install`, Claude Desktop ve Claude Code yapılandırmasını sizin için yazar."
+      }
+    },
+    {
+      "id": "P2",
+      "landing": true,
+      "title": { "en": "Model-accurate token counts", "tr": "Modele göre birebir token sayımı" },
+      "body": {
+        "en": "The right encoding for each model family, exact counts in the default install, and Claude counts through the API on request.",
+        "tr": "Her model ailesi için doğru kodlama, varsayılan kurulumda birebir sayım ve istenirse Claude için API ile sayım."
+      }
+    },
+    {
+      "id": "P3",
+      "landing": true,
+      "title": { "en": "`--budget` with content", "tr": "İçerikli `--budget`" },
+      "body": {
+        "en": "Pack the highest-ranked files and methods into a token budget from the CLI, and export their content as Claude-ready XML.",
+        "tr": "En üst sıradaki dosya ve metotları CLI'den bir token bütçesine sığdırın ve içeriklerini Claude'a hazır XML olarak dışa aktarın."
+      }
+    },
+    {
+      "id": "P4",
+      "landing": true,
+      "title": { "en": "One-command PR context", "tr": "Tek komutla PR bağlamı" },
+      "body": {
+        "en": "Diff, changed methods and related tests of a branch, packed for review.",
+        "tr": "Bir dalın diff'i, değişen metotları ve ilgili testleri, incelemeye hazır paketlenmiş halde."
+      }
+    }
+  ]
+}

@@ -2,6 +2,17 @@
 
 Bu belge, Ctxman v3.0.0 için kapsamlı performans kıyaslamaları sunar. Tüm ölçümler, standart bir geliştirme makinesinde Node.js 22.x kullanılarak gerçek dünya kod tabanlarında gerçekleştirilmiştir.
 
+> **Not (2026-10):** aşağıdaki tablolar yeniden üretilemedi; ölçüm değil hedef olarak okunmalı.
+> 4 vCPU'lu bir Linux VM'de, Node.js 22.22 ve kurulu tiktoken ile ölçülen değerler:
+>
+> | İş yükü                                      | Dosya               | Token | Süre   |
+> | -------------------------------------------- | ------------------- | ----- | ------ |
+> | Yalnız tarama (`Scanner`)                    | 2.578 içinden 1.894 | -     | ~75 ms |
+> | Tarama + token sayımı (`Scanner`+`Analyzer`) | 1.135               | 2,60M | 6,1 sn |
+> | Tarama + token sayımı, ctxman reposu         | 399                 | 1,40M | 2,6 sn |
+>
+> Analiz tek iş parçacığında çalışır; `lib/cache/CacheManager.js` henüz CLI tarafından kullanılmıyor.
+
 ## İçindekiler
 
 - [Test Ortamı](#test-ortamı)
@@ -386,7 +397,7 @@ console.log('Token:', result.stats.totalTokens);
 
 Sürümler arası performans gerilemelerini takip ediyoruz. Önemli yavaşlamalar fark ederseniz:
 
-1. Node.js sürümünü kontrol edin (v20+ önerilir)
+1. Node.js sürümünü kontrol edin (v22+ gerekli)
 2. Önbelleği temizleyin: `ctxman --clear-cache`
 3. tiktoken kurulumunu doğrulayın
 4. Kıyaslama verileriyle sorun bildirin

@@ -64,6 +64,47 @@ describe('MethodAnalyzer Coverage', () => {
       expect(result.map((m) => m.name)).toEqual(['arrow', 'asyncArrow']);
     });
 
+    test('extracts typed TypeScript arrow functions', () => {
+      const content = `export const tsArrow = (s: string): string => s;
+const sumValues = (values: number[]): number => values.reduce((a, b) => a + b, 0);
+const load = async (id: string): Promise<User | null> => {
+  return null;
+};
+export const handler: Handler<Req, Res> = async (event) => {};
+const multiLine = (
+  a: string,
+  b: number
+): { a: string } => ({ a });
+`;
+      const result = analyzer.extractMethods(content, 'test.ts');
+      expect(result.map((m) => `${m.name}@${m.line}`)).toEqual([
+        'tsArrow@1',
+        'sumValues@2',
+        'load@3',
+        'handler@6',
+        'multiLine@7',
+      ]);
+    });
+
+    test('does not report typed variables, calls or ternaries as arrow functions', () => {
+      const content = `if (ready) {
+  run();
+}
+const total: number = compute(a, b);
+const label = (flag) ? 'on' : 'off';
+let maybe: string | undefined;
+const typed: Map<string, number> = new Map();
+items.map((item): Item => item);
+const loaded = (opts.path ? import(
+  opts.path
+) : Promise.resolve()).catch((cause) => {
+  throw cause;
+});
+`;
+      const result = analyzer.extractMethods(content, 'test.ts');
+      expect(result.map((m) => m.name)).toEqual([]);
+    });
+
     test('extracts accessors', () => {
       const content = `
                 class Foo {
@@ -84,6 +125,31 @@ describe('MethodAnalyzer Coverage', () => {
             `;
       const result = analyzer.extractMethods(content, 'test.js');
       expect(result.map((m) => m.name)).toEqual(['method', 'asyncMethod']);
+    });
+
+    test('extracts typescript class methods with a return type', () => {
+      const content = `
+class UserService {
+  getUser(id: string): User {
+    return this.users[id];
+  }
+  private save(): void {}
+  async load(ids: string[]): Promise<Map<string, User>> {
+    return new Map();
+  }
+}
+`;
+      const result = analyzer.extractMethods(content, 'test.ts');
+      expect(result.map((m) => m.name)).toEqual(['getUser', 'save', 'load']);
+    });
+
+    test('does not take ternaries or template text for typed methods', () => {
+      const content = `
+const extra = enabled ? pick(options) : {};
+const message = \`Format error (\${format}): \${error.message}\`;
+`;
+      const result = analyzer.extractMethods(content, 'test.ts');
+      expect(result.map((m) => m.name)).toEqual([]);
     });
 
     test('ignores keywords', () => {
@@ -255,22 +321,29 @@ describe('MethodAnalyzer Coverage', () => {
     });
 
     test('extracts init', () => {
-      const content = `
-                init() {}
-                convenience init() {}
-            `;
-      const _result = analyzer.extractMethods(content, 'test.swift');
-      // The regex for init captures nothing in group 1 because 'init' is the keyword itself
-      // Wait, looking at regex: `init\\s*\\(`, type: 'init'
-      // processPatterns expects match[1] for methodName.
-      // The regex for init does NOT have a capturing group for the name (since name is init).
-      // This might be a bug or intended behavior where name is undefined?
-      // Let's check processPatterns logic.
-      // if (type === 'accessor') ... else methodName = match[1];
-      // If match[1] is undefined, methodName is undefined.
-      // if (methodName && keywordCheck) ...
-      // So 'init' might be skipped!
-      // Let's verify this behavior.
+      const content = `class View: UIView {
+    init() {}
+    convenience init(name: String) { self.init() }
+    required init?(coder: NSCoder) { super.init(coder: coder) }
+    public init<T>(value: T) {}
+}
+`;
+      const result = analyzer.extractMethods(content, 'test.swift');
+      expect(result.map((m) => `${m.name}@${m.line}`)).toEqual([
+        'init@2',
+        'init@3',
+        'init@4',
+        'init@5',
+      ]);
+    });
+
+    test('does not report init calls or names ending in init as initializers', () => {
+      const content = `func reinit() {}
+let view = View.init(frame: .zero)
+super.init(coder: coder)
+`;
+      const result = analyzer.extractMethods(content, 'test.swift');
+      expect(result.map((m) => m.name)).toEqual(['reinit']);
     });
 
     test('ignores keywords', () => {

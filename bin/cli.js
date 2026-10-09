@@ -3,7 +3,7 @@
 import { TokenAnalyzer } from '../index.js';
 import FormatRegistry from '../lib/formatters/format-registry.js';
 import FormatConverter from '../lib/utils/format-converter.js';
-import { LLMDetector } from '../lib/utils/llm-detector.js';
+import { LLMDetector, DEFAULT_TARGET_MODEL } from '../lib/utils/llm-detector.js';
 import { LLMCostEstimator } from '../lib/utils/llm-cost-estimator.js';
 import APIServer from '../lib/api/rest/server.js';
 import FileWatcher from '../lib/watch/FileWatcher.js';
@@ -17,9 +17,9 @@ import { ImportTracker } from '../lib/analyzers/import-tracker.js';
 import MultiRepoManager from '../lib/utils/multi-repo-manager.js';
 import SnapshotManager from '../lib/utils/snapshot-manager.js';
 import ContextVersioning from '../lib/utils/context-versioning.js';
-import { execSync } from 'child_process';
+import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+import { dirname, resolve, sep } from 'path';
 import { readFileSync } from 'fs';
 
 // ESM equivalents for __dirname and __filename
@@ -29,8 +29,30 @@ const __dirname = dirname(__filename);
 // Load package.json
 const pkg = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf-8'));
 
+// Run one of the bin/cm-*.js subcommand scripts with the remaining arguments
+function runSubcommand(script, scriptArgs) {
+  const result = spawnSync(process.execPath, [resolve(__dirname, script), ...scriptArgs], {
+    stdio: 'inherit',
+  });
+  process.exitCode = result.status ?? 1;
+}
+
 async function main() {
   const args = process.argv.slice(2);
+  // Subcommands count only in first position, so a word inside an unquoted `ask` query or
+  // an option value (`--profile serve`) does not switch commands
+  const command = args[0]?.startsWith('-') ? null : args[0];
+
+  // Before --help: the github command prints its own help
+  if (command === 'github' || command === 'git') {
+    runSubcommand('./cm-gitingest.js', args.slice(1));
+    return;
+  }
+
+  if (command === 'count') {
+    runSubcommand('./cm-count.js', args.slice(1));
+    return;
+  }
 
   if (args.includes('--help') || args.includes('-h')) {
     printHelp();
@@ -40,6 +62,24 @@ async function main() {
   // Check for version flag
   if (args.includes('--version')) {
     console.log(`Ctxman v${pkg.version}`);
+    return;
+  }
+
+  // Check for RAG 'ask' mode (v3.1.0); the rest of the arguments are the query
+  if (command === 'ask') {
+    runSubcommand('./cm-ask.js', args.slice(1));
+    return;
+  }
+
+  if (command === 'update') {
+    runSubcommand('./cm-update.js', args.slice(1));
+    return;
+  }
+
+  // Digest from an existing report/context file, handled by the legacy entry point's code
+  if (args.includes('--gitingest-from-report') || args.includes('--gitingest-from-context')) {
+    const { main: runLegacy } = await import('../ctxman.js');
+    await runLegacy(args);
     return;
   }
 
@@ -75,7 +115,7 @@ async function main() {
 
   // Check for LLM model listing (v2.3.7)
   if (args.includes('--list-llms')) {
-    listLLMs();
+    listLLMs(args);
     return;
   }
 
@@ -162,42 +202,25 @@ async function main() {
   }
 
   // Check for format conversion mode (v2.3.2)
-  if (args.includes('convert')) {
+  if (command === 'convert') {
     runFormatConversion(args);
     return;
   }
 
   // Check for init command (FEAT-001: Configuration Wizard)
-  if (args.includes('init')) {
+  if (command === 'init') {
     await runInitWizard(args);
     return;
   }
 
-  // Check for GitHub GitIngest mode (v2.3.6+)
-  if (args.includes('github') || args.includes('git')) {
-    const commandPath = resolve(__dirname, './cm-gitingest.js');
-    const gitArgs = args.filter((arg) => arg !== 'github' && arg !== 'git');
-    execSync(`node "${commandPath}" ${gitArgs.join(' ')}`, { stdio: 'inherit' });
-    return;
-  }
-
-  // Check for RAG 'ask' mode (v3.1.0)
-  if (args.includes('ask')) {
-    const commandPath = resolve(__dirname, './cm-ask.js');
-    const askArgs = args.filter((arg) => arg !== 'ask');
-    // Pass remaining args as the query
-    execSync(`node "${commandPath}" "${askArgs.join(' ')}"`, { stdio: 'inherit' });
-    return;
-  }
-
   // Check for API server mode (v3.0.0)
-  if (args.includes('serve')) {
+  if (command === 'serve') {
     await runAPIServer(args);
     return;
   }
 
   // Check for watch mode (v3.0.0)
-  if (args.includes('watch')) {
+  if (command === 'watch') {
     await runWatchMode(args);
     return;
   }
@@ -207,7 +230,7 @@ async function main() {
     try {
       await runDashboard();
       return;
-    } catch (_error) {
+    } catch (error) {
       console.error('⚠️  Live dashboard failed.');
       console.error('   Error:', error.message);
       console.error('   Falling back to standard mode...\n');
@@ -226,7 +249,7 @@ async function main() {
     try {
       await runWizard();
       return;
-    } catch (_error) {
+    } catch (error) {
       // If wizard fails, fall through to normal mode
       console.error('⚠️  Interactive wizard mode failed.');
       console.error('   Error:', error.message);
@@ -253,7 +276,7 @@ async function main() {
         // Use template's target model if not explicitly set
         targetModel: options.targetModel || templateConfig.targetModel,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error(`❌ Template error: ${error.message}`);
       process.exit(1);
     }
@@ -275,7 +298,7 @@ async function main() {
         targetModel: options.targetModel || profileConfig.targetModel,
         methodLevel: options.methodLevel || profileConfig.methodLevel,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error(`❌ Profile error: ${error.message}`);
       process.exit(1);
     }
@@ -316,6 +339,7 @@ function parseArguments(args) {
     // Analysis options
     methodLevel: args.includes('--method-level') || args.includes('-m'),
     gitingest: args.includes('--gitingest') || args.includes('-g'),
+    redactSecrets: !args.includes('--no-redact'),
     aiSuggest: args.includes('--ai-suggest'), // FEAT-005: AI suggestions
 
     // Profile options (FEAT-004)
@@ -334,8 +358,6 @@ function parseArguments(args) {
     // Git options (v3.0.0)
     changedOnly: args.includes('--changed-only'),
     changedSince: getChangedSince(args),
-    withAuthors: args.includes('--with-authors'),
-    withHistory: args.includes('--with-history'),
 
     // Multi-repo options (FEAT-006)
     multiRepo: args.includes('--multi-repo'),
@@ -360,7 +382,7 @@ function getOutputFormat(args) {
   if (formatIndex !== -1 && args[formatIndex + 1]) {
     return args[formatIndex + 1];
   }
-  return 'toon'; // Default to TOON format in v2.3.0
+  return null; // Not set: context exports stay JSON (llm-context.json)
 }
 
 function getChunkStrategy(args) {
@@ -398,11 +420,13 @@ function getTargetModel(args) {
   return null; // No model specified
 }
 
-function listLLMs() {
-  console.log('\n📋 Supported LLM Models (v2.3.7):\n');
-  console.log('═'.repeat(70));
+function listLLMs(args = []) {
+  const includeRetired = args.includes('--all');
+  const models = LLMDetector.getModelList({ includeRetired });
+  const checked = LLMDetector.getDataDate();
 
-  const models = LLMDetector.getModelList();
+  console.log(`\n📋 Supported LLM Models${checked ? ` (checked ${checked})` : ''}:\n`);
+  console.log('═'.repeat(78));
 
   // Group by vendor
   const byVendor = {};
@@ -413,24 +437,35 @@ function listLLMs() {
     byVendor[model.vendor].push(model);
   });
 
+  const size = (tokens) =>
+    !tokens
+      ? '-'
+      : tokens >= 1000000
+        ? `${+(tokens / 1000000).toFixed(2)}M`
+        : `${Math.floor(tokens / 1000)}K`;
+  const price = (pricing) => (pricing ? `$${pricing.input}/$${pricing.output}` : '-');
+
   // Display by vendor
   Object.entries(byVendor).forEach(([vendor, models]) => {
     console.log(`\n${vendor}:`);
+    console.log(
+      `  ${'ID'.padEnd(26)} ${'Context'.padStart(7)} ${'Output'.padStart(7)}  ${'$ in/out per 1M'.padEnd(16)} Status`
+    );
     models.forEach((model) => {
-      const contextDisplay =
-        model.contextWindow >= 1000000
-          ? `${(model.contextWindow / 1000000).toFixed(1)}M`
-          : `${Math.floor(model.contextWindow / 1000)}k`;
-      console.log(`  ${model.id.padEnd(25)} ${model.name.padEnd(25)} (${contextDisplay} context)`);
+      const status = model.status === 'active' ? '' : model.status;
+      console.log(
+        `  ${model.id.padEnd(26)} ${size(model.contextWindow).padStart(7)} ${size(model.outputWindow).padStart(7)}  ${price(model.pricing).padEnd(16)} ${status}`
+      );
     });
   });
 
-  console.log('\n' + '═'.repeat(70));
+  console.log('\n' + '═'.repeat(78));
   console.log('\nUsage:');
   console.log('  ctxman --target-model <MODEL_ID>');
   console.log('  ctxman --auto-detect-llm');
+  console.log('  ctxman --list-llms --all      Include models the provider has retired');
   console.log('\nExample:');
-  console.log('  ctxman --target-model claude-sonnet-4.5');
+  console.log(`  ctxman --target-model ${DEFAULT_TARGET_MODEL}`);
   console.log('  ctxman --auto-detect-llm --cli\n');
 }
 
@@ -502,7 +537,7 @@ function printStartupInfo(options) {
 
 function printHelp() {
   console.log(
-    'Ctxman v3.0.0 - AI Development Platform with Plugin Architecture and Git Integration'
+    `Ctxman v${pkg.version} - AI Development Platform with Plugin Architecture and Git Integration`
   );
   console.log();
   console.log('Usage: ctxman [options]');
@@ -532,10 +567,13 @@ function printHelp() {
   console.log('  -v, --verbose            Show all included files');
   console.log('  -m, --method-level       Enable method-level analysis');
   console.log('  -g, --gitingest          Generate GitIngest-style digest');
+  console.log('  --no-redact              Keep API keys/tokens/private keys in the digest');
   console.log('  --ai-suggest             Get AI-powered context optimization suggestions');
   console.log();
   console.log('Output Options (v2.3.0):');
-  console.log('  -o, --output FORMAT      Output format (default: toon)');
+  console.log(
+    '  -o, --output FORMAT      Format of --context-export/--context-clipboard (default: json)'
+  );
   console.log(
     '                           Formats: toon, json, yaml, csv, xml, markdown, gitingest'
   );
@@ -554,7 +592,9 @@ function printHelp() {
   console.log('  --chunk-size TOKENS      Max tokens per chunk (default: 100000)');
   console.log();
   console.log('LLM Optimization (v2.3.7):');
-  console.log('  --target-model MODEL     Optimize for specific LLM (e.g., claude-sonnet-4.5)');
+  console.log(
+    '  --target-model MODEL     Optimize for specific LLM (e.g., claude-sonnet-5-5, gpt-5)'
+  );
   console.log('  --auto-detect-llm        Auto-detect LLM from environment variables');
   console.log('  --list-llms              List all supported LLM models');
   console.log();
@@ -597,13 +637,13 @@ function printHelp() {
   console.log('Git Integration (v3.0.0):');
   console.log('  --changed-only           Analyze only files with uncommitted changes');
   console.log('  --changed-since REF      Analyze files changed since commit/branch');
-  console.log('  --with-authors           Include author information');
-  console.log('  --with-history           Include commit history');
   console.log();
   console.log('Platform Features (v3.0.0):');
   console.log('  serve [options]          Start REST API server');
   console.log('    --port PORT            Server port (default: 3000)');
   console.log('    --auth-token TOKEN     API authentication token');
+  console.log('    --host HOST            Address to bind (default: localhost)');
+  console.log('    --cors                 Send CORS headers (off by default)');
   console.log('  watch [options]          Watch mode with auto-analysis');
   console.log('    --debounce MS          Debounce delay (default: 1000ms)');
   console.log();
@@ -639,6 +679,13 @@ function printHelp() {
   console.log('    ctxman github facebook/react');
   console.log('    ctxman github https://github.com/vercel/next.js --branch canary');
   console.log('    ctxman git angular/angular -o docs/angular.txt');
+  console.log();
+  console.log('Other Commands:');
+  console.log('  count [path|-] [--model ID] [--api]');
+  console.log('                           Count tokens for a model (exact for Claude with --api)');
+  console.log('  ask QUESTION             Answer a question from the indexed codebase');
+  console.log('  update [check|install|rollback|channel NAME|info]');
+  console.log('                           Check for and manage ctxman updates');
   console.log();
   console.log('Examples:');
   console.log('  ctxman                                  # Launch interactive wizard (DEFAULT)');
@@ -730,7 +777,7 @@ function createProfile(args) {
     config: {
       exclude: ['**/*.test.js', '**/*.spec.js', 'node_modules/**'],
       include: ['src/**', 'lib/**'],
-      targetModel: 'claude-sonnet-4.5',
+      targetModel: DEFAULT_TARGET_MODEL,
       methodLevel: false,
     },
   };
@@ -740,7 +787,7 @@ function createProfile(args) {
     console.log(`\n✅ Created profile '${profileName}'`);
     console.log(`   Location: ${filePath}\n`);
     console.log('   Edit the file to customize your team configuration.\n');
-  } catch (_error) {
+  } catch (error) {
     console.error(`❌ Failed to create profile: ${error.message}`);
     process.exit(1);
   }
@@ -761,7 +808,7 @@ function exportProfile(args) {
   try {
     const profile = manager.export(profileName);
     console.log(JSON.stringify(profile, null, 2));
-  } catch (_error) {
+  } catch (error) {
     console.error(`❌ Failed to export profile: ${error.message}`);
     process.exit(1);
   }
@@ -775,7 +822,20 @@ async function runAPIServer(args) {
   const authToken =
     authTokenIndex !== -1 && args[authTokenIndex + 1] ? args[authTokenIndex + 1] : null;
 
-  const server = new APIServer({ port, authToken });
+  const hostIndex = args.findIndex((arg) => arg === '--host');
+  const host = hostIndex !== -1 && args[hostIndex + 1] ? args[hostIndex + 1] : 'localhost';
+  const cors = args.includes('--cors');
+
+  if (!authToken && cors) {
+    console.warn('⚠️  --cors without --auth-token: any web page you open can read the responses.');
+  }
+  if (!authToken && !['localhost', '127.0.0.1', '::1'].includes(host)) {
+    console.warn(
+      `⚠️  Listening on ${host} without --auth-token: anyone on the network can query it.`
+    );
+  }
+
+  const server = new APIServer({ port, host, authToken, cors });
 
   // Handle shutdown
   process.on('SIGINT', () => {
@@ -807,10 +867,11 @@ async function runChangedFilesAnalysis(options) {
     return;
   }
 
-  // Analyze only changed files
+  // Analyze only changed files; git reports them relative to the repository root
+  const changedFiles = new Set(changes.changedFiles);
   const analyzer = new TokenAnalyzer(options.projectRoot, {
     ...options,
-    fileFilter: (filePath) => changes.changedFiles.includes(filePath),
+    fileFilter: (relativePath) => changedFiles.has(relativePath.split(sep).join('/')),
   });
 
   analyzer.run();
@@ -862,8 +923,18 @@ async function runWatchMode(args) {
   });
 }
 
+// Ink needs raw mode on a terminal; without one it prints an error and exits 0 having done
+// nothing, so the callers' fallbacks never ran
+function assertInteractiveTerminal() {
+  if (!process.stdin.isTTY) {
+    throw new Error('stdin is not an interactive terminal');
+  }
+}
+
 async function runWizard() {
   try {
+    assertInteractiveTerminal();
+
     // Dynamic imports for ESM modules
     const ReactModule = await import('react');
     const React = ReactModule.default || ReactModule;
@@ -908,13 +979,15 @@ async function runWizard() {
         },
       })
     );
-  } catch (_error) {
+  } catch (error) {
     throw error; // Re-throw to be caught by main()
   }
 }
 
 async function runDashboard() {
   try {
+    assertInteractiveTerminal();
+
     // Dynamic imports for ESM modules
     const ReactModule = await import('react');
     const React = ReactModule.default || ReactModule;
@@ -953,7 +1026,7 @@ async function runDashboard() {
         },
       })
     );
-  } catch (_error) {
+  } catch (error) {
     throw error; // Re-throw to be caught by main()
   }
 }
@@ -969,6 +1042,13 @@ async function runInitWizard(args) {
       minimal: args.includes('--minimal'),
       yes: args.includes('--yes') || args.includes('-y'),
     };
+
+    if (!options.yes && !options.minimal && !process.stdin.isTTY) {
+      console.error('❌ The init wizard needs an interactive terminal.');
+      console.error('   Use --yes for the detected defaults or --minimal for a minimal config.');
+      process.exitCode = 1;
+      return;
+    }
 
     // Dynamic imports for ESM modules
     const ReactModule = await import('react');
@@ -1033,7 +1113,7 @@ async function runInitWizard(args) {
         },
       })
     );
-  } catch (_error) {
+  } catch (error) {
     console.error('❌ Init wizard failed:', error.message);
     console.error(error.stack);
     process.exit(1);
@@ -1107,7 +1187,7 @@ function addRepo(args) {
     console.log(`\n✅ Added repository: ${repo.alias}`);
     console.log(`   Path: ${repo.path}`);
     console.log(`   ID: ${repo.id}\n`);
-  } catch (_error) {
+  } catch (error) {
     console.error(`❌ Failed to add repository: ${error.message}`);
     process.exit(1);
   }
@@ -1239,14 +1319,17 @@ async function generateMultiRepoDigest(results, _options) {
  * @param {string[]} args - Command line arguments
  */
 async function runAISuggest(args) {
-  console.log('🤖 AI Context Suggestions');
-  console.log('═'.repeat(60));
-  console.log();
-  console.log('📊 Analyzing repository for optimization opportunities...');
-  console.log();
+  const json = args.includes('--json');
+  // With --json, stdout carries only the JSON document
+  const info = json ? console.error : console.log;
+
+  info('🤖 AI Context Suggestions');
+  info('═'.repeat(60));
+  info();
+  info('📊 Analyzing repository for optimization opportunities...');
+  info();
 
   const verbose = args.includes('--verbose') || args.includes('-v');
-  const json = args.includes('--json');
 
   // Run analyzer silently (no console output)
   const originalLog = console.log;
@@ -1277,8 +1360,10 @@ async function runAISuggest(args) {
     json,
   });
 
-  // Run analysis and get suggestions
+  // Run analysis and get suggestions; the suggester's logger writes through console.log
+  console.log = info;
   const result = await suggester.analyze(stats, files);
+  console.log = originalLog;
 
   // Display formatted output
   console.log(suggester.formatOutput(result));
@@ -1288,7 +1373,7 @@ async function runAISuggest(args) {
     const reportPath = resolve(process.cwd(), 'ai-suggestions-report.json');
     const fs = await import('fs');
     fs.writeFileSync(reportPath, JSON.stringify(result, null, 2));
-    console.log(`💾 Report saved to: ai-suggestions-report.json`);
+    info(`💾 Report saved to: ai-suggestions-report.json`);
   }
 }
 
@@ -1332,7 +1417,7 @@ function runFormatConversion(args) {
     console.log(`   Output size: ${result.outputSize.toLocaleString()} chars`);
     console.log(`   Savings:     ${result.savingsPercent} (${result.savings} chars)`);
     console.log(`   Output file: ${result.outputFile}`);
-  } catch (_error) {
+  } catch (error) {
     console.error('❌ Conversion failed:', error.message);
     process.exit(1);
   }
@@ -1401,11 +1486,13 @@ async function listSnapshots() {
  * @param {string[]} args - Command line arguments
  */
 async function runDiffLast(args) {
-  console.log('📊 Comparing with Last Snapshot');
-  console.log('═'.repeat(60));
-  console.log();
-
   const json = args.includes('--json');
+  // With --json, stdout carries only the JSON document
+  const info = json ? console.error : console.log;
+
+  info('📊 Comparing with Last Snapshot');
+  info('═'.repeat(60));
+  info();
 
   // Run current analysis
   const originalLog = console.log;
@@ -1431,8 +1518,8 @@ async function runDiffLast(args) {
   const comparison = await manager.compareWithLast(stats);
 
   if (!comparison) {
-    console.log('\n⚠️  No previous snapshots found.');
-    console.log('   Create one with: ctxman --snapshot "message"\n');
+    info('\n⚠️  No previous snapshots found.');
+    info('   Create one with: ctxman --snapshot "message"\n');
     return;
   }
 
@@ -1483,11 +1570,14 @@ async function runDiffSnapshot(args) {
  * @param {string[]} args - Command line arguments
  */
 async function runSnapshotTrend(args) {
-  console.log('📈 Snapshot Trend Analysis');
-  console.log('═'.repeat(60));
-  console.log();
-
   const json = args.includes('--json');
+  // With --json, stdout carries only the JSON document
+  const info = json ? console.error : console.log;
+
+  info('📈 Snapshot Trend Analysis');
+  info('═'.repeat(60));
+  info();
+
   const limitIndex = args.findIndex((arg) => arg === '--limit');
   const limit = limitIndex !== -1 && args[limitIndex + 1] ? parseInt(args[limitIndex + 1], 10) : 10;
 
@@ -1495,8 +1585,8 @@ async function runSnapshotTrend(args) {
   const trend = await manager.getTrend(limit);
 
   if (!trend) {
-    console.log('\n⚠️  Need at least 2 snapshots for trend analysis.');
-    console.log('   Create snapshots with: ctxman --snapshot "message"\n');
+    info('\n⚠️  Need at least 2 snapshots for trend analysis.');
+    info('   Create snapshots with: ctxman --snapshot "message"\n');
     return;
   }
 
@@ -1731,7 +1821,7 @@ async function runDependencyScan(args) {
       }
       console.log();
     }
-  } catch (_error) {
+  } catch (error) {
     console.error('❌ Dependency scan failed:', error.message);
     console.error();
     console.error('Make sure you are in a Node.js project with package.json and node_modules.');

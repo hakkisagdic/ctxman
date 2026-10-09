@@ -22,7 +22,7 @@
 
 ctxman aracını kurmadan önce, sisteminizin aşağıdaki gereksinimleri karşıladığından emin olun:
 
-- **Node.js**: Sürüm 14.0.0 veya üzeri (package.json dosyasında "engines" altında belirtilmiştir)
+- **Node.js**: Sürüm 22 veya üzeri (package.json dosyasında "engines" altında belirtilmiştir)
 - **npm**: Node Package Manager, genellikle Node.js ile birlikte kurulur
 
 Bu gereksinimler, paketin hem global hem de yerel kurulumları için gereklidir. Araç, Node.js'in çapraz platform yeteneklerinden yararlanarak tutarlı davranış için macOS, Linux ve Windows dahil farklı işletim sistemlerinde çalışacak şekilde tasarlanmıştır.

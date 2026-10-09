@@ -93,7 +93,7 @@ Configure the plugin in Settings → Tools → Ctxman:
 
 | Setting          | Type    | Default                   | Description                                     |
 | ---------------- | ------- | ------------------------- | ----------------------------------------------- |
-| Target Model     | string  | GPT-4                     | Target LLM model for token estimation           |
+| Target Model     | string  | claude-sonnet-5-5         | Any model id from `ctxman --list-llms`          |
 | Token Budget     | number  | 100000                    | Token budget for alerts                         |
 | Default Template | string  | feature                   | Default context template                        |
 | Exclude Patterns | list    | [node_modules, .git, ...] | File patterns to exclude                        |
@@ -102,16 +102,14 @@ Configure the plugin in Settings → Tools → Ctxman:
 
 ### Supported Models
 
-- GPT-4 / GPT-4 Turbo
-- GPT-3.5 Turbo
-- Claude 3 (Opus, Sonnet, Haiku)
-- Llama 2 (70B)
-- Gemini Pro
+Any model in `ctxman --list-llms`: Claude (Anthropic), GPT (OpenAI), Gemini (Google),
+DeepSeek, Mistral, Grok (xAI), Qwen and Llama. The list records context windows, output
+limits and prices, with the date they were checked.
 
 ## Requirements
 
 - JetBrains IDE 2022.3 or later
-- Node.js 20.0.0 or higher (for ctxman CLI)
+- Node.js 22 or newer (for ctxman CLI)
 - Ctxman CLI installed globally
 
 ## Project Structure

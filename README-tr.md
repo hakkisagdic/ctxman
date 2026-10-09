@@ -50,7 +50,7 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 - 🔀 **Git Entegrasyonu** - Sadece değişen dosyaları analiz et, diff analizi, yazar takibi
 - 👁️ **Watch Modu** - Gerçek zamanlı dosya izleme ve otomatik analiz
 - 🌐 **REST API** - Programatik erişim için HTTP serveri (6 endpoint)
-- ⚡ **Performans** - Önbellekleme sistemi, paralel işleme (5-10x daha hızlı)
+- ⚡ **Performans** - ~2.000 dosyayı 100 ms'nin altında tarar, tiktoken ile 2,6M token'ı yaklaşık 6 sn'de sayar; watch modu yalnızca değişen dosyaları yeniden analiz eder
 - 🏗️ **Modüler Çekirdek** - Scanner, Analyzer, ContextBuilder, Reporter
 
 ### 🔢 Token Analizi
@@ -79,8 +79,8 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 # Etkileşimli analiz ile dışa aktarım seçimi
 ctxman
 
-# Verbose dosya listesini devre dışı bırak
-ctxman --no-verbose
+# Analiz edilen her dosyayı token sayısıyla listele
+ctxman --cli --verbose
 
 # Detaylı rapor kaydet
 ctxman --save-report
@@ -90,9 +90,6 @@ ctxman --context-export
 
 # Minimal bağlamı clipboard'a kopyala
 ctxman --context-clipboard
-
-# Detaylı bağlam formatı kullan - eski format
-ctxman --detailed-context --context-clipboard
 ```
 
 ### Sarmalayıcı Script Kullanımı
@@ -146,9 +143,6 @@ ctxman --save-report
 
 # Minimal LLM bağlam dosya listesi oluştur
 ctxman --context-export
-
-# Detaylı bağlam formatı kullan - eski format
-ctxman --detailed-context --context-clipboard
 ```
 
 ### Etkileşimli Dışa Aktarım Seçimi
@@ -215,39 +209,30 @@ node token-analysis/token-calculator.js --help
 ### Mevcut Seçenekler
 
 - `--save-report`, `-s` - Detaylı JSON raporu kaydet
-- `--no-verbose` - Dosya listesini devre dışı bırak (verbose varsayılan)
+- `--verbose`, `-v` - Analiz edilen her dosyayı token sayısıyla listele
 - `--context-export` - LLM bağlam dosya listesi oluştur (llm-context.json olarak kaydeder)
 - `--context-clipboard` - LLM bağlamını doğrudan clipboard'a kopyala
-- `--detailed-context` - Detaylı bağlam formatı kullan (8.6k karakter, varsayılan kompakt 1k)
+- `-o`, `--output FORMAT` - Bağlam formatı: json (varsayılan), toon, yaml, markdown, csv, xml
 - `--help`, `-h` - Yardım mesajını göster
 
 ## LLM Bağlam Dışa Aktarımı
 
-Token calculator, iki format seçeneği ile LLM tüketimi için optimize edilmiş dosya listeleri oluşturabilir:
+Token calculator, LLM tüketimi için optimize edilmiş dosya listeleri oluşturabilir.
 
-### Ultra-Kompakt Format (Varsayılan)
+### Bağlam Formatı
 
-- **Boyut**: ~2.3k karakter (yapılandırılmış JSON)
-- **İçerik**: Token sayısı olmadan proje metadata'sı ve organize edilmiş dosya yolları
-- **Format**: llm-context.json dosyası ile aynı - tam JSON yapısı
-- **Mükemmel**: LLM tüketimi, programatik işleme, yapılandırılmış veri ihtiyaçları
+- **İçerik**: Proje metadata'sı ve klasöre göre gruplanmış dosya yolları; `-m` bunların yerine
+  satır numarası ve token sayısıyla metotları listeler
+- **Format**: Varsayılan JSON; `-o toon|yaml|markdown|csv|xml` başka bir kodlama seçer
+- **Her yerde aynı**: Pano, `llm-context.<format>` dosyasının içeriğinin aynısını alır
 - **Kullanım**: `--context-clipboard` veya `--context-export`
-
-### Detaylı Format (Eski)
-
-- **Boyut**: ~8.6k karakter (kapsamlı)
-- **İçerik**: Tam yollar, kategoriler, önem puanları, dizin istatistikleri
-- **Mükemmel**: İlk proje analizi, kapsamlı dokümantasyon
-- **Kullanım**: `--detailed-context --context-clipboard`
 
 ### Özellikler
 
-- **Akıllı dosya seçimi** - Token sayısı ve öneme göre en üst dosyalar
-- **Dizin gruplama** - Ortak önek sıkıştırması yer tasarrufu sağlar
-- **Minimal formatlama** - LLM için optimize edilmiş, sıfır gereksiz karakter
-- **Uzantı korunması** - `.js` uzantıları dosya tipini belirtir
-- **Çapraz platform clipboard** - macOS, Linux ve Windows'ta çalışır
-- **Çoklu çıktı formatları** - JSON dosyası veya clipboard hazır metin
+- **Dizin gruplama** - Her klasör, dosya adlarıyla bir kez listelenir
+- **TOON kodlaması** - `-o toon` resmi TOON kodlayıcısını kullanır: JSON'dan daha az token
+- **Metot seviyesi** - `-m` her metodu satır numarası ve token sayısıyla ekler
+- **Çapraz platform clipboard** - macOS, Linux ve Windows'ta çalışır, gerekirse dosyaya yazar
 
 ### Kullanım
 
@@ -257,9 +242,6 @@ ctxman --context-export
 
 # Minimal bağlamı doğrudan clipboard'a kopyala
 ctxman --context-clipboard
-
-# Detaylı bağlamı clipboard'a kopyala
-ctxman --detailed-context --context-clipboard
 
 # Normal analiz ile birleştir
 ctxman --save-report --context-clipboard
@@ -288,41 +270,12 @@ ctxman --save-report --context-clipboard
 }
 ```
 
-**Detaylı Format (8.6k karakter):**
-
-````markdown
-# cloudstack-go-mcp-proxy Kod Tabanı Bağlamı
-
-**Proje:** 64 dosya, 181,480 token
-
-**Ana Dosyalar (En Büyük 20):**
-
-1. `utility-mcp/src/server/CloudStackUtilityMCP.js` (12,388 token, server)
-2. `utility-mcp/src/handlers/workflow-handlers.js` (11,007 token, handler)
-   ...
-
-**Tüm Dosyalar:**
-
-```json
-[{ "path": "file.js", "t": 1234, "c": "core", "i": 85 }]
-```
-````
-
 ### Kullanım Durumları
-
-**Kompakt Format (2.3k karakter JSON):**
 
 1. **LLM Entegrasyonu** - Tam proje bağlamı ile AI asistanları için yapılandırılmış veri
 2. **Programatik İşleme** - Otomatik araçlar ve scriptler için JSON formatı
 3. **Bağlam Paylaşımı** - Clipboard ve dosya dışa aktarımlarında aynı format
 4. **Geliştirme İş Akışları** - CI/CD ve otomasyon için tutarlı yapı
-
-**Detaylı Format (8.6k karakter):**
-
-1. **Mimari Planlama** - Büyük kararlar için kapsamlı proje özeti
-2. **Yeni Takım Üyesi Alıştırma** - Tam kod tabanı anlayışı
-3. **Dokümantasyon Oluşturma** - Tam proje yapısı analizi
-4. **Kod İnceleme Hazırlığı** - Detaylı dosya ilişkileri ve önem
 
 **Genel Kullanım Durumları:**
 
@@ -455,8 +408,7 @@ LLM bağlam penceresi optimizasyonu için mükemmel:
 - **Odaklanmış geliştirme** = AI destekli geliştirme için temel kod
 - **Bağlam verimliliği** = Token başına maksimum faydalı kod
 - **Çift mod esnekliği** = Kesin include/exclude kontrolü
-- **Ultra-minimal dışa aktarım** = 1k karakter (%89 azalma) sık AI etkileşimleri için
-- **Detaylı dışa aktarım** = Gerektiğinde kapsamlı analiz için 8.6k karakter
+- **Kompakt dışa aktarım** = Klasöre göre gruplanmış yollar, JSON veya TOON olarak, sık AI etkileşimleri için
 
 ## Entegrasyon
 
@@ -511,16 +463,15 @@ Bu aracı şunlara entegre edebilirsiniz:
 # .contextignore dosyasını yedekleyin, sadece *.md hariç tutmayı kaldırın
 
 # CI/CD için otomatik rapor
-node token-analysis/token-calculator.js --save-report --no-verbose
+ctxman --cli --save-report
 
 # Geliştirme için detaylı analiz
-node token-analysis/token-calculator.js --verbose --save-report
+ctxman --cli --verbose --save-report
 ```
 
 ### Performans İpuçları
 
 - İlk çalıştırmada tiktoken yüklenir (biraz yavaş olabilir)
-- Büyük projeler için verbose modu devre dışı bırakın
 - JSON raporları büyük projeler için disk alanı kullanır
 - `.contextignore` desenlerini optimize edin
 

@@ -2,6 +2,70 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- `ctxman count [path|-] --model ID [--api] [--json]`: token count of a project or piped text for
+  a model, checked against its context window. `--api` counts Claude models exactly through
+  Anthropic's count_tokens endpoint (secrets are redacted before sending).
+- `--list-llms` shows context window, output limit, price and status per model; `--all` adds
+  retired models.
+- GitIngest digests mask known credential formats (cloud/API keys, tokens, PEM private keys) as
+  `[REDACTED:<type>]` by default; `--no-redact` keeps them.
+- `TokenCalculator.analyze()` for scan + analysis without console output or exports.
+
+### Changed
+
+- Model data refreshed (checked 2026-10-09): 44 current models from Anthropic, OpenAI, Google,
+  DeepSeek, Mistral, xAI, Qwen and Meta with the providers' API ids, windows, output limits, prices
+  (including long-prompt rates) and status. Old ids such as `claude-sonnet-4.5` still resolve;
+  deprecated and retired models warn and name a replacement. The default target model is
+  `claude-sonnet-5-5`.
+- `--estimate-cost` reads prices from the model profiles, applies long-prompt rates and caps the
+  assumed response at the model's output limit.
+- Counting uses `o200k_base` for OpenAI models since GPT-4o (`cl100k_base` otherwise), and counts
+  for models with their own tokenizers are labelled approximate.
+- tiktoken is a regular dependency, so a default install counts exactly.
+- Node.js 22 or newer is required (Node 20 reached end of life on 2026-04-30); CI tests 22.x and
+  24.x.
+- `@xenova/transformers` and `@lancedb/lancedb` are optional dependencies, loaded only by
+  `ctxman ask`; install with `--omit=optional` to skip them (451 MB → 55 MB).
+- `@toon-format/toon` 4.1.1: `ToonFormatter.encodeAsync()` now writes an empty array as `key: []`.
+- Token counting reuses one tiktoken encoder: ~20-25x faster analysis when tiktoken is installed.
+- REST API (`ctxman serve`): CORS is off unless `--cors` is given, and on a loopback host requests
+  with a foreign `Host` header get 403 (DNS rebinding).
+- MCP HTTP transport (`bin/mcp-server.js --transport=sse`): binds to 127.0.0.1 with `Host`
+  validation, CORS only with `--cors`, `--host=` to bind elsewhere.
+- `-o/--output` sets the format of `--context-export`/`--context-clipboard` (JSON by default), and
+  TOON output uses the official `@toon-format/toon` encoder.
+
+### Fixed
+
+- **Security:** git commands run without a shell, and user-supplied refs (REST `?since=`, MCP
+  `git_diff`, `--changed-since`, `ctxman github` branches) are validated before reaching git.
+- `ctxman github` and the update scripts crashed on start (CommonJS `require` in ESM).
+- Watch mode failed on every changed file, and `GET /api/v1/methods` returned 500 (`path` not
+  imported).
+- Error and fallback paths in the CLI, init wizard, LSP server and updater threw
+  `ReferenceError`.
+- npm audit advisories (proxy-addr, sharp, @modelcontextprotocol/sdk, qs, hono and others).
+- The release workflow validates the tag against `package.json` and takes notes from this file.
+- Added the missing LICENSE file and repository metadata.
+- `**` in `.gitignore`/`.contextignore`/`.contextinclude` patterns did not cross directories, and
+  `.contextinclude` (include mode) and watch-mode ignore checks did not apply.
+- `--changed-only`/`--changed-since` analyzed the whole repository instead of the changed files.
+- `--chunk` wrote a single digest instead of chunk files.
+- `ctxman github`: the branch from the URL or `--branch` is cloned, and a GitHub API error (rate
+  limit, private repository) no longer crashes the command.
+- The `targetModel` from `~/.ctxman/config.json` is read again, and files skipped by
+  `.contextignore`/`.contextinclude` are counted separately from `.gitignore`.
+- MCP: `file://` resources stay inside the project, refuse non-source files such as `.env` and
+  redact secrets; `search_code` and `list_methods` honour their documented options; the HTTP
+  transport answered every request with "Parse error"; the server reports the package version.
+- Context token budgets (`targetTokens`, MCP `maxTokens`) are no longer exceeded, and the
+  `changed-first` strategy orders by modification time.
+
 ## [3.0.0] - 2025-11-05
 
 ### 🚀 MAJOR: Platform Foundation - Plugin Architecture & Git Integration

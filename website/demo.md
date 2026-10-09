@@ -15,9 +15,9 @@ Try Ctxman directly in your browser! This interactive demo lets you experience t
 
 ### Token Analysis
 
-Ctxman calculates exact token counts using tiktoken (GPT-4 compatible):
+Ctxman counts tokens with tiktoken, using the encoding of the model you target:
 
-- **Accurate Counts**: No estimation, actual token counts
+- **Exact for OpenAI models**, marked approximate for models with their own tokenizer
 - **Per-File Breakdown**: See tokens for each file
 - **Method-Level**: Drill down to individual functions
 

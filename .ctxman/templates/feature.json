@@ -5,5 +5,5 @@
   "exclude": ["docs/**", "*.md", "examples/**"],
   "methodInclude": ["*Handler", "*Service", "*Controller", "*Manager", "*Factory", "*Builder"],
   "methodExclude": ["*test*", "console*"],
-  "targetModel": "claude-sonnet-4.5"
+  "targetModel": "claude-sonnet-5-5"
 }

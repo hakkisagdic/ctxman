@@ -12,6 +12,7 @@ Thank you for your interest in contributing to Ctxman! This document provides gu
 - [Pull Request Process](#pull-request-process)
 - [Testing Requirements](#testing-requirements)
 - [Documentation](#documentation)
+- [Releasing](#releasing)
 
 ## Code of Conduct
 
@@ -21,7 +22,7 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 ### Prerequisites
 
-- **Node.js**: Version 20.0.0 or higher
+- **Node.js**: Version 22 or newer (tested on 22 LTS and 24 LTS; see `.nvmrc`)
 - **npm**: Comes with Node.js
 - **Git**: For version control
 
@@ -378,6 +379,22 @@ test/
 2. Create Turkish translation with `-tr` suffix
 3. Update README.md to link to new docs
 4. Follow existing document structure
+
+## Releasing
+
+Releases are cut from `main` by pushing a version tag; maintainers only.
+
+1. On a branch, bump the version without tagging: `npm version minor --no-git-tag-version`
+   (or `patch` / `major`).
+2. In `CHANGELOG.md`, rename `## [Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD` and start a new empty
+   `## [Unreleased]` section above it. Open a PR and merge it once CI is green.
+3. Tag the merge commit and push the tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+
+The tag push starts two workflows. `release.yml` checks that the tag matches `package.json`, runs
+lint and tests, and creates the GitHub Release with the `## [X.Y.Z]` changelog section as notes.
+`npm-publish.yml` publishes to npm with provenance through npm Trusted Publishing (OIDC), and
+skips the publish if that version is already on the registry. `ctxman update` reads GitHub
+Releases, so every npm version should have a tag.
 
 ## Getting Help
 

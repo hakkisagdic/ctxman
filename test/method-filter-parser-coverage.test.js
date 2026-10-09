@@ -101,6 +101,56 @@ describe('MethodFilterParser Coverage', () => {
     });
   });
 
+  describe('Exact Matching', () => {
+    test('plain names match whole method names only', () => {
+      const includePath = path.join(tempDir, '.methodinclude');
+      fs.writeFileSync(includePath, 'startServer\nadd');
+
+      const parser = new MethodFilterParser(includePath, null);
+
+      expect(parser.shouldIncludeMethod('startServer', 'app')).toBe(true);
+      expect(parser.shouldIncludeMethod('add', 'math')).toBe(true);
+      expect(parser.shouldIncludeMethod('testStartServer', 'app')).toBe(false);
+      expect(parser.shouldIncludeMethod('addedLater', 'app')).toBe(false);
+      expect(parser.shouldIncludeMethod('padding', 'app')).toBe(false);
+    });
+
+    test('a leading or trailing wildcard anchors the other end', () => {
+      const includePath = path.join(tempDir, '.methodinclude');
+      fs.writeFileSync(includePath, '*Handler\nprocess*');
+
+      const parser = new MethodFilterParser(includePath, null);
+
+      expect(parser.shouldIncludeMethod('requestHandler', 'app')).toBe(true);
+      expect(parser.shouldIncludeMethod('HandlerFactory', 'app')).toBe(false);
+      expect(parser.shouldIncludeMethod('processData', 'app')).toBe(true);
+      expect(parser.shouldIncludeMethod('preprocess', 'app')).toBe(false);
+    });
+
+    test('plain names in the ignore file do not drop longer names', () => {
+      const ignorePath = path.join(tempDir, '.methodignore');
+      fs.writeFileSync(ignorePath, 'it\ndescribe');
+
+      const parser = new MethodFilterParser(null, ignorePath);
+
+      expect(parser.shouldIncludeMethod('it', 'app.test')).toBe(false);
+      expect(parser.shouldIncludeMethod('describe', 'app.test')).toBe(false);
+      expect(parser.shouldIncludeMethod('init', 'app')).toBe(true);
+      expect(parser.shouldIncludeMethod('submit', 'app')).toBe(true);
+    });
+
+    test('regex characters in names are matched literally', () => {
+      const includePath = path.join(tempDir, '.methodinclude');
+      fs.writeFileSync(includePath, 'valid?\n$emit');
+
+      const parser = new MethodFilterParser(includePath, null);
+
+      expect(parser.shouldIncludeMethod('valid?', 'model')).toBe(true);
+      expect(parser.shouldIncludeMethod('vali', 'model')).toBe(false);
+      expect(parser.shouldIncludeMethod('$emit', 'component')).toBe(true);
+    });
+  });
+
   describe('Case Insensitivity', () => {
     test('matches patterns case-insensitively', () => {
       const includePath = path.join(tempDir, '.methodinclude');

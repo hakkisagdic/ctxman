@@ -64,10 +64,10 @@
           <label class="setting-row">
             <span>Target LLM</span>
             <select v-model="config.targetLlm" class="form-select">
-              <option value="gpt-4">GPT-4</option>
-              <option value="claude-3-opus">Claude 3 Opus</option>
-              <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-              <option value="gemini-pro">Gemini Pro</option>
+              <option value="claude-sonnet-5-5">Claude Sonnet 5.5</option>
+              <option value="claude-opus-5-5">Claude Opus 5.5</option>
+              <option value="gpt-6.1-sol">GPT-6.1 Sol</option>
+              <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
             </select>
           </label>
 
@@ -143,7 +143,7 @@ const generating = ref(false);
 const config = reactive({
   files: [],
   format: 'xml',
-  targetLlm: 'claude-3.5-sonnet',
+  targetLlm: 'claude-sonnet-5-5',
   maxTokens: 100000,
   removeComments: false,
   removeEmptyLines: false,

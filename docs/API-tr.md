@@ -58,7 +58,7 @@ ctxman serve --port 3000 --auth-token gizli-anahtariniz
 | `--port`       | 3000       | Dinlenecek port numarası              |
 | `--host`       | localhost  | Bağlanılacak host adresi              |
 | `--auth-token` | null       | İsteğe bağlı kimlik doğrulama token'ı |
-| `--cors`       | true       | CORS başlıklarını etkinleştir         |
+| `--cors`       | kapalı     | CORS başlıklarını gönder              |
 
 ## Kimlik Doğrulama
 
@@ -613,13 +613,22 @@ const context = await generateContext({
 
 ## CORS
 
-CORS varsayılan olarak etkindir. Aşağıdaki başlıklar ayarlanır:
+CORS varsayılan olarak kapalıdır: açıkken tarayıcınızda açık herhangi bir web sayfası sunucunun
+yanıtlarını okuyabilir. `--cors` verildiğinde (tercihen `--auth-token` ile birlikte) şu başlıklar
+gönderilir:
 
 ```
 Access-Control-Allow-Origin: *
 Access-Control-Allow-Methods: GET, POST, OPTIONS
 Access-Control-Allow-Headers: Content-Type, Authorization
 ```
+
+## Host Kontrolü
+
+Loopback adresine bağlıyken (varsayılan `localhost`) sunucu yalnızca `Host` başlığı `localhost`,
+`127.0.0.1` veya `[::1]` olan isteklere yanıt verir, diğerlerine `403 Forbidden host` döner. Bu,
+web sayfalarından gelen DNS rebinding saldırılarını engeller. `--host` ile başka bir adrese
+bağlanınca kontrol kapanır; bu durumda `--auth-token` kullanın.
 
 ## Rate Limiting
 

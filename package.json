@@ -45,7 +45,6 @@
     "prepack": "npm run clean && npm test",
     "prepare": "husky || true",
     "mcp": "node bin/mcp-server.js",
-    "postinstall": "node -e \"console.log('\\n✅ Ctxman installed! Run: ctxman --help\\n')\"",
     "docs:dev": "npm run docs:dev --prefix website",
     "docs:build": "npm run docs:build --prefix website",
     "docs:preview": "npm run docs:preview --prefix website"
@@ -84,21 +83,32 @@
   ],
   "author": "Hakkı Sağdıç",
   "license": "MIT",
+  "homepage": "https://github.com/hakkisagdic/ctxman#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hakkisagdic/ctxman.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hakkisagdic/ctxman/issues"
+  },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "dependencies": {
-    "@lancedb/lancedb": "^0.23.0",
     "@modelcontextprotocol/sdk": "^1.21.1",
-    "@toon-format/toon": "^0.7.0",
-    "@xenova/transformers": "^2.17.2",
+    "@toon-format/toon": "^4.1.1",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "ink": "^6.4.0",
     "ink-spinner": "^5.0.0",
     "ink-text-input": "^6.0.0",
     "react": "^19.2.0",
+    "tiktoken": "^1.0.22",
     "zod": "^4.1.12"
+  },
+  "optionalDependencies": {
+    "@lancedb/lancedb": "^0.23.0",
+    "@xenova/transformers": "^2.17.2"
   },
   "files": [
     "index.js",
@@ -135,7 +145,6 @@
     "llama3-tokenizer-js": "^1.2.0",
     "prettier": "^3.6.2",
     "supertest": "^7.2.2",
-    "tiktoken": "^1.0.22",
     "vite": "^7.2.4",
     "vitest": "^4.0.18",
     "vue": "^3.5.24"

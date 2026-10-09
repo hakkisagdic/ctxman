@@ -15,9 +15,9 @@ Ctxman'ı doğrudan tarayıcınızda deneyin! Bu interaktif demo, herhangi bir �
 
 ### Token Analizi
 
-Ctxman, tiktoken (GPT-4 uyumlu) kullanarak kesin token sayılarını hesaplar:
+Ctxman, token'ları tiktoken ile, hedeflediğiniz modelin kodlamasını kullanarak sayar:
 
-- **Doğru Sayılar**: Tahmin yok, gerçek token sayıları
+- **OpenAI modelleri için birebir**, kendi tokenizer'ı olan modeller için yaklaşık olarak işaretli
 - **Dosya Başı Döküm**: Her dosya için token'ları görün
 - **Yöntem Düzeyi**: Bireysel fonksiyonlara inin
 

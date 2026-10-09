@@ -59,7 +59,7 @@ const mockOutput = computed(() => {
 
 📁 File: example${languages.find((l) => l.id === selectedLanguage.value)?.ext}
 📝 Lines of Code: 8
-🎯 Tokens (GPT-4): ~245
+🎯 Tokens (cl100k_base): ~245
 
 Function Analysis:
   • calculateSum - 45 tokens

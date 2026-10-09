@@ -1,5 +1,7 @@
 # NPM Publish Workflow
-# Publishes ctxman to npm when a Release is created.
+# Publishes ctxman to npm when a version tag (vX.Y.Z) is pushed or a Release is
+# created. The tag must match package.json "version"; see release.yml for the
+# release steps.
 #
 # Uses npm **Trusted Publishing (OIDC)** — no NPM_TOKEN secret. GitHub Actions
 # proves this workflow's identity to npm with a short-lived OIDC token and npm
@@ -46,6 +48,15 @@ jobs:
           node-version: 22.x
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Check tag matches package.json version
+        if: github.ref_type == 'tag'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "$GITHUB_REF_NAME" != "v$VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $VERSION (expected v$VERSION)"
+            exit 1
+          fi
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
