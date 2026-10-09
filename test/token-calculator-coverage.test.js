@@ -14,6 +14,7 @@ vi.mock('../lib/utils/token-utils.js', () => ({
   default: {
     calculate: vi.fn().mockReturnValue(10),
     hasExactCounting: vi.fn().mockReturnValue(true),
+    encodingFor: vi.fn().mockReturnValue('cl100k_base'),
   },
 }));
 vi.mock('../lib/utils/config-utils.js', () => ({

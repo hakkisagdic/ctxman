@@ -49,6 +49,11 @@ async function main() {
     return;
   }
 
+  if (command === 'count') {
+    runSubcommand('./cm-count.js', args.slice(1));
+    return;
+  }
+
   if (args.includes('--help') || args.includes('-h')) {
     printHelp();
     return;
@@ -676,6 +681,8 @@ function printHelp() {
   console.log('    ctxman git angular/angular -o docs/angular.txt');
   console.log();
   console.log('Other Commands:');
+  console.log('  count [path|-] [--model ID] [--api]');
+  console.log('                           Count tokens for a model (exact for Claude with --api)');
   console.log('  ask QUESTION             Answer a question from the indexed codebase');
   console.log('  update [check|install|rollback|channel NAME|info]');
   console.log('                           Check for and manage ctxman updates');
