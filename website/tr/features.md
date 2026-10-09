@@ -102,9 +102,11 @@ Yeni başlayanlar için kullanıcı dostu rehberli kurulum:
 
 LLM planlaması için doğru token sayımı:
 
-- **tiktoken Entegrasyonu**: GPT-4 uyumlu
-- **Çoklu Model**: Çeşitli LLM tokenizer'ları için destek
-- **Kesin Sayılar**: Tahmin yok, gerçek token sayıları
+- **Modele göre**: `--target-model` kodlamayı seçer (güncel OpenAI modelleri için `o200k_base`,
+  diğerleri için `cl100k_base`); kendi tokenizer'ı olan modellerin sayıları yaklaşık olarak işaretlenir
+- **Claude için birebir**: `ctxman count --model claude-opus-5-5 --api`, Anthropic'in count_tokens
+  API'sine sorar (ücretsiz; sırlar önce maskelenir)
+- **Güncel modeller**: `ctxman --list-llms`, 40'tan fazla modelin pencere, çıktı sınırı ve fiyatını listeler
 - **Dosya Başı Analiz**: Ayrıntılı döküm
 
 ### Çoklu Dil Desteği

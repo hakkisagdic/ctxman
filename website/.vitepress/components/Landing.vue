@@ -47,7 +47,7 @@ const content = {
         id: 'cli',
         tab: 'CLI',
         title: 'Analyse, filter and export from the terminal',
-        code: `$ ctxman --cli -m --context-export -o toon\n$ ctxman --cli --changed-since main --target-model claude-sonnet-4.5\n$ ctxman github facebook/react --chunk`,
+        code: `$ ctxman --cli -m --context-export -o toon\n$ ctxman --cli --changed-since main --target-model claude-sonnet-5-5\n$ ctxman github facebook/react --chunk`,
       },
       {
         id: 'mcp',
@@ -172,7 +172,7 @@ const content = {
         id: 'cli',
         tab: 'CLI',
         title: 'Terminalden analiz edin, filtreleyin, dışa aktarın',
-        code: `$ ctxman --cli -m --context-export -o toon\n$ ctxman --cli --changed-since main --target-model claude-sonnet-4.5\n$ ctxman github facebook/react --chunk`,
+        code: `$ ctxman --cli -m --context-export -o toon\n$ ctxman --cli --changed-since main --target-model claude-sonnet-5-5\n$ ctxman github facebook/react --chunk`,
       },
       {
         id: 'mcp',

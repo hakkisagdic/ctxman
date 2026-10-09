@@ -102,9 +102,11 @@ Traditional command-line interface for power users:
 
 Accurate token counting for LLM planning:
 
-- **tiktoken Integration**: GPT-4 compatible
-- **Multiple Models**: Support for various LLM tokenizers
-- **Exact Counts**: No estimation, actual token counts
+- **Per model**: `--target-model` picks the encoding (`o200k_base` for current OpenAI models,
+  `cl100k_base` otherwise); counts for models with their own tokenizer are marked approximate
+- **Exact for Claude**: `ctxman count --model claude-opus-5-5 --api` asks Anthropic's
+  count_tokens API (free; secrets are redacted first)
+- **Current models**: `ctxman --list-llms` lists windows, output limits and prices of 40+ models
 - **Per-File Analysis**: Detailed breakdown
 
 ### Multi-Language Support
