@@ -6,12 +6,27 @@ All notable changes to the Ctxman will be documented in this file.
 
 ### Added
 
+- `ctxman count [path|-] --model ID [--api] [--json]`: token count of a project or piped text for
+  a model, checked against its context window. `--api` counts Claude models exactly through
+  Anthropic's count_tokens endpoint (secrets are redacted before sending).
+- `--list-llms` shows context window, output limit, price and status per model; `--all` adds
+  retired models.
 - GitIngest digests mask known credential formats (cloud/API keys, tokens, PEM private keys) as
   `[REDACTED:<type>]` by default; `--no-redact` keeps them.
 - `TokenCalculator.analyze()` for scan + analysis without console output or exports.
 
 ### Changed
 
+- Model data refreshed (checked 2026-10-09): 44 current models from Anthropic, OpenAI, Google,
+  DeepSeek, Mistral, xAI, Qwen and Meta with the providers' API ids, windows, output limits, prices
+  (including long-prompt rates) and status. Old ids such as `claude-sonnet-4.5` still resolve;
+  deprecated and retired models warn and name a replacement. The default target model is
+  `claude-sonnet-5-5`.
+- `--estimate-cost` reads prices from the model profiles, applies long-prompt rates and caps the
+  assumed response at the model's output limit.
+- Counting uses `o200k_base` for OpenAI models since GPT-4o (`cl100k_base` otherwise), and counts
+  for models with their own tokenizers are labelled approximate.
+- tiktoken is a regular dependency, so a default install counts exactly.
 - Node.js 22 or newer is required (Node 20 reached end of life on 2026-04-30); CI tests 22.x and
   24.x.
 - `@xenova/transformers` and `@lancedb/lancedb` are optional dependencies, loaded only by
