@@ -537,7 +537,7 @@ function listLLMs(args = []) {
 }
 
 function printStartupInfo(options) {
-  console.log('🚀 Ctxman v3.0.0');
+  console.log(`🚀 Ctxman v${pkg.version}`);
   console.log('='.repeat(50));
 
   // Show profile info if used
@@ -751,27 +751,27 @@ function printHelp() {
   console.log('    ctxman git angular/angular -o docs/angular.txt');
   console.log();
   console.log('Other Commands:');
-  console.log('  count [path|-] [--model ID] [--api]');
-  console.log('                           Count tokens for a model (exact for Claude with --api)');
-  console.log('  map [path] [options]     Ranked repository map within a token budget');
-  console.log('                           (ctxman map --help for options)');
   console.log('  pack [path] [options]    File contents in one LLM-ready document (xml, markdown,');
   console.log('                           plain, json); --compress, --budget, --split');
   console.log('                           (ctxman pack --help for options)');
-  console.log('  ask QUESTION             Answer a question from the indexed codebase');
-  console.log('  mcp [install|uninstall|config]');
-  console.log('                           Start the MCP server or add it to an MCP client');
-  console.log('  search QUERY [path]      Ranked (BM25) search over methods and code chunks');
-  console.log('  why FILE[:SYMBOL|#L10-L40] [options]');
-  console.log('                           Why the code looks like this: commits, references,');
-  console.log('                           owners, co-changes, docs and tests (ctxman why --help)');
-  console.log('  update [check|install|rollback|channel NAME|info]');
-  console.log('                           Check for and manage ctxman updates');
+  console.log('  map [path] [options]     Ranked repository map within a token budget');
+  console.log('                           (ctxman map --help for options)');
   console.log('  pr [--base REF] [--head REF] [path]');
   console.log('                           Review context for a branch: log, changed methods,');
   console.log('                           diff, related tests (ctxman pr --help)');
+  console.log('  why FILE[:SYMBOL|#L10-L40] [options]');
+  console.log('                           Why the code looks like this: commits, references,');
+  console.log('                           owners, co-changes, docs and tests (ctxman why --help)');
+  console.log('  search QUERY [path]      Ranked (BM25) search over methods and code chunks');
+  console.log('  count [path|-] [--model ID] [--api]');
+  console.log('                           Count tokens for a model (exact for Claude with --api)');
+  console.log('  mcp [install|uninstall|config]');
+  console.log('                           Start the MCP server or add it to an MCP client');
   console.log('  policy [check|init]      Show or create the export policy (.ctxman/policy.json)');
   console.log('  audit [--since DATE]     Show the export audit log written under a policy');
+  console.log('  ask QUESTION             Answer a question from the indexed codebase');
+  console.log('  update [check|install|rollback|channel NAME|info]');
+  console.log('                           Check for and manage ctxman updates');
   console.log();
   console.log('Examples:');
   console.log('  ctxman                                  # Launch interactive wizard (DEFAULT)');
