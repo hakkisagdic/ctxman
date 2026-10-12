@@ -17,6 +17,8 @@ All notable changes to the Ctxman will be documented in this file.
 - `ctxman search`: ranked (BM25) search over methods and code chunks, with identifier splitting;
   the MCP `search_code` tool takes `type: "ranked"`, and the new `get_symbol` tool returns a
   function's source by name.
+- MCP tool `count_tokens`: token count of a project or a text for a model and the fit in its
+  window.
 - `ctxman mcp`: starts the MCP server; `ctxman mcp install|uninstall|config --client` writes the
   configuration of Claude Desktop, Claude Code, Cursor, VS Code and Windsurf (with a `.bak` of the
   previous file); `--root` confines every tool to one directory.

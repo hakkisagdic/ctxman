@@ -175,6 +175,9 @@ $ ctxman mcp uninstall --client claude-desktop
 | `search_code`      | `path`, `query`, `type?` (`regex`, `semantic`, `ranked`) | Matching lines; with `ranked`, the best matching code chunks (below) |
 | `list_methods`     | `path` (directory or file), `file?`                      | Methods per file                                                     |
 | `get_symbol`       | `path`, `name`, `file?`, `redact?`                       | Source of a named method, function or class                          |
+| `repo_map`         | `path`, `tokens?`, `focus?`                              | Ranked repository map within a token budget (`ctxman map`)           |
+| `pr_context`       | `path`, `base?`, `head?`, `budget?`, `style?`            | Review context for a branch (`ctxman pr`)                            |
+| `count_tokens`     | `path` or `text`, `model?`, `top?`                       | Token count for a model and the fit in its window (`ctxman count`)   |
 
 ### `search_code` with `type: "ranked"`
 
