@@ -59,7 +59,7 @@ export default defineConfig({
           { text: 'Features', link: '/features' },
           { text: 'Getting Started', link: '/getting-started' },
           { text: 'API', link: '/api-reference' },
-          { text: 'Demo', link: '/demo' },
+          { text: 'Compare', link: '/compare' },
           { text: 'Changelog', link: '/changelog' },
         ],
         sidebar: {
@@ -71,6 +71,7 @@ export default defineConfig({
                 { text: 'Showcase', link: '/showcase' },
                 { text: 'Quick Start', link: '/getting-started' },
                 { text: 'Features', link: '/features' },
+                { text: 'Compare', link: '/compare' },
               ],
             },
             {
@@ -139,7 +140,7 @@ export default defineConfig({
           { text: 'Özellikler', link: '/tr/features' },
           { text: 'Başlangıç', link: '/tr/getting-started' },
           { text: 'API', link: '/tr/api-reference' },
-          { text: 'Demo', link: '/tr/demo' },
+          { text: 'Karşılaştırma', link: '/tr/compare' },
           { text: 'Değişiklikler', link: '/tr/changelog' },
         ],
         sidebar: {
@@ -151,6 +152,7 @@ export default defineConfig({
                 { text: 'Vitrin', link: '/tr/showcase' },
                 { text: 'Hızlı Başlangıç', link: '/tr/getting-started' },
                 { text: 'Özellikler', link: '/tr/features' },
+                { text: 'Karşılaştırma', link: '/tr/compare' },
               ],
             },
             {
