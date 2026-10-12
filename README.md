@@ -79,6 +79,16 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 - ⚡ **Performance** - Scans ~2,000 files in under 100 ms and counts 2.6M tokens in about 6 s with tiktoken; watch mode re-analyzes only changed files
 - 🏗️ **Modular Core** - Scanner, Analyzer, ContextBuilder, Reporter
 
+### 🧰 Context Commands
+
+- 🗺️ **`ctxman map`** - Ranked repository map (import graph + git history) within a token budget
+- 🔍 **`ctxman pr`** - Review context for a branch: log, changed methods, diff, related tests
+- 🔎 **`ctxman search`** - Ranked (BM25) search over functions and code chunks
+- 🔢 **`ctxman count`** - Token count for one model, exact for Claude through Anthropic's API
+- 🔌 **`ctxman mcp`** - MCP server with one-command setup for Claude Desktop, Claude Code, Cursor, VS Code and Windsurf
+- 🛡️ **`ctxman policy` / `ctxman audit`** - Export policy (deny rules, required redaction, token limits) and an audit log
+- 🤖 **GitHub Action and Docker image** - Token budgets and model fit as a CI check
+
 ### 🎨 User Interface
 
 - 🧙 **Interactive Wizard Mode** - User-friendly guided setup (default)
@@ -95,6 +105,7 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 ### 🎯 Filtering & Configuration
 
 - 🚫 **Dual ignore system** - respects both `.gitignore` and context ignore rules
+- 🤝 **Other AI tools' ignore files** - `.cursorignore`, `.aiexclude`, `.aiderignore` and others on request (`--respect-ignore-files`)
 - 📋 **Include/Exclude modes** - `.contextinclude` takes priority over `.contextignore`
 - 🔍 **Method filtering** - `.methodinclude` and `.methodignore` for granular control
 - 🎯 **Core application focus** - configured to analyze only essential code files
@@ -216,6 +227,98 @@ ctxman count - --model claude-opus-5-5 --api < digest.txt   # piped text
 ```
 
 `--api` sends the (secret-redacted) text to Anthropic; counting is free and generates nothing.
+
+### 🗺️ Repository Map
+
+The shape of a codebase in a fixed token budget: the most important files, ranked by PageRank
+over the import graph (JS/TS, Python, Go, Java/Kotlin/Scala, C#, PHP, Ruby, C/C++, Rust), recent
+git activity and symbol references, with one line per function (line, signature, tokens).
+
+```bash
+ctxman map                              # 2048 tokens of the current project
+ctxman map --tokens 4096 --style markdown
+ctxman map --focus src/server.js        # rank around the file you are working on
+ctxman map --important-last -o map.txt  # best files last, next to your question
+ctxman map --graph --style dot | dot -Tsvg > deps.svg
+```
+
+Details: [docs/commands/map.md](docs/commands/map.md).
+
+### 🔍 Pull-Request Context
+
+Everything a reviewer (or a model) needs about a branch, in one document: summary, commit log,
+changed files, the full source of every changed method, deleted methods, the diff and related
+tests, with your question last.
+
+```bash
+ctxman pr                                    # HEAD against origin/HEAD, main or master
+ctxman pr --base release/2.x --budget 30k    # drops the least important parts to fit
+ctxman pr --staged --ask "Is this safe to merge?" --copy
+ctxman pr --style xml -o review.xml
+```
+
+Details: [docs/commands/pr.md](docs/commands/pr.md).
+
+### 🔎 Ranked Search and Symbols
+
+```bash
+ctxman search "parse config file"            # BM25 over functions and code chunks
+ctxman search getUserName --limit 5 --json
+```
+
+`getUserName`, `get_user_name` and `get-user-name` all match "get user name". The same engine
+backs the MCP `search_code` tool (`type: "ranked"`), and `get_symbol` returns a function's full
+source by name. Details: [docs/commands/search.md](docs/commands/search.md).
+
+### 🔌 MCP Server Setup
+
+```bash
+ctxman mcp install --client claude-desktop   # or claude-code, cursor, vscode, windsurf
+ctxman mcp install --client claude-code --scope project --root .
+ctxman mcp config --client cursor            # print the snippet only
+ctxman mcp                                   # run the server (stdio)
+```
+
+The installer merges into the client's configuration and keeps a `.bak` of the previous file.
+`--root` confines every tool to one directory. Tools: `analyze_codebase`, `generate_context`,
+`git_diff`, `search_code`, `list_methods`, `repo_map`, `pr_context`, `get_symbol`. Details:
+[docs/commands/mcp.md](docs/commands/mcp.md).
+
+### 🛡️ Export Policy and Audit Log
+
+A policy in the repository (`.ctxman/policy.json`), or one an organisation points to with
+`CTXMAN_POLICY`, applies to the CLI, the REST API and the MCP server alike:
+
+```bash
+ctxman policy init       # starter policy: deny .env, keys and secrets/, require redaction
+ctxman policy check      # validate and show the effective policy
+ctxman audit             # what was exported, when, by whom, how many tokens
+ctxman --cli --respect-ignore-files .cursorignore,.aiexclude   # honour other AI tools' ignore files
+```
+
+Denied files never leave the analysis, `--no-redact` and oversized exports are refused (exit
+code 3), and every export is appended to an audit log with a hash of what was written, never the
+content. It is a team and organisation control, not a barrier against a local user. Details:
+[docs/commands/policy.md](docs/commands/policy.md).
+
+### 🤖 CI and Docker
+
+```yaml
+# .github/workflows/ctxman.yml
+- uses: hakkisagdic/ctxman@main # pin a release tag or commit
+  with:
+    changed-since: ${{ github.event.pull_request.base.sha }}
+    max-tokens: 50000 # fail the job above this budget
+    target-model: claude-sonnet-5-5
+```
+
+```bash
+docker build -t ctxman .
+docker run --rm -v "$PWD:/work" ctxman --cli
+docker run -i --rm -v "$PWD:/work" ctxman mcp --root /work   # MCP over stdio
+```
+
+Details: [docs/commands/ci.md](docs/commands/ci.md).
 
 ### 🔀 Git Integration (v3.0.0)
 
