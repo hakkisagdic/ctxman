@@ -89,6 +89,11 @@ async function main() {
     return;
   }
 
+  if (command === 'why') {
+    runSubcommand('./cm-why.js', args.slice(1));
+    return;
+  }
+
   if (args.includes('--help') || args.includes('-h')) {
     printHelp();
     return;
@@ -749,6 +754,9 @@ function printHelp() {
   console.log('  mcp [install|uninstall|config]');
   console.log('                           Start the MCP server or add it to an MCP client');
   console.log('  search QUERY [path]      Ranked (BM25) search over methods and code chunks');
+  console.log('  why FILE[:SYMBOL|#L10-L40] [options]');
+  console.log('                           Why the code looks like this: commits, references,');
+  console.log('                           owners, co-changes, docs and tests (ctxman why --help)');
   console.log('  update [check|install|rollback|channel NAME|info]');
   console.log('                           Check for and manage ctxman updates');
   console.log('  pr [--base REF] [--head REF] [path]');
