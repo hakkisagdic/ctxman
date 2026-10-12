@@ -119,7 +119,24 @@ altında kalmak için en az önemli kısımları çıkarır. Burada `ctxman coun
 
 <Terminal title="~/ctxman" :command="ex.pr.command" :output="ex.pr.output" copy-label="Kopyala" copied-label="Kopyalandı" />
 
-## 9. Sırlar özete girmez
+## 9. Bütçe içinde dosya içerikleri
+
+`ctxman pack`, dosyaların kendisini bir model için tek belge olarak yazar: önce ağaç, sonra her
+dosya, en sonda talimatlarınız. `--compress` ile yalnızca imzalar kalır ve fonksiyon gövdeleri tek
+satırlık bir yer tutucuya dönüşür; `--budget`, bütçeyi `ctxman map`ın en üst sıraya koyduğu
+dosyalarla doldurur. Burada dört çekirdek modül {{ n(ex.pack.tokens) }} token'da:
+
+<Terminal title="~/ctxman" :command="ex.pack.command" :output="ex.pack.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+## 10. Kod neden böyle?
+
+`ctxman why`, git'in ve reponun bir fonksiyon hakkında kaydettiklerini toplar: satırlarını
+değiştiren commit'ler tam mesajlarıyla, içlerindeki referanslar, sahipler, onunla birlikte değişen
+dosyalar, notlar ve testler. Hiçbir şey makineden çıkmaz:
+
+<Terminal title="~/ctxman" :command="ex.why.command" :output="ex.why.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+## 11. Sırlar özete girmez
 
 Bir yapılandırma dosyasında kimlik bilgisi unutulmuş küçük bir proje (iki anahtar da sahte):
 
@@ -130,7 +147,7 @@ Bir yapılandırma dosyasında kimlik bilgisi unutulmuş küçük bir proje (iki
 Bilinen biçimler (AWS, GitHub, GitLab, Slack, Stripe, Google, OpenAI ve Anthropic anahtarları, PEM
 özel anahtarları) varsayılan olarak maskelenir; `--no-redact` onları korur.
 
-## 10. MCP ile sorun
+## 12. MCP ile sorun
 
 `ctxman mcp`, stdio üzerinden Model Context Protocol konuşur; Claude Desktop, Claude Code, Cursor ve
 diğer MCP istemcileri ctxman'i doğrudan çağırabilir. `ctxman mcp install --client claude-desktop`
@@ -145,7 +162,7 @@ gönderdiği ve ctxman'in yanıtladığı haliyle bir `list_methods` çağrısı
 <Terminal title="tools/call" :output="json(ex.mcp.request)" copy-label="Kopyala" copied-label="Kopyalandı" />
 <Terminal title="result" :output="json(ex.mcp.response)" copy-label="Kopyala" copied-label="Kopyalandı" />
 
-## 11. REST üzerinden kesin token bütçesi
+## 13. REST üzerinden kesin token bütçesi
 
 `ctxman serve` yerel bir REST API başlatır. `targetTokens` ile `POST /api/v1/context`, bütçeyi en
 üst sıradaki dosyalarla (önce çekirdek kod) doldurur ve asla aşmaz:

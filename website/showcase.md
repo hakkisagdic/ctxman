@@ -121,7 +121,24 @@ dropping the least important parts to stay under `--budget`. Here for the commit
 
 <Terminal title="~/ctxman" :command="ex.pr.command" :output="ex.pr.output" />
 
-## 9. Secrets stay out of the digest
+## 9. File contents within a budget
+
+`ctxman pack` writes the files themselves as one document for a model: the tree first, then each
+file, then your instructions. With `--compress` only signatures stay and function bodies become a
+one-line placeholder; `--budget` fills the budget with the files `ctxman map` ranks highest. Here the
+four core modules in {{ n(ex.pack.tokens) }} tokens:
+
+<Terminal title="~/ctxman" :command="ex.pack.command" :output="ex.pack.output" />
+
+## 10. Why the code looks like this
+
+`ctxman why` collects what git and the repository record about a function: the commits that
+changed its lines with their full messages, the references in them, the owners, the files that
+change with it, notes and tests. Nothing leaves the machine:
+
+<Terminal title="~/ctxman" :command="ex.why.command" :output="ex.why.output" />
+
+## 11. Secrets stay out of the digest
 
 A small project with credentials left in a config file (both keys are fake):
 
@@ -132,7 +149,7 @@ A small project with credentials left in a config file (both keys are fake):
 Known formats (AWS, GitHub, GitLab, Slack, Stripe, Google, OpenAI and Anthropic keys, PEM private
 keys) are masked by default; `--no-redact` keeps them.
 
-## 10. Ask through MCP
+## 12. Ask through MCP
 
 `ctxman mcp` speaks the Model Context Protocol over stdio, so Claude Desktop, Claude Code, Cursor
 and other MCP clients can call ctxman directly. `ctxman mcp install --client claude-desktop` adds it
@@ -147,7 +164,7 @@ A `list_methods` call, as the client sends it and as ctxman answers:
 <Terminal title="tools/call" :output="json(ex.mcp.request)" />
 <Terminal title="result" :output="json(ex.mcp.response)" />
 
-## 11. A hard token budget over REST
+## 13. A hard token budget over REST
 
 `ctxman serve` starts a local REST API. `POST /api/v1/context` with `targetTokens` fills the budget
 with the highest-ranked files (core code first) and never goes over it:

@@ -238,6 +238,31 @@ examples.pr = {
   tokens: tokens(prContext, 'pr.md'),
 };
 
+// File contents in one document: signatures only, within a budget
+reset({ '.contextinclude': 'lib/core/**\n' });
+const packed = ctxman(['pack', '--compress', '--budget', '3000', '--style', 'markdown', '-q']);
+examples.pack = {
+  command: 'ctxman pack --compress --budget 3000 --style markdown',
+  output: head(packed, 48),
+  tokens: tokens(packed, 'context.md'),
+};
+
+// Why a function looks as it does, from the local git history
+reset();
+const why = ctxman([
+  'why',
+  'lib/integrations/git/GitClient.js:isValidGitRef',
+  '--budget',
+  '1800',
+  '--limit',
+  '3',
+]);
+examples.why = {
+  command: 'ctxman why lib/integrations/git/GitClient.js:isValidGitRef --budget 1800 --limit 3',
+  output: head(why, 70),
+  tokens: tokens(why, 'why.md'),
+};
+
 // MCP client setup: the snippet `ctxman mcp install` writes, here with npx
 const mcpConfig = ctxman(['mcp', 'config', '--client', 'claude-desktop', '--npx']);
 examples.mcpConfig = mcpConfig.slice(mcpConfig.indexOf('{')).trim();

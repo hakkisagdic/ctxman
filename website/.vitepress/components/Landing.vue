@@ -46,14 +46,14 @@ const content = {
       {
         id: 'cli',
         tab: 'CLI',
-        title: 'Analyse, filter and export from the terminal',
-        code: `$ ctxman --cli -m --context-export -o toon\n$ ctxman --cli --changed-since main --target-model claude-sonnet-5-5\n$ ctxman github facebook/react --chunk`,
+        title: 'Analyse, map, review and explain from the terminal',
+        code: `$ ctxman --cli --changed-since main --target-model claude-sonnet-5-5\n$ ctxman map --tokens 4096 --focus src/server.js\n$ ctxman pr --base main --budget 30k\n$ ctxman why src/cart.js:total --ask "Why round here?"`,
       },
       {
         id: 'mcp',
         tab: 'MCP',
         title: 'Give Claude, Cursor or VS Code tools to read your codebase',
-        code: `// claude_desktop_config.json\n{\n  "mcpServers": {\n    "ctxman": {\n      "command": "node",\n      "args": ["<npm root -g>/ctxman/bin/mcp-server.js"]\n    }\n  }\n}`,
+        code: `$ ctxman mcp install --client claude-desktop\n$ ctxman mcp install --client claude-code --scope project\n$ ctxman mcp install --client cursor\n\n# tools: repo_map, pr_context, explain_history,\n#        search_code, get_symbol, count_tokens, …`,
       },
       {
         id: 'rest',
@@ -71,8 +71,8 @@ const content = {
     bentoTitle: 'Everything a model needs, nothing it does not',
     bento: {
       exact: [
-        'Exact token counts',
-        'tiktoken counts per file, directory and method, with a calibrated estimate as fallback.',
+        'Counts you can check',
+        "Per file and method, with your model's encoding where it is published, and Claude's exact count through Anthropic's API on request.",
       ],
       methods: [
         'Method maps',
@@ -80,15 +80,15 @@ const content = {
       ],
       budget: [
         'Budgets that hold',
-        'Pack the most central files into a hard token budget over REST or MCP.',
+        'Pack the highest-ranked files, whole or as signatures, into a hard token budget: `ctxman pack --budget`, REST or MCP.',
       ],
       redact: [
         'Secrets stay out',
         'Cloud keys, tokens and private keys become [REDACTED] before export.',
       ],
       git: [
-        'Only what changed',
-        'Limit any run to the files changed since a branch, tag or commit.',
+        'Changes and their history',
+        '`ctxman pr` packs a branch for review; `ctxman why` gathers the commits, issues and owners behind a function.',
       ],
       formats: [
         'Any format',
@@ -106,8 +106,8 @@ const content = {
         '.contextignore, .contextinclude and .methodinclude are plain files, reviewed and versioned like code.',
       ],
       [
-        'Team profiles',
-        'Shared profiles and templates give every engineer the same context for the same task.',
+        'Policy and audit log',
+        'A policy file denies paths, requires redaction and caps exports for the CLI, API and MCP server, and every export is logged.',
       ],
       [
         'Locked-down servers',
@@ -171,14 +171,14 @@ const content = {
       {
         id: 'cli',
         tab: 'CLI',
-        title: 'Terminalden analiz edin, filtreleyin, dışa aktarın',
-        code: `$ ctxman --cli -m --context-export -o toon\n$ ctxman --cli --changed-since main --target-model claude-sonnet-5-5\n$ ctxman github facebook/react --chunk`,
+        title: 'Terminalden analiz edin, haritalayın, inceleyin, açıklayın',
+        code: `$ ctxman --cli --changed-since main --target-model claude-sonnet-5-5\n$ ctxman map --tokens 4096 --focus src/server.js\n$ ctxman pr --base main --budget 30k\n$ ctxman why src/cart.js:total --ask "Why round here?"`,
       },
       {
         id: 'mcp',
         tab: 'MCP',
         title: 'Claude, Cursor veya VS Code’a kod tabanınızı okuyan araçlar verin',
-        code: `// claude_desktop_config.json\n{\n  "mcpServers": {\n    "ctxman": {\n      "command": "node",\n      "args": ["<npm root -g>/ctxman/bin/mcp-server.js"]\n    }\n  }\n}`,
+        code: `$ ctxman mcp install --client claude-desktop\n$ ctxman mcp install --client claude-code --scope project\n$ ctxman mcp install --client cursor\n\n# tools: repo_map, pr_context, explain_history,\n#        search_code, get_symbol, count_tokens, …`,
       },
       {
         id: 'rest',
@@ -196,21 +196,21 @@ const content = {
     bentoTitle: 'Modelin ihtiyacı olan her şey, fazlası değil',
     bento: {
       exact: [
-        'Birebir token sayımı',
-        'Dosya, klasör ve metot başına tiktoken sayımı; yedek olarak kalibre edilmiş tahmin.',
+        'Doğrulanabilir sayılar',
+        'Dosya ve metot başına, kodlaması yayımlanmış modellerde modelin kendi kodlamasıyla; istenirse Claude için Anthropic API’siyle birebir.',
       ],
       methods: ['Metot haritaları', 'Her metot satırı ve kendi token sayısıyla, 14 dilde.'],
       budget: [
         'Tutan bütçeler',
-        'En merkezi dosyaları REST veya MCP üzerinden kesin bir token bütçesine sığdırın.',
+        'En üst sıradaki dosyaları, tam veya yalnızca imzalarıyla, kesin bir token bütçesine sığdırın: `ctxman pack --budget`, REST veya MCP.',
       ],
       redact: [
         'Sırlar dışarıda kalır',
         'Bulut anahtarları, token’lar ve özel anahtarlar dışa aktarımdan önce [REDACTED] olur.',
       ],
       git: [
-        'Yalnızca değişenler',
-        'Herhangi bir çalıştırmayı bir daldan, etiketten veya commit’ten beri değişen dosyalarla sınırlayın.',
+        'Değişiklikler ve geçmişleri',
+        '`ctxman pr` bir dalı incelemeye hazırlar; `ctxman why` bir fonksiyonun ardındaki commit, issue ve sahipleri toplar.',
       ],
       formats: [
         'Her format',
@@ -228,8 +228,8 @@ const content = {
         '.contextignore, .contextinclude ve .methodinclude düz dosyalardır; kod gibi incelenir ve sürümlenir.',
       ],
       [
-        'Ekip profilleri',
-        'Paylaşılan profiller ve şablonlar her mühendise aynı iş için aynı bağlamı verir.',
+        'Politika ve denetim kaydı',
+        'Bir politika dosyası CLI, API ve MCP sunucusu için yolları engeller, maskelemeyi zorunlu kılar, dışa aktarmayı sınırlar; her dışa aktarma kaydedilir.',
       ],
       [
         'Kilitli sunucular',
@@ -285,12 +285,11 @@ const redactAfter = keyPart(
 
 // Inline `code` in roadmap texts
 const segments = (value) => value.split('`').map((part, i) => ({ code: i % 2 === 1, text: part }));
-const changedFiles = examples.changed.files;
+const prTokens = examples.pr.tokens;
 
 // The landing table shows the summary rows and columns; the compare page has everything
 const compareColumns = landscape.columns.filter((c) => c.landing);
 const compareRows = landscape.rows.filter((r) => r.landing);
-const MARK = { yes: '●', partial: '◐', no: '○' };
 const markLabel = (value) => landscape.legend[lang.value][value] ?? value;
 
 const copied = ref(false);
@@ -407,7 +406,12 @@ async function copyInstall() {
         </article>
         <article class="cell budget">
           <h3>{{ t.bento.budget[0] }}</h3>
-          <p>{{ t.bento.budget[1] }}</p>
+          <p>
+            <template v-for="(seg, i) in segments(t.bento.budget[1])" :key="i"
+              ><code v-if="seg.code">{{ seg.text }}</code
+              ><template v-else>{{ seg.text }}</template></template
+            >
+          </p>
           <div class="budget-bar" aria-hidden="true">
             <span
               :style="{ width: `${Math.round((examples.budget.keptTokens / 30000) * 100)}%` }"
@@ -429,8 +433,15 @@ async function copyInstall() {
         </article>
         <article class="cell git">
           <h3>{{ t.bento.git[0] }}</h3>
-          <p>{{ t.bento.git[1] }}</p>
-          <p class="mono-note">--changed-since HEAD~10 → {{ changedFiles }} {{ t.unitFiles }}</p>
+          <p>
+            <template v-for="(seg, i) in segments(t.bento.git[1])" :key="i"
+              ><code v-if="seg.code">{{ seg.text }}</code
+              ><template v-else>{{ seg.text }}</template></template
+            >
+          </p>
+          <p class="mono-note">
+            ctxman pr --budget 2500 → {{ prTokens.toLocaleString(numberLocale) }} {{ t.unitTokens }}
+          </p>
         </article>
         <article class="cell formats">
           <h3>{{ t.bento.formats[0] }}</h3>
@@ -488,7 +499,13 @@ async function copyInstall() {
                 :class="[r.values[c.id], { us: c.id === 'ctxman' }]"
                 :title="markLabel(r.values[c.id])"
               >
-                <span aria-hidden="true">{{ MARK[r.values[c.id]] ?? '?' }}</span>
+                <span
+                  v-if="!['yes', 'partial', 'no'].includes(r.values[c.id])"
+                  class="mark-q"
+                  aria-hidden="true"
+                  >?</span
+                >
+                <span v-else class="mark" :class="r.values[c.id]" aria-hidden="true"></span>
                 <span class="sr-only">{{ markLabel(r.values[c.id]) }}</span>
               </td>
             </tr>
@@ -496,10 +513,13 @@ async function copyInstall() {
         </table>
       </div>
       <p class="compare-foot">
-        <span class="legend"
-          >● {{ landscape.legend[lang].yes }} · ◐ {{ landscape.legend[lang].partial }} · ○
-          {{ landscape.legend[lang].no }}</span
-        >
+        <span class="legend">
+          <span class="mark yes" aria-hidden="true"></span> {{ landscape.legend[lang].yes }} ·
+          <span class="mark partial" aria-hidden="true"></span>
+          {{ landscape.legend[lang].partial }} · <span class="mark no" aria-hidden="true"></span>
+          {{ landscape.legend[lang].no }} · <span class="mark-q" aria-hidden="true">?</span>
+          {{ landscape.legend[lang].unknown }}
+        </span>
         <span
           >{{ t.compareChecked }} {{ landscape.checked }} ·
           <a :href="link('/compare')">{{ t.compareCta }} →</a></span
@@ -584,6 +604,33 @@ h3 {
 
 p {
   margin: 0;
+}
+
+.mark {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.mark.yes {
+  background: #10b981;
+}
+
+.mark.partial {
+  border: 2px solid #f59e0b;
+  background: linear-gradient(90deg, #f59e0b 50%, transparent 50%);
+}
+
+.mark.no {
+  border: 2px solid var(--vp-c-text-3);
+}
+
+.mark-q {
+  font-weight: 600;
+  color: var(--vp-c-text-3);
 }
 
 .sr-only {
@@ -1050,6 +1097,8 @@ h3 {
 
 /* Compare */
 .compare-wrap {
+  /* Contains the absolutely positioned .sr-only labels, which would otherwise widen the page */
+  position: relative;
   margin-top: 1.75rem;
   border: 1px solid var(--vp-c-divider);
   border-radius: var(--radius);
