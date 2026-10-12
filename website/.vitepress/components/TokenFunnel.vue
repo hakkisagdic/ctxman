@@ -12,14 +12,14 @@ const text = {
     notes: ['no configuration', 'build output and lockfiles out', 'source only'],
     files: 'files',
     tokens: 'tokens',
-    fits: 'fits Claude Sonnet 4.5 (200K)',
+    fits: (percent) => `fits Claude Sonnet 5.5's 1M window (${percent}%)`,
   },
   tr: {
     steps: ["Git'teki her şey", '+ .contextignore', '+ .contextinclude'],
     notes: ['yapılandırma yok', 'derleme çıktıları ve lock dosyaları hariç', 'yalnız kaynak kod'],
     files: 'dosya',
     tokens: 'token',
-    fits: "Claude Sonnet 4.5'e sığar (200K)",
+    fits: (percent) => `Claude Sonnet 5.5'in 1M penceresine sığar (%${percent})`,
   },
 };
 
@@ -35,7 +35,8 @@ const rows = computed(() => {
     files: step.files,
     tokens: step.tokens,
     width: Math.max(4, Math.round((step.tokens / max) * 100)),
-    fits: i === 2 && step.tokens <= 200000,
+    fits: i === 2 && step.tokens <= 1000000,
+    percent: Math.round((step.tokens / 1000000) * 100),
   }));
 });
 
@@ -55,7 +56,7 @@ const format = (value) => value.toLocaleString(locale.value);
       <div class="numbers">
         <strong>{{ format(row.tokens) }}</strong> {{ t.tokens }} · {{ format(row.files) }}
         {{ t.files }}
-        <span v-if="row.fits" class="fits-badge">✓ {{ t.fits }}</span>
+        <span v-if="row.fits" class="fits-badge">✓ {{ t.fits(row.percent) }}</span>
       </div>
     </li>
   </ol>

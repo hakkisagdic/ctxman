@@ -35,8 +35,9 @@ No configuration at all, just the files git tracks:
 
 <Terminal title="~/ctxman" :command="ex.raw.command" :output="ex.raw.output" />
 
-A quarter of all tokens is one built bundle of the desktop app (`html/assets/*.js`), and the next
-three entries are lockfiles and a vendored text dump. A model learns nothing from any of them.
+More than a fifth of all tokens is one built bundle of the desktop app (`html/assets/*.js`), and
+the next three entries are lockfiles and a vendored text dump. A model learns nothing from any of
+them.
 
 ## 2. Drop what no model needs
 
@@ -45,7 +46,9 @@ A `.contextignore` uses `.gitignore` syntax. Five lines take out the build outpu
 <Terminal title=".contextignore" :output="ex.contextignore.config" />
 <Terminal title="~/ctxman" :command="ex.contextignore.command" :output="ex.contextignore.output" />
 
-{{ n(ex.raw.tokens) }} → {{ n(ex.contextignore.tokens) }} tokens. Still more than any context window.
+{{ n(ex.raw.tokens) }} → {{ n(ex.contextignore.tokens) }} tokens. That squeezes into a 1M window but
+leaves little room for the conversation, and more than two thirds of it is documentation, tests
+and the website.
 
 ## 3. Keep only the source, and check the fit
 
@@ -56,8 +59,18 @@ result against the model's context window:
 <Terminal title="~/ctxman" :command="ex.contextinclude.command" :output="ex.contextinclude.output" />
 
 {{ ex.contextinclude.files }} files and {{ n(ex.contextinclude.tokens) }} tokens: the whole source of
-ctxman fits in Claude Sonnet 4.5's 200K window, {{ data.stats.reduction }}% less than where we
-started.
+ctxman fits in Claude Sonnet 5.5's 1M window with room to spare, {{ data.stats.reduction }}% less
+than where we started.
+
+Claude counts with its own tokenizer, so a count made with an OpenAI encoding is an approximation.
+`ctxman count` says which kind of count you have and how to get the exact one; for OpenAI models it
+uses the model's own encoding:
+
+<Terminal title="~/ctxman" :command="ex.count.command" :output="ex.count.output" />
+<Terminal title="~/ctxman" :command="ex.count.gptCommand" :output="ex.count.gptOutput" />
+
+`ctxman count --model claude-sonnet-5-5 --api` sends the redacted text to Anthropic's free
+count_tokens endpoint and reports Claude's exact count.
 
 ## 4. Same context, fewer tokens
 
@@ -91,7 +104,24 @@ base of a pull request:
 
 <Terminal title="~/ctxman" :command="ex.changed.command" :output="ex.changed.output" />
 
-## 7. Secrets stay out of the digest
+## 7. A map of the repository in 700 tokens
+
+`ctxman map` ranks files by PageRank over the import graph, recent git activity and symbol
+references, and lists each file's functions with their line and token count, until the budget is
+used:
+
+<Terminal title="~/ctxman" :command="ex.map.command" :output="ex.map.output" />
+
+## 8. Review context for a commit
+
+`ctxman pr` writes what a reviewer needs about a branch or commit range: the summary, the commit
+messages, the changed files, the source of every changed method, the diff and the related tests,
+dropping the least important parts to stay under `--budget`. Here for the commit that added
+`ctxman count` (the diff is left out to keep the page short):
+
+<Terminal title="~/ctxman" :command="ex.pr.command" :output="ex.pr.output" />
+
+## 9. Secrets stay out of the digest
 
 A small project with credentials left in a config file (both keys are fake):
 
@@ -102,30 +132,22 @@ A small project with credentials left in a config file (both keys are fake):
 Known formats (AWS, GitHub, GitLab, Slack, Stripe, Google, OpenAI and Anthropic keys, PEM private
 keys) are masked by default; `--no-redact` keeps them.
 
-## 8. Ask through MCP
+## 10. Ask through MCP
 
-`bin/mcp-server.js` speaks the Model Context Protocol over stdio, so Claude Desktop and other MCP
-clients can call ctxman directly. In `claude_desktop_config.json`:
+`ctxman mcp` speaks the Model Context Protocol over stdio, so Claude Desktop, Claude Code, Cursor
+and other MCP clients can call ctxman directly. `ctxman mcp install --client claude-desktop` adds it
+to the client's configuration; this is the entry it writes with `--npx`:
 
-```json
-{
-  "mcpServers": {
-    "ctxman": {
-      "command": "node",
-      "args": ["/usr/local/lib/node_modules/ctxman/bin/mcp-server.js"]
-    }
-  }
-}
-```
+<Terminal title="claude_desktop_config.json" :output="ex.mcpConfig" />
 
-The path is `$(npm root -g)/ctxman/bin/mcp-server.js` on your machine. The server offers
+The server offers
 {{ ex.mcp.tools.length }} tools — {{ ex.mcp.tools.join(', ') }} — plus file resources and prompts.
 A `list_methods` call, as the client sends it and as ctxman answers:
 
 <Terminal title="tools/call" :output="json(ex.mcp.request)" />
 <Terminal title="result" :output="json(ex.mcp.response)" />
 
-## 9. A hard token budget over REST
+## 11. A hard token budget over REST
 
 `ctxman serve` starts a local REST API. `POST /api/v1/context` with `targetTokens` fills the budget
 with the highest-ranked files (core code first) and never goes over it:

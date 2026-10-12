@@ -57,15 +57,17 @@ const STEPS = [
   { tokens: formats.methods.json, command: 'ctxman --cli -m --context-export' },
   { tokens: formats.methods.toon, command: 'ctxman --cli -m --context-export -o toon' },
 ];
+// Context windows of current models: 1M (Claude Sonnet/Opus 5.5, GPT-6, Gemini 3), 400K
+// (GPT-5.4 mini), 200K (Claude Haiku 4.5) and 128K (older and smaller models)
 const WINDOWS = [
-  { label: '32K', tokens: 32000 },
   { label: '128K', tokens: 128000 },
   { label: '200K', tokens: 200000 },
+  { label: '400K', tokens: 400000 },
   { label: '1M', tokens: 1000000 },
 ];
 
 const step = ref(0);
-const windowSize = ref(200000);
+const windowSize = ref(1000000);
 const current = computed(() => STEPS[step.value]);
 const fits = computed(() => current.value.tokens <= windowSize.value);
 const ratio = computed(() => current.value.tokens / windowSize.value);

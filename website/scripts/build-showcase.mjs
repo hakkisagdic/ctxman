@@ -134,10 +134,10 @@ const contextinclude = [
   '',
 ].join('\n');
 reset({ '.contextinclude': contextinclude });
-const included = ctxman(['--cli', '--simple', '--target-model', 'claude-sonnet-4.5']);
+const included = ctxman(['--cli', '--simple', '--target-model', 'claude-sonnet-5-5']);
 examples.contextinclude = {
   config: contextinclude.trim(),
-  command: 'ctxman --cli --target-model claude-sonnet-4.5',
+  command: 'ctxman --cli --target-model claude-sonnet-5-5',
   output: [
     lines(included, /Total files analyzed/, /Average tokens per file/),
     lines(included, /Context Window Analysis/, /Context version created/),
@@ -197,6 +197,50 @@ examples.changed = {
   files: number(changed, 'Total files analyzed'),
   tokens: number(changed, 'Total tokens'),
 };
+
+// Token count for one model; Claude's own count needs the API (`--api`), so the page shows
+// the local count and says how to get the exact one
+reset({ '.contextinclude': contextinclude });
+examples.count = {
+  command: 'ctxman count --model claude-sonnet-5-5 --top 3',
+  output: ctxman(['count', '--model', 'claude-sonnet-5-5', '--top', '3']),
+  gptCommand: 'ctxman count --model gpt-5.5 --top 0',
+  gptOutput: ctxman(['count', '--model', 'gpt-5.5', '--top', '0']),
+};
+
+// A ranked repository map within a token budget
+reset();
+const repoMap = ctxman(['map', '--tokens', '700']);
+examples.map = {
+  command: 'ctxman map --tokens 700',
+  output: repoMap,
+  tokens: tokens(repoMap, 'map.txt'),
+};
+
+// Review context for the commit that added `ctxman count`
+reset();
+const countCommit = git('log', '--format=%h', '--grep=^feat(count)', '-1');
+const prContext = ctxman([
+  'pr',
+  '--base',
+  `${countCommit}~1`,
+  '--head',
+  countCommit,
+  '--no-diff',
+  '--budget',
+  '2500',
+  '-q',
+]);
+examples.pr = {
+  command: `ctxman pr --base ${countCommit}~1 --head ${countCommit} --no-diff --budget 2500`,
+  commit: countCommit,
+  output: head(prContext, 60),
+  tokens: tokens(prContext, 'pr.md'),
+};
+
+// MCP client setup: the snippet `ctxman mcp install` writes, here with npx
+const mcpConfig = ctxman(['mcp', 'config', '--client', 'claude-desktop', '--npx']);
+examples.mcpConfig = mcpConfig.slice(mcpConfig.indexOf('{')).trim();
 
 // 7. Secrets in source never reach the digest
 const demo = path.join(work, 'payments-service');

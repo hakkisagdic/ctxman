@@ -1,68 +1,86 @@
 {
   "meta": {
-    "commit": "2a97d88",
-    "commitDate": "2026-10-07T10:30:53+00:00",
+    "commit": "5731a63",
+    "commitDate": "2026-10-12T11:14:45+00:00",
     "ctxmanVersion": "3.0.0",
     "node": "v22.22.0",
     "exactTokens": true
   },
   "stats": {
-    "rawTokens": 1430646,
-    "focusedTokens": 175294,
-    "reduction": 88,
+    "rawTokens": 1622202,
+    "focusedTokens": 262042,
+    "reduction": 84,
     "toonSaving": 64,
-    "methods": 862,
-    "scannedFiles": 396,
-    "scanMs": 21
+    "methods": 1221,
+    "scannedFiles": 469,
+    "scanMs": 16
   },
   "examples": {
     "raw": {
       "command": "ctxman --cli",
-      "output": "📊 Total files analyzed: 397\n🔢 Total tokens: 1,430,646\n💾 Total size: 4.92 MB\n📄 Total lines: 163,331\n\n🏆 TOP 5 LARGEST FILES BY TOKEN COUNT:\n--------------------------------------------------------------------------------\n 1.  357,327 tokens (25.0%) - html/assets/index-BUCFJtth.js\n    💾   1217.9 KB, 📄 40,666 lines\n 2.  115,920 tokens (8.1%) - package-lock.json\n    💾    285.0 KB, 📄  8,376 lines\n 3.  103,364 tokens (7.2%) - desktop-app/package-lock.json\n    💾    252.7 KB, 📄  7,454 lines\n 4.   98,301 tokens (6.9%) - docs/coderamp-labs-gitingest-8a5edab282632443.txt\n    💾    413.1 KB, 📄 12,586 lines\n 5.   37,380 tokens (2.6%) - html/assets/index-DlhE0rqZ.css\n    💾     92.1 KB, 📄  3,591 lines",
-      "files": 397,
-      "tokens": 1430646
+      "output": "📊 Total files analyzed: 470\n🔢 Total tokens: 1,622,202\n💾 Total size: 5.63 MB\n📄 Total lines: 182,770\n\n🏆 TOP 5 LARGEST FILES BY TOKEN COUNT:\n--------------------------------------------------------------------------------\n 1.  357,327 tokens (22.0%) - html/assets/index-BUCFJtth.js\n    💾   1217.9 KB, 📄 40,666 lines\n 2.  115,914 tokens (7.1%) - package-lock.json\n    💾    285.0 KB, 📄  8,375 lines\n 3.  103,364 tokens (6.4%) - desktop-app/package-lock.json\n    💾    252.7 KB, 📄  7,454 lines\n 4.   98,301 tokens (6.1%) - docs/coderamp-labs-gitingest-8a5edab282632443.txt\n    💾    413.1 KB, 📄 12,586 lines\n 5.   37,380 tokens (2.3%) - html/assets/index-DlhE0rqZ.css\n    💾     92.1 KB, 📄  3,591 lines",
+      "files": 470,
+      "tokens": 1622202
     },
     "contextignore": {
       "config": "# Build output and lockfiles: large, generated, nothing for a model to learn\nhtml/\n**/package-lock.json\ndesktop-app/\ndocs/*.txt\ntest-repos/",
       "command": "ctxman --cli",
-      "output": "📊 Total files analyzed: 379\n🔢 Total tokens: 677,986\n💾 Total size: 2.61 MB\n📄 Total lines: 87,393\n📈 Average tokens per file: 1,789\n🚫 Files ignored by .gitignore: 0\n📋 Files ignored by context rules: 18",
-      "files": 379,
-      "tokens": 677986
+      "output": "📊 Total files analyzed: 452\n🔢 Total tokens: 869,548\n💾 Total size: 3.32 MB\n📄 Total lines: 106,833\n📈 Average tokens per file: 1,924\n🚫 Files ignored by .gitignore: 0\n📋 Files ignored by context rules: 18",
+      "files": 452,
+      "tokens": 869548
     },
     "contextinclude": {
       "config": "lib/**\nbin/**\n/index.js\n/index.d.ts\n/package.json\n/README.md",
-      "command": "ctxman --cli --target-model claude-sonnet-4.5",
-      "output": "📊 Total files analyzed: 81\n🔢 Total tokens: 175,294\n💾 Total size: 0.69 MB\n📄 Total lines: 25,993\n\n📊 Context Window Analysis:\n════════════════════════════════════════════════════\n   Target Model: Claude Sonnet 4.5\n   Available Context: 200,000 tokens\n   Your Repository: 175,294 tokens (87.6%)\n\n   ⚠️  WARNING: You're using 80%+ of context window\n\n   💡 Consider excluding these large files:\n      - bin/cli.js (15,068 tokens, 8.6%)\n      - README.md (8,862 tokens, 5.1%)\n      - lib/analyzers/method-analyzer.js (7,023 tokens, 4.0%)\n      ... and 5 more\n\n   Repository requires 2 chunks. Enable chunking with --chunk flag.",
-      "files": 81,
-      "tokens": 175294
+      "command": "ctxman --cli --target-model claude-sonnet-5-5",
+      "output": "📊 Total files analyzed: 114\n🔢 Total tokens: 262,042\n💾 Total size: 1.02 MB\n📄 Total lines: 35,557\n\n📊 Context Window Analysis:\n════════════════════════════════════════════════════\n   Target Model: Claude Sonnet 5.5\n   Available Context: 1,000,000 tokens\n   Your Repository: 262,042 tokens (26.2%)\n\n   ✅ Context usage is within safe limits\n\n   💡 Consider excluding these large files:\n      - bin/cli.js (15,978 tokens, 6.1%)\n      - README.md (11,180 tokens, 4.3%)\n      - lib/analyzers/token-calculator.js (7,697 tokens, 2.9%)\n\n   Plenty of room for system prompts and responses.",
+      "files": 114,
+      "tokens": 262042
     },
     "formats": {
       "command": "ctxman --cli --context-export -o toon",
       "files": {
-        "json": 779,
-        "toon": 567,
-        "saving": 27
+        "json": 1016,
+        "toon": 729,
+        "saving": 28
       },
       "methods": {
-        "json": 23745,
-        "toon": 8580,
+        "json": 33478,
+        "toon": 11995,
         "saving": 64
       },
-      "totalMethods": 862,
-      "excerpt": "project:\n  root: ctxman\n  totalFiles: 81\n  totalTokens: 175294\npaths:\n  \"bin/\"[5]: cli.js,cm-gitingest.js,cm-update.js,cm-ask.js,mcp-server.js\n  \"/\"[4]: README.md,index.d.ts,package.json,index.js\n  \"lib/analyzers/\"[9]: method-analyzer.js,token-calculator.js,performance-dashboard.js,dependency-scanner.js,ai-suggester.js,import-tracker.js,unused-exports-detector.js,duplicate-detector.js,go-method-analyzer.js\n  \"lib/formatters/\"[4]: gitingest-formatter.js,toon-formatter-v1.3.js,format-registry.js,toon-formatter.js\n  \"lib/utils/\"[19]: snapshot-manager.js,llm-detector.js,updater.js,context-versioning.js,format-converter.js,template-manager.js,tokenizer-adapter.js,git-utils.js,profile-manager.js,messages.js,multi-repo-manager.js,llm-cost-estimator.js,logger.js,token-utils.js,file-utils.js,error-handler.js,config-utils.js,secret-redactor.js,clipboard-utils.js\n  \"lib/ui/\"[7]: init-wizard-ui.js,wizard.js,dashboard.js,progress-bar.js,template-selector.js,select-input.js,index.js\n  \"lib/wizards/\"[2]: project-detector.js,config-generator.js\n  \"lib/api/rest/\"[1]: server.js\n  \"lib/api/mcp/\"[3]: server.js,prompts.js,resources.js\n  \"lib/integrations/git/\"[3]: GitClient.js,DiffAnalyzer.js,BlameTracker.js\n  \"lib/cache/\"[1]: CacheManager.js\n  \"lib/core/\"[4]: ContextBuilder.js,Reporter.js,Analyzer.js,Scanner.js\n  \"lib/lsp/\"[1]: server.js\n…"
+      "totalMethods": 1221,
+      "excerpt": "project:\n  root: ctxman\n  totalFiles: 114\n  totalTokens: 262042\npaths:\n  \"bin/\"[12]: cli.js,cm-mcp.js,cm-pr.js,cm-map.js,cm-search.js,cm-count.js,cm-gitingest.js,cm-policy.js,cm-update.js,cm-audit.js,cm-ask.js,mcp-server.js\n  \"/\"[4]: README.md,index.d.ts,package.json,index.js\n  \"lib/analyzers/\"[9]: token-calculator.js,method-analyzer.js,performance-dashboard.js,dependency-scanner.js,ai-suggester.js,import-tracker.js,unused-exports-detector.js,duplicate-detector.js,go-method-analyzer.js\n  \"lib/pr/\"[6]: pr-context.js,pr-renderer.js,related-tests.js,diff-parser.js,pr-git.js,method-mapper.js\n  \"lib/formatters/\"[4]: gitingest-formatter.js,toon-formatter-v1.3.js,format-registry.js,toon-formatter.js\n  \"lib/utils/\"[21]: snapshot-manager.js,llm-detector.js,updater.js,context-versioning.js,tokenizer-adapter.js,git-utils.js,format-converter.js,template-manager.js,profile-manager.js,messages.js,multi-repo-manager.js,llm-cost-estimator.js,logger.js,token-utils.js,claude-token-counter.js,file-utils.js,error-handler.js,config-utils.js,secret-redactor.js,clipboard-utils.js,cli-output.js\n  \"lib/map/\"[6]: resolver.js,render.js,rank.js,graph.js,imports.js,index.js\n  \"lib/policy/\"[5]: policy.js,audit.js,ignore-files.js,enforce.js,index.js\n  \"lib/api/mcp/\"[6]: server.js,install.js,resources.js,prompts.js,start.js,sandbox.js\n  \"lib/search/\"[3]: bm25.js,code-units.js,symbols.js\n  \"lib/ui/\"[7]: init-wizard-ui.js,wizard.js,dashboard.js,progress-bar.js,template-selector.js,select-input.js,index.js\n  \"lib/wizards/\"[2]: project-detector.js,config-generator.js\n  \"lib/api/rest/\"[1]: server.js\n…"
     },
     "methods": {
       "config": "lib/core/**",
       "command": "ctxman --cli -m --context-export -o toon",
-      "output": "project:\n  root: ctxman\n  totalFiles: 4\n  totalTokens: 5919\nmethods:\n  \"lib/core/Analyzer.js\"[10]{name,line,tokens}:\n    constructor,15,6\n    initStats,27,64\n    analyze,40,87\n    analyzeSequential,57,61\n    analyzeFile,71,253\n    updateStats,110,218\n    detectLanguage,142,162\n    getStats,167,14\n    reset,171,14\n    getLanguageDistribution,175,67\n  \"lib/core/ContextBuilder.js\"[12]{name,line,tokens}:\n    constructor,19,6\n    build,36,161\n    buildMetadata,68,97\n    buildFileList,89,125\n    buildMethodList,118,92\n    applySmartFiltering,141,201\n    prioritizeFiles,173,235\n    calculateCoreScore,211,171\n    calculateBalancedScore,237,50\n    optimizeForLLM,248,192\n    generateCompactPaths,282,58\n    getSummary,298,150\n  \"lib/core/Reporter.js\"[9]{name,line,tokens}:\n    constructor,21,6\n    report,38,91\n…",
-      "tokens": 417
+      "output": "project:\n  root: ctxman\n  totalFiles: 4\n  totalTokens: 6501\nmethods:\n  \"lib/core/Analyzer.js\"[10]{name,line,tokens}:\n    constructor,15,54\n    initStats,27,64\n    analyze,40,87\n    analyzeSequential,57,61\n    analyzeFile,71,253\n    updateStats,110,218\n    detectLanguage,142,162\n    getStats,167,14\n    reset,171,14\n    getLanguageDistribution,175,67\n  \"lib/core/ContextBuilder.js\"[12]{name,line,tokens}:\n    constructor,19,66\n    build,36,161\n    buildMetadata,68,97\n    buildFileList,89,125\n    buildMethodList,118,92\n    applySmartFiltering,141,201\n    prioritizeFiles,173,235\n    calculateCoreScore,211,171\n    calculateBalancedScore,237,50\n    optimizeForLLM,248,192\n    generateCompactPaths,282,58\n    getSummary,298,150\n  \"lib/core/Reporter.js\"[9]{name,line,tokens}:\n    constructor,21,50\n    report,38,91\n…",
+      "tokens": 435
     },
     "changed": {
       "command": "ctxman --cli --changed-since HEAD~10",
-      "output": "📝 Found 23 changed files\n   Since: HEAD~10\n   Impact: CRITICAL (score: 112)\n\n📊 Total files analyzed: 23\n🔢 Total tokens: 63,503\n💾 Total size: 0.25 MB\n📄 Total lines: 8,241",
-      "files": 23,
-      "tokens": 63503
+      "output": "📝 Found 81 changed files\n   Since: HEAD~10\n   Impact: CRITICAL (score: 218)\n\n📊 Total files analyzed: 79\n🔢 Total tokens: 272,404\n💾 Total size: 1.02 MB\n📄 Total lines: 28,469",
+      "files": 79,
+      "tokens": 272404
     },
+    "count": {
+      "command": "ctxman count --model claude-sonnet-5-5 --top 3",
+      "output": "Model:   Claude Sonnet 5.5 (claude-sonnet-5-5)\nFiles:   114\nTokens:  262,042  [approximate, tiktoken cl100k_base; Anthropic models use their own tokenizer]\nWindow:  1,000,000 tokens — 26.2% used, fits\n         For an exact count: ctxman count --model claude-sonnet-5-5 --api\n\nLargest files:\n     15,978  bin/cli.js\n     11,180  README.md\n      7,697  lib/analyzers/token-calculator.js",
+      "gptCommand": "ctxman count --model gpt-5.5 --top 0",
+      "gptOutput": "Model:   GPT-5.5 (gpt-5.5)\nFiles:   114\nTokens:  264,157  [exact, tiktoken o200k_base]\nWindow:  1,050,000 tokens — 25.2% used, fits"
+    },
+    "map": {
+      "command": "ctxman map --tokens 700",
+      "output": "lib/utils/logger.js (score 0.877, 1714 tokens)\n  11: constructor(options = {}) [293 tok]\n  52: initializeLogDirectory() [131 tok]\n  72: getDateString() [51 tok]\n  80: getTimestamp() [14 tok]\n  87: shouldLog(level) [20 tok]\n  94: formatMessage(level, message, meta = {}) [128 tok]\n  111: writeToFile(message) [109 tok]\n  129: log(level, message, meta = {}) [76 tok]\n  146: error(message, meta = {}) [20 tok]\n  150: warn(message, meta = {}) [20 tok]\n  154: info(message, meta = {}) [20 tok]\n  158: debug(message, meta = {}) [20 tok]\n  162: trace(message, meta = {}) [20 tok]\n  169: custom(icon, level, message, meta = {}) [49 tok]\n  179: group(title) [35 tok]\n  186: groupEnd() [34 tok]\n  196: time(label) [24 tok]\n  201: timeEnd(label) [26 tok]\n  209: clearOldLogs(daysToKeep = 7) [194 tok]\n  238: getLogFilePath() [44 tok]\n  247: getRecentLogs(lines = 100) [104 tok]\n  270: function getLogger(options = {}) [29 tok]\n  280: function createLogger(options = {}) [14 tok]\nlib/parsers/gitignore-parser.js (score 0.576, 1052 tokens)\n  9: constructor(gitignorePath, contextIgnorePath, contextIncludePath) [64 tok]\n  18: loadPatterns(gitignorePath, contextIgnorePath, contextIncludePath) [169 tok]\n  35: parsePatternFile(filePath) [145 tok]\n  56: convertToRegex(pattern) [253 tok]\n  80: isIgnored(filePath, relativePath) [182 tok]\n  105: isDirectory(filePath) [59 tok]\n  114: testPatterns(patterns, relativePath, reason) [69 tok]\n  125: testPatternsWithNegation(patterns, relativePath) [70 tok]\nlib/utils/file-utils.js (score 0.396, 949 tokens)\n  26: static isText(filePath) [243 tok]\n  82: static isCode(filePath) [149 tok]\n  113: static getType(filePath) [209 tok]\n  158: static isSkippedDirectory(name) [21 tok]\n  167: static getExtension(filePath) [34 tok]\nlib/analyzers/go-method-analyzer.js (score 0.372, 1056 tokens)\n  9: extractMethods(content, filePath) [385 tok]\n  60: getLineNumber(content, index) [25 tok]\n  64: isInComment(content, index) [175 tok]\n  87: isKeyword(name) [230 tok]\n  140: extractMethodContent(content, methodName) [205 tok]\nindex.js (score 0.236, 503 tokens)\ntest/format-converter.test.js (score 0.173, 1286 tokens)\n  24: FormatRegistry.mockImplementation(function () [16 tok]",
+      "tokens": 697
+    },
+    "pr": {
+      "command": "ctxman pr --base 805d404~1 --head 805d404 --no-diff --budget 2500",
+      "commit": "805d404",
+      "output": "# Pull request context: `805d404` into `805d404~1`\n\n## Summary\n\n- Base: 805d404~1 (cf6d566)\n- Head: 805d404 (805d404)\n- Merge base: cf6d566\n- Commits: 1\n- Files changed: 12 (7 modified, 5 added), +744 -28 lines\n- Changed methods: 39 (23 added, 16 modified); deleted methods: 0\n- Related tests: 27\n- Impact (heuristic): critical\n- Tokens: ~2,412 total; summary 229, commits 416, files 234, methods 1,533\n- Diff: not included (--no-diff)\n- Budget: 2,500 tokens; dropped: 27 related test path(s); source of 22 changed method(s) (bin/cli.js:printHelp, bin/cli.js:main, lib/count/index.js:countForModel, bin/cm-count.js:printResult, lib/analyzers/token-calculator.js:printHeader, +17 more)\n\n## Commits (1)\n\n### `805d404` feat(count): count tokens with each model's encoding, exact via api\nClaude, 2026-10-09\n\n> Every count used cl100k_base, which is GPT-4's encoding: OpenAI models\n> since GPT-4o use o200k_base, and Claude, Gemini and the other vendors\n> use their own tokenizers, so the \"Exact\" label was only true for GPT-4.\n>\n> - --target-model picks the tiktoken encoding: o200k_base for GPT-4o,\n>   GPT-4.1, GPT-5, GPT-6 and o-series models, cl100k_base otherwise.\n> - Labels say when a count only approximates the model's tokenizer\n>   (Claude, Gemini and other vendors, GPT-6 whose encoding is\n>   unpublished, and the estimation fallback, which was labelled \"Exact\").\n>   The @anthropic-ai/tokenizer package is the Claude 2 tokenizer and is\n>   now labelled as an approximation.\n> - New `ctxman count [path|-] --model ID [--api] [--json]`: counts a\n>   project or piped text for a model and checks it against the window.\n>   With --api it counts Claude models exactly through Anthropic's\n>   count_tokens endpoint (free, nothing generated; needs the\n>   @anthropic-ai/sdk package and ANTHROPIC_API_KEY), batching files into\n>   as few requests as possible and redacting secrets before sending.\n> - tiktoken moves to dependencies so a plain `npm install ctxman` counts\n>   exactly instead of estimating.\n>\n> Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n> Claude-Session: https://claude.ai/code/session_014PDhYwtj4A1a2USJPtyAYG\n\n## Changed files (12)\n\n| Status | File | + | - |\n| --- | --- | ---: | ---: |\n| modified | `bin/cli.js` | 7 | 0 |\n| added | `bin/cm-count.js` | 147 | 0 |\n| modified | `lib/analyzers/token-calculator.js` | 18 | 3 |\n| added | `lib/count/index.js` | 100 | 0 |\n| added | `lib/utils/claude-token-counter.js` | 151 | 0 |\n| modified | `lib/utils/token-utils.js` | 37 | 8 |\n| modified | `lib/utils/tokenizer-adapter.js` | 60 | 14 |\n| modified | `package-lock.json` | 1 | 2 |\n| modified | `package.json` | 1 | 1 |\n| added | `test/count-command.test.js` | 163 | 0 |\n| modified | `test/token-calculator-coverage.test.js` | 1 | 0 |\n| added | `test/tokenizer-encoding.test.js` | 58 | 0 |\n…",
+      "tokens": 2413
+    },
+    "mcpConfig": "{\n  \"mcpServers\": {\n    \"ctxman\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"ctxman\",\n        \"mcp\"\n      ]\n    }\n  }\n}",
     "redaction": {
       "source": "// Left here during a late-night debugging session\nexport const s3 = { region: 'eu-west-1', accessKeyId: 'AKIAABCDEFGHIJKLMNOP' };\nexport const github = { token: 'ghp_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8' };",
       "command": "ctxman --cli --gitingest",
@@ -75,7 +93,11 @@
         "generate_context",
         "git_diff",
         "search_code",
-        "list_methods"
+        "list_methods",
+        "repo_map",
+        "pr_context",
+        "get_symbol",
+        "count_tokens"
       ],
       "request": {
         "name": "list_methods",
@@ -91,7 +113,7 @@
             {
               "name": "constructor",
               "line": 19,
-              "tokens": 6
+              "tokens": 66
             },
             {
               "name": "build",
@@ -155,10 +177,10 @@
     },
     "budget": {
       "request": "curl -s localhost:3000/api/v1/context -H 'Content-Type: application/json' \\\n  -d '{\"path\": \"~/ctxman\", \"targetTokens\": 30000}'",
-      "projectFiles": 81,
-      "projectTokens": 175294,
+      "projectFiles": 114,
+      "projectTokens": 262042,
       "keptFiles": 11,
-      "keptTokens": 29989,
+      "keptTokens": 29995,
       "sample": [
         {
           "path": "lib/core/ContextBuilder.js",
@@ -169,20 +191,20 @@
           "tokens": 1996
         },
         {
+          "path": "lib/core/Scanner.js",
+          "tokens": 1376
+        },
+        {
           "path": "lib/core/Analyzer.js",
           "tokens": 1079
         },
         {
-          "path": "lib/core/Scanner.js",
-          "tokens": 794
+          "path": "lib/count/index.js",
+          "tokens": 905
         },
         {
           "path": "lib/utils/snapshot-manager.js",
           "tokens": 5193
-        },
-        {
-          "path": "lib/utils/llm-detector.js",
-          "tokens": 3876
         }
       ]
     }

@@ -35,7 +35,7 @@ Hiç yapılandırma yok, yalnızca git'in izlediği dosyalar:
 
 <Terminal title="~/ctxman" :command="ex.raw.command" :output="ex.raw.output" copy-label="Kopyala" copied-label="Kopyalandı" />
 
-Tüm token'ların dörtte biri masaüstü uygulamasının tek bir derlenmiş paketi (`html/assets/*.js`);
+Tüm token'ların beşte birinden fazlası masaüstü uygulamasının tek bir derlenmiş paketi (`html/assets/*.js`);
 sonraki üç kayıt lock dosyaları ve depoya eklenmiş bir metin dökümü. Bunların hiçbiri bir modele
 kodu anlatmaz.
 
@@ -47,7 +47,8 @@ dosyalarını dışarıda bırakır:
 <Terminal title=".contextignore" :output="ex.contextignore.config" copy-label="Kopyala" copied-label="Kopyalandı" />
 <Terminal title="~/ctxman" :command="ex.contextignore.command" :output="ex.contextignore.output" copy-label="Kopyala" copied-label="Kopyalandı" />
 
-{{ n(ex.raw.tokens) }} → {{ n(ex.contextignore.tokens) }} token. Hâlâ her bağlam penceresinden büyük.
+{{ n(ex.raw.tokens) }} → {{ n(ex.contextignore.tokens) }} token. Bu 1M'lik bir pencereye sığar ama
+konuşmaya pek yer bırakmaz ve üçte ikisinden fazlası hâlâ dokümantasyon, testler ve web sitesidir.
 
 ## 3. Yalnızca kaynak kodu tutun ve sığıp sığmadığına bakın
 
@@ -58,7 +59,17 @@ sonucu modelin bağlam penceresiyle karşılaştırır:
 <Terminal title="~/ctxman" :command="ex.contextinclude.command" :output="ex.contextinclude.output" copy-label="Kopyala" copied-label="Kopyalandı" />
 
 {{ ex.contextinclude.files }} dosya ve {{ n(ex.contextinclude.tokens) }} token: ctxman'in tüm kaynak
-kodu Claude Sonnet 4.5'in 200K penceresine sığıyor; başlangıca göre %{{ data.stats.reduction }} daha az.
+kodu Claude Sonnet 5.5'in 1M penceresine rahatça sığıyor; başlangıca göre %{{ data.stats.reduction }} daha az.
+
+Claude kendi tokenizer'ıyla sayar; bu yüzden bir OpenAI kodlamasıyla yapılan sayım yaklaşıktır.
+`ctxman count` elinizdeki sayının hangi türden olduğunu ve birebir sayıyı nasıl alacağınızı söyler;
+OpenAI modelleri için modelin kendi kodlamasını kullanır:
+
+<Terminal title="~/ctxman" :command="ex.count.command" :output="ex.count.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+<Terminal title="~/ctxman" :command="ex.count.gptCommand" :output="ex.count.gptOutput" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+`ctxman count --model claude-sonnet-5-5 --api`, maskelenmiş metni Anthropic'in ücretsiz
+count_tokens uç noktasına gönderir ve Claude'un birebir sayısını verir.
 
 ## 4. Aynı bağlam, daha az token
 
@@ -91,7 +102,24 @@ dosyalarla sınırlar; örneğin bir pull request'in tabanından:
 
 <Terminal title="~/ctxman" :command="ex.changed.command" :output="ex.changed.output" copy-label="Kopyala" copied-label="Kopyalandı" />
 
-## 7. Sırlar özete girmez
+## 7. 700 token'da repo haritası
+
+`ctxman map`, dosyaları import grafiği üzerinde PageRank, son git hareketleri ve sembol
+referanslarına göre sıralar; bütçe dolana kadar her dosyanın fonksiyonlarını satır ve token
+sayısıyla listeler:
+
+<Terminal title="~/ctxman" :command="ex.map.command" :output="ex.map.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+## 8. Bir commit için inceleme bağlamı
+
+`ctxman pr`, bir dal veya commit aralığı hakkında inceleyicinin ihtiyaç duyduğunu yazar: özet,
+commit mesajları, değişen dosyalar, değişen her metodun kaynağı, diff ve ilgili testler; `--budget`
+altında kalmak için en az önemli kısımları çıkarır. Burada `ctxman count`'u ekleyen commit için
+(sayfa kısa kalsın diye diff hariç):
+
+<Terminal title="~/ctxman" :command="ex.pr.command" :output="ex.pr.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+## 9. Sırlar özete girmez
 
 Bir yapılandırma dosyasında kimlik bilgisi unutulmuş küçük bir proje (iki anahtar da sahte):
 
@@ -102,30 +130,22 @@ Bir yapılandırma dosyasında kimlik bilgisi unutulmuş küçük bir proje (iki
 Bilinen biçimler (AWS, GitHub, GitLab, Slack, Stripe, Google, OpenAI ve Anthropic anahtarları, PEM
 özel anahtarları) varsayılan olarak maskelenir; `--no-redact` onları korur.
 
-## 8. MCP ile sorun
+## 10. MCP ile sorun
 
-`bin/mcp-server.js`, stdio üzerinden Model Context Protocol konuşur; Claude Desktop ve diğer MCP
-istemcileri ctxman'i doğrudan çağırabilir. `claude_desktop_config.json` içinde:
+`ctxman mcp`, stdio üzerinden Model Context Protocol konuşur; Claude Desktop, Claude Code, Cursor ve
+diğer MCP istemcileri ctxman'i doğrudan çağırabilir. `ctxman mcp install --client claude-desktop`
+onu istemcinin yapılandırmasına ekler; `--npx` ile yazdığı kayıt şudur:
 
-```json
-{
-  "mcpServers": {
-    "ctxman": {
-      "command": "node",
-      "args": ["/usr/local/lib/node_modules/ctxman/bin/mcp-server.js"]
-    }
-  }
-}
-```
+<Terminal title="claude_desktop_config.json" :output="ex.mcpConfig" copy-label="Kopyala" copied-label="Kopyalandı" />
 
-Yol, makinenizde `$(npm root -g)/ctxman/bin/mcp-server.js` olur. Sunucu {{ ex.mcp.tools.length }}
+Sunucu {{ ex.mcp.tools.length }}
 araç sunar — {{ ex.mcp.tools.join(', ') }} — ayrıca dosya kaynakları ve prompt'lar. İstemcinin
 gönderdiği ve ctxman'in yanıtladığı haliyle bir `list_methods` çağrısı:
 
 <Terminal title="tools/call" :output="json(ex.mcp.request)" copy-label="Kopyala" copied-label="Kopyalandı" />
 <Terminal title="result" :output="json(ex.mcp.response)" copy-label="Kopyala" copied-label="Kopyalandı" />
 
-## 9. REST üzerinden kesin token bütçesi
+## 11. REST üzerinden kesin token bütçesi
 
 `ctxman serve` yerel bir REST API başlatır. `targetTokens` ile `POST /api/v1/context`, bütçeyi en
 üst sıradaki dosyalarla (önce çekirdek kod) doldurur ve asla aşmaz:
