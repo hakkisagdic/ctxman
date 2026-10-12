@@ -123,14 +123,18 @@ function check(json) {
 function init(force) {
   const file = path.join(process.cwd(), POLICY_FILE);
 
-  if (fs.existsSync(file) && !force) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  try {
+    // 'wx' fails when the file exists, without a separate check that could go stale
+    fs.writeFileSync(file, `${JSON.stringify(createStarterPolicy(), null, 2)}\n`, {
+      flag: force ? 'w' : 'wx',
+    });
+  } catch (error) {
+    if (error.code !== 'EEXIST') throw error;
     console.error(`❌ ${POLICY_FILE} already exists. Use --force to overwrite it.`);
     process.exitCode = 1;
     return;
   }
-
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `${JSON.stringify(createStarterPolicy(), null, 2)}\n`);
 
   console.log(`✅ Wrote ${POLICY_FILE}`);
   console.log();

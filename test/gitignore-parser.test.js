@@ -46,7 +46,11 @@ describe('GitIgnoreParser Coverage', () => {
 
     test('handles directory as pattern file', () => {
       fs.existsSync.mockReturnValue(true);
-      fs.statSync.mockReturnValue({ isDirectory: () => true });
+      fs.readFileSync.mockImplementation(() => {
+        throw Object.assign(new Error('EISDIR: illegal operation on a directory'), {
+          code: 'EISDIR',
+        });
+      });
       vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const parser = new GitIgnoreParser('/.gitignore', null, null);

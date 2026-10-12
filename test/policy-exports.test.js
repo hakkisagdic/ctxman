@@ -175,7 +175,8 @@ describe('policy enforcement on exports', () => {
     });
 
     it('applies the organisation policy named by CTXMAN_POLICY', () => {
-      const org = path.join(os.tmpdir(), `ctxman-org-${process.pid}-${Date.now()}.json`);
+      const orgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-org-'));
+      const org = path.join(orgDir, 'policy.json');
       fs.writeFileSync(org, JSON.stringify({ version: 1, deny: ['src/config.js'] }));
       try {
         const result = cli(['--context-export'], { CTXMAN_POLICY: org });
@@ -186,7 +187,7 @@ describe('policy enforcement on exports', () => {
           'config.js'
         );
       } finally {
-        fs.rmSync(org, { force: true });
+        fs.rmSync(orgDir, { recursive: true, force: true });
       }
     });
 
