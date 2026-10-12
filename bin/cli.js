@@ -94,6 +94,11 @@ async function main() {
     return;
   }
 
+  if (command === 'pack') {
+    runSubcommand('./cm-pack.js', args.slice(1));
+    return;
+  }
+
   if (args.includes('--help') || args.includes('-h')) {
     printHelp();
     return;
@@ -750,6 +755,9 @@ function printHelp() {
   console.log('                           Count tokens for a model (exact for Claude with --api)');
   console.log('  map [path] [options]     Ranked repository map within a token budget');
   console.log('                           (ctxman map --help for options)');
+  console.log('  pack [path] [options]    File contents in one LLM-ready document (xml, markdown,');
+  console.log('                           plain, json); --compress, --budget, --split');
+  console.log('                           (ctxman pack --help for options)');
   console.log('  ask QUESTION             Answer a question from the indexed codebase');
   console.log('  mcp [install|uninstall|config]');
   console.log('                           Start the MCP server or add it to an MCP client');
