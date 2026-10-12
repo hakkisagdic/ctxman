@@ -6,7 +6,8 @@
 #                         dependencies locked in its package-lock.json
 #   CTXMAN_VERSION set    that version or dist-tag of the ctxman npm package
 #
-# Both get tiktoken, which is a devDependency of ctxman, so token counts are exact.
+# Both count exactly with tiktoken: it is a dependency of ctxman, and installed next to
+# releases that still listed it as a devDependency.
 # Optional dependencies (the vector store and embeddings of `ctxman ask`) are left out, and
 # no install scripts run.
 set -euo pipefail
@@ -15,7 +16,7 @@ action_dir="${GITHUB_ACTION_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." &&
 version="${CTXMAN_VERSION:-}"
 npm_flags=(--no-audit --no-fund --ignore-scripts --loglevel=error)
 
-# The tiktoken version the action's lockfile pins
+# The tiktoken version the action's lockfile pins, for releases that don't depend on it
 tiktoken_version="$(node -p "require(process.argv[1]).packages['node_modules/tiktoken'].version" \
   "$action_dir/package-lock.json")"
 
@@ -24,13 +25,6 @@ if [ -z "$version" ]; then
   # A second use of the action in the same job reuses the installation
   if [ ! -f "$marker" ]; then
     (cd "$action_dir" && npm ci --omit=dev --omit=optional "${npm_flags[@]}")
-    # `npm install tiktoken --omit=dev` skips it as a devDependency of this package, so
-    # install it on its own and copy it in (it has no dependencies)
-    tmp="$(mktemp -d)"
-    npm install --prefix "$tmp" "${npm_flags[@]}" "tiktoken@$tiktoken_version"
-    rm -rf "$action_dir/node_modules/tiktoken"
-    cp -R "$tmp/node_modules/tiktoken" "$action_dir/node_modules/tiktoken"
-    rm -rf "$tmp"
     touch "$marker"
   fi
   cli="$action_dir/bin/cli.js"

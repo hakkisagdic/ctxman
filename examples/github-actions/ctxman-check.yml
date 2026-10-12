@@ -36,7 +36,7 @@ jobs:
         with:
           changed-since: ${{ github.event.pull_request.base.sha }}
           max-tokens: 50000
-          target-model: claude-sonnet-4.5
+          target-model: claude-sonnet-5-5
           export: toon
           upload-artifact: true
 

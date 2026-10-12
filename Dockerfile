@@ -5,7 +5,7 @@
 #   docker build -t ctxman .
 #   docker run --rm -v "$PWD:/work" ctxman --cli
 #   docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/work" ctxman --save-report
-#   docker run -i --rm -v "$PWD:/work" --entrypoint node ctxman /app/bin/mcp-server.js
+#   docker run -i --rm -v "$PWD:/work" ctxman mcp
 #
 # The project is mounted at /work, the working directory, and reports and context files are
 # written there (hence --user when /work is not writable for uid 1000). The last line runs
@@ -18,14 +18,9 @@ FROM node:${NODE_VERSION}-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 # Optional dependencies (vector store and embeddings of `ctxman ask`) are left out: they are
-# large and need native builds. tiktoken is a devDependency, so `npm ci --omit=dev` skips it;
-# it is installed at the locked version on its own (it has no dependencies) for exact counts
+# large and need native builds. tiktoken is a production dependency, so counts are exact
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --omit=dev --omit=optional --ignore-scripts --no-audit --no-fund \
-    && TIKTOKEN_VERSION="$(node -p "require('./package-lock.json').packages['node_modules/tiktoken'].version")" \
-    && npm install --prefix /tmp/tiktoken --ignore-scripts --no-audit --no-fund "tiktoken@${TIKTOKEN_VERSION}" \
-    && cp -R /tmp/tiktoken/node_modules/tiktoken node_modules/tiktoken \
-    && rm -rf /tmp/tiktoken
+    npm ci --omit=dev --omit=optional --ignore-scripts --no-audit --no-fund
 
 FROM node:${NODE_VERSION}-alpine
 

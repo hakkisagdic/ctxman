@@ -16,6 +16,7 @@ import {
   escapeCommandData,
   evaluate,
   isStrictRef,
+  loadModelProfiles,
   parseBoolean,
   parseInputs,
   readReport,
@@ -26,7 +27,7 @@ import {
 const RUN_SCRIPT = path.resolve('scripts/action/run.mjs');
 const INSTALL_SCRIPT = path.resolve('scripts/action/install.sh');
 const ACTION_FILE = path.resolve('action.yml');
-const MODELS = ['claude-sonnet-4.5', 'gpt-4o'];
+const MODELS = ['claude-sonnet-5-5', 'gpt-6.1-sol'];
 
 /** Parse a GITHUB_OUTPUT file written in the `name<<delimiter` form */
 function parseOutputs(file) {
@@ -119,7 +120,7 @@ describe('parseInputs', () => {
   test('reads every input', () => {
     const inputs = parse({
       INPUT_PATH: 'sub',
-      INPUT_TARGET_MODEL: 'gpt-4o',
+      INPUT_TARGET_MODEL: 'gpt-6.1-sol',
       INPUT_MAX_TOKENS: '50000',
       INPUT_CHANGED_SINCE: 'origin/main',
       INPUT_METHOD_LEVEL: 'true',
@@ -127,7 +128,7 @@ describe('parseInputs', () => {
     });
     expect(inputs).toMatchObject({
       projectDir: path.join(workspace, 'sub'),
-      targetModel: 'gpt-4o',
+      targetModel: 'gpt-6.1-sol',
       maxTokens: 50000,
       changedSince: 'origin/main',
       methodLevel: true,
@@ -159,6 +160,15 @@ describe('parseInputs', () => {
       fs.rmSync(path.join(workspace, 'escape'), { force: true });
       fs.rmSync(outside, { recursive: true, force: true });
     }
+  });
+});
+
+describe('loadModelProfiles', () => {
+  test('accepts current ids and the aliases the CLI resolves', () => {
+    const profiles = loadModelProfiles(path.resolve('bin/cli.js'));
+    expect(profiles['claude-sonnet-5-5'].contextWindow).toBe(1000000);
+    // An id from earlier ctxman versions
+    expect(profiles['claude-sonnet-4.5']).toBe(profiles['claude-sonnet-4-5']);
   });
 });
 
@@ -435,7 +445,7 @@ describe('run.mjs end to end', () => {
 
   test('analyzes the project, writes outputs and summary, keeps the checkout clean', () => {
     const run = runAction({
-      INPUT_TARGET_MODEL: 'claude-sonnet-4.5',
+      INPUT_TARGET_MODEL: 'claude-sonnet-5-5',
       INPUT_MAX_TOKENS: '100000',
       INPUT_EXPORT: 'toon',
       INPUT_METHOD_LEVEL: 'true',
@@ -462,7 +472,7 @@ describe('run.mjs end to end', () => {
     expect(run.summary).toContain('## ctxman context check');
     expect(run.summary).toContain('in **14 files**');
     expect(run.summary).toContain('| Within budget |');
-    expect(run.summary).toContain('<code>Claude Sonnet 4.5</code> context window | 200,000');
+    expect(run.summary).toContain('<code>Claude Sonnet 5.5</code> context window | 1,000,000');
     expect(run.summary).toContain('### Top 10 files by tokens');
     expect(run.summary).toContain('| 1 | <code>README.md</code>');
     expect(run.summary).toContain('method-level analysis');

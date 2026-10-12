@@ -24,7 +24,7 @@ inputs:
     required: false
     default: '.'
   target-model:
-    description: Model id to check the context window of (see `ctxman --list-llms`), e.g. claude-sonnet-4.5. Sets the `fits` output.
+    description: Model id to check the context window of (see `ctxman --list-llms`), e.g. claude-sonnet-5-5. Sets the `fits` output.
     required: false
     default: ''
   max-tokens:

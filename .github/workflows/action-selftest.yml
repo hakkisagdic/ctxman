@@ -68,7 +68,7 @@ jobs:
         uses: ./
         with:
           path: lib
-          target-model: gemini-2.0-flash
+          target-model: gemini-3.8-flash
           node-version: ''
 
       - name: Check outputs (lib)

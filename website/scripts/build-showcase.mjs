@@ -37,7 +37,7 @@ const git = (...args) => execFileSync('git', args, { cwd: clone, encoding: 'utf-
 
 const clean = (text, root = clone) =>
   text
-    .replace(/\x1b\[[0-9;]*m/g, '') // eslint-disable-line no-control-regex
+    .replace(/\x1b\[[0-9;]*m/g, '')
     .replaceAll(root, DISPLAY_ROOT)
     .replace(/\n{3,}/g, '\n\n')
     .trim();

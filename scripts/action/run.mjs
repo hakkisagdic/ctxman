@@ -175,7 +175,13 @@ export function loadModelProfiles(cliPath) {
   ];
   for (const file of candidates) {
     try {
-      return JSON.parse(fs.readFileSync(file, 'utf8')).profiles ?? {};
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      const profiles = { ...data.profiles };
+      // Aliases (older ctxman ids such as claude-sonnet-4.5) resolve like the CLI does
+      for (const [alias, id] of Object.entries(data.aliases ?? {})) {
+        if (profiles[id] && !profiles[alias]) profiles[alias] = profiles[id];
+      }
+      return profiles;
     } catch (_error) {
       // Try the next location
     }
