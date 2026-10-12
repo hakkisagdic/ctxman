@@ -81,6 +81,7 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 
 ### 🧰 Context Commands
 
+- 📦 **`ctxman pack`** - File contents in one LLM-ready document (Claude XML, Markdown, JSON) with signatures-only compression and a hard token budget
 - 🗺️ **`ctxman map`** - Ranked repository map (import graph + git history) within a token budget
 - 🔍 **`ctxman pr`** - Review context for a branch: log, changed methods, diff, related tests
 - 🧭 **`ctxman why`** - Why code looks as it does: commits, linked issues and PRs, owners, co-changed files, ADRs and tests from local git history
@@ -229,6 +230,25 @@ ctxman count - --model claude-opus-5-5 --api < digest.txt   # piped text
 
 `--api` sends the (secret-redacted) text to Anthropic; counting is free and generates nothing.
 
+### 📦 Pack a Codebase into One Prompt
+
+`ctxman pack` writes the directory tree, then every file, then your instructions, as one document
+for a model: Anthropic's `<documents>` XML by default, or Markdown, plain text or JSON.
+
+```bash
+ctxman pack -o context.xml                          # tree + every file, Anthropic XML
+ctxman pack --style markdown --copy                 # Markdown to the clipboard
+ctxman pack --compress --budget 100k --instructions task.md
+git ls-files -z -- '*.py' | ctxman pack --stdin -0 --line-numbers
+ctxman pack --target-model gpt-6.1-sol --max-tokens 120k -q -o ctx.xml   # CI guard, exit 2
+ctxman pack --split 150k -o context.xml             # context.1.xml, context.2.xml, ...
+```
+
+`--compress` keeps signatures and replaces function bodies with a one-line placeholder,
+`--budget` fills the budget with the files `ctxman map` ranks highest and never goes over, and
+secrets are redacted. Your instructions go last, after the long material, as Anthropic recommends
+for long context. Details: [docs/commands/pack.md](docs/commands/pack.md).
+
 ### 🗺️ Repository Map
 
 The shape of a codebase in a fixed token budget: the most important files, ranked by PageRank
@@ -302,7 +322,7 @@ ctxman mcp                                   # run the server (stdio)
 The installer merges into the client's configuration and keeps a `.bak` of the previous file.
 `--root` confines every tool to one directory. Tools: `analyze_codebase`, `generate_context`,
 `git_diff`, `search_code`, `list_methods`, `repo_map`, `pr_context`, `get_symbol`,
-`count_tokens`, `explain_history`. Details:
+`count_tokens`, `explain_history`, `pack_context`. Details:
 [docs/commands/mcp.md](docs/commands/mcp.md).
 
 ### 🛡️ Export Policy and Audit Log

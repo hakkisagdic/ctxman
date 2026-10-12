@@ -51,6 +51,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Context Commands** (each a `bin/cm-<name>.js` subcommand with a library module):
 
+- `lib/pack/` - `ctxman pack`: selection, budget (map ranking), signatures-only compression, split, renderers (xml/markdown/plain/json)
 - `lib/count/` - `ctxman count`: token count for one model; `lib/utils/claude-token-counter.js` counts Claude models exactly through Anthropic's count_tokens API (`--api`)
 - `lib/map/` - `ctxman map`: import graph (`imports.js`, `resolver.js`), PageRank + git history + symbol references (`rank.js`), budgeted rendering (`render.js`)
 - `lib/pr/` - `ctxman pr`: branch review context (diff parsing, changed methods, related tests, budgeted rendering)

@@ -55,6 +55,7 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 
 ### 🧰 Bağlam Komutları
 
+- 📦 **`ctxman pack`** - Dosya içeriklerini tek bir LLM belgesinde toplar (Claude XML, Markdown, JSON); yalnızca imza sıkıştırması ve kesin token bütçesiyle
 - 🗺️ **`ctxman map`** - Import grafiği ve git geçmişine göre sıralanmış, token bütçesine sığan repo haritası
 - 🔍 **`ctxman pr`** - Bir dal için inceleme bağlamı: commit geçmişi, değişen metotlar, diff, ilgili testler
 - 🧭 **`ctxman why`** - Kod neden böyle: yerel git geçmişinden commit'ler, bağlı issue ve PR'lar, sahipler, birlikte değişen dosyalar, ADR'ler ve testler
@@ -244,6 +245,26 @@ ctxman count - --model claude-opus-5-5 --api < digest.txt   # stdin'den gelen me
 
 `--api`, gizli bilgileri maskelenmiş metni Anthropic'e gönderir; sayım ücretsizdir ve yanıt
 üretilmez.
+
+### 📦 Kod tabanını tek bir prompt'a paketleme (`ctxman pack`)
+
+`ctxman pack`, önce dizin ağacını, sonra her dosyayı, en sonda da talimatlarınızı tek bir belge
+olarak yazar: varsayılan olarak Anthropic'in `<documents>` XML'i; Markdown, düz metin veya JSON da
+olabilir.
+
+```bash
+ctxman pack -o context.xml                          # ağaç + her dosya, Anthropic XML
+ctxman pack --style markdown --copy                 # Markdown olarak panoya
+ctxman pack --compress --budget 100k --instructions gorev.md
+git ls-files -z -- '*.py' | ctxman pack --stdin -0 --line-numbers
+ctxman pack --target-model gpt-6.1-sol --max-tokens 120k -q -o ctx.xml   # CI kontrolü, çıkış kodu 2
+ctxman pack --split 150k -o context.xml             # context.1.xml, context.2.xml, ...
+```
+
+`--compress` imzaları tutar ve fonksiyon gövdelerini tek satırlık bir yer tutucuyla değiştirir;
+`--budget` bütçeyi `ctxman map`ın en üst sıraya koyduğu dosyalarla doldurur ve asla aşmaz; sırlar
+maskelenir. Talimatlarınız, Anthropic'in uzun bağlam önerisine uygun olarak uzun içerikten sonra,
+en sonda yer alır. Ayrıntılar: [docs/commands/pack.md](docs/commands/pack.md).
 
 ### 🗺️ Repo haritası (`ctxman map`)
 

@@ -6,6 +6,11 @@ All notable changes to the Ctxman will be documented in this file.
 
 ### Added
 
+- `ctxman pack`: file contents in one LLM-ready document (Anthropic `<documents>` XML, Markdown,
+  plain, JSON) with the tree first and instructions last; `--compress` (signatures only),
+  `--budget` (ranked by `ctxman map`, never exceeded), `--split`, `--target-model` fit, a
+  `--max-tokens` CI guard (exit 2) and `--stdin`/`-0` file lists; secrets redacted. Library
+  `packContext`; MCP tool `pack_context`.
 - `ctxman map`: ranked repository map within a token budget. PageRank over the import graph
   (JS/TS, Python, Go, Java/Kotlin/Scala, C#, PHP, Ruby, C/C++, Rust) blended with git change
   frequency and symbol references; `--focus`, `--important-last`, text/markdown/json/dot,
