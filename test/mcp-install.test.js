@@ -108,6 +108,38 @@ describe('buildServerEntry', () => {
       '"C:\\Program Files\\node.exe"'
     );
   });
+
+  it('quotes Windows arguments so the argv parser reads them back unchanged', () => {
+    // CommandLineToArgvW: 2n backslashes + quote -> n backslashes and a toggle,
+    // 2n+1 -> n backslashes and a literal quote; other backslashes are literal
+    const parse = (text) => {
+      let out = '';
+      for (let i = 0; i < text.length; i++) {
+        let slashes = 0;
+        while (text[i] === '\\') {
+          slashes++;
+          i++;
+        }
+        if (text[i] === '"') {
+          out += '\\'.repeat(Math.floor(slashes / 2)) + (slashes % 2 ? '"' : '');
+        } else {
+          out += '\\'.repeat(slashes) + (text[i] ?? '');
+        }
+      }
+      return out;
+    };
+    const args = [
+      'C:\\dir with space\\',
+      'say "hi"',
+      'a\\"b',
+      'a\\\\" c',
+      JSON.stringify({ name: 'ctxman', command: 'C:\\tools\\', args: ['a b'] }),
+    ];
+    for (const arg of args) {
+      expect(parse(shellQuote(arg, 'win32'))).toBe(arg);
+    }
+    expect(shellQuote('C:\\dir with space\\', 'win32')).toBe('"C:\\dir with space\\\\"');
+  });
 });
 
 describe('installServer and uninstallServer', () => {
