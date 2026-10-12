@@ -54,6 +54,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `lib/count/` - `ctxman count`: token count for one model; `lib/utils/claude-token-counter.js` counts Claude models exactly through Anthropic's count_tokens API (`--api`)
 - `lib/map/` - `ctxman map`: import graph (`imports.js`, `resolver.js`), PageRank + git history + symbol references (`rank.js`), budgeted rendering (`render.js`)
 - `lib/pr/` - `ctxman pr`: branch review context (diff parsing, changed methods, related tests, budgeted rendering)
+- `lib/why/` - `ctxman why`: history of a file, symbol or line range (`git log -L`), references, blame ownership, co-change coupling, related docs and tests
 - `lib/search/` - `ctxman search` and the MCP `search_code` (ranked) / `get_symbol` tools: BM25 over methods and code chunks
 - `lib/policy/` - export policy (`.ctxman/policy.json`, `CTXMAN_POLICY`), enforcement, audit log, AI-tool ignore files; `ctxman policy` / `ctxman audit`
 - `lib/api/mcp/` - `ctxman mcp` (`start.js`), client setup (`install.js`), `--root` sandbox (`sandbox.js`)

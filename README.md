@@ -83,6 +83,7 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 
 - 🗺️ **`ctxman map`** - Ranked repository map (import graph + git history) within a token budget
 - 🔍 **`ctxman pr`** - Review context for a branch: log, changed methods, diff, related tests
+- 🧭 **`ctxman why`** - Why code looks as it does: commits, linked issues and PRs, owners, co-changed files, ADRs and tests from local git history
 - 🔎 **`ctxman search`** - Ranked (BM25) search over functions and code chunks
 - 🔢 **`ctxman count`** - Token count for one model, exact for Claude through Anthropic's API
 - 🔌 **`ctxman mcp`** - MCP server with one-command setup for Claude Desktop, Claude Code, Cursor, VS Code and Windsurf
@@ -259,6 +260,25 @@ ctxman pr --style xml -o review.xml
 
 Details: [docs/commands/pr.md](docs/commands/pr.md).
 
+### 🧭 Why Is the Code Like This?
+
+The local, offline answer to "why is this here?": `ctxman why` collects what git and the
+repository record about a file, a function or a line range.
+
+```bash
+ctxman why src/cart.js:total                   # function / method / class (Class.method)
+ctxman why src/cart.js#L40-L72 --patches       # line range, with each commit's diff
+ctxman why lib/server.js --since "1 year ago"  # whole file, following renames
+ctxman why src/cart.js:total --ask "Why round here?" --budget 8k --copy
+```
+
+It gathers the commits that changed the code with their full messages, the issues, PRs and
+tickets they reference (linked for GitHub, GitLab and Bitbucket), co-authors and reviewers, blame
+ownership, files that usually change with it, ADRs, docs, changelog entries and comments that
+mention it, TODOs inside it and the tests that use it, with secrets redacted. Platforms such as
+Unblocked answer this from Slack, Jira and Confluence on their servers; ctxman covers what git and
+the repository know, on your machine. Details: [docs/commands/why.md](docs/commands/why.md).
+
 ### 🔎 Ranked Search and Symbols
 
 ```bash
@@ -282,7 +302,7 @@ ctxman mcp                                   # run the server (stdio)
 The installer merges into the client's configuration and keeps a `.bak` of the previous file.
 `--root` confines every tool to one directory. Tools: `analyze_codebase`, `generate_context`,
 `git_diff`, `search_code`, `list_methods`, `repo_map`, `pr_context`, `get_symbol`,
-`count_tokens`. Details:
+`count_tokens`, `explain_history`. Details:
 [docs/commands/mcp.md](docs/commands/mcp.md).
 
 ### 🛡️ Export Policy and Audit Log

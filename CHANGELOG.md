@@ -14,6 +14,10 @@ All notable changes to the Ctxman will be documented in this file.
   commit log, changed files, full source of changed and deleted methods, the diff and related
   tests, with `--budget`, `--ask`, markdown/xml/json. Library: `buildPrContext`; MCP tool
   `pr_context`.
+- `ctxman why <file>[:symbol|#L10-L40]`: offline "why is the code like this?" context from git
+  history: commits with full messages, linked issues, PRs and tickets, trailers, blame ownership,
+  co-change coupling, related ADRs, docs and comments, TODOs and tests, as markdown, xml or json
+  within a token budget. Library `explainHistory()`; MCP tool `explain_history`.
 - `ctxman search`: ranked (BM25) search over methods and code chunks, with identifier splitting;
   the MCP `search_code` tool takes `type: "ranked"`, and the new `get_symbol` tool returns a
   function's source by name.

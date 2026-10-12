@@ -57,6 +57,7 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 
 - 🗺️ **`ctxman map`** - Import grafiği ve git geçmişine göre sıralanmış, token bütçesine sığan repo haritası
 - 🔍 **`ctxman pr`** - Bir dal için inceleme bağlamı: commit geçmişi, değişen metotlar, diff, ilgili testler
+- 🧭 **`ctxman why`** - Kod neden böyle: yerel git geçmişinden commit'ler, bağlı issue ve PR'lar, sahipler, birlikte değişen dosyalar, ADR'ler ve testler
 - 🔎 **`ctxman search`** - Fonksiyonlar ve kod parçaları üzerinde sıralı (BM25) arama
 - 🔢 **`ctxman count`** - Bir model için token sayısı; Claude için Anthropic API'siyle birebir
 - 🔌 **`ctxman mcp`** - Claude Desktop, Claude Code, Cursor, VS Code ve Windsurf için tek komutla kurulan MCP sunucusu
@@ -272,6 +273,25 @@ ctxman pr --staged --ask "Birleştirmek güvenli mi?" --copy
 ```
 
 Ayrıntılar: [docs/commands/pr.md](docs/commands/pr.md).
+
+### 🧭 Kod neden böyle? (`ctxman why`)
+
+"Bu neden burada?" sorusunun yerel ve çevrimdışı yanıtı: `ctxman why`, git'in ve reponun bir dosya,
+fonksiyon veya satır aralığı hakkında kaydettiklerini toplar.
+
+```bash
+ctxman why src/cart.js:total                   # fonksiyon / metot / sınıf (Sinif.metot)
+ctxman why src/cart.js#L40-L72 --patches       # satır aralığı, her commit'in diff'iyle
+ctxman why lib/server.js --since "1 year ago"  # yeniden adlandırmaları izleyerek tüm dosya
+ctxman why src/cart.js:total --ask "Burada neden yuvarlanıyor?" --budget 8k --copy
+```
+
+Kodu değiştiren commit'leri tam mesajlarıyla, referans verilen issue, PR ve ticket'ları (GitHub,
+GitLab ve Bitbucket için bağlantılı), ortak yazarları ve inceleyenleri, blame sahipliğini, onunla
+birlikte değişen dosyaları, ondan bahseden ADR, doküman, changelog kaydı ve yorumları, içindeki
+TODO'ları ve onu kullanan testleri toplar; sırlar maskelenir. Unblocked gibi platformlar bunu kendi
+sunucularında Slack, Jira ve Confluence ile yanıtlar; ctxman makinenizde, git'in ve reponun
+bildiklerini kapsar. Ayrıntılar: [docs/commands/why.md](docs/commands/why.md).
 
 ### 🔎 Sıralı arama (`ctxman search`)
 
