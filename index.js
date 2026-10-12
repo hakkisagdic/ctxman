@@ -36,6 +36,9 @@ import { generateDigestFromReport, generateDigestFromContext } from './ctxman.js
 // Repository map (`ctxman map`)
 import { buildRepoGraph, rankFiles, renderRepoMap } from './lib/map/index.js';
 
+// Code history explanation (`ctxman why`)
+import { explainHistory } from './lib/why/index.js';
+
 export {
   // Analyzers
   TokenCalculator,
@@ -76,6 +79,9 @@ export {
 
   // Pull-request context
   buildPrContext,
+
+  // Code history explanation (`ctxman why`)
+  explainHistory,
 };
 
 // Alias for backward compatibility

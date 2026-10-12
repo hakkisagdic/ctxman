@@ -1128,3 +1128,182 @@ export interface PrContextResult {
  * changes or the working tree
  */
 export function buildPrContext(root?: string, options?: PrContextOptions): Promise<PrContextResult>;
+
+// ============================================
+// ctxman why
+// ============================================
+
+/**
+ * Target of explainHistory() given as an object instead of "file:symbol" / "file#L1-L9"
+ */
+export interface ExplainHistoryTarget {
+  file: string;
+  /** Function, method or class: "total", "Cart.total", "Cart::total" */
+  symbol?: string;
+  startLine?: number;
+  endLine?: number;
+}
+
+export interface ExplainHistoryOptions {
+  /** Commits to include (default 20) */
+  limit?: number;
+  /** Only commits after this date, in git's date syntax */
+  since?: string;
+  /** Explain the code as of this revision instead of the working tree */
+  rev?: string;
+  /** Include each commit's diff of the target */
+  patches?: boolean;
+  /** Commits of the file examined for co-changes (default 500, 0 = off) */
+  couplingWindow?: number;
+  /** Co-changed files listed (default 10) */
+  couplingTop?: number;
+  /** Commits touching more files are ignored for coupling (default 50) */
+  maxFilesPerCommit?: number;
+  /** Related text snippets listed (default 20) */
+  maxRelated?: number;
+  /** Test files listed (default 10) */
+  maxTests?: number;
+  style?: 'markdown' | 'xml' | 'json';
+  /** Maximum tokens of the output */
+  budget?: number;
+  /** Question appended at the end of the document */
+  ask?: string;
+  /** Mask secrets (default true) */
+  redact?: boolean;
+  /** Directory relative target paths start from (default: root) */
+  cwd?: string;
+}
+
+export interface WhyCommit {
+  sha: string;
+  shortSha: string;
+  /** Author date, ISO 8601 in UTC: 2024-01-02T10:00:00Z */
+  date: string;
+  author: string;
+  email: string;
+  merge: boolean;
+  subject: string;
+  body: string;
+  /** Issue / ticket ids this commit mentions */
+  refs: string[];
+  patch?: string;
+  /** Oldest commit a shallow clone has: its parents were not fetched */
+  shallowBoundary?: boolean;
+}
+
+export interface WhyIssueReference {
+  /** "#12", or "owner/repo#12" for another repository */
+  id: string;
+  number: number;
+  repo: string | null;
+  kind: 'issue' | 'pr' | 'mr';
+  /** Referred to with fixes / closes / resolves */
+  closes: boolean;
+  url: string | null;
+  commits: string[];
+}
+
+export interface ExplainHistoryData {
+  target: {
+    path: string;
+    symbol: string | null;
+    kind: string | null;
+    line: number | null;
+    resolvedBy: string | null;
+    startLine: number | null;
+    endLine: number | null;
+    totalLines: number;
+    wholeFile: boolean;
+    binary: boolean;
+    revision: string;
+    symbolsInRange: string[];
+    contentOmitted: string | null;
+    source: string | null;
+  };
+  repository: { remote: string | null; provider: string | null; shallow: boolean };
+  history: {
+    mode: 'range' | 'funcname' | 'file' | 'none';
+    startLine: number | null;
+    endLine: number | null;
+    funcname?: string;
+    since: string | null;
+    limit: number;
+    limitReached: boolean;
+    reason?: string;
+    commits: WhyCommit[];
+  };
+  references: {
+    issues: WhyIssueReference[];
+    tickets: Array<{ id: string; commits: string[] }>;
+    cves: Array<{ id: string; commits: string[] }>;
+    urls: Array<{ url: string; commits: string[] }>;
+    coAuthors: Array<{ value: string; commits: string[] }>;
+    reviewers: Array<{ value: string; commits: string[] }>;
+  };
+  ownership: {
+    startLine: number | null;
+    endLine: number | null;
+    totalLines: number;
+    /** ISO 8601 in UTC, like the dates below */
+    lastChanged: string | null;
+    authors: Array<{
+      name: string;
+      lines: number;
+      share: number;
+      commits: number;
+      lastTouched: string | null;
+    }>;
+  } | null;
+  coupling: {
+    window: number;
+    targetChanges: number;
+    skippedLargeCommits: number;
+    maxFilesPerCommit: number;
+    totalFiles: number;
+    files: Array<{ path: string; count: number; confidence: number; exists: boolean }>;
+  } | null;
+  related: Array<{
+    path: string;
+    line: number;
+    kind: 'adr' | 'changelog' | 'doc' | 'comment';
+    mentions: 'symbol' | 'file';
+    heading: string | null;
+    snippet: string;
+  }>;
+  notes: Array<{ line: number; tag: string; text: string; author?: string }>;
+  tests: Array<{
+    path: string;
+    references: 'symbol' | 'file';
+    matches: Array<{ line: number; text: string }>;
+    totalMatches: number;
+  }>;
+  warnings: string[];
+  question: string | null;
+}
+
+export interface ExplainHistoryResult {
+  /** The rendered document */
+  text: string;
+  style: 'markdown' | 'xml' | 'json';
+  tokens: number;
+  budget: number | null;
+  /** Items dropped to fit the budget, per section */
+  omitted: Record<string, number>;
+  warnings: string[];
+  /** Everything collected (before budget trimming, after redaction) */
+  data: ExplainHistoryData;
+}
+
+/**
+ * Explain why code looks the way it does, from the local git history: commits, referenced
+ * issues and tickets, ownership, co-changed files, related docs, notes and tests.
+ * Errors carry a `code` (NOT_A_GIT_REPO, PATH_OUTSIDE_ROOT, FILE_NOT_FOUND, NOT_TRACKED,
+ * SYMBOL_NOT_FOUND, INVALID_RANGE, INVALID_REF, BUDGET_TOO_SMALL, ...)
+ * @param root - Project directory inside a git work tree
+ * @param target - "file", "file:symbol", "file#L10-L40" or an object
+ */
+export function explainHistory(
+  root: string,
+  target: string | ExplainHistoryTarget,
+  options?: ExplainHistoryOptions
+): Promise<ExplainHistoryResult>;
