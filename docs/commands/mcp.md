@@ -178,6 +178,9 @@ $ ctxman mcp uninstall --client claude-desktop
 | `repo_map`         | `path`, `tokens?`, `focus?`                              | Ranked repository map within a token budget (`ctxman map`)           |
 | `pr_context`       | `path`, `base?`, `head?`, `budget?`, `style?`            | Review context for a branch (`ctxman pr`)                            |
 | `count_tokens`     | `path` or `text`, `model?`, `top?`                       | Token count for a model and the fit in its window (`ctxman count`)   |
+| `explain_history`  | `path`, `target`, `limit?`, `budget?`, `since?`          | Why code looks as it does: git history, references, owners, tests    |
+
+`explain_history` also takes `patches?` (each commit's diff); see [`ctxman why`](why.md).
 
 ### `search_code` with `type: "ranked"`
 
