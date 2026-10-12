@@ -17,6 +17,7 @@ import { ImportTracker } from '../lib/analyzers/import-tracker.js';
 import MultiRepoManager from '../lib/utils/multi-repo-manager.js';
 import SnapshotManager from '../lib/utils/snapshot-manager.js';
 import ContextVersioning from '../lib/utils/context-versioning.js';
+import { loadPolicy } from '../lib/policy/policy.js';
 import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, resolve, sep } from 'path';
@@ -71,6 +72,16 @@ async function main() {
 
   if (command === 'search') {
     runSubcommand('./cm-search.js', args.slice(1));
+    return;
+  }
+
+  if (command === 'policy') {
+    runSubcommand('./cm-policy.js', args.slice(1));
+    return;
+  }
+
+  if (command === 'audit') {
+    runSubcommand('./cm-audit.js', args.slice(1));
     return;
   }
 
@@ -324,9 +335,12 @@ async function main() {
     }
   }
 
+  // Export policy (.ctxman/policy.json, CTXMAN_POLICY): deny rules, export limits, audit log
+  const policy = loadCliPolicy(options.projectRoot);
+
   // Git integration: Filter to changed files only (v3.0.0)
   if (options.changedOnly || options.changedSince) {
-    await runChangedFilesAnalysis(options);
+    await runChangedFilesAnalysis({ ...options, policy });
     return;
   }
 
@@ -338,7 +352,7 @@ async function main() {
 
   printStartupInfo(options);
 
-  const analyzer = new TokenAnalyzer(options.projectRoot, options);
+  const analyzer = new TokenAnalyzer(options.projectRoot, { ...options, policy });
   const stats = analyzer.run();
 
   // Auto-create context version when using --cli (FEAT-012)
@@ -360,6 +374,7 @@ function parseArguments(args) {
     methodLevel: args.includes('--method-level') || args.includes('-m'),
     gitingest: args.includes('--gitingest') || args.includes('-g'),
     redactSecrets: !args.includes('--no-redact'),
+    respectIgnoreFiles: getRespectIgnoreFiles(args),
     aiSuggest: args.includes('--ai-suggest'), // FEAT-005: AI suggestions
 
     // Profile options (FEAT-004)
@@ -403,6 +418,24 @@ function getOutputFormat(args) {
     return args[formatIndex + 1];
   }
   return null; // Not set: context exports stay JSON (llm-context.json)
+}
+
+// --respect-ignore-files <list|all>: also honour other AI tools' ignore files
+function getRespectIgnoreFiles(args) {
+  const index = args.indexOf('--respect-ignore-files');
+  if (index === -1) return null;
+  const value = args[index + 1];
+  return value && !value.startsWith('-') ? value : 'all';
+}
+
+// An invalid policy file stops the command instead of being ignored
+function loadCliPolicy(projectRoot) {
+  try {
+    return loadPolicy(projectRoot);
+  } catch (error) {
+    console.error(`❌ ${error.message}`);
+    process.exit(error.exitCode ?? 2);
+  }
 }
 
 function getChunkStrategy(args) {
@@ -588,6 +621,9 @@ function printHelp() {
   console.log('  -m, --method-level       Enable method-level analysis');
   console.log('  -g, --gitingest          Generate GitIngest-style digest');
   console.log('  --no-redact              Keep API keys/tokens/private keys in the digest');
+  console.log('  --respect-ignore-files LIST');
+  console.log('                           Also honour AI-tool ignore files: "all" or a list such');
+  console.log('                           as .cursorignore,.aiexclude (see ctxman policy)');
   console.log('  --ai-suggest             Get AI-powered context optimization suggestions');
   console.log();
   console.log('Output Options (v2.3.0):');
@@ -714,6 +750,8 @@ function printHelp() {
   console.log('  pr [--base REF] [--head REF] [path]');
   console.log('                           Review context for a branch: log, changed methods,');
   console.log('                           diff, related tests (ctxman pr --help)');
+  console.log('  policy [check|init]      Show or create the export policy (.ctxman/policy.json)');
+  console.log('  audit [--since DATE]     Show the export audit log written under a policy');
   console.log();
   console.log('Examples:');
   console.log('  ctxman                                  # Launch interactive wizard (DEFAULT)');
@@ -998,6 +1036,7 @@ async function runWizard() {
             simple: true, // No export menu
             contextExport: true, // Auto-export to file
             template: answers.profile !== 'custom' ? answers.profile : null,
+            policy: loadCliPolicy(process.cwd()),
           };
 
           const analyzer = new TokenAnalyzer(options.projectRoot, options);

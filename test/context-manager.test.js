@@ -9,6 +9,15 @@ import _path from 'path';
 vi.mock('../lib/analyzers/token-calculator.js');
 vi.mock('../lib/formatters/gitingest-formatter.js');
 vi.mock('fs');
+// fs is mocked, so a real policy lookup would read the mocked report as a policy file
+vi.mock('../lib/policy/policy.js', () => ({
+  loadPolicy: () => ({
+    active: false,
+    audit: { enabled: false },
+    isDenied: () => false,
+    filterFiles: (files) => ({ kept: files, removed: [] }),
+  }),
+}));
 
 describe('Ctxman CLI', () => {
   let consoleLogSpy;

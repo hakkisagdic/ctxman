@@ -6,6 +6,7 @@
 
 import GitUtils from '../lib/utils/git-utils.js';
 import { getLogger } from '../lib/utils/logger.js';
+import { loadPolicy } from '../lib/policy/policy.js';
 
 const logger = getLogger({ level: 'info' });
 
@@ -65,6 +66,8 @@ async function main() {
       branch,
       cleanup: !keepClone,
       shallow,
+      // Policy of the current directory and CTXMAN_POLICY (deny rules apply to the clone)
+      policy: loadPolicy(process.cwd()),
       formatterOptions: chunkSize
         ? {
             chunking: {
@@ -95,7 +98,8 @@ async function main() {
   } catch (error) {
     console.error('\n❌ Error:', error.message);
     logger.error('GitHub GitIngest failed', { error: error.message });
-    process.exit(1);
+    // 2: invalid policy file, 3: export refused by the policy
+    process.exit(error.exitCode ?? 1);
   }
 }
 
