@@ -8,6 +8,10 @@
 
 import fs from 'fs';
 import path from 'path';
+import { exitOnBrokenPipe } from '../lib/utils/cli-output.js';
+
+// `ctxman ... | head` closes stdout early; stop quietly instead of throwing EPIPE
+exitOnBrokenPipe();
 
 // Shared modules (ignore-file notices, the logger) print with console.log; keep stdout
 // for the context itself

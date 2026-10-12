@@ -6,6 +6,10 @@
 import fs from 'fs';
 import path from 'path';
 import { getLogger } from '../lib/utils/logger.js';
+import { exitOnBrokenPipe } from '../lib/utils/cli-output.js';
+
+// `ctxman ... | head` closes stdout early; stop quietly instead of throwing EPIPE
+exitOnBrokenPipe();
 
 const STYLES = ['text', 'markdown', 'json', 'dot'];
 const ORDERS = ['rank', 'path'];

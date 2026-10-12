@@ -13,6 +13,10 @@ import { parseArgs } from 'util';
 import { searchProject, DEFAULT_LIMIT, DEFAULT_MAX_TOKENS } from '../lib/search/bm25.js';
 import { getLogger } from '../lib/utils/logger.js';
 import ClipboardUtils from '../lib/utils/clipboard-utils.js';
+import { exitOnBrokenPipe } from '../lib/utils/cli-output.js';
+
+// `ctxman ... | head` closes stdout early; stop quietly instead of throwing EPIPE
+exitOnBrokenPipe();
 
 const PREVIEW_LINES = 8;
 

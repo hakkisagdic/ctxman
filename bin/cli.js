@@ -22,6 +22,10 @@ import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, resolve, sep } from 'path';
 import { readFileSync } from 'fs';
+import { exitOnBrokenPipe } from '../lib/utils/cli-output.js';
+
+// `ctxman --cli | head` closes stdout early; stop quietly instead of throwing EPIPE
+exitOnBrokenPipe();
 
 // ESM equivalents for __dirname and __filename
 const __filename = fileURLToPath(import.meta.url);

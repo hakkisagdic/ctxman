@@ -8,6 +8,10 @@ import path from 'path';
 import { countForModel } from '../lib/count/index.js';
 import { LLMDetector } from '../lib/utils/llm-detector.js';
 import { getLogger } from '../lib/utils/logger.js';
+import { exitOnBrokenPipe } from '../lib/utils/cli-output.js';
+
+// `ctxman ... | head` closes stdout early; stop quietly instead of throwing EPIPE
+exitOnBrokenPipe();
 
 // stdout carries only the result (it may be JSON); progress, notices and warnings go to stderr
 const print = (line = '') => process.stdout.write(`${line}\n`);
