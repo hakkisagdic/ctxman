@@ -338,7 +338,7 @@ Farklı çıktı formatları geliştirme iş akışlarında belirli kullanım se
 **Performans Değerlendirmeleri:**
 
 - Compact format, tam kod tabanına kıyasla context boyutunu yaklaşık %89 azaltır
-- Token sayımı, mevcut olduğunda GPT-4 uyumluluğu için tiktoken kullanır, tahmin fallback'i ile
+- Token sayımı, hedef modelin encoding'iyle tiktoken kullanır (OpenAI modelleri için kesin, diğer sağlayıcılar için yaklaşık), tahmin fallback'i ile
 - Dizin gruplandırması ve ortak önek sıkıştırması alan kullanımını optimize eder
 - Method seviyesinde analiz ek yük ekler ancak odaklanmış hata ayıklama için granüler context sağlar
 

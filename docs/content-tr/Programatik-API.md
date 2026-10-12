@@ -333,13 +333,13 @@ ctxman API'sini programatik olarak kullanırken, birkaç performans değerlendir
 
 Araç, token sayımı için iki methodu destekler:
 
-- tiktoken kütüphanesini kullanarak **Kesin sayım** (yükleme gerektirir)
-- Karakter tabanlı sezgisel yöntemler kullanarak **Tahmin** (tiktoken mevcut olmadığında fallback)
+- Hedef modelin encoding'iyle **tiktoken sayımı** (ctxman ile birlikte kurulur): OpenAI modelleri için kesin, diğer sağlayıcılar için yaklaşık
+- Karakter tabanlı sezgisel yöntemler kullanarak **Tahmin** (tiktoken yüklenemediğinde fallback)
 
-Optimal doğruluk için tiktoken paketini yükleyin:
+Claude için kesin sayım `ctxman count --model claude-sonnet-5-5 --api` ile yapılır ve Anthropic SDK'sını gerektirir:
 
 ```bash
-npm install tiktoken
+npm install @anthropic-ai/sdk
 ```
 
 ### Analiz Kapsamı
@@ -379,7 +379,7 @@ Konfigürasyon dosyası formatlarında veya seçenek parametrelerinde herhangi b
 
 ### Bağımlılık Yönetimi
 
-Gerekli bağımlılıkların, özellikle kesin token sayımı için tiktoken'ın düzgün şekilde yüklendiğinden emin olun. tiktoken mevcut değilse araç tahminine geri döner, ancak daha düşük doğrulukla.
+Gerekli bağımlılıkların düzgün şekilde yüklendiğinden emin olun; tiktoken ctxman ile birlikte kurulur. tiktoken yüklenemezse araç tahmine geri döner, ancak daha düşük doğrulukla.
 
 ### Test
 

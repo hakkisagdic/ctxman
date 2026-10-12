@@ -261,21 +261,22 @@ npm install -g ctxman
 - Uses simple text-based output
 - All core features available
 
-### Exact Token Counting
+### Token Counting
 
-For exact GPT-4 token counting (optional):
+tiktoken is installed with ctxman; there is nothing to add. It counts with the target model's
+encoding (`o200k_base` for OpenAI models since GPT-4o, `cl100k_base` otherwise):
+
+- ✅ Exact counts for OpenAI models up to GPT-5.x
+- ≈ Approximate counts for GPT-6 (encoding unpublished), Claude, Gemini and other vendors, which use
+  their own tokenizers
+- ✅ Smart estimation (~95% accuracy) if tiktoken cannot be loaded
+
+For exact Claude counts with `ctxman count --model claude-sonnet-5-5 --api`, install Anthropic's SDK
+(optional) and set `ANTHROPIC_API_KEY`:
 
 ```bash
-npm install -g tiktoken
+npm install -g @anthropic-ai/sdk   # next to a global ctxman; without -g for a project install
 ```
-
-**With tiktoken:**
-
-- ✅ Exact token counts (100% accuracy)
-
-**Without tiktoken:**
-
-- ✅ Smart estimation (~95% accuracy)
 
 ---
 

@@ -24,7 +24,7 @@
 
 1. [Introduction](#introduction)
 2. [Token Calculation Methods](#token-calculation-methods)
-3. [Exact Token Counting with tiktoken](#exact-token-counting-with-tiktoken)
+3. [Token Counting with tiktoken](#token-counting-with-tiktoken)
 4. [Estimated Token Counting Implementation](#estimated-token-counting-implementation)
 5. [File Type Specific Examples](#file-type-specific-examples)
 6. [Integration with File and Project Statistics](#integration-with-file-and-project-statistics)
@@ -35,7 +35,7 @@
 
 ## Introduction
 
-The ctxman tool provides sophisticated token counting functionality to support LLM context management and code analysis. The system implements a dual approach to token counting, combining exact GPT-4 compatible calculations with intelligent estimation methods. This documentation details the implementation, usage, and integration of the token counting system within the ctxman tool.
+The ctxman tool provides sophisticated token counting functionality to support LLM context management and code analysis. The system implements a dual approach to token counting, combining tiktoken counts in the target model's encoding with intelligent estimation methods. This documentation details the implementation, usage, and integration of the token counting system within the ctxman tool.
 
 **Section sources**
 
@@ -44,16 +44,16 @@ The ctxman tool provides sophisticated token counting functionality to support L
 
 ## Token Calculation Methods
 
-The token counting system in ctxman implements two complementary methods for determining token counts: exact counting using the tiktoken library and estimated counting using character-per-token ratios. The system automatically selects the appropriate method based on library availability and performance requirements.
+The token counting system in ctxman implements two complementary methods for determining token counts: counting with the tiktoken library (exact for OpenAI models) and estimated counting using character-per-token ratios. The system automatically selects the appropriate method based on library availability and performance requirements.
 
-The primary entry point for token calculation is the `calculateTokens` method in the `TokenCalculator` class, which delegates to the `TokenUtils.calculate` method. This utility class serves as a dispatcher between the exact and estimated counting methods. When tiktoken is available, the system uses exact counting; otherwise, it falls back to estimation.
+The primary entry point for token calculation is the `calculateTokens` method in the `TokenCalculator` class, which delegates to the `TokenUtils.calculate` method. This utility class serves as a dispatcher between the tiktoken and estimated counting methods. When tiktoken is available, the system counts with the target model's encoding; otherwise, it falls back to estimation.
 
 ```mermaid
 flowchart TD
 Start([calculateTokens]) --> CheckTiktoken{"tiktoken available?"}
-CheckTiktoken --> |Yes| ExactCounting["Use tiktoken.encode()"]
+CheckTiktoken --> |Yes| ExactCounting["Use tiktoken encode() with the target model's encoding"]
 CheckTiktoken --> |No| EstimateCounting["Use estimateTokens()"]
-ExactCounting --> ReturnExact["Return exact token count"]
+ExactCounting --> ReturnExact["Return tiktoken token count"]
 EstimateCounting --> ReturnEstimate["Return estimated token count"]
 ReturnExact --> End([Method complete])
 ReturnEstimate --> End
@@ -68,25 +68,24 @@ ReturnEstimate --> End
 - [lib/utils/token-utils.js](file://lib/utils/token-utils.js#L20-L32)
 - [ctxman.js](file://ctxman.js#L280-L292)
 
-## Exact Token Counting with tiktoken
+## Token Counting with tiktoken
 
-The ctxman tool uses the tiktoken library to provide exact GPT-4 compatible token counts when available. The implementation follows a graceful degradation pattern, attempting to load tiktoken at initialization and falling back to estimation if the library is not present.
+The ctxman tool counts tokens with the tiktoken library, which is installed with ctxman. The implementation follows a graceful degradation pattern, loading tiktoken at initialization and falling back to estimation if the library cannot be loaded.
 
-The exact token counting process uses the cl100k_base encoding, which is the tokenizer used by GPT-4, GPT-3.5-Turbo, and other models. This ensures that token counts are accurate representations of how these models would process the text.
+The encoding follows the target model (`--target-model`): `o200k_base` for OpenAI models since GPT-4o (GPT-4o, GPT-4.1, GPT-5, GPT-6 and the o-series), and `cl100k_base` for everything else, including GPT-4, GPT-3.5-Turbo and runs without a target model. The counts are exact for OpenAI models up to GPT-5.x. OpenAI has not published GPT-6's encoding, and Claude, Gemini and the other vendors' models use their own tokenizers, so for those models the counts are approximate and the output says so. For exact Claude counts, `ctxman count --model <claude-id> --api` asks Anthropic's count_tokens API (it needs the `@anthropic-ai/sdk` package and `ANTHROPIC_API_KEY`, sends the secret-redacted text, and is free of charge).
 
 ```mermaid
 sequenceDiagram
 participant Calculator as TokenCalculator
 participant Tiktoken as tiktoken Library
-participant Encoding as cl100k_base Encoding
+participant Encoding as o200k_base / cl100k_base Encoding
 Calculator->>Calculator : calculateTokens(content, filePath)
 Calculator->>Tiktoken : Check if tiktoken is available
 alt tiktoken available
-Calculator->>Encoding : get_encoding('cl100k_base')
+Calculator->>Encoding : get_encoding(encodingFor(targetModel)), built once and reused
 Encoding-->>Calculator : Return encoding instance
 Calculator->>Encoding : encode(content)
 Encoding-->>Calculator : Return token array
-Calculator->>Encoding : free() memory
 Calculator->>Calculator : Return token count
 else tiktoken not available
 Calculator->>Calculator : Call estimateTokens()
@@ -141,7 +140,7 @@ The implementation includes specific character-per-token ratios for common file 
 
 ## File Type Specific Examples
 
-The token counting system handles different file types appropriately through the extension-specific character-per-token ratios in the estimation method. When exact counting is available via tiktoken, the system provides accurate counts regardless of file type.
+The token counting system handles different file types appropriately through the extension-specific character-per-token ratios in the estimation method. When tiktoken is available, these ratios are not used.
 
 For JavaScript files (.js, .ts, .jsx, .tsx), the system uses a ratio of 3.2 characters per token, reflecting the typical density of code in these languages. Markdown and plain text files use a more generous 4.0 characters per token, accounting for the higher proportion of spaces and formatting in documentation.
 
@@ -240,14 +239,14 @@ The choice of format affects how token counts are presented in the output, with 
 
 ## Performance Implications
 
-The token counting system balances accuracy and performance through its dual-method approach. Exact counting with tiktoken provides precise GPT-4 compatible results but incurs additional overhead from library loading and encoding operations. Estimated counting is faster and has no external dependencies but provides approximate results.
+The token counting system balances accuracy and performance through its dual-method approach. Counting with tiktoken matches OpenAI's tokenizers but incurs additional overhead from building the encoder (~150 ms, once per encoding) and encoding. Estimated counting is faster and needs no library but provides approximate results.
 
 The performance implications of each method are:
 
-- **Exact counting**: Higher accuracy (100%), slower performance, requires tiktoken dependency
+- **tiktoken counting**: exact for OpenAI models up to GPT-5.x, approximate for other vendors; slower
 - **Estimated counting**: Lower accuracy (~95%), faster performance, no external dependencies
 
-The system is designed to prefer exact counting when available, as indicated by the startup message that shows "✅ Exact (using tiktoken)" when the library is loaded successfully. When tiktoken is not available, the system falls back to estimation with a "⚠️ Estimated" indicator.
+The startup message shows which one is used: "✅ Exact (using tiktoken) · o200k_base" (or `cl100k_base`) when the library is loaded. When the target model uses its own tokenizer, a second line says that its counts are approximate and, for Claude models, names the `ctxman count --api` command that counts exactly. When tiktoken cannot be loaded, the system falls back to estimation with a "⚠️ Estimated" indicator.
 
 For large codebases, the performance difference becomes more significant, making estimated counting preferable when absolute precision is not required. The estimation method's O(n) complexity for text cleaning and simple division makes it highly efficient even for large files.
 
@@ -262,13 +261,13 @@ Common issues with token counting in the ctxman tool typically relate to inaccur
 
 1. **Inaccurate estimates for non-standard file types**: When a file has an uncommon extension not included in the predefined mapping, the system uses a default ratio of 3.5 characters per token. This may lead to inaccurate estimates for specialized file formats.
 
-2. **tiktoken not installed**: If the tiktoken library is not properly installed, the system falls back to estimation mode. This can be identified by the "⚠️ Estimated" message during execution.
+2. **tiktoken cannot be loaded**: tiktoken is installed with ctxman, but if the installation is broken the system falls back to estimation mode. This can be identified by the "⚠️ Estimated" message during execution; reinstalling ctxman fixes it.
 
-3. **Permission issues**: On some systems, installing native dependencies like tiktoken may require elevated permissions or specific build tools.
+3. **Counts differ from the provider's**: tiktoken matches OpenAI's tokenizers only. Claude, Gemini and other vendors' models count differently (Claude usually counts more tokens for the same code). Use `ctxman count --model <claude-id> --api` for exact Claude counts.
 
-4. **Version compatibility**: The package.json specifies tiktoken version ^1.0.0, and version mismatches could cause loading failures.
+4. **Version compatibility**: The package.json specifies tiktoken version ^1.0.22, and version mismatches could cause loading failures.
 
-To troubleshoot token counting issues, users should first verify tiktoken installation and check the startup message to confirm whether exact or estimated counting is being used.
+To troubleshoot token counting issues, users should first check the startup message to confirm which encoding is used and whether the counts are exact, approximate or estimated.
 
 **Section sources**
 
@@ -277,24 +276,26 @@ To troubleshoot token counting issues, users should first verify tiktoken instal
 
 ## Installation and Configuration
 
-To ensure exact token counting, the tiktoken library must be properly installed. The ctxman tool lists tiktoken as both a dependency and optionalDependency in package.json, allowing the tool to function without it while encouraging installation for exact counting.
-
-Installation is performed via npm:
+tiktoken is a regular dependency in package.json, so installing ctxman installs it; no extra step is needed. Exact Claude counts through `ctxman count --api` additionally need Anthropic's SDK, which ctxman does not install:
 
 ```bash
-npm install tiktoken
+npm install @anthropic-ai/sdk
+export ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-The implementation uses a try-catch block to load tiktoken, allowing graceful degradation when the library is not available:
+The implementation uses a try-catch block around a dynamic import to load tiktoken, allowing graceful degradation when the library cannot be loaded:
 
 ```javascript
 let tiktoken = null;
 try {
-  tiktoken = require('tiktoken');
-} catch {}
+  const tiktokenModule = await import('tiktoken');
+  tiktoken = tiktokenModule.default || tiktokenModule;
+} catch (_err) {
+  // fall back to estimation
+}
 ```
 
-This pattern ensures that the tool remains functional even if tiktoken installation fails or is not performed, while still providing the option for exact counting when desired. The startup sequence displays the token calculation method being used, helping users verify their installation status.
+This pattern ensures that the tool remains functional even if tiktoken cannot be loaded. The startup sequence displays the token calculation method being used, helping users verify their installation status.
 
 **Section sources**
 

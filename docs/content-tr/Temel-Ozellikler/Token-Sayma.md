@@ -12,7 +12,7 @@
 
 1. [Giriş](#giriş)
 2. [Token Hesaplama Yöntemleri](#token-hesaplama-yöntemleri)
-3. [tiktoken ile Tam Token Sayımı](#tiktoken-ile-tam-token-sayımı)
+3. [tiktoken ile Token Sayımı](#tiktoken-ile-token-sayımı)
 4. [Tahmini Token Sayımı Implementasyonu](#tahmini-token-sayımı-implementasyonu)
 5. [Dosya Türüne Özgü Örnekler](#dosya-türüne-özgü-örnekler)
 6. [Dosya ve Proje İstatistikleriyle Entegrasyon](#dosya-ve-proje-i̇statistikleriyle-entegrasyon)
@@ -23,7 +23,7 @@
 
 ## Giriş
 
-ctxman aracı, LLM context yönetimi ve kod analizini desteklemek için sofistike token sayma işlevselliği sağlar. Sistem, tam GPT-4 uyumlu hesaplamaları akıllı tahmin yöntemleriyle birleştirerek token sayımına ikili bir yaklaşım uygular. Bu dokümantasyon, ctxman aracı içindeki token sayma sisteminin implementasyonunu, kullanımını ve entegrasyonunu detaylandırır.
+ctxman aracı, LLM context yönetimi ve kod analizini desteklemek için sofistike token sayma işlevselliği sağlar. Sistem, hedef modelin encoding'iyle yapılan tiktoken sayımlarını akıllı tahmin yöntemleriyle birleştirerek token sayımına ikili bir yaklaşım uygular. Bu dokümantasyon, ctxman aracı içindeki token sayma sisteminin implementasyonunu, kullanımını ve entegrasyonunu detaylandırır.
 
 **Bölüm kaynakları**
 
@@ -32,16 +32,16 @@ ctxman aracı, LLM context yönetimi ve kod analizini desteklemek için sofistik
 
 ## Token Hesaplama Yöntemleri
 
-ctxman'daki token sayma sistemi, token sayılarını belirlemek için iki tamamlayıcı method uygular: tiktoken kütüphanesini kullanarak tam sayım ve karakter-başına-token oranlarını kullanarak tahmini sayım. Sistem, kütüphane kullanılabilirliğine ve performans gereksinimlerine göre uygun methodu otomatik olarak seçer.
+ctxman'daki token sayma sistemi, token sayılarını belirlemek için iki tamamlayıcı method uygular: tiktoken kütüphanesiyle sayım (OpenAI modelleri için kesin) ve karakter-başına-token oranlarını kullanarak tahmini sayım. Sistem, kütüphane kullanılabilirliğine ve performans gereksinimlerine göre uygun methodu otomatik olarak seçer.
 
-Token hesaplaması için birincil giriş noktası, tam ve tahmini sayım methodları arasında dağıtıcı olarak hizmet eden `TokenCalculator` sınıfındaki `calculateTokens` methodudur. tiktoken mevcut olduğunda, sistem tam sayım kullanır; aksi takdirde, tahmini hesaplamaya geçer.
+Token hesaplaması için birincil giriş noktası, tiktoken ve tahmini sayım methodları arasında dağıtıcı olarak hizmet eden `TokenCalculator` sınıfındaki `calculateTokens` methodudur. tiktoken mevcut olduğunda, sistem hedef modelin encoding'iyle sayar; aksi takdirde, tahmini hesaplamaya geçer.
 
 ```mermaid
 flowchart TD
 Start([calculateTokens]) --> CheckTiktoken{"tiktoken mevcut mu?"}
-CheckTiktoken --> |Evet| ExactCounting["tiktoken.encode() kullan"]
+CheckTiktoken --> |Evet| ExactCounting["Hedef modelin encoding'iyle tiktoken encode() kullan"]
 CheckTiktoken --> |Hayır| EstimateCounting["estimateTokens() kullan"]
-ExactCounting --> ReturnExact["Tam token sayısını döndür"]
+ExactCounting --> ReturnExact["tiktoken token sayısını döndür"]
 EstimateCounting --> ReturnEstimate["Tahmini token sayısını döndür"]
 ReturnExact --> End([Method tamamlandı])
 ReturnEstimate --> End
@@ -55,25 +55,24 @@ ReturnEstimate --> End
 
 - [ctxman.js](file://ctxman.js#L280-L292)
 
-## tiktoken ile Tam Token Sayımı
+## tiktoken ile Token Sayımı
 
-ctxman aracı, mevcut olduğunda tam GPT-4 uyumlu token sayımları sağlamak için tiktoken kütüphanesini kullanır. Implementasyon, başlatma sırasında tiktoken'ı yüklemeye çalışan ve kütüphane mevcut değilse tahmini hesaplamaya geçen zarif bir bozulma modeli izler.
+ctxman aracı, token'ları ctxman ile birlikte kurulan tiktoken kütüphanesiyle sayar. Implementasyon, başlatma sırasında tiktoken'ı yükleyen ve kütüphane yüklenemezse tahmini hesaplamaya geçen zarif bir bozulma modeli izler.
 
-Tam token sayma işlemi, GPT-4, GPT-3.5-Turbo ve diğer modeller tarafından kullanılan tokenizer olan cl100k_base encoding'ini kullanır. Bu, token sayılarının bu modellerin metni nasıl işleyeceğinin doğru temsilleri olmasını sağlar.
+Encoding hedef modele (`--target-model`) göre seçilir: GPT-4o'dan bu yana OpenAI modelleri (GPT-4o, GPT-4.1, GPT-5, GPT-6 ve o serisi) için `o200k_base`; GPT-4, GPT-3.5-Turbo ve hedef model verilmeyen çalıştırmalar dahil diğer her durumda `cl100k_base`. Sayımlar GPT-5.x'e kadarki OpenAI modelleri için kesindir. OpenAI GPT-6'nın encoding'ini yayımlamadığı, Claude, Gemini ve diğer sağlayıcıların modelleri de kendi tokenizer'larını kullandığı için bu modellerde sayımlar yaklaşıktır ve çıktı bunu belirtir. Claude için kesin sayım `ctxman count --model <claude-id> --api` ile Anthropic'in count_tokens API'sinden alınır (`@anthropic-ai/sdk` paketi ve `ANTHROPIC_API_KEY` gerekir; gizli bilgileri maskelenmiş metin gönderilir ve sayım ücretsizdir).
 
 ```mermaid
 sequenceDiagram
 participant Calculator as TokenCalculator
 participant Tiktoken as tiktoken Library
-participant Encoding as cl100k_base Encoding
+participant Encoding as o200k_base / cl100k_base Encoding
 Calculator->>Calculator : calculateTokens(content, filePath)
 Calculator->>Tiktoken : tiktoken'ın mevcut olup olmadığını kontrol et
 alt tiktoken mevcut
-Calculator->>Encoding : get_encoding('cl100k_base')
+Calculator->>Encoding : get_encoding(encodingFor(targetModel)), bir kez oluşturulup yeniden kullanılır
 Encoding-->>Calculator : Encoding instance döndür
 Calculator->>Encoding : encode(content)
 Encoding-->>Calculator : Token dizisi döndür
-Calculator->>Encoding : free() bellek
 Calculator->>Calculator : Token sayısını döndür
 else tiktoken mevcut değil
 Calculator->>Calculator : estimateTokens() çağır
@@ -128,7 +127,7 @@ Implementasyon, yaygın dosya türleri için spesifik karakter-başına-token or
 
 ## Dosya Türüne Özgü Örnekler
 
-Token sayma sistemi, tahmin methodundaki uzantıya özgü karakter-başına-token oranları aracılığıyla farklı dosya türlerini uygun şekilde işler. tiktoken aracılığıyla tam sayım mevcut olduğunda, sistem dosya türünden bağımsız olarak doğru sayımlar sağlar.
+Token sayma sistemi, tahmin methodundaki uzantıya özgü karakter-başına-token oranları aracılığıyla farklı dosya türlerini uygun şekilde işler. tiktoken mevcut olduğunda bu oranlar kullanılmaz.
 
 JavaScript dosyaları (.js, .ts, .jsx, .tsx) için sistem, bu dillerdeki kodun tipik yoğunluğunu yansıtan token başına 3.2 karakter oranı kullanır. Markdown ve düz metin dosyaları, dokümantasyondaki daha yüksek boşluk ve formatlama oranını hesaba katarak daha cömert token başına 4.0 karakter kullanır.
 
@@ -227,14 +226,14 @@ Format seçimi, kompakt format dosya organizasyonuna odaklanırken ve detaylı f
 
 ## Performans Etkileri
 
-Token sayma sistemi, ikili method yaklaşımı aracılığıyla doğruluk ve performansı dengeler. tiktoken ile tam sayım, kesin GPT-4 uyumlu sonuçlar sağlar ancak kütüphane yükleme ve encoding işlemlerinden ek yük getirir. Tahmini sayım daha hızlıdır ve harici bağımlılığı yoktur ancak yaklaşık sonuçlar sağlar.
+Token sayma sistemi, ikili method yaklaşımı aracılığıyla doğruluk ve performansı dengeler. tiktoken ile sayım OpenAI'ın tokenizer'larıyla eşleşir ancak encoder'ın oluşturulması (encoding başına bir kez, ~150 ms) ve encoding işlemleri ek yük getirir. Tahmini sayım daha hızlıdır ve kütüphane gerektirmez ancak yaklaşık sonuçlar sağlar.
 
 Her methodun performans etkileri şunlardır:
 
-- **Tam sayım**: Daha yüksek doğruluk (%100), daha yavaş performans, tiktoken bağımlılığı gerektirir
+- **tiktoken ile sayım**: GPT-5.x'e kadarki OpenAI modelleri için kesin, diğer sağlayıcılar için yaklaşık; daha yavaş
 - **Tahmini sayım**: Daha düşük doğruluk (~%95), daha hızlı performans, harici bağımlılık gerektirmez
 
-Sistem, mevcut olduğunda tam sayımı tercih edecek şekilde tasarlanmıştır; bu, kütüphane başarıyla yüklendiğinde "✅ Exact (using tiktoken)" gösteren başlangıç mesajıyla belirtilir. tiktoken mevcut olmadığında, sistem "⚠️ Estimated" göstergesiyle tahmini hesaplamaya geçer.
+Hangi yöntemin kullanıldığını başlangıç mesajı gösterir: kütüphane yüklendiğinde "✅ Exact (using tiktoken) · o200k_base" (veya `cl100k_base`). Hedef model kendi tokenizer'ını kullanıyorsa ikinci bir satır sayımların yaklaşık olduğunu söyler ve Claude modelleri için kesin sayım yapan `ctxman count --api` komutunu gösterir. tiktoken yüklenemezse sistem "⚠️ Estimated" göstergesiyle tahmini hesaplamaya geçer.
 
 Büyük codebase'ler için performans farkı daha önemli hale gelir ve mutlak hassasiyet gerekli olmadığında tahmini sayımı tercih edilir kılar. Tahmin methodunun metin temizleme ve basit bölme için O(n) karmaşıklığı, büyük dosyalar için bile oldukça verimli olmasını sağlar.
 
@@ -249,13 +248,13 @@ ctxman aracındaki token sayımıyla ilgili yaygın sorunlar genellikle standart
 
 1. **Standart olmayan dosya türleri için yanlış tahminler**: Bir dosya, önceden tanımlanmış eşlemede yer almayan alışılmadık bir uzantıya sahip olduğunda, sistem varsayılan olarak token başına 3.5 karakter oranı kullanır. Bu, özel dosya formatları için yanlış tahminlere yol açabilir.
 
-2. **tiktoken yüklü değil**: tiktoken kütüphanesi düzgün şekilde yüklenmemişse, sistem tahmini moduna geri döner. Bu, yürütme sırasında "⚠️ Estimated" mesajıyla tanımlanabilir.
+2. **tiktoken yüklenemiyor**: tiktoken ctxman ile birlikte kurulur; kurulum bozuksa sistem tahmini moda geri döner. Bu, yürütme sırasında "⚠️ Estimated" mesajıyla anlaşılır; ctxman'i yeniden kurmak sorunu giderir.
 
-3. **İzin sorunları**: Bazı sistemlerde, tiktoken gibi native bağımlılıkları yüklemek yükseltilmiş izinler veya belirli build araçları gerektirebilir.
+3. **Sayımlar sağlayıcınınkinden farklı**: tiktoken yalnızca OpenAI'ın tokenizer'larıyla eşleşir. Claude, Gemini ve diğer sağlayıcıların modelleri farklı sayar (Claude aynı kod için genellikle daha fazla token sayar). Claude için kesin sayım: `ctxman count --model <claude-id> --api`.
 
-4. **Versiyon uyumluluğu**: package.json, tiktoken version ^1.0.0 belirtir ve versiyon uyumsuzlukları yükleme hatalarına neden olabilir.
+4. **Versiyon uyumluluğu**: package.json, tiktoken version ^1.0.22 belirtir ve versiyon uyumsuzlukları yükleme hatalarına neden olabilir.
 
-Token sayma sorunlarını gidermek için kullanıcılar önce tiktoken kurulumunu doğrulamalı ve tam veya tahmini sayımın kullanılıp kullanılmadığını onaylamak için başlangıç mesajını kontrol etmelidir.
+Token sayma sorunlarını gidermek için kullanıcılar önce başlangıç mesajına bakarak hangi encoding'in kullanıldığını ve sayımların kesin, yaklaşık ya da tahmini olduğunu kontrol etmelidir.
 
 **Bölüm kaynakları**
 
@@ -264,24 +263,26 @@ Token sayma sorunlarını gidermek için kullanıcılar önce tiktoken kurulumun
 
 ## Kurulum ve Yapılandırma
 
-Tam token sayımını sağlamak için tiktoken kütüphanesinin düzgün şekilde yüklenmesi gerekir. ctxman aracı, tiktoken'ı package.json'da hem dependency hem de optionalDependency olarak listeler; bu, tam sayım için kurulumu teşvik ederken aracın onsuz çalışmasına izin verir.
-
-Kurulum npm aracılığıyla gerçekleştirilir:
+tiktoken, package.json'da normal bir bağımlılıktır; ctxman kurulduğunda o da kurulur ve ek bir adım gerekmez. `ctxman count --api` ile Claude için kesin sayım ise ctxman'in kurmadığı Anthropic SDK'sını gerektirir:
 
 ```bash
-npm install tiktoken
+npm install @anthropic-ai/sdk
+export ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Implementasyon, tiktoken'ı yüklemek için bir try-catch bloğu kullanır ve kütüphane mevcut olmadığında zarif bir bozulmaya izin verir:
+Implementasyon, tiktoken'ı dinamik import ile yüklemek için bir try-catch bloğu kullanır ve kütüphane yüklenemediğinde zarif bir bozulmaya izin verir:
 
 ```javascript
 let tiktoken = null;
 try {
-  tiktoken = require('tiktoken');
-} catch {}
+  const tiktokenModule = await import('tiktoken');
+  tiktoken = tiktokenModule.default || tiktokenModule;
+} catch (_err) {
+  // tahmine geri dön
+}
 ```
 
-Bu kalıp, aracın tiktoken kurulumu başarısız olsa veya gerçekleştirilmese bile işlevsel kalmasını sağlarken, istendiğinde tam sayım seçeneğini hala sağlar. Başlangıç dizisi, kullanılan token hesaplama methodunu görüntüleyerek kullanıcıların kurulum durumlarını doğrulamalarına yardımcı olur.
+Bu kalıp, tiktoken yüklenemese bile aracın işlevsel kalmasını sağlar. Başlangıç dizisi, kullanılan token hesaplama methodunu görüntüleyerek kullanıcıların kurulum durumlarını doğrulamalarına yardımcı olur.
 
 **Bölüm kaynakları**
 

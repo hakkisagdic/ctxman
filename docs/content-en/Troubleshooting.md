@@ -56,7 +56,7 @@ Negation patterns (prefixed with `!`) work differently in INCLUDE versus EXCLUDE
 
 ## Token Counting Discrepancies
 
-The ctxman tool provides both exact and estimated token counts, which can lead to discrepancies that users might find confusing. The tool first attempts to use the tiktoken library for exact GPT-4 compatible token counting. If tiktoken is not available, it falls back to an estimation algorithm.
+The ctxman tool provides both exact and estimated token counts, which can lead to discrepancies that users might find confusing. The tool counts with the tiktoken library in the target model's encoding (`o200k_base` for OpenAI models since GPT-4o, `cl100k_base` otherwise). These counts are exact for OpenAI models up to GPT-5.x and approximate for GPT-6 and for Claude, Gemini and other vendors, whose models use their own tokenizers. If tiktoken cannot be loaded, it falls back to an estimation algorithm.
 
 The estimation algorithm uses predefined characters-per-token ratios for different file types:
 
@@ -66,7 +66,7 @@ The estimation algorithm uses predefined characters-per-token ratios for differe
 - HTML/XML: 2.8 characters per token
 - Default: 3.5 characters per token
 
-These estimates are typically around 95% accurate compared to exact counts. Users might notice differences between the estimated counts and what they expect from other tools. The tool clearly indicates which counting method is being used in the output: "🎯 Token calculation: ✅ Exact (using tiktoken)" for exact counts or "🎯 Token calculation: ⚠️ Estimated" for estimates.
+These estimates are typically around 95% accurate compared to exact counts. Users might notice differences between the estimated counts and what they expect from other tools. The tool clearly indicates which counting method is being used in the output: "🎯 Token calculation: ✅ Exact (using tiktoken) · cl100k_base" for tiktoken counts (followed by a line saying the counts are approximate when the target model uses its own tokenizer) or "🎯 Token calculation: ⚠️ Estimated" for estimates. For exact Claude counts, run `ctxman count --model claude-sonnet-5-5 --api`.
 
 **Section sources**
 
@@ -132,7 +132,7 @@ To diagnose issues with the ctxman tool, users should follow these steps:
 
 4. Examine the configuration files (`.gitignore`, `.contextignore`, `.contextinclude`) for conflicting or incorrect patterns.
 
-5. Verify that the tiktoken dependency is installed if exact token counts are required.
+5. If the output says "⚠️ Estimated", tiktoken could not be loaded: reinstall ctxman. For exact Claude counts, use `ctxman count --api`.
 
 The tool provides clear visual indicators in its output that help with diagnosis, such as the number of files ignored due to `.gitignore` rules versus context rules, and whether exact or estimated token counting is being used.
 
@@ -144,7 +144,7 @@ The tool provides clear visual indicators in its output that help with diagnosis
 
 ## Common Environment Issues
 
-Common environment issues include missing dependencies and permission errors. The most frequent dependency issue is the absence of the tiktoken library, which is required for exact token counting. When tiktoken is not installed, the tool automatically falls back to estimation mode, but users should install it via `npm install tiktoken` for accurate results.
+Common environment issues include missing dependencies and permission errors. tiktoken is installed with ctxman; if it cannot be loaded (for example after a broken install), the tool automatically falls back to estimation mode, and reinstalling ctxman restores tiktoken counting. `ctxman count --api` additionally needs the `@anthropic-ai/sdk` package, which ctxman does not install.
 
 Permission errors can occur when the tool doesn't have read access to certain files or directories in the codebase. This might happen when running the tool in restricted environments or when file permissions are set too narrowly. Users should ensure the tool has appropriate read permissions for all files they want to analyze.
 

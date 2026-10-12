@@ -107,7 +107,7 @@ export ANTHROPIC_API_KEY=sk-test-12345
 ctxman --cli --auto-detect-llm
 
 Expected Output:
-✅ Auto-detected LLM: Claude Sonnet 4.5
+✅ Auto-detected LLM: Claude Sonnet 5.5
 ✅ Context Fit Analysis displayed
 ✅ Recommendation shown (fits/chunks)
 ```
@@ -116,12 +116,12 @@ Expected Output:
 
 ```bash
 cd test-repos/express
-ctxman --cli --target-model gpt-4o
+ctxman --cli --target-model gpt-6.1-sol
 
 Expected Output:
 📊 Context Window Analysis:
-   Target Model: GPT-4o
-   Available Context: 128,000 tokens
+   Target Model: GPT-6.1 Sol
+   Available Context: 1,050,000 tokens
    Your Repository: ~70,000 tokens
    ✅ PERFECT FIT! Your entire codebase fits in one context.
 ```
@@ -132,8 +132,9 @@ Expected Output:
 ctxman --list-llms
 
 Expected Output:
-✅ Shows 9+ models grouped by vendor
-✅ Anthropic, OpenAI, Google, DeepSeek
+✅ Shows the current models grouped by vendor (Anthropic, OpenAI, Google, DeepSeek, Mistral,
+   xAI, Qwen, Meta) with context window, output limit, price and status
+✅ `ctxman --list-llms --all` also lists retired models
 ```
 
 ---
@@ -332,7 +333,7 @@ curl -X POST http://localhost:3000/api/v1/context \
   -d '{
     "path": "./test-repos/express",
     "methodLevel": true,
-    "targetModel": "claude-sonnet-4.5",
+    "targetModel": "claude-sonnet-5-5",
     "useCase": "code-review"
   }'
 
@@ -588,7 +589,7 @@ ctxman --cli --no-verbose > /dev/null && echo "✅ PASS" || echo "❌ FAIL"
 
 # Test 2: LLM optimization
 echo "2. LLM Optimization..."
-ctxman --cli --target-model claude-sonnet-4.5 --no-verbose > /dev/null && echo "✅ PASS" || echo "❌ FAIL"
+ctxman --cli --target-model claude-sonnet-5-5 --no-verbose > /dev/null && echo "✅ PASS" || echo "❌ FAIL"
 
 # Test 3: Git integration
 echo "3. Git Integration..."

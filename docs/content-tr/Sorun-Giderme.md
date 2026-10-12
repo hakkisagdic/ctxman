@@ -56,7 +56,7 @@ Negasyon desenleri (`!` ile başlayan), INCLUDE ve EXCLUDE modlarında farklı �
 
 ## Token Sayımı Tutarsızlıkları
 
-ctxman aracı hem kesin hem de tahmini token sayıları sağlar, bu da kullanıcıların kafa karıştırıcı bulabileceği tutarsızlıklara yol açabilir. Araç önce kesin GPT-4 uyumlu token sayımı için tiktoken kütüphanesini kullanmayı dener. tiktoken mevcut değilse, bir tahmin algoritmasına geri döner.
+ctxman aracı hem kesin hem de tahmini token sayıları sağlar, bu da kullanıcıların kafa karıştırıcı bulabileceği tutarsızlıklara yol açabilir. Araç, tiktoken kütüphanesiyle hedef modelin encoding'ini kullanarak sayar (GPT-4o'dan bu yana OpenAI modelleri için `o200k_base`, diğerleri için `cl100k_base`). Bu sayımlar GPT-5.x'e kadarki OpenAI modelleri için kesin; GPT-6 ile kendi tokenizer'larını kullanan Claude, Gemini ve diğer sağlayıcıların modelleri için yaklaşıktır. tiktoken yüklenemezse bir tahmin algoritmasına geri döner.
 
 Tahmin algoritması, farklı dosya türleri için önceden tanımlanmış karakter başına token oranları kullanır:
 
@@ -66,7 +66,7 @@ Tahmin algoritması, farklı dosya türleri için önceden tanımlanmış karakt
 - HTML/XML: Token başına 2.8 karakter
 - Varsayılan: Token başına 3.5 karakter
 
-Bu tahminler genellikle kesin sayımlara kıyasla yaklaşık %95 doğrudur. Kullanıcılar, tahmini sayımlar ile diğer araçlardan bekledikleri arasında farklılıklar fark edebilirler. Araç çıktıda hangi sayım methodunun kullanıldığını açıkça gösterir: kesin sayımlar için "🎯 Token calculation: ✅ Exact (using tiktoken)" veya tahminler için "🎯 Token calculation: ⚠️ Estimated".
+Bu tahminler genellikle kesin sayımlara kıyasla yaklaşık %95 doğrudur. Kullanıcılar, tahmini sayımlar ile diğer araçlardan bekledikleri arasında farklılıklar fark edebilirler. Araç çıktıda hangi sayım methodunun kullanıldığını açıkça gösterir: tiktoken sayımları için "🎯 Token calculation: ✅ Exact (using tiktoken) · cl100k_base" (hedef model kendi tokenizer'ını kullanıyorsa ardından sayımların yaklaşık olduğunu söyleyen bir satır gelir) veya tahminler için "🎯 Token calculation: ⚠️ Estimated". Claude için kesin sayım: `ctxman count --model claude-sonnet-5-5 --api`.
 
 **Bölüm kaynakları**
 
@@ -132,7 +132,7 @@ ctxman aracı ile ilgili sorunları tanılamak için, kullanıcılar şu adımla
 
 4. Çakışan veya yanlış desenler için konfigürasyon dosyalarını (`.gitignore`, `.contextignore`, `.contextinclude`) inceleyin.
 
-5. Kesin token sayıları gerekiyorsa tiktoken bağımlılığının yüklendiğini doğrulayın.
+5. Çıktıda "⚠️ Estimated" görünüyorsa tiktoken yüklenememiştir: ctxman'i yeniden kurun. Claude için kesin sayım gerekiyorsa `ctxman count --api` kullanın.
 
 Araç çıktısında tanıya yardımcı olan açık görsel göstergeler sağlar, örneğin `.gitignore` kuralları ile calculator kuralları nedeniyle göz ardı edilen dosyaların sayısı ve kesin veya tahmini token sayımının kullanılıp kullanılmadığı.
 
@@ -144,7 +144,7 @@ Araç çıktısında tanıya yardımcı olan açık görsel göstergeler sağlar
 
 ## Yaygın Ortam Sorunları
 
-Yaygın ortam sorunları arasında eksik bağımlılıklar ve izin hataları yer alır. En sık karşılaşılan bağımlılık sorunu, kesin token sayımı için gerekli olan tiktoken kütüphanesinin yokluğudur. tiktoken yüklü olmadığında, araç otomatik olarak tahmin moduna geri döner, ancak doğru sonuçlar için kullanıcılar `npm install tiktoken` ile yüklemelidir.
+Yaygın ortam sorunları arasında eksik bağımlılıklar ve izin hataları yer alır. tiktoken ctxman ile birlikte kurulur; yüklenemezse (örneğin bozuk bir kurulumdan sonra) araç otomatik olarak tahmin moduna geçer ve ctxman'i yeniden kurmak tiktoken sayımını geri getirir. `ctxman count --api` ayrıca ctxman'in kurmadığı `@anthropic-ai/sdk` paketini gerektirir.
 
 İzin hataları, araç kod tabanındaki belirli dosya veya dizinlere okuma erişimine sahip olmadığında meydana gelebilir. Bu, aracı kısıtlı ortamlarda çalıştırırken veya dosya izinleri çok dar ayarlandığında olabilir. Kullanıcılar, aracın analiz etmek istedikleri tüm dosyalar için uygun okuma izinlerine sahip olduğundan emin olmalıdır.
 

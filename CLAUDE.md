@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**ctxman** is an AI Development Platform with plugin architecture, Git integration, REST API, and real-time analysis capabilities. It provides method-level filtering and exact token counting for 14+ programming languages, generating optimized context for AI assistants.
+**ctxman** is an AI Development Platform with plugin architecture, Git integration, REST API, and real-time analysis capabilities. It provides method-level filtering and per-model token counting for 14+ programming languages, generating optimized context for AI assistants.
 
 **Core Capabilities (v3.0.0):**
 
@@ -85,7 +85,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Token Counting
 
-Uses tiktoken library (cl100k_base encoding) for exact GPT-4 token counts. Falls back to smart estimation (~95% accuracy) based on file extension if tiktoken unavailable. tiktoken is a devDependency, so a plain `npm install ctxman` uses the estimate unless the user also installs tiktoken. The encoder is built once and reused (building it costs ~150 ms).
+Uses the tiktoken library (a regular dependency, so a plain `npm install ctxman` counts with it) with the encoding of `--target-model`: `o200k_base` for OpenAI models since GPT-4o, `cl100k_base` otherwise and when no model is given (`TokenUtils.encodingFor`, `encodingForModel` in `lib/utils/tokenizer-adapter.js`). Counts are exact for OpenAI models up to GPT-5.x; for GPT-6 (encoding unpublished), Claude, Gemini and other vendors they are approximate and labelled so. `ctxman count [path|-] --model ID [--api] [--json]` (`bin/cm-count.js`, `lib/count/`) counts for one model; with `--api` it counts Claude models exactly through Anthropic's count_tokens API (`lib/utils/claude-token-counter.js`; needs the optional `@anthropic-ai/sdk` and `ANTHROPIC_API_KEY`, sends secret-redacted text). Falls back to smart estimation (~95% accuracy) based on file extension if tiktoken cannot be loaded. Each encoder is built once and reused (building one costs ~150 ms).
+
+Model data (ids, context/output windows, prices with long-prompt tiers, status, aliases) lives in `.ctxman/llm-profiles.json` (checked 2026-10-09) and is read by `lib/utils/llm-detector.js`, `--list-llms` and `--estimate-cost`. `DEFAULT_TARGET_MODEL` is `claude-sonnet-5-5`; old ids such as `claude-sonnet-4.5` resolve through aliases.
 
 ## Development Commands
 
@@ -120,7 +122,8 @@ npm run serve                     # Start API server (port 3000)
 npm run watch                     # Start watch mode
 ctxman --changed-only    # Analyze only changed files
 ctxman --changed-since main  # Analyze changes since branch
-ctxman --list-llms       # List supported LLM models
+ctxman --list-llms       # List supported LLM models (--all adds retired ones)
+ctxman count --model claude-sonnet-5-5 --api  # Token count for one model (exact for Claude with --api)
 ```
 
 ### Build & Publish
@@ -265,6 +268,6 @@ When no export flags provided, prompts user to choose:
 
 - ES6 class syntax for core components
 - Regex-based parsing (no AST dependencies)
-- Graceful fallbacks (tiktoken optional, clipboard fallback to file)
-- Minimal dependencies (only tiktoken as optional)
+- Graceful fallbacks (estimation if tiktoken cannot be loaded, clipboard fallback to file)
+- Minimal dependencies (heavy or networked extras such as `@anthropic-ai/sdk` or the `ask` search stack stay optional)
 - No TypeScript, pure JavaScript for maximum portability

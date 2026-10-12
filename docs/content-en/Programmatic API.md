@@ -389,13 +389,13 @@ When using the ctxman API programmatically, several performance considerations s
 
 The tool supports two methods for token counting:
 
-- **Exact counting** using the tiktoken library (requires installation)
-- **Estimation** using character-based heuristics (fallback when tiktoken is not available)
+- **tiktoken counting** in the target model's encoding (installed with ctxman): exact for OpenAI models, approximate for other vendors
+- **Estimation** using character-based heuristics (fallback when tiktoken cannot be loaded)
 
-For optimal accuracy, install the tiktoken package:
+For exact Claude counts, use `ctxman count --model claude-sonnet-5-5 --api`, which needs Anthropic's SDK:
 
 ```bash
-npm install tiktoken
+npm install @anthropic-ai/sdk
 ```
 
 ### Analysis Scope
@@ -444,7 +444,7 @@ Recent updates have introduced several new features that enhance the tool's capa
 
 ### Dependency Management
 
-Ensure that required dependencies are properly installed, particularly tiktoken for exact token counting. The tool will fall back to estimation if tiktoken is not available, but with reduced accuracy.
+Ensure that required dependencies are properly installed; tiktoken is installed with ctxman. The tool will fall back to estimation if tiktoken cannot be loaded, but with reduced accuracy.
 
 ### Testing
 

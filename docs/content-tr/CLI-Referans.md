@@ -35,7 +35,7 @@
 
 ## Giriş
 
-ctxman CLI, kod tabanlarını analiz etmek ve LLM tüketimi için context'i optimize etmek üzere kapsamlı bir araç sağlar. Method seviyesinde filtreleme, kesin token sayımı ve AI destekli geliştirme iş akışlarını desteklemek için birden fazla export formatı sunar. Araç hem .gitignore hem de özel ignore/include kurallarına saygı gösterir ve farklı analiz senaryoları için esnek konfigürasyon seçenekleri sağlar.
+ctxman CLI, kod tabanlarını analiz etmek ve LLM tüketimi için context'i optimize etmek üzere kapsamlı bir araç sağlar. Method seviyesinde filtreleme, modele göre token sayımı ve AI destekli geliştirme iş akışlarını desteklemek için birden fazla export formatı sunar. Araç hem .gitignore hem de özel ignore/include kurallarına saygı gösterir ve farklı analiz senaryoları için esnek konfigürasyon seçenekleri sağlar.
 
 **Bölüm kaynakları**
 
@@ -207,6 +207,15 @@ ctxman --gitingest-from-report token-analysis-report.json
 
 Önce kod tabanını analiz eder ve bir rapor kaydeder, ardından mevcut rapordan yeniden tarama yapmadan hızlıca bir digest oluşturur.
 
+### Tek bir model için token sayımı
+
+```bash
+ctxman count --model gpt-5.5
+ctxman count --model claude-sonnet-5-5 --api
+```
+
+Projeyi (veya `-` ile stdin'den gelen metni) tek bir model için sayar ve modelin context penceresiyle karşılaştırır. OpenAI modelleri kendi tiktoken encoding'leriyle kesin sayılır; diğer sağlayıcıların sayımları yaklaşıktır. `--api` ile Claude modelleri Anthropic'in count_tokens API'si üzerinden kesin sayılır (`@anthropic-ai/sdk` ve `ANTHROPIC_API_KEY` gerekir; gizli bilgileri maskelenmiş metin gönderilir). Model kimlikleri için `ctxman --list-llms`, tüm seçenekler için `ctxman count --help` çalıştırın.
+
 **Bölüm kaynakları**
 
 - [README.md](file://README.md#L0-L891)
@@ -270,7 +279,7 @@ ctxman CLI güçlü hata yönetim mekanizmaları uygular:
 - **Dosya sistemi hatası (exit code 1)**: Analiz sırasında dosya veya dizinlere erişimde sorunlar.
 - **Pano hatası**: Pano işlemleri başarısız olduğunda, araç bir uyarı mesajıyla context'i llm-context.json'a kaydetmeye geri döner.
 
-Araç, eksik konfigürasyon dosyalarını zarif bir şekilde ele alır ve bilgilendirici hata mesajları sağlar. tiktoken kesin token sayımı için mevcut olmadığında, bir uyarıyla akıllı tahmin yöntemine geri döner.
+Araç, eksik konfigürasyon dosyalarını zarif bir şekilde ele alır ve bilgilendirici hata mesajları sağlar. tiktoken yüklenemediğinde, bir uyarıyla akıllı tahmin yöntemine geri döner.
 
 **Bölüm kaynakları**
 
@@ -342,7 +351,7 @@ Dosyaların .gitignore veya calculator kuralları tarafından hariç tutulup tut
 
 ### Token sayımı tutarsızlıkları
 
-Kesin token sayımı için tiktoken'ın yüklendiğinden emin olun. tiktoken olmadan, araç dosya türüne dayalı tahmin kullanır.
+tiktoken sayımları yalnızca OpenAI modelleri için kesindir; Claude, Gemini ve diğer sağlayıcıların modelleri kendi tokenizer'larını kullanır. Tek bir model için saymak üzere `ctxman count --model <id>` çalıştırın; Claude için kesin sayımda `--api` ekleyin. Çıktıda "⚠️ Estimated" görünüyorsa tiktoken yüklenememiştir ve araç dosya türüne dayalı tahmin kullanır.
 
 ### GitIngest digest sorunları
 

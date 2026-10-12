@@ -395,7 +395,7 @@ Generate optimized LLM context based on parameters.
 | -------------- | ------- | -------- | ------------------------------------------------------- |
 | `path`         | string  | No       | Project path (defaults to current directory)            |
 | `methodLevel`  | boolean | No       | Include method-level analysis                           |
-| `targetModel`  | string  | No       | Target LLM model (e.g., "claude-sonnet-4.5")            |
+| `targetModel`  | string  | No       | Target LLM model (e.g., "claude-sonnet-5-5")            |
 | `targetTokens` | number  | No       | Target token budget                                     |
 | `useCase`      | string  | No       | Use case template (bug-fix, feature, code-review, etc.) |
 
@@ -407,7 +407,7 @@ curl -X POST http://localhost:3000/api/v1/context \
   -d '{
     "path": "/path/to/project",
     "methodLevel": true,
-    "targetModel": "claude-sonnet-4.5",
+    "targetModel": "claude-sonnet-5-5",
     "targetTokens": 50000
   }'
 ```
@@ -437,8 +437,8 @@ curl -X POST http://localhost:3000/api/v1/context \
     }
   },
   "metadata": {
-    "targetModel": "claude-sonnet-4.5",
-    "contextWindow": 200000,
+    "targetModel": "claude-sonnet-5-5",
+    "contextWindow": 1000000,
     "fitStatus": "fits",
     "recommendedFormat": "toon"
   }
@@ -548,7 +548,7 @@ curl "http://localhost:3000/api/v1/diff?since=main" > diff.json
 # 5. Generate context for Claude
 curl -X POST http://localhost:3000/api/v1/context \
   -H "Content-Type: application/json" \
-  -d '{"targetModel": "claude-sonnet-4.5"}' > context.json
+  -d '{"targetModel": "claude-sonnet-5-5"}' > context.json
 ```
 
 ### CI/CD Integration
@@ -606,7 +606,7 @@ async function generateContext(options) {
 // Usage
 const analysis = await analyzeProject('/path/to/project');
 const context = await generateContext({
-  targetModel: 'claude-sonnet-4.5',
+  targetModel: 'claude-sonnet-5-5',
   methodLevel: true,
 });
 ```

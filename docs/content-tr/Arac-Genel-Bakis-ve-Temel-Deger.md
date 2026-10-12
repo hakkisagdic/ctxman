@@ -251,18 +251,18 @@ GenerateContext --> End([End Analysis])
 
 ## Token Sayımı ve Context Oluşturma
 
-ctxman aracı, LLM context optimizasyonu için gerekli olan doğru token sayımı yetenekleri sağlar. GPT-4 ile uyumlu kesin token sayımı için tiktoken kütüphanesini kullanır, tiktoken mevcut olmadığında akıllı tahmini yönteme geri döner. Token sayım sistemi, tiktoken bağımlılığı olmadan bile ~%95 doğruluk sağlayacak şekilde tasarlanmıştır ve çeşitli geliştirme ortamları için erişilebilir hale getirir.
+ctxman aracı, LLM context optimizasyonu için gerekli olan doğru token sayımı yetenekleri sağlar. ctxman ile birlikte kurulan tiktoken kütüphanesini hedef modelin encoding'iyle kullanır: OpenAI modelleri için kesin, Claude, Gemini ve diğer sağlayıcılar için yaklaşık sayım yapar (`ctxman count --api` Claude modellerini kesin sayar). tiktoken yüklenemezse akıllı tahmine (~%95 doğruluk) geri döner.
 
-Token sayım süreci, dosya içeriğini okumayı, dosya uzantılarına özgü karakter-token oranlarına dayalı token hesaplamayı ve kod tabanı genelinde istatistikleri toplamayı içerir. Kesin sayım için araç, GPT-4 tarafından kullanılan aynı encoding olan tiktoken'dan cl100k_base encoding'ini kullanır ve hassas context penceresi yönetimini sağlar. Tahmin sistemi, güvenilir yaklaşımlar sağlamak için farklı dosya tipleri için önceden tanımlanmış token başına karakter oranlarını (örneğin, JavaScript için 3.2, Markdown için 4.0) kullanır.
+Token sayım süreci, dosya içeriğini okumayı, dosya uzantılarına özgü karakter-token oranlarına dayalı token hesaplamayı ve kod tabanı genelinde istatistikleri toplamayı içerir. tiktoken ile araç, GPT-4o'dan bu yana OpenAI modelleri için `o200k_base`, diğerleri için `cl100k_base` (GPT-4 ve GPT-3.5'in encoding'i) kullanır. Tahmin sistemi, güvenilir yaklaşımlar sağlamak için farklı dosya tipleri için önceden tanımlanmış token başına karakter oranlarını (örneğin, JavaScript için 3.2, Markdown için 4.0) kullanır.
 
 Context oluşturma, LLM tüketimi için iki formatta optimize edilmiş dosya listeleri üreten önemli bir özelliktir: ultra-compact (varsayılan) ve detailed. Ultra-compact format, token sayıları olmadan proje metadata'sı ve organize edilmiş dosya yollarını içeren ~2.3k karakter yapılandırılmış JSON temsili oluştururken, detailed format tam yollar, kategoriler, önem puanları ve dizin istatistikleri dahil olmak üzere ~8.6k karakter kapsamlı bilgi üretir. Her iki format da aynı JSON yapılarını kullanır ve pano ile dosya export'ları arasında tutarlılığı sağlar.
 
 ```mermaid
 flowchart LR
 A[Read File Content] --> B{tiktoken Available?}
-B --> |Yes| C[Use cl100k_base Encoding]
+B --> |Yes| C[Use o200k_base or cl100k_base Encoding]
 B --> |No| D[Use Smart Estimation]
-C --> E[Calculate Exact Token Count]
+C --> E[Calculate Token Count]
 D --> F[Apply Extension-Specific Ratios]
 F --> G[Estimate Token Count]
 E --> H[Aggregate Statistics]

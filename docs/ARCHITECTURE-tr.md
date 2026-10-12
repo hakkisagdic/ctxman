@@ -103,7 +103,7 @@ LLM tüketimi için akıllı bağlam oluşturma.
 
 ```javascript
 const builder = new ContextBuilder({
-  targetModel: 'claude-sonnet-4.5',
+  targetModel: 'claude-sonnet-5-5',
   targetTokens: 50000,
 });
 const context = builder.build(analizSonucu);
@@ -361,7 +361,9 @@ Token analizi için ana orkestratör.
 
 **Özellikler:**
 
-- tiktoken ile kesin token sayımı
+- Hedef modelin encoding'iyle (o200k_base veya cl100k_base) tiktoken sayımı: GPT-5.x'e kadarki
+  OpenAI modelleri için kesin, diğer sağlayıcılar için yaklaşık (Claude için kesin sayım:
+  `ctxman count --api`)
 - Akıllı tahmin fallback'i (~%95 doğruluk)
 - Çoklu dil desteği (14+ dil)
 - Method seviyesi analizi

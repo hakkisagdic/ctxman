@@ -24,7 +24,7 @@
 
 ## Introduction
 
-The ctxman project is an LLM context optimization tool with method-level filtering and token analysis capabilities. This guide provides comprehensive information for contributors to understand the development workflow, code structure, testing strategy, and contribution guidelines. The tool is designed to help developers analyze codebases and generate optimized context for AI assistants by calculating exact token counts using tiktoken (GPT-4 compatible).
+The ctxman project is an LLM context optimization tool with method-level filtering and token analysis capabilities. This guide provides comprehensive information for contributors to understand the development workflow, code structure, testing strategy, and contribution guidelines. The tool is designed to help developers analyze codebases and generate optimized context for AI assistants by counting tokens with tiktoken in the target model's encoding.
 
 **Section sources**
 
@@ -38,7 +38,7 @@ To set up the local development environment for ctxman, follow these steps:
 
 1. Clone the repository from GitHub
 2. Install dependencies using `npm install`
-3. Install tiktoken for exact token counting: `npm install tiktoken`
+3. tiktoken comes with `npm install`; install `@anthropic-ai/sdk` only to try `ctxman count --api`
 
 The tool can be used both as a global CLI tool and programmatically. The package is configured to work with Node.js version 14.0.0 or higher.
 
@@ -236,8 +236,8 @@ The project follows these coding standards:
 
 - ES6 class syntax for core components
 - Regex-based parsing (no AST dependencies)
-- Graceful fallbacks (tiktoken optional, clipboard fallback to file)
-- Minimal dependencies (only tiktoken as optional)
+- Graceful fallbacks (estimation if tiktoken cannot be loaded, clipboard fallback to file)
+- Minimal dependencies (heavy or networked extras such as `@anthropic-ai/sdk` stay optional)
 - No TypeScript, pure JavaScript for maximum portability
 - Consistent naming conventions
 - Comprehensive commenting for complex logic

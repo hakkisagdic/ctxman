@@ -36,7 +36,7 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 
 ## Dosyalar
 
-- **`ctxman.js`** - Kesin token sayımı ile ana LLM bağlam analiz scripti
+- **`ctxman.js`** - Token sayımı yapan ana LLM bağlam analiz scripti
 - **`.contextignore`** - Token hesaplamadan hariç tutulacak dosyalar (EXCLUDE modu)
 - **`.contextinclude`** - Token hesaplamaya dahil edilecek dosyalar (INCLUDE modu)
 - **`README.md`** - İngilizce dokümantasyon dosyası
@@ -55,7 +55,7 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 
 ### 🔢 Token Analizi
 
-- ✅ **Kesin token sayımı** tiktoken kullanarak (GPT-4 uyumlu)
+- ✅ **tiktoken ile token sayımı** hedef modelin encoding'iyle (o200k_base veya cl100k_base): GPT-5.x'e kadarki OpenAI modelleri için kesin, GPT-6 ve diğer sağlayıcıların modelleri için yaklaşık; Claude için kesin sayım `ctxman count --api` ile
 - 🚫 **Çifte ignore sistemi** - hem `.gitignore` hem calculator ignore kurallarını dikkate alır
 - 📋 **Include/Exclude modları** - `.contextinclude` dosyası `.contextignore` üzerinde önceliğe sahip
 - 📊 **Detaylı raporlama** - dosya tipine göre, en büyük dosyalar, istatistikler
@@ -214,6 +214,25 @@ node token-analysis/token-calculator.js --help
 - `--context-clipboard` - LLM bağlamını doğrudan clipboard'a kopyala
 - `-o`, `--output FORMAT` - Bağlam formatı: json (varsayılan), toon, yaml, markdown, csv, xml
 - `--help`, `-h` - Yardım mesajını göster
+- `--target-model ID` - Hedef model, örn. `claude-sonnet-5-5`, `gpt-6.1-sol`, `gemini-3.8-flash` (tam liste ve fiyatlar için `ctxman --list-llms`; veriler 2026-10-09 tarihinde kontrol edildi)
+
+### Model için token sayımı (`ctxman count`)
+
+Sayım, hedef modelin tiktoken encoding'iyle yapılır: GPT-4o'dan bu yana OpenAI modelleri için
+`o200k_base`, diğerleri için `cl100k_base`. Sonuç GPT-5.x'e kadarki OpenAI modelleri için
+kesindir; Claude, Gemini ve diğer sağlayıcıların modelleri kendi tokenizer'larını kullandığı (ve
+OpenAI GPT-6'nın encoding'ini yayımlamadığı) için bu modellerde sayım yaklaşıktır. `--api` ile
+Claude modelleri Anthropic'in count_tokens API'si üzerinden kesin sayılır:
+
+```bash
+ctxman count --model gpt-5.5                     # kesin (o200k_base)
+ctxman count --model claude-sonnet-5-5           # yaklaşık, --api önerir
+ctxman count --model claude-sonnet-5-5 --api     # kesin; @anthropic-ai/sdk ve ANTHROPIC_API_KEY gerekir
+ctxman count - --model claude-opus-5-5 --api < digest.txt   # stdin'den gelen metin
+```
+
+`--api`, gizli bilgileri maskelenmiş metni Anthropic'e gönderir; sayım ücretsizdir ve yanıt
+üretilmez.
 
 ## LLM Bağlam Dışa Aktarımı
 
@@ -363,13 +382,17 @@ src/**/*.js
 
 ## Kurulum
 
-Kesin token sayımı için tiktoken kurun:
+tiktoken, ctxman'in bağımlılıkları arasında olduğu için token sayımı kurulumdan hemen sonra
+çalışır (OpenAI modelleri için kesin, diğer sağlayıcılar için yaklaşık). tiktoken
+yüklenemezse araç akıllı tahmine geçer (~%95 doğruluk).
+
+`ctxman count --api` ile Claude için kesin sayım yapmak isterseniz Anthropic SDK'sını kurup API
+anahtarınızı tanımlayın:
 
 ```bash
-npm install tiktoken
+npm install -g @anthropic-ai/sdk   # global ctxman için; projeye kurulu ctxman için -g olmadan
+export ANTHROPIC_API_KEY=sk-ant-...
 ```
-
-Tiktoken olmadan araç akıllı tahmin kullanır (~%95 doğruluk).
 
 ## Çıktı Örneği
 
@@ -471,7 +494,7 @@ ctxman --cli --verbose --save-report
 
 ### Performans İpuçları
 
-- İlk çalıştırmada tiktoken yüklenir (biraz yavaş olabilir)
+- tiktoken encoder'ı ilk sayımda bir kez oluşturulur (~150 ms), sonra yeniden kullanılır
 - JSON raporları büyük projeler için disk alanı kullanır
 - `.contextignore` desenlerini optimize edin
 

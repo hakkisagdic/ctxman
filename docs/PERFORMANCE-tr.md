@@ -276,7 +276,7 @@ Paylaşılan önbellekleme ve tekilleştirme sayesinde daha fazla depo ile belle
 # Hızlı tahmin (%95 doğruluk, 3x hızlı)
 ctxman analyze --estimate
 
-# Kesin sayım (yavaş, %100 doğruluk)
+# tiktoken ile sayım (yavaş; OpenAI modelleri için kesin, diğer sağlayıcılar için yaklaşık)
 ctxman analyze --exact
 ```
 

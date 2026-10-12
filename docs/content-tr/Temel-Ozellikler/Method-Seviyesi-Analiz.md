@@ -99,7 +99,7 @@ TokenCalculator-->>TokenCalculator : methodlar ile fileInfo döndür
 
 Entegrasyon işlemi, method seviyesi analizin etkin olup olmadığını kontrol eden TokenCalculator'ın `analyzeFile` methodunda başlar. Etkinse, dosya içeriğini işlemek için `analyzeFileMethods`'u çağırır. Bu fonksiyon önce MethodAnalyzer'ı kullanarak tüm methodları çıkarır, ardından filtreleme kurallarına göre dahil edilip edilmeyeceğini belirlemek için her method üzerinde iterasyon yapar.
 
-Dahil edilen her method için sistem, method içeriğini çıkarır ve tüm dosyalar için kullanılan mekanizmanın aynısını kullanarak tokenleri hesaplar. Token hesaplaması, mevcut olduğunda GPT-4 uyumlu tam sayımlar için tiktoken kütüphanesini kullanır, tiktoken yüklü olmadığında dosya türü başına karakter sayısına dayalı tahmini hesaplamaya geçer.
+Dahil edilen her method için sistem, method içeriğini çıkarır ve tüm dosyalar için kullanılan mekanizmanın aynısını kullanarak tokenleri hesaplar. Token hesaplaması, hedef modelin encoding'iyle tiktoken kütüphanesini kullanır (OpenAI modelleri için kesin, diğer sağlayıcılar için yaklaşık); tiktoken yüklenemediğinde dosya türü başına karakter sayısına dayalı tahmini hesaplamaya geçer.
 
 **Diyagram kaynakları**
 

@@ -35,7 +35,7 @@
 
 ## Introduction
 
-The ctxman CLI provides a comprehensive tool for analyzing codebases and optimizing context for LLM consumption. It offers method-level filtering, exact token counting, and multiple export formats to support AI-assisted development workflows. The tool respects both .gitignore and custom ignore/include rules, providing flexible configuration options for different analysis scenarios.
+The ctxman CLI provides a comprehensive tool for analyzing codebases and optimizing context for LLM consumption. It offers method-level filtering, per-model token counting, and multiple export formats to support AI-assisted development workflows. The tool respects both .gitignore and custom ignore/include rules, providing flexible configuration options for different analysis scenarios.
 
 **Section sources**
 
@@ -207,6 +207,15 @@ ctxman --gitingest-from-report token-analysis-report.json
 
 First analyzes the codebase and saves a report, then quickly generates a digest from the existing report without re-scanning.
 
+### Token count for one model
+
+```bash
+ctxman count --model gpt-5.5
+ctxman count --model claude-sonnet-5-5 --api
+```
+
+Counts the project (or text piped in with `-`) for one model and checks it against the model's context window. OpenAI models are counted exactly with their tiktoken encoding; other vendors' counts are approximate. With `--api`, Claude models are counted exactly through Anthropic's count_tokens API (needs `@anthropic-ai/sdk` and `ANTHROPIC_API_KEY`; sends the secret-redacted text). Run `ctxman --list-llms` for model ids and `ctxman count --help` for all options.
+
 **Section sources**
 
 - [README.md](file://README.md#L0-L891)
@@ -270,7 +279,7 @@ The ctxman CLI implements robust error handling mechanisms:
 - **File system error (exit code 1)**: Issues accessing files or directories during analysis.
 - **Clipboard error**: When clipboard operations fail, the tool falls back to saving the context to llm-context.json with a warning message.
 
-The tool gracefully handles missing configuration files and provides informative error messages. When tiktoken is not available for exact token counting, it falls back to smart estimation with a warning.
+The tool gracefully handles missing configuration files and provides informative error messages. When tiktoken cannot be loaded, it falls back to smart estimation with a warning.
 
 **Section sources**
 
@@ -342,7 +351,7 @@ Check if files are excluded by .gitignore or context rules. Use verbose mode to 
 
 ### Token count discrepancies
 
-Ensure tiktoken is installed for exact token counting. Without tiktoken, the tool uses estimation based on file type.
+tiktoken counts are exact for OpenAI models only; Claude, Gemini and other vendors' models use their own tokenizers. Run `ctxman count --model <id>` to count for one model, with `--api` for exact Claude counts. If the output says "⚠️ Estimated", tiktoken could not be loaded and the tool uses estimation based on file type.
 
 ### GitIngest digest issues
 

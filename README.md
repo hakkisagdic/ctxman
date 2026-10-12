@@ -62,7 +62,7 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 
 ## Files
 
-- **`ctxman.js`** - Main LLM context analysis script with exact token counting
+- **`ctxman.js`** - Main LLM context analysis script with token counting
 - **`.contextignore`** - Files to exclude from token calculation (EXCLUDE mode)
 - **`.contextinclude`** - Files to include in token calculation (INCLUDE mode)
 - **`README.md`** - This documentation file
@@ -87,7 +87,7 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 
 ### 🔢 Token Analysis
 
-- ✅ **Exact token counting** using tiktoken (GPT-4 compatible)
+- ✅ **Token counting with tiktoken** using the target model's encoding (o200k_base or cl100k_base): exact for OpenAI models up to GPT-5.x, approximate for GPT-6 and other vendors; exact Claude counts with `ctxman count --api`
 - 🌍 **Multi-language support** - 14+ languages: JavaScript, TypeScript, Python, PHP, Ruby, Java, Kotlin, C#, Go, Rust, Swift, C/C++, Scala
 - 🎯 **Method-level analysis** - Analyze tokens per function/method
 - 📊 **Detailed reporting** - by file type, largest files, statistics
@@ -120,7 +120,7 @@ ctxman
 The wizard provides a user-friendly interface to:
 
 - Select your use case (Bug Fix, Feature, Code Review, etc.)
-- Choose target LLM (Claude, GPT-4, Gemini, etc.)
+- Choose target LLM (Claude, GPT, Gemini, etc.)
 - Pick output format (TOON, JSON, YAML, etc.)
 
 **Note:** Wizard mode uses Ink terminal UI. If you experience visual artifacts, use CLI mode with `--cli` flag.
@@ -154,31 +154,68 @@ export ANTHROPIC_API_KEY=sk-...
 ctxman  # Automatically optimizes for Claude
 
 # Explicit model selection
-ctxman --target-model claude-sonnet-4.5
-ctxman --target-model gpt-4o
-ctxman --target-model gemini-2.0-flash
+ctxman --target-model claude-sonnet-5-5
+ctxman --target-model gpt-6.1-sol
+ctxman --target-model gemini-3.8-flash
 
 # List all supported models
 ctxman --list-llms
 
 # Context fit analysis
-ctxman --cli --target-model claude-sonnet-4.5
+ctxman --cli --target-model claude-sonnet-5-5
 # Output:
 # 📊 Context Window Analysis:
-#    Target Model: Claude Sonnet 4.5
-#    Available Context: 200,000 tokens
+#    Target Model: Claude Sonnet 5.5
+#    Available Context: 1,000,000 tokens
 #    Your Repository: 181,480 tokens
 #    ✅ PERFECT FIT! Your entire codebase fits in one context.
 ```
 
-Supported LLM models (9+ models):
+Some of the supported models (run `ctxman --list-llms` for the full list, checked 2026-10-09):
 
-- **Anthropic**: Claude Sonnet 4.5, Claude Opus 4
-- **OpenAI**: GPT-4 Turbo, GPT-4o, GPT-4o Mini
-- **Google**: Gemini 1.5 Pro, Gemini 2.0 Flash
-- **DeepSeek**: DeepSeek Coder, DeepSeek Chat
+| Vendor    | Model ID                 | Context | Output | $ in/out per 1M tokens |
+| --------- | ------------------------ | ------- | ------ | ---------------------- |
+| Anthropic | `claude-fable-5-1`       | 1M      | 128K   | $10 / $50              |
+| Anthropic | `claude-opus-5-5`        | 1M      | 128K   | $4 / $20               |
+| Anthropic | `claude-sonnet-5-5`      | 1M      | 128K   | $2 / $10               |
+| Anthropic | `claude-haiku-5-5`       | 1M      | 128K   | $0.10 / $0.50          |
+| OpenAI    | `gpt-6-astra`            | 1.05M   | 128K   | $10 / $50              |
+| OpenAI    | `gpt-6.1-sol`            | 1.05M   | 128K   | $2 / $10               |
+| OpenAI    | `gpt-6-luna`             | 1.05M   | 128K   | $0.10 / $0.50          |
+| OpenAI    | `gpt-5.5`                | 1.05M   | 128K   | $5 / $30               |
+| Google    | `gemini-3.1-pro-preview` | 1.05M   | 65K    | $2 / $12               |
+| Google    | `gemini-3.8-flash`       | 1.05M   | 65K    | $0.75 / $3.75          |
+| DeepSeek  | `deepseek-flash`         | 1.05M   | 393K   | $0.30 / $1.20          |
+| Mistral   | `mistral-medium-3-5`     | 256K    | -      | $1.50 / $7.50          |
+| xAI       | `grok-4.7`               | 500K    | -      | $2 / $6                |
+| Qwen      | `qwen3-coder-plus`       | 1M      | 65K    | $1 / $5                |
+| Meta      | `llama-4-maverick`       | 1M      | -      | -                      |
+
+Prices are list prices for the base tier; several models charge a higher rate above a prompt
+size, which `ctxman --estimate-cost` applies. `ctxman --list-llms` also shows each model's status
+(preview, legacy, deprecated) and `--list-llms --all` adds retired models. Earlier ids such as
+`claude-sonnet-4.5` still resolve through aliases. `claude-sonnet-5-5` is the default model of the
+wizard, the built-in templates and profiles, and `ctxman count`.
 
 Custom models supported via `.ctxman/custom-profiles.json`
+
+#### Token counts per model
+
+ctxman counts with tiktoken, which is installed with it, using the target model's encoding:
+`o200k_base` for OpenAI models since GPT-4o and `cl100k_base` otherwise. The counts are exact for
+OpenAI models up to GPT-5.x. Claude, Gemini and the other vendors' models use their own
+tokenizers (and OpenAI has not published GPT-6's encoding), so their counts are approximate.
+`ctxman count` counts a project, or piped text, for one model and checks it against the window;
+with `--api` it counts Claude models exactly through Anthropic's count_tokens API:
+
+```bash
+ctxman count --model gpt-5.5                     # exact (o200k_base)
+ctxman count --model claude-sonnet-5-5           # approximate, suggests --api
+ctxman count --model claude-sonnet-5-5 --api     # exact; needs @anthropic-ai/sdk and ANTHROPIC_API_KEY
+ctxman count - --model claude-opus-5-5 --api < digest.txt   # piped text
+```
+
+`--api` sends the (secret-redacted) text to Anthropic; counting is free and generates nothing.
 
 ### 🔀 Git Integration (v3.0.0)
 
@@ -264,7 +301,7 @@ Ctxman includes real-world test repositories for validation:
 cd test-repos/express
 
 # Run full test suite
-ctxman --cli -m --target-model claude-sonnet-4.5
+ctxman --cli -m --target-model claude-sonnet-5-5
 
 # Git integration test
 ctxman --changed-since v5.0.0
@@ -661,13 +698,16 @@ src/**/*.js
 
 ## Installation
 
-For exact token counting, install tiktoken:
+tiktoken is a dependency of ctxman, so token counting works out of the box (exact for OpenAI
+models, approximate for other vendors; see [Token counts per model](#token-counts-per-model)). If
+tiktoken cannot be loaded, the tool falls back to smart estimation (~95% accuracy).
+
+For exact Claude counts with `ctxman count --api`, install Anthropic's SDK and set your API key:
 
 ```bash
-npm install tiktoken
+npm install -g @anthropic-ai/sdk   # next to a global ctxman; without -g for a project install
+export ANTHROPIC_API_KEY=sk-ant-...
 ```
-
-Without tiktoken, the tool uses smart estimation (~95% accuracy).
 
 ## Output Example
 
@@ -759,7 +799,7 @@ _Created by Hakkı Sağdıç_
 🔧 **Method-level analysis** - Extract and analyze specific methods from JavaScript/TypeScript/Rust/C#/Go/Java
 📋 **Dual filtering system** - Include/exclude files and methods with pattern matching  
 📊 **LLM context optimization** - Generate ultra-compact context for AI assistants  
-🎯 **Exact token counting** - Uses tiktoken for GPT-4 compatible counts  
+🎯 **Token counting** - tiktoken with the target model's encoding (exact for OpenAI models)  
 📤 **Multiple export formats** - JSON reports, clipboard, file exports  
 📦 **NPM package** - Use programmatically or as global CLI tool  
 🔍 **Pattern matching** - Wildcards and regex support for flexible filtering  
@@ -1114,6 +1154,9 @@ ctxman --save-report --context-export
 
 # Development debugging
 ctxman --method-level --verbose
+
+# Token count for one model (exact for Claude with --api)
+ctxman count --model claude-sonnet-5-5 --api
 ```
 
 ## 💻 Programmatic API
@@ -1196,7 +1239,8 @@ const filteredMethods = methods.filter((method) =>
 ## Requirements
 
 - **Node.js**: 22 or newer (tested on 22 LTS and 24 LTS)
-- **tiktoken**: ^1.0.0 (optional, for exact token counts)
+- **tiktoken**: ^1.0.22 (installed with ctxman; token counting)
+- **@anthropic-ai/sdk** (optional, install it yourself; used only by `ctxman count --api`)
 - **@xenova/transformers** and **@lancedb/lancedb** (optional dependencies, used only by
   `ctxman ask` for local semantic search). npm installs them by default; skip them with
   `npm install -g ctxman --omit=optional` if you do not need `ask`.

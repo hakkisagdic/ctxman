@@ -24,7 +24,7 @@
 
 ## Giriş
 
-ctxman projesi, method seviyesinde filtreleme ve token analiz yeteneklerine sahip bir LLM context optimizasyon aracıdır. Bu rehber, katkıda bulunanlara geliştirme iş akışını, kod yapısını, test stratejisini ve katkı rehberlerini anlamaları için kapsamlı bilgi sağlar. Araç, geliştiricilerin kod tabanlarını analiz etmelerine ve tiktoken (GPT-4 uyumlu) kullanarak kesin token sayıları hesaplayarak AI asistanları için optimize edilmiş context oluşturmalarına yardımcı olmak üzere tasarlanmıştır.
+ctxman projesi, method seviyesinde filtreleme ve token analiz yeteneklerine sahip bir LLM context optimizasyon aracıdır. Bu rehber, katkıda bulunanlara geliştirme iş akışını, kod yapısını, test stratejisini ve katkı rehberlerini anlamaları için kapsamlı bilgi sağlar. Araç, geliştiricilerin kod tabanlarını analiz etmelerine ve tiktoken ile hedef modelin encoding'inde token sayarak AI asistanları için optimize edilmiş context oluşturmalarına yardımcı olmak üzere tasarlanmıştır.
 
 **Bölüm kaynakları**
 
@@ -38,7 +38,7 @@ ctxman için yerel geliştirme ortamını kurmak için şu adımları izleyin:
 
 1. Repoyu GitHub'dan klonlayın
 2. `npm install` kullanarak bağımlılıkları yükleyin
-3. Kesin token sayımı için tiktoken'ı yükleyin: `npm install tiktoken`
+3. tiktoken `npm install` ile gelir; `@anthropic-ai/sdk` paketini yalnızca `ctxman count --api` komutunu denemek için kurun
 
 Araç hem global CLI aracı hem de programatik olarak kullanılabilir. Paket, Node.js sürüm 14.0.0 veya üstü ile çalışacak şekilde yapılandırılmıştır.
 
@@ -236,8 +236,8 @@ Proje şu kodlama standartlarını takip eder:
 
 - Core bileşenler için ES6 sınıf sözdizimi
 - Regex tabanlı parsing (AST bağımlılıkları yok)
-- Zarif fallback'ler (tiktoken opsiyonel, pano için dosyaya fallback)
-- Minimum bağımlılıklar (yalnızca tiktoken opsiyonel olarak)
+- Zarif fallback'ler (tiktoken yüklenemezse tahmin, pano için dosyaya fallback)
+- Minimum bağımlılıklar (`@anthropic-ai/sdk` gibi ağır veya ağ kullanan ekler opsiyonel kalır)
 - TypeScript yok, maksimum taşınabilirlik için saf JavaScript
 - Tutarlı isimlendirme kuralları
 - Karmaşık mantık için kapsamlı yorumlama

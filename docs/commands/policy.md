@@ -147,7 +147,7 @@ failure only prints a warning: it never fails the export.
   "user": "alice",
   "host": "alice-laptop",
   "gitHead": "56983c8bcceaceb9a52dfb373f5a4583d34ae039",
-  "targetModel": "claude-sonnet-4.5",
+  "targetModel": "claude-sonnet-5-5",
   "format": "toon",
   "destination": "/work/app/llm-context.toon",
   "fileCount": 41,

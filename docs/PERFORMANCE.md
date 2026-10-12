@@ -276,7 +276,7 @@ Memory efficiency improves with more repos due to shared caching and deduplicati
 # Fast estimation (95% accurate, 3x faster)
 ctxman analyze --estimate
 
-# Exact counting (slower, 100% accurate)
+# tiktoken counting (slower; exact for OpenAI models, approximate for other vendors)
 ctxman analyze --exact
 ```
 
