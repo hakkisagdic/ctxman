@@ -266,4 +266,13 @@ describe('GitIgnoreParser Coverage', () => {
       expect(parser._lastIgnoreReason).toBe('context');
     });
   });
+
+  describe('Without pattern files', () => {
+    test('does not pass a missing path to fs.existsSync', () => {
+      // Node 24 warns (DEP0187) when existsSync gets null, which lands on stderr
+      const parser = new GitIgnoreParser(null, null, null);
+      expect(fs.existsSync).not.toHaveBeenCalled();
+      expect(parser.patterns).toEqual([]);
+    });
+  });
 });
