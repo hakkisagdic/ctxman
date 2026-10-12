@@ -1307,3 +1307,116 @@ export function explainHistory(
   target: string | ExplainHistoryTarget,
   options?: ExplainHistoryOptions
 ): Promise<ExplainHistoryResult>;
+// Packed file contents (`ctxman pack`)
+// ============================================
+
+export type PackStyle = 'xml' | 'markdown' | 'plain' | 'json';
+
+export interface PackOptions {
+  /** Output style (default: xml, Anthropic's `<documents>` long-context format) */
+  style?: PackStyle;
+  /** Gitignore-style globs: keep only matching files */
+  include?: string[];
+  /** Gitignore-style globs: leave matching files out */
+  exclude?: string[];
+  /**
+   * Explicit file list instead of scanning the root. Entries must lie inside the root
+   * (PATH_OUTSIDE_ROOT otherwise); .gitignore/.contextignore/.contextinclude still apply.
+   */
+  files?: string[];
+  /** Base directory for relative `files` entries (default: the root) */
+  cwd?: string;
+  /** Absolute paths to leave out (e.g. the output file) */
+  excludeFiles?: string[];
+  /** Skip files larger than this many bytes (default: 1 MiB) */
+  maxFileSize?: number;
+  /** Directory tree at the top (default: true) */
+  tree?: boolean;
+  /** Text at the top */
+  header?: string;
+  /** Text at the end, after the files (long documents first, the query last) */
+  instructions?: string;
+  /** Number every line with its original line number */
+  lineNumbers?: boolean;
+  /** Keep signatures, replace function bodies with a one-line placeholder */
+  compress?: boolean;
+  /** Mask secrets (default: true) */
+  redact?: boolean;
+  /**
+   * Token limit for the whole rendered document: the highest-ranked files (ranking of
+   * `ctxman map`) are packed first, the others are listed as omitted
+   */
+  budget?: number;
+  /** Token limit per part: adds `parts` to the result */
+  split?: number;
+  /** Count with this model's tiktoken encoding and report the fit in `model` */
+  targetModel?: string;
+}
+
+export interface PackedFile {
+  /** Project-relative path with `/` separators */
+  path: string;
+  /** Tokens of the file's content as packed (after compression, numbering, redaction) */
+  tokens: number;
+  /** Lines of the original file */
+  lines: number;
+  compressed: boolean;
+}
+
+export interface PackPart {
+  /** 1-based part number */
+  index: number;
+  text: string;
+  tokens: number;
+  /** Files in the part; pieces of a file split by lines read "path (lines a-b)" */
+  files: string[];
+}
+
+export interface PackModelFit {
+  id: string;
+  name: string;
+  vendor: string;
+  /** tiktoken encoding used ('estimate' without tiktoken) */
+  encoding: string;
+  /** Whether the encoding is the model's own tokenizer */
+  exact: boolean;
+  contextWindow: number;
+  maxRecommendedInput: number | null;
+  fits: boolean;
+  percentOfWindow: number;
+}
+
+export interface PackResult {
+  /** The whole document (also when it is split) */
+  text: string;
+  style: PackStyle;
+  /** tiktoken encoding of every count ('estimate' without tiktoken) */
+  encoding: string;
+  /** Tokens of `text` */
+  totalTokens: number;
+  files: PackedFile[];
+  /** Files left out by the budget, most important first */
+  omitted: Array<{ path: string; tokens: number }>;
+  /** Files not packed: binary, too-large, unreadable, missing, not-a-file, ignored */
+  skipped: Array<{ path: string; reason: string }>;
+  redactions: { total: number; byType: Record<string, number> };
+  compression: {
+    files: number;
+    bodies: number;
+    originalTokens: number;
+    compressedTokens: number;
+    savedTokens: number;
+  } | null;
+  budget: { limit: number; used: number } | null;
+  model: PackModelFit | null;
+  parts: PackPart[] | null;
+  /** Files larger than a part on their own, split by lines */
+  splitFiles: Array<{ path: string; pieces: number }>;
+}
+
+/**
+ * Pack the contents of a project's files into one document. Rejects with a PackError
+ * (`code`: ROOT_NOT_FOUND, PATH_OUTSIDE_ROOT, INVALID_OPTION, UNKNOWN_MODEL,
+ * BUDGET_TOO_SMALL, SPLIT_TOO_SMALL).
+ */
+export function packContext(root: string, options?: PackOptions): Promise<PackResult>;

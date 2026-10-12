@@ -38,6 +38,8 @@ import { buildRepoGraph, rankFiles, renderRepoMap } from './lib/map/index.js';
 
 // Code history explanation (`ctxman why`)
 import { explainHistory } from './lib/why/index.js';
+// File contents in one document (`ctxman pack`)
+import { packContext } from './lib/pack/index.js';
 
 export {
   // Analyzers
@@ -82,6 +84,8 @@ export {
 
   // Code history explanation (`ctxman why`)
   explainHistory,
+  // Packed file contents
+  packContext,
 };
 
 // Alias for backward compatibility
