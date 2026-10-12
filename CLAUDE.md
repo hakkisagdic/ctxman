@@ -49,6 +49,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `server.js` - HTTP/REST API with 6 endpoints
 
+**Context Commands** (each a `bin/cm-<name>.js` subcommand with a library module):
+
+- `lib/count/` - `ctxman count`: token count for one model; `lib/utils/claude-token-counter.js` counts Claude models exactly through Anthropic's count_tokens API (`--api`)
+- `lib/map/` - `ctxman map`: import graph (`imports.js`, `resolver.js`), PageRank + git history + symbol references (`rank.js`), budgeted rendering (`render.js`)
+- `lib/pr/` - `ctxman pr`: branch review context (diff parsing, changed methods, related tests, budgeted rendering)
+- `lib/search/` - `ctxman search` and the MCP `search_code` (ranked) / `get_symbol` tools: BM25 over methods and code chunks
+- `lib/policy/` - export policy (`.ctxman/policy.json`, `CTXMAN_POLICY`), enforcement, audit log, AI-tool ignore files; `ctxman policy` / `ctxman audit`
+- `lib/api/mcp/` - `ctxman mcp` (`start.js`), client setup (`install.js`), `--root` sandbox (`sandbox.js`)
+- `action.yml`, `scripts/action/` - GitHub Action; `Dockerfile` - container image
+- `lib/utils/cli-output.js` - quiet exit when stdout's reader closes (EPIPE)
+
 **Performance** (`lib/cache/`):
 
 - `CacheManager.js` - Disk/memory caching system (not yet wired into the analysis pipeline)
@@ -124,6 +135,11 @@ ctxman --changed-only    # Analyze only changed files
 ctxman --changed-since main  # Analyze changes since branch
 ctxman --list-llms       # List supported LLM models (--all adds retired ones)
 ctxman count --model claude-sonnet-5-5 --api  # Token count for one model (exact for Claude with --api)
+ctxman map --tokens 4096 # Ranked repository map within a token budget
+ctxman pr --base main    # Review context for the current branch
+ctxman search "query"    # Ranked code search
+ctxman mcp install --client claude-code  # MCP server setup
+ctxman policy check      # Validate the export policy; ctxman audit lists exports
 ```
 
 ### Build & Publish

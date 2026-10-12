@@ -6,6 +6,28 @@ All notable changes to the Ctxman will be documented in this file.
 
 ### Added
 
+- `ctxman map`: ranked repository map within a token budget. PageRank over the import graph
+  (JS/TS, Python, Go, Java/Kotlin/Scala, C#, PHP, Ruby, C/C++, Rust) blended with git change
+  frequency and symbol references; `--focus`, `--important-last`, text/markdown/json/dot,
+  `--graph`. Library: `buildRepoGraph`, `rankFiles`, `renderRepoMap`; MCP tool `repo_map`.
+- `ctxman pr`: review context for a branch, the staged changes or the working tree: summary,
+  commit log, changed files, full source of changed and deleted methods, the diff and related
+  tests, with `--budget`, `--ask`, markdown/xml/json. Library: `buildPrContext`; MCP tool
+  `pr_context`.
+- `ctxman search`: ranked (BM25) search over methods and code chunks, with identifier splitting;
+  the MCP `search_code` tool takes `type: "ranked"`, and the new `get_symbol` tool returns a
+  function's source by name.
+- `ctxman mcp`: starts the MCP server; `ctxman mcp install|uninstall|config --client` writes the
+  configuration of Claude Desktop, Claude Code, Cursor, VS Code and Windsurf (with a `.bak` of the
+  previous file); `--root` confines every tool to one directory.
+- Export policy (`.ctxman/policy.json`, or `CTXMAN_POLICY` for an organisation): deny rules,
+  required redaction, an export token limit and allowed target models, enforced by the CLI, the
+  REST API and the MCP server; an audit log of every export; `ctxman policy check|init`,
+  `ctxman audit`, and `--respect-ignore-files` for other AI tools' ignore files (`.cursorignore`,
+  `.aiexclude`, `.aiderignore` and others).
+- GitHub Action (`uses: hakkisagdic/ctxman@<ref>`): token counts, a token budget that fails the
+  job, model fit, a job summary and an optional context artifact. A Docker image (`Dockerfile`,
+  published to ghcr.io on release tags) for the CLI and the MCP server.
 - `ctxman count [path|-] --model ID [--api] [--json]`: token count of a project or piped text for
   a model, checked against its context window. `--api` counts Claude models exactly through
   Anthropic's count_tokens endpoint (secrets are redacted before sending).
@@ -42,6 +64,10 @@ All notable changes to the Ctxman will be documented in this file.
 
 ### Fixed
 
+- Per-method token counts no longer stop at `{}` in parameter defaults or destructuring
+  (`log(level, meta = {}) {`), which counted such methods at a few tokens.
+- `ctxman --cli | head` and the other commands that print to stdout exit quietly when the pipe
+  closes instead of crashing with EPIPE.
 - **Security:** git commands run without a shell, and user-supplied refs (REST `?since=`, MCP
   `git_diff`, `--changed-since`, `ctxman github` branches) are validated before reaching git.
 - `ctxman github` and the update scripts crashed on start (CommonJS `require` in ESM).
