@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { execFileSync } from 'child_process';
 import { buildPrContext } from '../lib/pr/pr-context.js';
 import {
   parseNameStatus,
@@ -629,5 +630,46 @@ describe('test file detection', () => {
     expect(testStem('tests/test_user_store.py')).toBe(sourceStem('lib/user_store.py'));
     expect(testStem('src/test/FooServiceTest.java')).toBe(sourceStem('src/main/FooService.java'));
     expect(testStem('src/auth/__tests__/index.test.js')).toBe(sourceStem('src/auth/index.js'));
+  });
+});
+
+describe('buildPrContext under an export policy', () => {
+  let dir;
+
+  beforeAll(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-pr-policy-'));
+    const git = (...args) => execFileSync('git', args, { cwd: dir, stdio: 'pipe' });
+    const write = (file, text) => {
+      fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
+      fs.writeFileSync(path.join(dir, file), text);
+    };
+    git('init', '-q', '-b', 'main');
+    git('config', 'user.name', 'Test');
+    git('config', 'user.email', 'test@example.com');
+    write('src/app.js', 'export const a = 1;\n');
+    write('secrets/db.txt', 'old-password\n');
+    write('.ctxman/policy.json', JSON.stringify({ version: 1, deny: ['secrets/**'] }));
+    git('add', '-A');
+    git('commit', '-qm', 'init');
+    git('checkout', '-qb', 'feature');
+    write('src/app.js', 'export const a = 2;\n');
+    write('secrets/db.txt', 'NEW-PASSWORD-VALUE\n');
+    git('commit', '-qam', 'change');
+  });
+
+  afterAll(() => {
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('leaves denied files out of the file list, the diff and the contents', async () => {
+    const result = await buildPrContext(dir, { base: 'main', head: 'feature', withFiles: true });
+
+    expect(result.stats.files).toBe(1);
+    expect(result.output).toContain('src/app.js');
+    expect(result.output).not.toContain('secrets/db.txt');
+    expect(result.output).not.toContain('PASSWORD');
+    expect(result.warnings).toContain(
+      '1 changed file(s) denied by the export policy were left out'
+    );
   });
 });
