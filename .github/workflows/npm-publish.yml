@@ -112,8 +112,17 @@ jobs:
         if: steps.check.outputs.published == 'false'
         run: npm publish --provenance --access public
 
+      # The registry can take a minute or more to list a version it has just accepted
       - name: Verify published version
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
         run: |
-          VERSION="${{ steps.check.outputs.version }}"
-          echo "ctxman@$VERSION is live on the npm registry"
-          npm view ctxman@$VERSION
+          for attempt in $(seq 1 18); do
+            if [ -n "$(npm view "ctxman@$VERSION" version 2>/dev/null)" ]; then
+              echo "ctxman@$VERSION is live on the npm registry"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::ctxman@$VERSION is not on the npm registry after 3 minutes"
+          exit 1
