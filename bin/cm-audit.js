@@ -6,7 +6,7 @@
 
 import path from 'path';
 import {
-  loadPolicy,
+  auditLogFiles,
   readAuditLog,
   filterAuditEvents,
   formatAuditTable,
@@ -84,15 +84,12 @@ function main() {
 
 // The policy's audit logs; the default location when no policy names one
 function auditFiles() {
-  const root = process.cwd();
-  try {
-    const policy = loadPolicy(root);
-    if (policy.audit.paths.length > 0) return policy.audit.paths;
-  } catch (error) {
+  const { files, error } = auditLogFiles(process.cwd());
+  if (error) {
     console.error(`⚠️  ${error.message}`);
     console.error(`   Reading the default log ${DEFAULT_AUDIT_PATH} instead.`);
   }
-  return [path.join(root, DEFAULT_AUDIT_PATH)];
+  return files;
 }
 
 function valueOf(args, flag) {

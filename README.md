@@ -322,7 +322,8 @@ ctxman mcp                                   # run the server (stdio)
 The installer merges into the client's configuration and keeps a `.bak` of the previous file.
 `--root` confines every tool to one directory. Tools: `analyze_codebase`, `generate_context`,
 `git_diff`, `search_code`, `list_methods`, `repo_map`, `pr_context`, `get_symbol`,
-`count_tokens`, `explain_history`, `pack_context`. Details:
+`count_tokens`, `explain_history`, `pack_context`, `check_policy`, `audit_log`, `ask_codebase`.
+Details:
 [docs/commands/mcp.md](docs/commands/mcp.md).
 
 ### 🛡️ Export Policy and Audit Log

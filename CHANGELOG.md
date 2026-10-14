@@ -2,6 +2,30 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- MCP tools `check_policy` (the effective export policy, or why it is invalid), `audit_log`
+  (exports recorded in the policy's audit log) and `ask_codebase` (semantic search, as
+  `ctxman ask`). Library `askCodebase()` in `lib/rag/ask.js`.
+
+### Changed
+
+- GitHub Actions move to the majors that run on Node 24 (checkout v7, setup-node v7, CodeQL
+  v4, artifact, pages and Docker actions). The ctxman GitHub Action turns off setup-node's
+  automatic cache.
+- The npm package's homepage is the website.
+
+### Fixed
+
+- `ctxman ask` indexed files left out by `.gitignore`, `.contextignore` and the export policy,
+  and printed snippets without redacting secrets. Denied files are no longer indexed or shown
+  (also from an index built earlier), and snippets are redacted.
+- A line break in a logged message started what looked like a new entry in the log file; it
+  is now written escaped.
+- The npm publish workflow waits for the registry to list a new version before verifying it.
+
 ## [3.1.0] - 2026-10-14
 
 ### Added

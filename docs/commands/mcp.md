@@ -167,20 +167,30 @@ $ ctxman mcp uninstall --client claude-desktop
 
 ## Tools
 
-| Tool               | Arguments                                                | Returns                                                              |
-| ------------------ | -------------------------------------------------------- | -------------------------------------------------------------------- |
-| `analyze_codebase` | `path`                                                   | Statistics and token counts                                          |
-| `generate_context` | `path`, `template?`, `maxTokens?`                        | LLM context                                                          |
-| `git_diff`         | `path`, `branch?`                                        | `git diff <branch>`                                                  |
-| `search_code`      | `path`, `query`, `type?` (`regex`, `semantic`, `ranked`) | Matching lines; with `ranked`, the best matching code chunks (below) |
-| `list_methods`     | `path` (directory or file), `file?`                      | Methods per file                                                     |
-| `get_symbol`       | `path`, `name`, `file?`, `redact?`                       | Source of a named method, function or class                          |
-| `repo_map`         | `path`, `tokens?`, `focus?`                              | Ranked repository map within a token budget (`ctxman map`)           |
-| `pr_context`       | `path`, `base?`, `head?`, `budget?`, `style?`            | Review context for a branch (`ctxman pr`)                            |
-| `count_tokens`     | `path` or `text`, `model?`, `top?`                       | Token count for a model and the fit in its window (`ctxman count`)   |
-| `explain_history`  | `path`, `target`, `limit?`, `budget?`, `since?`          | Why code looks as it does: git history, references, owners, tests    |
+| Tool               | Arguments                                                     | Returns                                                                             |
+| ------------------ | ------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `analyze_codebase` | `path`                                                        | Statistics and token counts                                                         |
+| `generate_context` | `path`, `template?`, `maxTokens?`                             | LLM context                                                                         |
+| `git_diff`         | `path`, `branch?`                                             | `git diff <branch>`                                                                 |
+| `search_code`      | `path`, `query`, `type?` (`regex`, `semantic`, `ranked`)      | Matching lines; with `ranked`, the best matching code chunks (below)                |
+| `list_methods`     | `path` (directory or file), `file?`                           | Methods per file                                                                    |
+| `get_symbol`       | `path`, `name`, `file?`, `redact?`                            | Source of a named method, function or class                                         |
+| `repo_map`         | `path`, `tokens?`, `focus?`                                   | Ranked repository map within a token budget (`ctxman map`)                          |
+| `pr_context`       | `path`, `base?`, `head?`, `budget?`, `style?`                 | Review context for a branch (`ctxman pr`)                                           |
+| `count_tokens`     | `path` or `text`, `model?`, `top?`                            | Token count for a model and the fit in its window (`ctxman count`)                  |
+| `explain_history`  | `path`, `target`, `limit?`, `budget?`, `since?`               | Why code looks as it does: git history, references, owners, tests                   |
+| `pack_context`     | `path`, `include?`, `exclude?`, `files?`, `style?`, `budget?` | File contents in one LLM-ready document (`ctxman pack`)                             |
+| `check_policy`     | `path`                                                        | The effective export policy, or why its files are invalid (`ctxman policy check`)   |
+| `audit_log`        | `path`, `since?`, `limit?`                                    | Exports recorded in the policy's audit log (`ctxman audit`)                         |
+| `ask_codebase`     | `path`, `query`, `limit?`                                     | Files closest in meaning to a question, from a local embedding index (`ctxman ask`) |
 
 `explain_history` also takes `patches?` (each commit's diff); see [`ctxman why`](why.md).
+
+`audit_log` reads only the logs the policy names (or `.ctxman/audit.log`); no argument names
+another file. `ask_codebase` needs the optional `@xenova/transformers` and `@lancedb/lancedb`
+packages; the first call builds the index and downloads the embedding model, which can take
+minutes. Files left out by the ignore files or denied by the export policy are not indexed or
+returned, and secrets in the snippets are redacted.
 
 ### `search_code` with `type: "ranked"`
 
