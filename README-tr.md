@@ -335,7 +335,10 @@ ctxman mcp                                   # sunucuyu çalıştırır (stdio)
 ```
 
 Kurulum, istemcinin yapılandırmasıyla birleştirir ve önceki dosyanın `.bak` yedeğini tutar.
-`--root`, tüm araçları tek bir dizinle sınırlar. Ayrıntılar: [docs/commands/mcp.md](docs/commands/mcp.md).
+`--root`, tüm araçları tek bir dizinle sınırlar. Araçlar: `analyze_codebase`, `generate_context`,
+`git_diff`, `search_code`, `list_methods`, `repo_map`, `pr_context`, `get_symbol`, `count_tokens`,
+`explain_history`, `pack_context`, `check_policy`, `audit_log`, `ask_codebase`. Ayrıntılar:
+[docs/commands/mcp.md](docs/commands/mcp.md).
 
 ### 🛡️ Dışa aktarma politikası ve denetim kaydı
 

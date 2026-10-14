@@ -19,7 +19,7 @@ jobs:
   context:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # changed-since needs the base commit
       - uses: hakkisagdic/ctxman@main # pin a release tag or commit SHA
@@ -116,7 +116,7 @@ jobs:
   context:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: hakkisagdic/ctxman@main
         with:
           max-tokens: 400000

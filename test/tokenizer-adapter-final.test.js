@@ -35,7 +35,7 @@ describe('TokenizerAdapter Final Coverage', () => {
       expect(result).toBe(false);
       expect(adapter.isAvailable()).toBe(false);
 
-      vi.unmock('tiktoken');
+      vi.doUnmock('tiktoken');
     });
 
     test('count throws if not available', () => {
@@ -70,7 +70,7 @@ describe('TokenizerAdapter Final Coverage', () => {
       expect(result).toBe(false);
       expect(adapter.isAvailable()).toBe(false);
 
-      vi.unmock('@anthropic-ai/tokenizer');
+      vi.doUnmock('@anthropic-ai/tokenizer');
     });
 
     test('count throws if not available', () => {
@@ -105,7 +105,7 @@ describe('TokenizerAdapter Final Coverage', () => {
       expect(result).toBe(false);
       expect(adapter.isAvailable()).toBe(false);
 
-      vi.unmock('llama3-tokenizer-js');
+      vi.doUnmock('llama3-tokenizer-js');
     });
 
     test('count throws if not available', () => {
@@ -144,7 +144,7 @@ describe('TokenizerAdapter Final Coverage', () => {
       expect(result).toBe(false);
       expect(adapter.isAvailable()).toBe(false);
 
-      vi.unmock('tiktoken');
+      vi.doUnmock('tiktoken');
     });
 
     test('count falls back to estimation', async () => {

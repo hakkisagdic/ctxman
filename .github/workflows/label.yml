@@ -25,14 +25,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
           fetch-depth: 0
 
       # Label based on file paths
       - name: Label based on changed files
-        uses: actions/labeler@v5
+        uses: actions/labeler@v7
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: .github/labeler.yml
@@ -40,7 +40,7 @@ jobs:
 
       # Label based on branch name
       - name: Label based on branch name
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

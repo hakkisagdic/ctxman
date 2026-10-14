@@ -185,3 +185,19 @@ describe('Logger', () => {
     });
   });
 });
+
+describe('Logger line breaks', () => {
+  test('writes a multi-line message as one entry', () => {
+    const logger = new Logger({ silent: true });
+    const { consoleMessage, fileMessage } = logger.formatMessage(
+      'info',
+      'scan /tmp/a\n[2026-01-01T00:00:00.000Z] [ERROR] forged\r\nentry'
+    );
+
+    expect(fileMessage.split('\n')).toHaveLength(1);
+    expect(fileMessage).toContain(
+      'scan /tmp/a\\n[2026-01-01T00:00:00.000Z] [ERROR] forged\\nentry'
+    );
+    expect(consoleMessage).not.toMatch(/[\r\n]/);
+  });
+});
