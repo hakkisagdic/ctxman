@@ -371,7 +371,7 @@ The different output formats serve specific use cases in development workflows:
 **Performance Considerations:**
 
 - The compact format reduces context size by approximately 89% compared to the full codebase
-- Token counting uses tiktoken for GPT-4 compatibility when available, with estimation fallback
+- Token counting uses tiktoken in the target model's encoding (exact for OpenAI models, approximate for other vendors), with estimation fallback
 - Directory grouping and common prefix compression optimize space usage
 - Method-level analysis adds overhead but provides granular context for focused debugging
 - JSON-based digest generation provides instant output without re-scanning the codebase

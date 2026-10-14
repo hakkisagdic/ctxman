@@ -5,5 +5,5 @@
   "exclude": ["docs/**", "*.md", "*.json", "node_modules/**"],
   "methodInclude": ["*Handler", "*Service", "*Controller", "*Manager", "*Parser", "*Analyzer"],
   "methodExclude": ["*test*"],
-  "targetModel": "claude-sonnet-4.5"
+  "targetModel": "claude-sonnet-5-5"
 }

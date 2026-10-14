@@ -109,7 +109,7 @@ describe('TemplateManager', () => {
       expect(config).toBeDefined();
       expect(config.templateId).toBe('bug-fix');
       expect(config.templateName).toBe('Bug Fix Context');
-      expect(config.targetModel).toBe('claude-sonnet-4.5');
+      expect(config.targetModel).toBe('claude-sonnet-5-5');
     });
 
     it('should throw error for non-existent template', () => {

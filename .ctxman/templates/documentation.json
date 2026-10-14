@@ -5,5 +5,5 @@
   "exclude": ["**/*.test.js", "**/*.spec.js", "test/**", "examples/**", "node_modules/**"],
   "methodInclude": ["*"],
   "methodExclude": ["_*", "*test*", "*internal*"],
-  "targetModel": "claude-sonnet-4.5"
+  "targetModel": "claude-sonnet-5-5"
 }

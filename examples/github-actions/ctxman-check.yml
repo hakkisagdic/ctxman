@@ -1,0 +1,49 @@
+# ctxman context check for pull requests
+#
+# Copy this file to .github/workflows/ctxman-check.yml in your repository. On every pull
+# request it counts the tokens of the files the pull request changes, fails when they
+# exceed the budget, reports whether they fit Claude Sonnet 4.5's context window in the
+# job summary and uploads the TOON context file as an artifact.
+#
+# Pin the action to a release tag or a commit SHA instead of main for reproducible runs.
+# Inputs, outputs and limits: https://github.com/hakkisagdic/ctxman/blob/main/docs/commands/ci.md
+
+name: ctxman context check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  context:
+    name: Context size
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          # changed-since needs the base commit of the pull request in the checkout
+          fetch-depth: 0
+
+      - name: ctxman context check
+        id: ctxman
+        uses: hakkisagdic/ctxman@main
+        with:
+          changed-since: ${{ github.event.pull_request.base.sha }}
+          max-tokens: 50000
+          target-model: claude-sonnet-5-5
+          export: toon
+          upload-artifact: true
+
+      - name: Use the outputs
+        if: ${{ !cancelled() }}
+        env:
+          TOTAL_TOKENS: ${{ steps.ctxman.outputs.total-tokens }}
+          TOTAL_FILES: ${{ steps.ctxman.outputs.total-files }}
+          FITS: ${{ steps.ctxman.outputs.fits }}
+        run: echo "The pull request changes $TOTAL_FILES files with $TOTAL_TOKENS tokens (fits Claude Sonnet 4.5 - $FITS)"

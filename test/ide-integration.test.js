@@ -142,19 +142,20 @@ describe('IDE Integration', () => {
 
       // Test with typical code
       const code = 'function hello() { return "world"; }';
-      const tokens = estimateTokens(code, 'gpt-4');
-      const expected = Math.ceil(code.length / MODEL_TOKEN_RATIOS['gpt-4']);
+      const tokens = estimateTokens(code, 'gpt-6.1-sol');
+      const expected = Math.ceil(code.length / MODEL_TOKEN_RATIOS.gpt);
       expect(tokens).toBe(expected);
+      expect(estimateTokens(code, 'claude-opus-5-5')).toBe(
+        Math.ceil(code.length / MODEL_TOKEN_RATIOS.claude)
+      );
     });
 
     it('should have model token ratios defined', async () => {
       const { MODEL_TOKEN_RATIOS } = await import('../lib/lsp/server.js');
 
-      expect(MODEL_TOKEN_RATIOS['gpt-4']).toBeDefined();
-      expect(MODEL_TOKEN_RATIOS['gpt-3.5-turbo']).toBeDefined();
-      expect(MODEL_TOKEN_RATIOS['claude-3-opus']).toBeDefined();
-      expect(MODEL_TOKEN_RATIOS['llama-2-70b']).toBeDefined();
-      expect(MODEL_TOKEN_RATIOS['gemini-pro']).toBeDefined();
+      for (const family of ['claude', 'gpt', 'gemini', 'llama', 'deepseek', 'mistral']) {
+        expect(MODEL_TOKEN_RATIOS[family], family).toBeDefined();
+      }
     });
   });
 

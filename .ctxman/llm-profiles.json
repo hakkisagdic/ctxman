@@ -1,47 +1,552 @@
 {
-  "$schema": "./llm-profiles.schema.json",
-  "version": "3.0.0",
-  "lastUpdated": "2025-11-05",
+  "version": "4.0.0",
+  "lastUpdated": "2026-10-09",
+  "description": "Context windows, output limits and list prices (USD per 1M tokens, standard tier) of current models. Check prices with the provider before budgeting.",
+  "sources": {
+    "Anthropic": [
+      "https://platform.claude.com/docs/en/about-claude/models/overview",
+      "https://platform.claude.com/docs/en/about-claude/pricing"
+    ],
+    "OpenAI": [
+      "https://developers.openai.com/api/docs/models",
+      "https://developers.openai.com/api/docs/pricing",
+      "https://developers.openai.com/api/docs/deprecations"
+    ],
+    "Google": [
+      "https://ai.google.dev/gemini-api/docs/models",
+      "https://ai.google.dev/gemini-api/docs/pricing",
+      "https://ai.google.dev/gemini-api/docs/changelog"
+    ],
+    "DeepSeek": [
+      "https://api-docs.deepseek.com/quick_start/pricing/",
+      "https://api-docs.deepseek.com/updates/"
+    ],
+    "Mistral": ["https://docs.mistral.ai/resources/changelogs", "https://mistral.ai/pricing/api/"],
+    "xAI": ["https://docs.x.ai/developers/models", "https://docs.x.ai/developers/pricing"],
+    "Qwen": ["https://www.alibabacloud.com/help/en/model-studio/model-pricing"],
+    "Meta": ["https://www.llama.com/docs/model-cards-and-prompt-formats/llama4/"]
+  },
   "config": {
     "utilizationPercentage": 0.6,
     "description": "Use only 60% of context window (leave 40% for system prompts, responses, overhead)"
   },
+  "fields": {
+    "tier": "frontier | balanced | fast",
+    "status": "active | preview | legacy (still served, superseded) | deprecated (retirement announced) | retired (no longer served; kept so old configs resolve)",
+    "pricing": "USD per 1M tokens; tiers[].above = prompt tokens above which the whole request uses that rate",
+    "tokenizer": "encoding = tiktoken encoding used to count; exact = whether that matches the model; Claude counts are exact only through the Anthropic API (ctxman count --api)"
+  },
+  "aliases": {
+    "claude-sonnet-4.5": "claude-sonnet-4-5",
+    "claude-opus-4": "claude-opus-4-0",
+    "deepseek-coder": "deepseek-chat",
+    "claude-fable": "claude-fable-5-1",
+    "claude-opus": "claude-opus-5-5",
+    "claude-sonnet": "claude-sonnet-5-5",
+    "claude-haiku": "claude-haiku-5-5",
+    "opus": "claude-opus-5-5",
+    "sonnet": "claude-sonnet-5-5",
+    "haiku": "claude-haiku-5-5",
+    "gemini-pro": "gemini-3.1-pro-preview",
+    "gemini-flash": "gemini-3.8-flash",
+    "mistral-medium-latest": "mistral-medium-3-5",
+    "mistral-small-latest": "mistral-small-2603",
+    "codestral-latest": "codestral-2508",
+    "mistral-large-latest": "mistral-large-4",
+    "meta-llama/llama-4-maverick-17b-128e-instruct": "llama-4-maverick",
+    "llama-4-maverick-17b-128e-instruct": "llama-4-maverick",
+    "meta-llama/llama-4-scout-17b-16e-instruct": "llama-4-scout",
+    "llama-4-scout-17b-16e-instruct": "llama-4-scout"
+  },
   "profiles": {
-    "claude-sonnet-4.5": {
+    "claude-fable-5-1": {
+      "name": "Claude Fable 5.1",
+      "vendor": "Anthropic",
+      "contextWindow": 1000000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "toon",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["reasoning", "long-horizon-agents", "long-context"],
+      "tier": "frontier",
+      "status": "active",
+      "pricing": {
+        "input": 10,
+        "output": 50
+      },
+      "tokenizer": {
+        "family": "claude",
+        "exact": false,
+        "exactVia": "anthropic-api"
+      }
+    },
+    "claude-opus-5-5": {
+      "name": "Claude Opus 5.5",
+      "vendor": "Anthropic",
+      "contextWindow": 1000000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "toon",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["agentic-coding", "reasoning", "long-context"],
+      "tier": "frontier",
+      "status": "active",
+      "pricing": {
+        "input": 4,
+        "output": 20
+      },
+      "tokenizer": {
+        "family": "claude",
+        "exact": false,
+        "exactVia": "anthropic-api"
+      },
+      "featured": true
+    },
+    "claude-sonnet-5-5": {
+      "name": "Claude Sonnet 5.5",
+      "vendor": "Anthropic",
+      "contextWindow": 1000000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "toon",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["code-generation", "agentic-coding", "long-context"],
+      "tier": "balanced",
+      "status": "active",
+      "pricing": {
+        "input": 2,
+        "output": 10
+      },
+      "tokenizer": {
+        "family": "claude",
+        "exact": false,
+        "exactVia": "anthropic-api"
+      },
+      "featured": true
+    },
+    "claude-haiku-5-5": {
+      "name": "Claude Haiku 5.5",
+      "vendor": "Anthropic",
+      "contextWindow": 1000000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "toon",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["speed", "cost-effective", "sub-agents"],
+      "tier": "fast",
+      "status": "active",
+      "pricing": {
+        "input": 0.1,
+        "output": 0.5,
+        "tiers": [
+          {
+            "above": 100000,
+            "input": 0.5,
+            "output": 2.5
+          }
+        ]
+      },
+      "tokenizer": {
+        "family": "claude",
+        "exact": false,
+        "exactVia": "anthropic-api"
+      },
+      "featured": true
+    },
+    "claude-opus-5": {
+      "name": "Claude Opus 5",
+      "vendor": "Anthropic",
+      "contextWindow": 1000000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "toon",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["agentic-coding", "reasoning"],
+      "tier": "frontier",
+      "status": "active",
+      "pricing": {
+        "input": 5,
+        "output": 25
+      },
+      "tokenizer": {
+        "family": "claude",
+        "exact": false,
+        "exactVia": "anthropic-api"
+      }
+    },
+    "claude-sonnet-5": {
+      "name": "Claude Sonnet 5",
+      "vendor": "Anthropic",
+      "contextWindow": 1000000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "toon",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["code-generation", "agentic-coding"],
+      "tier": "balanced",
+      "status": "active",
+      "pricing": {
+        "input": 2,
+        "output": 10
+      },
+      "tokenizer": {
+        "family": "claude",
+        "exact": false,
+        "exactVia": "anthropic-api"
+      }
+    },
+    "claude-opus-4-8": {
+      "name": "Claude Opus 4.8",
+      "vendor": "Anthropic",
+      "contextWindow": 1000000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "toon",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["agentic-coding", "reasoning"],
+      "tier": "frontier",
+      "status": "active",
+      "pricing": {
+        "input": 5,
+        "output": 25
+      },
+      "tokenizer": {
+        "family": "claude",
+        "exact": false,
+        "exactVia": "anthropic-api"
+      }
+    },
+    "claude-opus-4-7": {
+      "name": "Claude Opus 4.7",
+      "vendor": "Anthropic",
+      "contextWindow": 1000000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "toon",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["agentic-coding", "reasoning"],
+      "tier": "frontier",
+      "status": "active",
+      "pricing": {
+        "input": 5,
+        "output": 25
+      },
+      "tokenizer": {
+        "family": "claude",
+        "exact": false,
+        "exactVia": "anthropic-api"
+      }
+    },
+    "claude-opus-4-6": {
+      "name": "Claude Opus 4.6",
+      "vendor": "Anthropic",
+      "contextWindow": 1000000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "toon",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["reasoning"],
+      "tier": "frontier",
+      "status": "active",
+      "pricing": {
+        "input": 5,
+        "output": 25
+      },
+      "tokenizer": {
+        "family": "claude",
+        "exact": false,
+        "exactVia": "anthropic-api"
+      }
+    },
+    "claude-sonnet-4-6": {
+      "name": "Claude Sonnet 4.6",
+      "vendor": "Anthropic",
+      "contextWindow": 1000000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "toon",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["code-generation", "reasoning"],
+      "tier": "balanced",
+      "status": "active",
+      "pricing": {
+        "input": 3,
+        "output": 15
+      },
+      "tokenizer": {
+        "family": "claude",
+        "exact": false,
+        "exactVia": "anthropic-api"
+      }
+    },
+    "claude-haiku-4-5": {
+      "name": "Claude Haiku 4.5",
+      "vendor": "Anthropic",
+      "contextWindow": 200000,
+      "outputWindow": 64000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 120000,
+      "preferredFormat": "toon",
+      "chunkStrategy": "smart",
+      "supportedLanguages": "all",
+      "strengths": ["speed", "cost-effective"],
+      "tier": "fast",
+      "status": "active",
+      "pricing": {
+        "input": 1,
+        "output": 5
+      },
+      "tokenizer": {
+        "family": "claude",
+        "exact": false,
+        "exactVia": "anthropic-api"
+      }
+    },
+    "claude-sonnet-4-5": {
       "name": "Claude Sonnet 4.5",
       "vendor": "Anthropic",
       "contextWindow": 200000,
-      "outputWindow": 8192,
+      "outputWindow": 64000,
       "utilizationPercentage": 0.6,
       "maxRecommendedInput": 120000,
       "preferredFormat": "toon",
       "chunkStrategy": "smart",
       "supportedLanguages": "all",
-      "strengths": ["long-context", "code-generation", "reasoning"]
+      "strengths": ["code-generation", "reasoning"],
+      "tier": "balanced",
+      "status": "legacy",
+      "pricing": {
+        "input": 3,
+        "output": 15
+      },
+      "tokenizer": {
+        "family": "claude",
+        "exact": false,
+        "exactVia": "anthropic-api"
+      },
+      "replacement": "claude-sonnet-5-5"
     },
-    "claude-opus-4": {
+    "claude-opus-4-0": {
       "name": "Claude Opus 4",
       "vendor": "Anthropic",
       "contextWindow": 200000,
-      "outputWindow": 8192,
+      "outputWindow": 32000,
       "utilizationPercentage": 0.6,
       "maxRecommendedInput": 120000,
       "preferredFormat": "toon",
       "chunkStrategy": "smart",
       "supportedLanguages": "all",
-      "strengths": ["reasoning", "complex-tasks", "accuracy"]
+      "strengths": ["reasoning"],
+      "tier": "frontier",
+      "status": "deprecated",
+      "pricing": {
+        "input": 15,
+        "output": 75
+      },
+      "tokenizer": {
+        "family": "claude",
+        "exact": false,
+        "exactVia": "anthropic-api"
+      },
+      "replacement": "claude-opus-5-5"
     },
-    "gpt-4-turbo": {
-      "name": "GPT-4 Turbo",
+    "gpt-6-astra": {
+      "name": "GPT-6 Astra",
       "vendor": "OpenAI",
-      "contextWindow": 128000,
-      "outputWindow": 4096,
+      "contextWindow": 1050000,
+      "outputWindow": 128000,
       "utilizationPercentage": 0.6,
-      "maxRecommendedInput": 76800,
+      "maxRecommendedInput": 630000,
+      "preferredFormat": "json",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["reasoning", "agentic-coding", "long-context"],
+      "tier": "frontier",
+      "status": "active",
+      "pricing": {
+        "input": 10,
+        "output": 50,
+        "tiers": [
+          {
+            "above": 272000,
+            "input": 20,
+            "output": 75.0
+          }
+        ]
+      },
+      "tokenizer": {
+        "encoding": "o200k_base",
+        "exact": false
+      },
+      "released": "2026-09",
+      "notes": "OpenAI has not published the encoding of GPT-6 models; o200k_base is an approximation"
+    },
+    "gpt-6.1-sol": {
+      "name": "GPT-6.1 Sol",
+      "vendor": "OpenAI",
+      "contextWindow": 1050000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 630000,
+      "preferredFormat": "json",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["code-generation", "agentic-coding"],
+      "tier": "balanced",
+      "status": "active",
+      "pricing": {
+        "input": 2,
+        "output": 10,
+        "tiers": [
+          {
+            "above": 272000,
+            "input": 4,
+            "output": 15.0
+          }
+        ]
+      },
+      "tokenizer": {
+        "encoding": "o200k_base",
+        "exact": false
+      },
+      "released": "2026-09",
+      "featured": true,
+      "notes": "OpenAI has not published the encoding of GPT-6 models; o200k_base is an approximation"
+    },
+    "gpt-6-luna": {
+      "name": "GPT-6 Luna",
+      "vendor": "OpenAI",
+      "contextWindow": 1050000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 630000,
+      "preferredFormat": "json",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["speed", "cost-effective"],
+      "tier": "fast",
+      "status": "active",
+      "pricing": {
+        "input": 0.1,
+        "output": 0.5,
+        "tiers": [
+          {
+            "above": 272000,
+            "input": 0.2,
+            "output": 0.75
+          }
+        ]
+      },
+      "tokenizer": {
+        "encoding": "o200k_base",
+        "exact": false
+      },
+      "released": "2026-09",
+      "featured": true,
+      "notes": "Maximum input is 922,000 tokens. OpenAI has not published the encoding of GPT-6 models; o200k_base is an approximation"
+    },
+    "gpt-5.6-terra": {
+      "name": "GPT-5.6 Terra",
+      "vendor": "OpenAI",
+      "contextWindow": 1050000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 630000,
+      "preferredFormat": "json",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["code-generation", "reasoning"],
+      "tier": "balanced",
+      "status": "active",
+      "pricing": {
+        "input": 2,
+        "output": 12,
+        "tiers": [
+          {
+            "above": 272000,
+            "input": 4,
+            "output": 18.0
+          }
+        ]
+      },
+      "tokenizer": {
+        "encoding": "o200k_base",
+        "exact": true
+      },
+      "released": "2026-07"
+    },
+    "gpt-5.5": {
+      "name": "GPT-5.5",
+      "vendor": "OpenAI",
+      "contextWindow": 1050000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 630000,
+      "preferredFormat": "json",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["reasoning", "code-generation"],
+      "tier": "frontier",
+      "status": "active",
+      "pricing": {
+        "input": 5,
+        "output": 30,
+        "tiers": [
+          {
+            "above": 272000,
+            "input": 10,
+            "output": 45.0
+          }
+        ]
+      },
+      "tokenizer": {
+        "encoding": "o200k_base",
+        "exact": true
+      },
+      "released": "2026-04"
+    },
+    "gpt-5.4-mini": {
+      "name": "GPT-5.4 mini",
+      "vendor": "OpenAI",
+      "contextWindow": 400000,
+      "outputWindow": 128000,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 240000,
       "preferredFormat": "json",
       "chunkStrategy": "smart",
       "supportedLanguages": "all",
-      "strengths": ["accuracy", "json-mode", "function-calling"]
+      "strengths": ["speed", "cost-effective"],
+      "tier": "fast",
+      "status": "active",
+      "pricing": {
+        "input": 0.75,
+        "output": 4.5
+      },
+      "tokenizer": {
+        "encoding": "o200k_base",
+        "exact": true
+      },
+      "released": "2026-03"
     },
     "gpt-4o": {
       "name": "GPT-4o",
@@ -53,67 +558,590 @@
       "preferredFormat": "json",
       "chunkStrategy": "smart",
       "supportedLanguages": "all",
-      "strengths": ["speed", "vision", "structured-output", "reasoning"]
+      "strengths": ["vision", "structured-output"],
+      "tier": "frontier",
+      "status": "legacy",
+      "pricing": {
+        "input": 2.5,
+        "output": 10
+      },
+      "tokenizer": {
+        "encoding": "o200k_base",
+        "exact": true
+      },
+      "replacement": "gpt-6.1-sol"
     },
     "gpt-4o-mini": {
-      "name": "GPT-4o Mini",
+      "name": "GPT-4o mini",
       "vendor": "OpenAI",
       "contextWindow": 128000,
       "outputWindow": 16384,
       "utilizationPercentage": 0.6,
       "maxRecommendedInput": 76800,
       "preferredFormat": "json",
-      "chunkStrategy": "file",
+      "chunkStrategy": "smart",
       "supportedLanguages": "all",
-      "strengths": ["speed", "cost-effective", "quick-tasks"]
+      "strengths": ["speed", "cost-effective"],
+      "tier": "fast",
+      "status": "legacy",
+      "pricing": {
+        "input": 0.15,
+        "output": 0.6
+      },
+      "tokenizer": {
+        "encoding": "o200k_base",
+        "exact": true
+      },
+      "replacement": "gpt-6-luna"
     },
-    "gemini-1.5-pro": {
-      "name": "Gemini 1.5 Pro",
-      "vendor": "Google",
-      "contextWindow": 1000000,
-      "outputWindow": 8192,
+    "gpt-4-turbo": {
+      "name": "GPT-4 Turbo",
+      "vendor": "OpenAI",
+      "contextWindow": 128000,
+      "outputWindow": 4096,
       "utilizationPercentage": 0.6,
-      "maxRecommendedInput": 600000,
+      "maxRecommendedInput": 76800,
+      "preferredFormat": "json",
+      "chunkStrategy": "smart",
+      "supportedLanguages": "all",
+      "strengths": ["json-mode", "function-calling"],
+      "tier": "frontier",
+      "status": "deprecated",
+      "pricing": {
+        "input": 10,
+        "output": 30
+      },
+      "tokenizer": {
+        "encoding": "cl100k_base",
+        "exact": true
+      },
+      "retires": "2026-10-23",
+      "replacement": "gpt-6.1-sol"
+    },
+    "gemini-3.1-pro-preview": {
+      "name": "Gemini 3.1 Pro (preview)",
+      "vendor": "Google",
+      "contextWindow": 1048576,
+      "outputWindow": 65536,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 629145,
       "preferredFormat": "gitingest",
       "chunkStrategy": "none",
       "supportedLanguages": "all",
-      "strengths": ["ultra-long-context", "multimodal", "analysis"]
+      "strengths": ["ultra-long-context", "reasoning", "multimodal"],
+      "tier": "frontier",
+      "status": "preview",
+      "pricing": {
+        "input": 2,
+        "output": 12,
+        "tiers": [
+          {
+            "above": 200000,
+            "input": 4,
+            "output": 18
+          }
+        ]
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2026-02",
+      "featured": true
+    },
+    "gemini-3.8-flash": {
+      "name": "Gemini 3.8 Flash",
+      "vendor": "Google",
+      "contextWindow": 1048576,
+      "outputWindow": 65536,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 629145,
+      "preferredFormat": "gitingest",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["ultra-long-context", "speed", "multimodal"],
+      "tier": "balanced",
+      "status": "active",
+      "pricing": {
+        "input": 0.75,
+        "output": 3.75
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2026-09",
+      "featured": true,
+      "notes": "Introductory price until 2026-12-31, then $1.50 input / $7.50 output"
+    },
+    "gemini-3.5-flash": {
+      "name": "Gemini 3.5 Flash",
+      "vendor": "Google",
+      "contextWindow": 1048576,
+      "outputWindow": 65536,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 629145,
+      "preferredFormat": "gitingest",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["ultra-long-context", "speed"],
+      "tier": "balanced",
+      "status": "active",
+      "pricing": {
+        "input": 1.5,
+        "output": 9
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2026-05"
+    },
+    "gemini-3.5-flash-lite": {
+      "name": "Gemini 3.5 Flash-Lite",
+      "vendor": "Google",
+      "contextWindow": 1048576,
+      "outputWindow": 65536,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 629145,
+      "preferredFormat": "gitingest",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["ultra-long-context", "cost-effective"],
+      "tier": "fast",
+      "status": "active",
+      "pricing": {
+        "input": 0.3,
+        "output": 2.5
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2026-07"
+    },
+    "gemini-2.5-pro": {
+      "name": "Gemini 2.5 Pro",
+      "vendor": "Google",
+      "contextWindow": 1048576,
+      "outputWindow": 65536,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 629145,
+      "preferredFormat": "gitingest",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["ultra-long-context", "reasoning"],
+      "tier": "frontier",
+      "status": "deprecated",
+      "pricing": {
+        "input": 1.25,
+        "output": 10,
+        "tiers": [
+          {
+            "above": 200000,
+            "input": 2.5,
+            "output": 15
+          }
+        ]
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "replacement": "gemini-3.1-pro-preview"
     },
     "gemini-2.0-flash": {
       "name": "Gemini 2.0 Flash",
       "vendor": "Google",
-      "contextWindow": 1000000,
+      "contextWindow": 1048576,
       "outputWindow": 8192,
       "utilizationPercentage": 0.6,
-      "maxRecommendedInput": 600000,
+      "maxRecommendedInput": 629145,
       "preferredFormat": "gitingest",
       "chunkStrategy": "none",
       "supportedLanguages": "all",
-      "strengths": ["ultra-long-context", "speed", "multimodal"]
+      "strengths": ["speed"],
+      "tier": "fast",
+      "status": "retired",
+      "pricing": {
+        "input": 0.1,
+        "output": 0.4
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "retires": "2026-06-01",
+      "replacement": "gemini-3.8-flash"
     },
-    "deepseek-coder": {
-      "name": "DeepSeek Coder",
-      "vendor": "DeepSeek",
-      "contextWindow": 16000,
-      "outputWindow": 4096,
+    "gemini-1.5-pro": {
+      "name": "Gemini 1.5 Pro",
+      "vendor": "Google",
+      "contextWindow": 2097152,
+      "outputWindow": 8192,
       "utilizationPercentage": 0.6,
-      "maxRecommendedInput": 9600,
-      "preferredFormat": "json",
-      "chunkStrategy": "file",
+      "maxRecommendedInput": 1258291,
+      "preferredFormat": "gitingest",
+      "chunkStrategy": "none",
       "supportedLanguages": "all",
-      "strengths": ["code-completion", "efficiency", "cost-effective"]
+      "strengths": ["ultra-long-context"],
+      "tier": "frontier",
+      "status": "retired",
+      "pricing": {
+        "input": 1.25,
+        "output": 5
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "retires": "2025-09-29",
+      "replacement": "gemini-3.1-pro-preview"
+    },
+    "deepseek-flash": {
+      "name": "DeepSeek V4.1 Flash",
+      "vendor": "DeepSeek",
+      "contextWindow": 1048576,
+      "outputWindow": 393216,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 629145,
+      "preferredFormat": "json",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["reasoning", "cost-effective", "long-context"],
+      "tier": "balanced",
+      "status": "active",
+      "pricing": {
+        "input": 0.3,
+        "output": 1.2
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2026-09",
+      "featured": true,
+      "notes": "Peak-hour price; off-peak hours cost half"
     },
     "deepseek-chat": {
       "name": "DeepSeek Chat",
       "vendor": "DeepSeek",
-      "contextWindow": 64000,
-      "outputWindow": 4096,
+      "contextWindow": 128000,
+      "outputWindow": 8192,
       "utilizationPercentage": 0.6,
-      "maxRecommendedInput": 38400,
+      "maxRecommendedInput": 76800,
       "preferredFormat": "json",
       "chunkStrategy": "smart",
       "supportedLanguages": "all",
-      "strengths": ["reasoning", "analysis", "cost-effective"]
+      "strengths": [],
+      "tier": "balanced",
+      "status": "retired",
+      "tokenizer": {
+        "exact": false
+      },
+      "retires": "2026-07-24",
+      "replacement": "deepseek-flash"
+    },
+    "deepseek-reasoner": {
+      "name": "DeepSeek Reasoner",
+      "vendor": "DeepSeek",
+      "contextWindow": 128000,
+      "outputWindow": 65536,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 76800,
+      "preferredFormat": "json",
+      "chunkStrategy": "smart",
+      "supportedLanguages": "all",
+      "strengths": [],
+      "tier": "balanced",
+      "status": "retired",
+      "tokenizer": {
+        "exact": false
+      },
+      "retires": "2026-07-24",
+      "replacement": "deepseek-flash"
+    },
+    "mistral-large-4": {
+      "name": "Mistral Large 4 (preview)",
+      "vendor": "Mistral",
+      "contextWindow": 1000000,
+      "outputWindow": null,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "json",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["reasoning", "long-context"],
+      "tier": "frontier",
+      "status": "preview",
+      "pricing": {
+        "input": 1.36,
+        "output": 4.18
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2026-10"
+    },
+    "mistral-medium-3-5": {
+      "name": "Mistral Medium 3.5",
+      "vendor": "Mistral",
+      "contextWindow": 256000,
+      "outputWindow": null,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 153600,
+      "preferredFormat": "json",
+      "chunkStrategy": "smart",
+      "supportedLanguages": "all",
+      "strengths": ["code-generation", "agentic-coding"],
+      "tier": "balanced",
+      "status": "active",
+      "pricing": {
+        "input": 1.5,
+        "output": 7.5
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2026-04",
+      "featured": true
+    },
+    "mistral-small-2603": {
+      "name": "Mistral Small 4",
+      "vendor": "Mistral",
+      "contextWindow": 256000,
+      "outputWindow": null,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 153600,
+      "preferredFormat": "json",
+      "chunkStrategy": "smart",
+      "supportedLanguages": "all",
+      "strengths": ["speed", "cost-effective"],
+      "tier": "fast",
+      "status": "active",
+      "pricing": {
+        "input": 0.15,
+        "output": 0.6
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2026-03"
+    },
+    "codestral-2508": {
+      "name": "Codestral 25.08",
+      "vendor": "Mistral",
+      "contextWindow": 128000,
+      "outputWindow": null,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 76800,
+      "preferredFormat": "json",
+      "chunkStrategy": "smart",
+      "supportedLanguages": "all",
+      "strengths": ["code-completion", "fill-in-the-middle"],
+      "tier": "fast",
+      "status": "active",
+      "pricing": {
+        "input": 0.3,
+        "output": 0.9
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2025-07"
+    },
+    "grok-4.7": {
+      "name": "Grok 4.7",
+      "vendor": "xAI",
+      "contextWindow": 500000,
+      "outputWindow": null,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 300000,
+      "preferredFormat": "json",
+      "chunkStrategy": "smart",
+      "supportedLanguages": "all",
+      "strengths": ["reasoning", "code-generation"],
+      "tier": "frontier",
+      "status": "active",
+      "pricing": {
+        "input": 2,
+        "output": 6,
+        "tiers": [
+          {
+            "above": 200000,
+            "input": 4,
+            "output": 12
+          }
+        ]
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2026-09",
+      "featured": true
+    },
+    "grok-4.3": {
+      "name": "Grok 4.3",
+      "vendor": "xAI",
+      "contextWindow": 1000000,
+      "outputWindow": null,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "json",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["long-context", "cost-effective"],
+      "tier": "balanced",
+      "status": "active",
+      "pricing": {
+        "input": 1.25,
+        "output": 2.5,
+        "tiers": [
+          {
+            "above": 200000,
+            "input": 2.5,
+            "output": 5
+          }
+        ]
+      },
+      "tokenizer": {
+        "exact": false
+      }
+    },
+    "grok-build-0.1": {
+      "name": "Grok Build 0.1 (beta)",
+      "vendor": "xAI",
+      "contextWindow": 256000,
+      "outputWindow": null,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 153600,
+      "preferredFormat": "json",
+      "chunkStrategy": "smart",
+      "supportedLanguages": "all",
+      "strengths": ["code-generation", "agentic-coding"],
+      "tier": "balanced",
+      "status": "preview",
+      "pricing": {
+        "input": 1,
+        "output": 2
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2026-05"
+    },
+    "qwen3.8-max": {
+      "name": "Qwen3.8-Max",
+      "vendor": "Qwen",
+      "contextWindow": 1000000,
+      "outputWindow": 131072,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "json",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["reasoning", "long-context"],
+      "tier": "frontier",
+      "status": "active",
+      "pricing": {
+        "input": 2,
+        "output": 6
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2026-08"
+    },
+    "qwen3.8-flash": {
+      "name": "Qwen3.8-Flash",
+      "vendor": "Qwen",
+      "contextWindow": 1000000,
+      "outputWindow": 131072,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "json",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["speed", "cost-effective"],
+      "tier": "fast",
+      "status": "active",
+      "pricing": {
+        "input": 0.15,
+        "output": 0.47
+      },
+      "tokenizer": {
+        "exact": false
+      }
+    },
+    "qwen3-coder-plus": {
+      "name": "Qwen3-Coder-Plus",
+      "vendor": "Qwen",
+      "contextWindow": 1000000,
+      "outputWindow": 65536,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "json",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["code-generation", "agentic-coding"],
+      "tier": "balanced",
+      "status": "active",
+      "pricing": {
+        "input": 1,
+        "output": 5,
+        "tiers": [
+          {
+            "above": 32000,
+            "input": 1.8,
+            "output": 9
+          },
+          {
+            "above": 128000,
+            "input": 3,
+            "output": 15
+          },
+          {
+            "above": 256000,
+            "input": 6,
+            "output": 60
+          }
+        ]
+      },
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2025-07",
+      "featured": true
+    },
+    "llama-4-maverick": {
+      "name": "Llama 4 Maverick",
+      "vendor": "Meta",
+      "contextWindow": 1000000,
+      "outputWindow": null,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 600000,
+      "preferredFormat": "json",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["open-weights", "multimodal"],
+      "tier": "balanced",
+      "status": "active",
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2025-04",
+      "notes": "Context per the model card; hosted providers often cap it lower"
+    },
+    "llama-4-scout": {
+      "name": "Llama 4 Scout",
+      "vendor": "Meta",
+      "contextWindow": 10000000,
+      "outputWindow": null,
+      "utilizationPercentage": 0.6,
+      "maxRecommendedInput": 6000000,
+      "preferredFormat": "json",
+      "chunkStrategy": "none",
+      "supportedLanguages": "all",
+      "strengths": ["open-weights", "ultra-long-context"],
+      "tier": "fast",
+      "status": "active",
+      "tokenizer": {
+        "exact": false
+      },
+      "released": "2025-04",
+      "notes": "Context per the model card; hosted providers often cap it lower"
     }
   },
   "default": {

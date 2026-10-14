@@ -36,7 +36,7 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 
 ## Dosyalar
 
-- **`ctxman.js`** - Kesin token sayımı ile ana LLM bağlam analiz scripti
+- **`ctxman.js`** - Token sayımı yapan ana LLM bağlam analiz scripti
 - **`.contextignore`** - Token hesaplamadan hariç tutulacak dosyalar (EXCLUDE modu)
 - **`.contextinclude`** - Token hesaplamaya dahil edilecek dosyalar (INCLUDE modu)
 - **`README.md`** - İngilizce dokümantasyon dosyası
@@ -50,12 +50,24 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 - 🔀 **Git Entegrasyonu** - Sadece değişen dosyaları analiz et, diff analizi, yazar takibi
 - 👁️ **Watch Modu** - Gerçek zamanlı dosya izleme ve otomatik analiz
 - 🌐 **REST API** - Programatik erişim için HTTP serveri (6 endpoint)
-- ⚡ **Performans** - Önbellekleme sistemi, paralel işleme (5-10x daha hızlı)
+- ⚡ **Performans** - ~2.000 dosyayı 100 ms'nin altında tarar, tiktoken ile 2,6M token'ı yaklaşık 6 sn'de sayar; watch modu yalnızca değişen dosyaları yeniden analiz eder
 - 🏗️ **Modüler Çekirdek** - Scanner, Analyzer, ContextBuilder, Reporter
+
+### 🧰 Bağlam Komutları
+
+- 📦 **`ctxman pack`** - Dosya içeriklerini tek bir LLM belgesinde toplar (Claude XML, Markdown, JSON); yalnızca imza sıkıştırması ve kesin token bütçesiyle
+- 🗺️ **`ctxman map`** - Import grafiği ve git geçmişine göre sıralanmış, token bütçesine sığan repo haritası
+- 🔍 **`ctxman pr`** - Bir dal için inceleme bağlamı: commit geçmişi, değişen metotlar, diff, ilgili testler
+- 🧭 **`ctxman why`** - Kod neden böyle: yerel git geçmişinden commit'ler, bağlı issue ve PR'lar, sahipler, birlikte değişen dosyalar, ADR'ler ve testler
+- 🔎 **`ctxman search`** - Fonksiyonlar ve kod parçaları üzerinde sıralı (BM25) arama
+- 🔢 **`ctxman count`** - Bir model için token sayısı; Claude için Anthropic API'siyle birebir
+- 🔌 **`ctxman mcp`** - Claude Desktop, Claude Code, Cursor, VS Code ve Windsurf için tek komutla kurulan MCP sunucusu
+- 🛡️ **`ctxman policy` / `ctxman audit`** - Dışa aktarma politikası (engellenen yollar, zorunlu maskeleme, token sınırı) ve denetim kaydı
+- 🤖 **GitHub Action ve Docker imajı** - Token bütçesi ve modele sığma kontrolü CI'da
 
 ### 🔢 Token Analizi
 
-- ✅ **Kesin token sayımı** tiktoken kullanarak (GPT-4 uyumlu)
+- ✅ **tiktoken ile token sayımı** hedef modelin encoding'iyle (o200k_base veya cl100k_base): GPT-5.x'e kadarki OpenAI modelleri için kesin, GPT-6 ve diğer sağlayıcıların modelleri için yaklaşık; Claude için kesin sayım `ctxman count --api` ile
 - 🚫 **Çifte ignore sistemi** - hem `.gitignore` hem calculator ignore kurallarını dikkate alır
 - 📋 **Include/Exclude modları** - `.contextinclude` dosyası `.contextignore` üzerinde önceliğe sahip
 - 📊 **Detaylı raporlama** - dosya tipine göre, en büyük dosyalar, istatistikler
@@ -79,8 +91,8 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 # Etkileşimli analiz ile dışa aktarım seçimi
 ctxman
 
-# Verbose dosya listesini devre dışı bırak
-ctxman --no-verbose
+# Analiz edilen her dosyayı token sayısıyla listele
+ctxman --cli --verbose
 
 # Detaylı rapor kaydet
 ctxman --save-report
@@ -90,9 +102,6 @@ ctxman --context-export
 
 # Minimal bağlamı clipboard'a kopyala
 ctxman --context-clipboard
-
-# Detaylı bağlam formatı kullan - eski format
-ctxman --detailed-context --context-clipboard
 ```
 
 ### Sarmalayıcı Script Kullanımı
@@ -146,9 +155,6 @@ ctxman --save-report
 
 # Minimal LLM bağlam dosya listesi oluştur
 ctxman --context-export
-
-# Detaylı bağlam formatı kullan - eski format
-ctxman --detailed-context --context-clipboard
 ```
 
 ### Etkileşimli Dışa Aktarım Seçimi
@@ -215,39 +221,175 @@ node token-analysis/token-calculator.js --help
 ### Mevcut Seçenekler
 
 - `--save-report`, `-s` - Detaylı JSON raporu kaydet
-- `--no-verbose` - Dosya listesini devre dışı bırak (verbose varsayılan)
+- `--verbose`, `-v` - Analiz edilen her dosyayı token sayısıyla listele
 - `--context-export` - LLM bağlam dosya listesi oluştur (llm-context.json olarak kaydeder)
 - `--context-clipboard` - LLM bağlamını doğrudan clipboard'a kopyala
-- `--detailed-context` - Detaylı bağlam formatı kullan (8.6k karakter, varsayılan kompakt 1k)
+- `-o`, `--output FORMAT` - Bağlam formatı: json (varsayılan), toon, yaml, markdown, csv, xml
 - `--help`, `-h` - Yardım mesajını göster
+- `--target-model ID` - Hedef model, örn. `claude-sonnet-5-5`, `gpt-6.1-sol`, `gemini-3.8-flash` (tam liste ve fiyatlar için `ctxman --list-llms`; veriler 2026-10-09 tarihinde kontrol edildi)
+
+### Model için token sayımı (`ctxman count`)
+
+Sayım, hedef modelin tiktoken encoding'iyle yapılır: GPT-4o'dan bu yana OpenAI modelleri için
+`o200k_base`, diğerleri için `cl100k_base`. Sonuç GPT-5.x'e kadarki OpenAI modelleri için
+kesindir; Claude, Gemini ve diğer sağlayıcıların modelleri kendi tokenizer'larını kullandığı (ve
+OpenAI GPT-6'nın encoding'ini yayımlamadığı) için bu modellerde sayım yaklaşıktır. `--api` ile
+Claude modelleri Anthropic'in count_tokens API'si üzerinden kesin sayılır:
+
+```bash
+ctxman count --model gpt-5.5                     # kesin (o200k_base)
+ctxman count --model claude-sonnet-5-5           # yaklaşık, --api önerir
+ctxman count --model claude-sonnet-5-5 --api     # kesin; @anthropic-ai/sdk ve ANTHROPIC_API_KEY gerekir
+ctxman count - --model claude-opus-5-5 --api < digest.txt   # stdin'den gelen metin
+```
+
+`--api`, gizli bilgileri maskelenmiş metni Anthropic'e gönderir; sayım ücretsizdir ve yanıt
+üretilmez.
+
+### 📦 Kod tabanını tek bir prompt'a paketleme (`ctxman pack`)
+
+`ctxman pack`, önce dizin ağacını, sonra her dosyayı, en sonda da talimatlarınızı tek bir belge
+olarak yazar: varsayılan olarak Anthropic'in `<documents>` XML'i; Markdown, düz metin veya JSON da
+olabilir.
+
+```bash
+ctxman pack -o context.xml                          # ağaç + her dosya, Anthropic XML
+ctxman pack --style markdown --copy                 # Markdown olarak panoya
+ctxman pack --compress --budget 100k --instructions gorev.md
+git ls-files -z -- '*.py' | ctxman pack --stdin -0 --line-numbers
+ctxman pack --target-model gpt-6.1-sol --max-tokens 120k -q -o ctx.xml   # CI kontrolü, çıkış kodu 2
+ctxman pack --split 150k -o context.xml             # context.1.xml, context.2.xml, ...
+```
+
+`--compress` imzaları tutar ve fonksiyon gövdelerini tek satırlık bir yer tutucuyla değiştirir;
+`--budget` bütçeyi `ctxman map`ın en üst sıraya koyduğu dosyalarla doldurur ve asla aşmaz; sırlar
+maskelenir. Talimatlarınız, Anthropic'in uzun bağlam önerisine uygun olarak uzun içerikten sonra,
+en sonda yer alır. Ayrıntılar: [docs/commands/pack.md](docs/commands/pack.md).
+
+### 🗺️ Repo haritası (`ctxman map`)
+
+Bir kod tabanının şekli, sabit bir token bütçesinde: import grafiği üzerinde PageRank (JS/TS,
+Python, Go, Java/Kotlin/Scala, C#, PHP, Ruby, C/C++, Rust), son git hareketleri ve sembol
+referanslarına göre en önemli dosyalar, her fonksiyon için bir satır (satır, imza, token).
+
+```bash
+ctxman map                              # mevcut projenin 2048 token'lık haritası
+ctxman map --tokens 4096 --style markdown
+ctxman map --focus src/server.js        # üzerinde çalıştığınız dosyanın çevresini öne alır
+ctxman map --important-last -o map.txt  # en önemli dosyalar sonda, sorunuzun yanında
+```
+
+Ayrıntılar: [docs/commands/map.md](docs/commands/map.md).
+
+### 🔍 Pull request bağlamı (`ctxman pr`)
+
+Bir dal hakkında inceleyicinin (veya modelin) ihtiyaç duyduğu her şey tek belgede: özet, commit
+geçmişi, değişen dosyalar, değişen her metodun tam kaynağı, silinen metotlar, diff ve ilgili
+testler; sorunuz en sonda.
+
+```bash
+ctxman pr                                    # HEAD ile origin/HEAD, main veya master
+ctxman pr --base release/2.x --budget 30k    # sığmak için en az önemli kısımları çıkarır
+ctxman pr --staged --ask "Birleştirmek güvenli mi?" --copy
+```
+
+Ayrıntılar: [docs/commands/pr.md](docs/commands/pr.md).
+
+### 🧭 Kod neden böyle? (`ctxman why`)
+
+"Bu neden burada?" sorusunun yerel ve çevrimdışı yanıtı: `ctxman why`, git'in ve reponun bir dosya,
+fonksiyon veya satır aralığı hakkında kaydettiklerini toplar.
+
+```bash
+ctxman why src/cart.js:total                   # fonksiyon / metot / sınıf (Sinif.metot)
+ctxman why src/cart.js#L40-L72 --patches       # satır aralığı, her commit'in diff'iyle
+ctxman why lib/server.js --since "1 year ago"  # yeniden adlandırmaları izleyerek tüm dosya
+ctxman why src/cart.js:total --ask "Burada neden yuvarlanıyor?" --budget 8k --copy
+```
+
+Kodu değiştiren commit'leri tam mesajlarıyla, referans verilen issue, PR ve ticket'ları (GitHub,
+GitLab ve Bitbucket için bağlantılı), ortak yazarları ve inceleyenleri, blame sahipliğini, onunla
+birlikte değişen dosyaları, ondan bahseden ADR, doküman, changelog kaydı ve yorumları, içindeki
+TODO'ları ve onu kullanan testleri toplar; sırlar maskelenir. Unblocked gibi platformlar bunu kendi
+sunucularında Slack, Jira ve Confluence ile yanıtlar; ctxman makinenizde, git'in ve reponun
+bildiklerini kapsar. Ayrıntılar: [docs/commands/why.md](docs/commands/why.md).
+
+### 🔎 Sıralı arama (`ctxman search`)
+
+```bash
+ctxman search "parse config file"            # fonksiyonlar ve kod parçaları üzerinde BM25
+ctxman search getUserName --limit 5 --json
+```
+
+`getUserName`, `get_user_name` ve `get-user-name` aynı kelimelerle eşleşir. Aynı motor MCP
+`search_code` aracının (`type: "ranked"`) arkasındadır; `get_symbol` bir fonksiyonun tam kaynağını
+adıyla döndürür.
+
+### 🔌 MCP sunucusu kurulumu (`ctxman mcp`)
+
+```bash
+ctxman mcp install --client claude-desktop   # veya claude-code, cursor, vscode, windsurf
+ctxman mcp install --client claude-code --scope project --root .
+ctxman mcp config --client cursor            # yalnızca yapılandırma parçasını yazdırır
+ctxman mcp                                   # sunucuyu çalıştırır (stdio)
+```
+
+Kurulum, istemcinin yapılandırmasıyla birleştirir ve önceki dosyanın `.bak` yedeğini tutar.
+`--root`, tüm araçları tek bir dizinle sınırlar. Ayrıntılar: [docs/commands/mcp.md](docs/commands/mcp.md).
+
+### 🛡️ Dışa aktarma politikası ve denetim kaydı
+
+Repodaki bir politika (`.ctxman/policy.json`) veya bir kurumun `CTXMAN_POLICY` ile gösterdiği
+dosya; CLI, REST API ve MCP sunucusu için aynı şekilde uygulanır:
+
+```bash
+ctxman policy init       # başlangıç politikası: .env, anahtarlar ve secrets/ engellenir, maskeleme zorunlu
+ctxman policy check      # doğrular ve geçerli politikayı gösterir
+ctxman audit             # ne, ne zaman, kim tarafından, kaç token dışa aktarıldı
+ctxman --cli --respect-ignore-files .cursorignore,.aiexclude   # diğer AI araçlarının ignore dosyaları
+```
+
+Engellenen dosyalar analizden tamamen çıkar; `--no-redact` ve sınırı aşan dışa aktarmalar
+reddedilir (çıkış kodu 3); her dışa aktarma, içeriği değil yazılanın özetini (hash) içeren bir
+denetim kaydına eklenir. Bu bir ekip ve kurum denetimidir, yerel bir kullanıcıya karşı bir engel
+değildir. Ayrıntılar: [docs/commands/policy.md](docs/commands/policy.md).
+
+### 🤖 CI ve Docker
+
+```yaml
+- uses: hakkisagdic/ctxman@main # bir sürüm etiketine veya commit'e sabitleyin
+  with:
+    changed-since: ${{ github.event.pull_request.base.sha }}
+    max-tokens: 50000 # bu bütçenin üstünde iş başarısız olur
+    target-model: claude-sonnet-5-5
+```
+
+```bash
+docker build -t ctxman .
+docker run --rm -v "$PWD:/work" ctxman --cli
+docker run -i --rm -v "$PWD:/work" ctxman mcp --root /work   # stdio üzerinden MCP
+```
+
+Ayrıntılar: [docs/commands/ci.md](docs/commands/ci.md).
 
 ## LLM Bağlam Dışa Aktarımı
 
-Token calculator, iki format seçeneği ile LLM tüketimi için optimize edilmiş dosya listeleri oluşturabilir:
+Token calculator, LLM tüketimi için optimize edilmiş dosya listeleri oluşturabilir.
 
-### Ultra-Kompakt Format (Varsayılan)
+### Bağlam Formatı
 
-- **Boyut**: ~2.3k karakter (yapılandırılmış JSON)
-- **İçerik**: Token sayısı olmadan proje metadata'sı ve organize edilmiş dosya yolları
-- **Format**: llm-context.json dosyası ile aynı - tam JSON yapısı
-- **Mükemmel**: LLM tüketimi, programatik işleme, yapılandırılmış veri ihtiyaçları
+- **İçerik**: Proje metadata'sı ve klasöre göre gruplanmış dosya yolları; `-m` bunların yerine
+  satır numarası ve token sayısıyla metotları listeler
+- **Format**: Varsayılan JSON; `-o toon|yaml|markdown|csv|xml` başka bir kodlama seçer
+- **Her yerde aynı**: Pano, `llm-context.<format>` dosyasının içeriğinin aynısını alır
 - **Kullanım**: `--context-clipboard` veya `--context-export`
-
-### Detaylı Format (Eski)
-
-- **Boyut**: ~8.6k karakter (kapsamlı)
-- **İçerik**: Tam yollar, kategoriler, önem puanları, dizin istatistikleri
-- **Mükemmel**: İlk proje analizi, kapsamlı dokümantasyon
-- **Kullanım**: `--detailed-context --context-clipboard`
 
 ### Özellikler
 
-- **Akıllı dosya seçimi** - Token sayısı ve öneme göre en üst dosyalar
-- **Dizin gruplama** - Ortak önek sıkıştırması yer tasarrufu sağlar
-- **Minimal formatlama** - LLM için optimize edilmiş, sıfır gereksiz karakter
-- **Uzantı korunması** - `.js` uzantıları dosya tipini belirtir
-- **Çapraz platform clipboard** - macOS, Linux ve Windows'ta çalışır
-- **Çoklu çıktı formatları** - JSON dosyası veya clipboard hazır metin
+- **Dizin gruplama** - Her klasör, dosya adlarıyla bir kez listelenir
+- **TOON kodlaması** - `-o toon` resmi TOON kodlayıcısını kullanır: JSON'dan daha az token
+- **Metot seviyesi** - `-m` her metodu satır numarası ve token sayısıyla ekler
+- **Çapraz platform clipboard** - macOS, Linux ve Windows'ta çalışır, gerekirse dosyaya yazar
 
 ### Kullanım
 
@@ -257,9 +399,6 @@ ctxman --context-export
 
 # Minimal bağlamı doğrudan clipboard'a kopyala
 ctxman --context-clipboard
-
-# Detaylı bağlamı clipboard'a kopyala
-ctxman --detailed-context --context-clipboard
 
 # Normal analiz ile birleştir
 ctxman --save-report --context-clipboard
@@ -288,41 +427,12 @@ ctxman --save-report --context-clipboard
 }
 ```
 
-**Detaylı Format (8.6k karakter):**
-
-````markdown
-# cloudstack-go-mcp-proxy Kod Tabanı Bağlamı
-
-**Proje:** 64 dosya, 181,480 token
-
-**Ana Dosyalar (En Büyük 20):**
-
-1. `utility-mcp/src/server/CloudStackUtilityMCP.js` (12,388 token, server)
-2. `utility-mcp/src/handlers/workflow-handlers.js` (11,007 token, handler)
-   ...
-
-**Tüm Dosyalar:**
-
-```json
-[{ "path": "file.js", "t": 1234, "c": "core", "i": 85 }]
-```
-````
-
 ### Kullanım Durumları
-
-**Kompakt Format (2.3k karakter JSON):**
 
 1. **LLM Entegrasyonu** - Tam proje bağlamı ile AI asistanları için yapılandırılmış veri
 2. **Programatik İşleme** - Otomatik araçlar ve scriptler için JSON formatı
 3. **Bağlam Paylaşımı** - Clipboard ve dosya dışa aktarımlarında aynı format
 4. **Geliştirme İş Akışları** - CI/CD ve otomasyon için tutarlı yapı
-
-**Detaylı Format (8.6k karakter):**
-
-1. **Mimari Planlama** - Büyük kararlar için kapsamlı proje özeti
-2. **Yeni Takım Üyesi Alıştırma** - Tam kod tabanı anlayışı
-3. **Dokümantasyon Oluşturma** - Tam proje yapısı analizi
-4. **Kod İnceleme Hazırlığı** - Detaylı dosya ilişkileri ve önem
 
 **Genel Kullanım Durumları:**
 
@@ -410,13 +520,17 @@ src/**/*.js
 
 ## Kurulum
 
-Kesin token sayımı için tiktoken kurun:
+tiktoken, ctxman'in bağımlılıkları arasında olduğu için token sayımı kurulumdan hemen sonra
+çalışır (OpenAI modelleri için kesin, diğer sağlayıcılar için yaklaşık). tiktoken
+yüklenemezse araç akıllı tahmine geçer (~%95 doğruluk).
+
+`ctxman count --api` ile Claude için kesin sayım yapmak isterseniz Anthropic SDK'sını kurup API
+anahtarınızı tanımlayın:
 
 ```bash
-npm install tiktoken
+npm install -g @anthropic-ai/sdk   # global ctxman için; projeye kurulu ctxman için -g olmadan
+export ANTHROPIC_API_KEY=sk-ant-...
 ```
-
-Tiktoken olmadan araç akıllı tahmin kullanır (~%95 doğruluk).
 
 ## Çıktı Örneği
 
@@ -455,8 +569,7 @@ LLM bağlam penceresi optimizasyonu için mükemmel:
 - **Odaklanmış geliştirme** = AI destekli geliştirme için temel kod
 - **Bağlam verimliliği** = Token başına maksimum faydalı kod
 - **Çift mod esnekliği** = Kesin include/exclude kontrolü
-- **Ultra-minimal dışa aktarım** = 1k karakter (%89 azalma) sık AI etkileşimleri için
-- **Detaylı dışa aktarım** = Gerektiğinde kapsamlı analiz için 8.6k karakter
+- **Kompakt dışa aktarım** = Klasöre göre gruplanmış yollar, JSON veya TOON olarak, sık AI etkileşimleri için
 
 ## Entegrasyon
 
@@ -511,16 +624,15 @@ Bu aracı şunlara entegre edebilirsiniz:
 # .contextignore dosyasını yedekleyin, sadece *.md hariç tutmayı kaldırın
 
 # CI/CD için otomatik rapor
-node token-analysis/token-calculator.js --save-report --no-verbose
+ctxman --cli --save-report
 
 # Geliştirme için detaylı analiz
-node token-analysis/token-calculator.js --verbose --save-report
+ctxman --cli --verbose --save-report
 ```
 
 ### Performans İpuçları
 
-- İlk çalıştırmada tiktoken yüklenir (biraz yavaş olabilir)
-- Büyük projeler için verbose modu devre dışı bırakın
+- tiktoken encoder'ı ilk sayımda bir kez oluşturulur (~150 ms), sonra yeniden kullanılır
 - JSON raporları büyük projeler için disk alanı kullanır
 - `.contextignore` desenlerini optimize edin
 

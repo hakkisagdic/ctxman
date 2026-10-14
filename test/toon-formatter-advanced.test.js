@@ -61,8 +61,12 @@ describe('ToonFormatter Advanced Coverage', () => {
       toon.decode = originalDecode;
     });
 
-    test('decode throws error (sync not supported)', () => {
-      expect(() => formatter.decode('string')).toThrow('Synchronous decoder not available');
+    test('decode delegates to the official decoder', async () => {
+      const toon = await import('@toon-format/toon');
+
+      formatter.decode('key: value');
+
+      expect(toon.decode).toHaveBeenCalledWith('key: value', {});
     });
   });
 

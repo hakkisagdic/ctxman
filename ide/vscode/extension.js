@@ -161,7 +161,7 @@ async function generateContext(mode, filePath, options = {}) {
 
         const model = config.get('targetModel');
         if (model) {
-          args.push('--target-llm', model);
+          args.push('--target-model', model);
         }
 
         // Run ctxman
@@ -213,12 +213,40 @@ async function generateContext(mode, filePath, options = {}) {
  * @param {string[]} args - Command arguments
  * @returns {Promise<{output: string, tokenCount: number}>}
  */
+// cmd.exe expands these even inside quoted arguments
+const WINDOWS_SHELL_METACHARACTERS = /[&|<>^%!"`\r\n]/;
+
+/**
+ * How to start `npx ctxman ...`. Arguments include editor file paths, so no shell is used:
+ * a file named `$(cmd).js` must not run a command. On Windows npx is a .cmd script that only
+ * cmd.exe can run, so arguments cmd.exe would interpret are refused there.
+ * @param {string[]} args - CLI arguments
+ * @param {string} [platform]
+ * @returns {{command: string, args: string[], shell: boolean}}
+ */
+function npxCommand(args, platform = process.platform) {
+  if (platform !== 'win32') {
+    return { command: 'npx', args: ['ctxman', ...args], shell: false };
+  }
+  const unsafe = args.find((arg) => WINDOWS_SHELL_METACHARACTERS.test(arg));
+  if (unsafe) {
+    throw new Error(`Cannot pass "${unsafe}" to the ctxman CLI safely on Windows`);
+  }
+  // With a shell the arguments are joined with spaces; quote those that contain one
+  const quoted = args.map((arg) => (/\s/.test(arg) ? `"${arg}"` : arg));
+  return { command: 'npx', args: ['ctxman', ...quoted], shell: true };
+}
+
 function runCtxman(cwd, args) {
   return new Promise((resolve, reject) => {
-    const proc = spawn('npx', ['ctxman', ...args], {
+    const command = npxCommand(args);
+    const proc = spawn(command.command, command.args, {
       cwd,
-      shell: true,
+      shell: command.shell,
       timeout: 60000,
+      // Without an export flag the CLI asks which export to run; with no stdin it gets EOF
+      // and finishes instead of waiting for an answer nobody can give
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
 
     let output = '';
@@ -236,9 +264,9 @@ function runCtxman(cwd, args) {
       if (code !== 0 && !output) {
         reject(new Error(error || `ctxman exited with code ${code}`));
       } else {
-        // Try to parse token count from output
-        const tokenMatch = output.match(/Total tokens: (\d+)/);
-        const tokenCount = tokenMatch ? parseInt(tokenMatch[1], 10) : 0;
+        // The CLI prints the count with locale digit grouping, e.g. "Total tokens: 12,345"
+        const tokenMatch = output.match(/Total tokens: (\d[^\n]*)/);
+        const tokenCount = tokenMatch ? parseInt(tokenMatch[1].replace(/\D/g, ''), 10) : 0;
         resolve({ output, tokenCount });
       }
     });
@@ -320,4 +348,5 @@ function deactivate() {
 module.exports = {
   activate,
   deactivate,
+  npxCommand,
 };

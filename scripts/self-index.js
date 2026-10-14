@@ -34,7 +34,7 @@ async function main() {
     // Trigger init explicitly to catch errors early
     await provider.init();
     console.log('✅ Model loaded.');
-  } catch (_e) {
+  } catch (e) {
     console.log(`⚠️ Local embedding failed: ${e.message}`);
     console.log('⚠️ Falling back to MockEmbeddingProvider for structure test.');
     provider = new MockEmbeddingProvider();

@@ -80,12 +80,15 @@ describe('MCPServer', () => {
 
     const result = await listToolsHandler({});
     expect(result.tools).toBeDefined();
-    expect(result.tools.length).toBe(5);
+    // The original tools come first; newer ones are appended
+    expect(result.tools.length).toBeGreaterThanOrEqual(5);
+    expect(result.tools.map((tool) => tool.name)).toContain('pr_context');
     expect(result.tools[0].name).toBe('analyze_codebase');
     expect(result.tools[1].name).toBe('generate_context');
     expect(result.tools[2].name).toBe('git_diff');
     expect(result.tools[3].name).toBe('search_code');
     expect(result.tools[4].name).toBe('list_methods');
+    expect(result.tools.map((tool) => tool.name)).toContain('repo_map');
   });
 
   it('should handle analyze_codebase tool call', async () => {

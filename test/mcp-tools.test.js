@@ -7,29 +7,28 @@ import { GitClient } from '../lib/integrations/git/GitClient.js';
 import { CallToolRequestSchema as _CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import fs from 'fs';
 
-// Mock fs to prevent side effects in constructors
+// Mock fs to prevent side effects in constructors. Paths with an extension are files, the
+// others directories: the server checks that a tool's `path` is an existing directory.
 vi.mock('fs', () => {
-  return {
-    readFileSync: vi.fn().mockReturnValue(''),
-    existsSync: vi.fn().mockReturnValue(true),
-    statSync: vi.fn().mockReturnValue({
-      isDirectory: () => false,
-      isFile: () => true,
+  const stat = (p) => {
+    const isFile = /\.\w+$/.test(String(p));
+    return {
+      isDirectory: () => !isFile,
+      isFile: () => isFile,
       size: 100,
       mtime: new Date(),
       birthtime: new Date(),
-    }),
+    };
+  };
+  return {
+    readFileSync: vi.fn().mockReturnValue(''),
+    existsSync: vi.fn().mockReturnValue(true),
+    statSync: vi.fn(stat),
     readdirSync: vi.fn().mockReturnValue([]),
     default: {
       readFileSync: vi.fn().mockReturnValue(''),
       existsSync: vi.fn().mockReturnValue(true),
-      statSync: vi.fn().mockReturnValue({
-        isDirectory: () => false,
-        isFile: () => true,
-        size: 100,
-        mtime: new Date(),
-        birthtime: new Date(),
-      }),
+      statSync: vi.fn(stat),
       readdirSync: vi.fn().mockReturnValue([]),
     },
   };
@@ -103,8 +102,19 @@ describe('MCPServer Tool Logic', () => {
       params: { name: 'git_diff', arguments: { path: '/test', branch: 'dev' } },
     });
 
-    expect(GitClient.prototype.exec).toHaveBeenCalledWith('diff dev');
+    expect(GitClient.prototype.exec).toHaveBeenCalledWith(['diff', 'dev', '--']);
     expect(result.content[0].text).toBe('diff output');
+  });
+
+  it('should reject an unsafe git_diff branch without running git', async () => {
+    const handler = server.server.setRequestHandler.mock.calls[6][1];
+    const result = await handler({
+      params: { name: 'git_diff', arguments: { path: '/test', branch: 'main; touch x' } },
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Invalid branch or ref');
+    expect(GitClient.prototype.exec).not.toHaveBeenCalled();
   });
 
   it('should handle search_code', async () => {

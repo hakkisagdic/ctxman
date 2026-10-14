@@ -46,7 +46,11 @@ describe('GitIgnoreParser Coverage', () => {
 
     test('handles directory as pattern file', () => {
       fs.existsSync.mockReturnValue(true);
-      fs.statSync.mockReturnValue({ isDirectory: () => true });
+      fs.readFileSync.mockImplementation(() => {
+        throw Object.assign(new Error('EISDIR: illegal operation on a directory'), {
+          code: 'EISDIR',
+        });
+      });
       vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const parser = new GitIgnoreParser('/.gitignore', null, null);
@@ -101,6 +105,22 @@ describe('GitIgnoreParser Coverage', () => {
       // ** at start means can match at any level, including root
       expect(result.regex.test('src/node_modules')).toBe(true);
       expect(result.regex.test('src/lib/node_modules')).toBe(true);
+    });
+
+    test('double-star crosses directory levels', () => {
+      const trailing = parser.convertToRegex('src/**');
+      expect(trailing.regex.test('src/lib/deep/util.js')).toBe(true);
+      expect(trailing.regex.test('docs/a.md')).toBe(false);
+
+      const leading = parser.convertToRegex('**/*.test.js');
+      expect(leading.regex.test('a.test.js')).toBe(true);
+      expect(leading.regex.test('x/y/a.test.js')).toBe(true);
+      expect(leading.regex.test('x/a.js')).toBe(false);
+
+      const middle = parser.convertToRegex('a/**/b');
+      expect(middle.regex.test('a/b')).toBe(true);
+      expect(middle.regex.test('a/x/y/b')).toBe(true);
+      expect(middle.regex.test('a/xb')).toBe(false);
     });
 
     test('converts directory pattern', () => {
@@ -248,6 +268,15 @@ describe('GitIgnoreParser Coverage', () => {
       const result = parser.isIgnored('/proj/app.test.js', 'app.test.js');
       expect(result).toBe(true);
       expect(parser._lastIgnoreReason).toBe('context');
+    });
+  });
+
+  describe('Without pattern files', () => {
+    test('does not pass a missing path to fs.existsSync', () => {
+      // Node 24 warns (DEP0187) when existsSync gets null, which lands on stderr
+      const parser = new GitIgnoreParser(null, null, null);
+      expect(fs.existsSync).not.toHaveBeenCalled();
+      expect(parser.patterns).toEqual([]);
     });
   });
 });

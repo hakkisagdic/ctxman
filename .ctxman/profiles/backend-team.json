@@ -6,7 +6,7 @@
   "config": {
     "exclude": ["frontend/**", "src/components/**", "pages/**", "**/*.test.js", "**/*.spec.js"],
     "include": ["api/**", "server/**", "lib/**", "db/**", "services/**"],
-    "targetModel": "claude-sonnet-4.5",
+    "targetModel": "claude-sonnet-5-5",
     "methodLevel": true,
     "methodInclude": ["*Controller", "*Service", "*Repository", "*Handler", "*Middleware"]
   }

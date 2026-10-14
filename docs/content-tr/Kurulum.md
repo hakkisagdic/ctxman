@@ -22,7 +22,7 @@
 
 ctxman aracını kurmadan önce, sisteminizin aşağıdaki gereksinimleri karşıladığından emin olun:
 
-- **Node.js**: Sürüm 14.0.0 veya üzeri (package.json dosyasında "engines" altında belirtilmiştir)
+- **Node.js**: Sürüm 22 veya üzeri (package.json dosyasında "engines" altında belirtilmiştir)
 - **npm**: Node Package Manager, genellikle Node.js ile birlikte kurulur
 
 Bu gereksinimler, paketin hem global hem de yerel kurulumları için gereklidir. Araç, Node.js'in çapraz platform yeteneklerinden yararlanarak tutarlı davranış için macOS, Linux ve Windows dahil farklı işletim sistemlerinde çalışacak şekilde tasarlanmıştır.
@@ -67,21 +67,23 @@ Yerel kurulum, tüm ekip üyelerinin projenin package-lock.json dosyasında tan�
 
 ## Token Sayım Yapılandırması
 
-ctxman aracı, doğruluğu artıran isteğe bağlı bir bağımlılıkla birlikte token sayımı için iki yöntem sağlar.
+ctxman aracı token sayımı için iki yöntem sağlar; asıl yöntemi sağlayan tiktoken, ctxman ile birlikte kurulur.
 
-### tiktoken ile Kesin Token Sayımı
+### tiktoken ile Token Sayımı
 
-GPT-4'ün tokenizasyonuyla eşleşen hassas token sayımı için tiktoken paketini kurun:
+tiktoken ctxman'in bir bağımlılığıdır, bu yüzden ayrıca kurmanız gerekmez. Araç hedef modelin encoding'ini kullanır: GPT-4o'dan bu yana OpenAI modelleri için `o200k_base`, diğerleri için `cl100k_base`. Sayımlar GPT-5.x'e kadarki OpenAI modelleri için kesin; GPT-6 ile kendi tokenizer'larını kullanan Claude, Gemini ve diğer sağlayıcıların modelleri için yaklaşıktır.
+
+Claude için kesin sayım istiyorsanız Anthropic SDK'sını (isteğe bağlı) kurup `ctxman count --api` kullanın; bu komut gizli bilgileri maskelenmiş metni Anthropic'in ücretsiz count_tokens API'sine gönderir:
 
 ```bash
-npm install tiktoken
+npm install @anthropic-ai/sdk
+export ANTHROPIC_API_KEY=sk-ant-...
+ctxman count --model claude-sonnet-5-5 --api
 ```
-
-tiktoken mevcut olduğunda, araç cl100k_base encoding'i (GPT-4 tarafından kullanılır) yükleyerek kesin token sayımı kullanır. Bu, LLM context yönetimi için en doğru token sayımlarını sağlar.
 
 ### Akıllı Tahmine Geri Dönüş
 
-tiktoken kurulu değilse, araç otomatik olarak yaklaşık %95 doğrulukla akıllı bir tahmin algoritmasına geri döner. Tahmin, dosya tiplerine özgü karakter-token oranlarını kullanır:
+tiktoken yüklenemezse, araç otomatik olarak yaklaşık %95 doğrulukla akıllı bir tahmin algoritmasına geri döner. Tahmin, dosya tiplerine özgü karakter-token oranlarını kullanır:
 
 - JavaScript/TypeScript: Token başına 3.2 karakter
 - JSON: Token başına 2.5 karakter
@@ -204,7 +206,7 @@ ctxman --context-clipboard
 ctxman --method-level --context-clipboard
 ```
 
-Araç, yürütme sırasında anında geri bildirim sağlar; kesin token sayımı (tiktoken ile) veya tahmin kullanıp kullanmadığını, analiz modunu (INCLUDE/EXCLUDE) ve tamamlanma sonrasında özet istatistikleri gösterir.
+Araç, yürütme sırasında anında geri bildirim sağlar; tiktoken ile mi (hangi encoding'le) saydığını yoksa tahmin mi kullandığını, analiz modunu (INCLUDE/EXCLUDE) ve tamamlanma sonrasında özet istatistikleri gösterir.
 
 **Bölüm kaynakları**
 
@@ -293,8 +295,8 @@ tiktoken kurulumu başarısız olursa, araç otomatik olarak tahmin moduna geri 
 # npm önbelleğini temizle
 npm cache clean --force
 
-# Taze bağımlılıklarla yeniden kur
-npm install tiktoken
+# ctxman'i taze bağımlılıklarla (tiktoken dahil) yeniden kur
+npm install -g ctxman
 ```
 
 ### Yapılandırma Sorunları

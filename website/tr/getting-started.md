@@ -33,7 +33,7 @@ npm link
 
 ## Gereksinimler
 
-- **Node.js**: Sürüm 20.0.0 veya üzeri
+- **Node.js**: Sürüm 22 veya üzeri (22 LTS ve 24 LTS ile test edilir; bkz. `.nvmrc`)
 - **npm**: Sürüm 8.0.0 veya üzeri
 
 Node.js sürümünüzü kontrol edin:

@@ -13,5 +13,5 @@
   ],
   "methodInclude": ["*Handler", "*Service", "*Controller", "*Manager"],
   "methodExclude": ["*test*", "console*", "debug*", "log*"],
-  "targetModel": "claude-sonnet-4.5"
+  "targetModel": "claude-sonnet-5-5"
 }

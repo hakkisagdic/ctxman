@@ -103,7 +103,7 @@ Smart context generation for LLM consumption.
 
 ```javascript
 const builder = new ContextBuilder({
-  targetModel: 'claude-sonnet-4.5',
+  targetModel: 'claude-sonnet-5-5',
   targetTokens: 50000,
 });
 const context = builder.build(analysisResult);
@@ -361,7 +361,8 @@ Main orchestrator for token analysis.
 
 **Features:**
 
-- Exact token counting with tiktoken
+- tiktoken counting with the target model's encoding (o200k_base or cl100k_base): exact for OpenAI
+  models up to GPT-5.x, approximate for other vendors (exact Claude counts: `ctxman count --api`)
 - Smart estimation fallback (~95% accuracy)
 - Multi-language support (14+ languages)
 - Method-level analysis

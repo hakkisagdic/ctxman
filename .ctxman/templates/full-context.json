@@ -5,5 +5,5 @@
   "exclude": ["node_modules/**", ".git/**", "coverage/**", "dist/**", "build/**"],
   "methodInclude": ["*"],
   "methodExclude": [],
-  "targetModel": "claude-sonnet-4.5"
+  "targetModel": "claude-sonnet-5-5"
 }

@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach, _afterEach } from 'vitest';
 import GitUtils from '../lib/utils/git-utils.js';
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import fs from 'fs';
 import https from 'https';
 import TokenCalculator from '../lib/analyzers/token-calculator.js';
@@ -87,11 +87,30 @@ describe('GitUtils', () => {
       const path = gitUtils.cloneRepository(repoInfo);
 
       expect(fs.mkdirSync).toHaveBeenCalled();
-      expect(execSync).toHaveBeenCalledWith(
-        expect.stringContaining('git clone'),
+      expect(execFileSync).toHaveBeenCalledWith(
+        'git',
+        [
+          'clone',
+          '--depth=1',
+          '--single-branch',
+          '--branch=main',
+          '--',
+          'https://github.com/owner/repo.git',
+          expect.stringContaining('owner-repo'),
+        ],
         expect.any(Object)
       );
       expect(path).toContain('owner-repo');
+    });
+
+    test('rejects an unsafe branch name without running git', () => {
+      expect(() => gitUtils.cloneRepository({ ...repoInfo, branch: 'main;touch x' })).toThrow(
+        'Invalid branch name'
+      );
+      expect(() => gitUtils.cloneRepository({ ...repoInfo, branch: '--upload-pack=x' })).toThrow(
+        'Invalid branch name'
+      );
+      expect(execFileSync).not.toHaveBeenCalled();
     });
 
     test('removes existing clone', () => {
@@ -111,9 +130,8 @@ describe('GitUtils', () => {
     });
 
     test('handles clone failure', () => {
-      execSync.mockImplementation((cmd) => {
-        if (cmd.includes('clone')) throw new Error('Clone failed');
-        return 'git version';
+      execFileSync.mockImplementationOnce(() => {
+        throw new Error('Clone failed');
       });
 
       expect(() => gitUtils.cloneRepository(repoInfo)).toThrow('Failed to clone repository');
@@ -126,19 +144,41 @@ describe('GitUtils', () => {
       vi.spyOn(gitUtils, 'cloneRepository').mockReturnValue('/tmp/repo');
       TokenCalculator.prototype.analyze = vi.fn().mockReturnValue([]);
       TokenCalculator.prototype.stats = { totalFiles: 10, totalTokens: 100, totalLines: 50 };
-      GitIngestFormatter.prototype.generateDigest = vi.fn().mockReturnValue('digest content');
+      GitIngestFormatter.prototype.saveToFile = vi.fn(function () {
+        this.chunkFiles = [];
+        return 'digest content'.length;
+      });
 
       const result = await gitUtils.generateFromGitHub('owner/repo', { outputFile: 'out.txt' });
 
-      expect(gitUtils.cloneRepository).toHaveBeenCalled();
+      expect(gitUtils.cloneRepository).toHaveBeenCalledWith(
+        expect.objectContaining({ fullName: 'owner/repo', branch: null }),
+        expect.any(Object)
+      );
       expect(TokenCalculator).toHaveBeenCalled();
       expect(GitIngestFormatter).toHaveBeenCalled();
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        expect.stringContaining('out.txt'),
-        'digest content',
-        'utf8'
+      expect(GitIngestFormatter.prototype.saveToFile).toHaveBeenCalledWith(
+        expect.stringContaining('out.txt')
       );
       expect(result.tokens).toBe(100);
+      expect(result.digestSize).toBe('digest content'.length);
+    });
+
+    test('clones the branch passed in options', async () => {
+      vi.spyOn(gitUtils, 'cloneRepository').mockReturnValue('/tmp/repo');
+      TokenCalculator.prototype.analyze = vi.fn().mockReturnValue([]);
+      TokenCalculator.prototype.stats = { totalFiles: 1, totalTokens: 1, totalLines: 1 };
+      GitIngestFormatter.prototype.saveToFile = vi.fn(function () {
+        this.chunkFiles = [];
+        return 1;
+      });
+
+      await gitUtils.generateFromGitHub('owner/repo', { outputFile: 'out.txt', branch: 'dev' });
+
+      expect(gitUtils.cloneRepository).toHaveBeenCalledWith(
+        expect.objectContaining({ branch: 'dev' }),
+        expect.any(Object)
+      );
     });
   });
 

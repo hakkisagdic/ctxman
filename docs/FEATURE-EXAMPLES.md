@@ -308,11 +308,11 @@ The wizard guides you through 5 steps:
 ┌──────────────────────────────────────────────────────────┐
 │  Which AI model will you use?                           │
 │                                                          │
-│  ❯ Claude Opus (200k tokens)                            │
-│    Claude Sonnet (200k tokens)                          │
-│    GPT-4 Turbo (128k tokens)                            │
-│    GPT-4 (8k tokens)                                    │
-│    Gemini Pro (1M tokens)                               │
+│  ❯ Claude Opus 5.5 (1M tokens)                          │
+│    Claude Sonnet 5.5 (1M tokens)                        │
+│    GPT-6.1 Sol (1.05M tokens)                           │
+│    GPT-5.4 mini (400k tokens)                           │
+│    Gemini 3.8 Flash (1M tokens)                         │
 │    Custom (specify token limit)                         │
 └──────────────────────────────────────────────────────────┘
 ```
@@ -367,7 +367,7 @@ The wizard guides you through 5 steps:
 ├──────────────────────────────────────────────────────────┤
 │                                                          │
 │  Use Case: Bug Fix                                      │
-│  Target: Claude Opus (200k tokens)                      │
+│  Target: Claude Opus 5.5 (1M tokens)                    │
 │  Files: Changed + Related (estimated 45 files)          │
 │  Format: TOON                                           │
 │  Estimated tokens: 12,450                               │
@@ -414,7 +414,7 @@ ctxman --dashboard
 │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 67% (43/64 files) │
 │                                                          │
 │  Current: src/analyzers/method-analyzer.js              │
-│  Tokens: 181,480 / 200,000 (90.7%)                      │
+│  Tokens: 181,480 / 1,000,000 (18.1%)                    │
 │  Time Elapsed: 2.3s                                     │
 │                                                          │
 │  ✓ Scanning files                                       │
@@ -560,7 +560,7 @@ ctxman --list-formats
 ```bash
 # Use wizard for guided setup
 ctxman --wizard
-# Select: Bug Fix → Claude Opus → Changed + Related → TOON
+# Select: Bug Fix → Claude Opus 5.5 → Changed + Related → TOON
 
 # Or use CLI directly
 ctxman --changed-only --output toon --context-clipboard

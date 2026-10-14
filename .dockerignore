@@ -1,0 +1,23 @@
+# Build context of the Dockerfile: an allowlist of what the image copies.
+# Everything else stays out, among it node_modules, website, desktop-app, ide, test,
+# coverage, docs, .git, local reports and .env files.
+*
+
+!package.json
+!package-lock.json
+!index.js
+!index.d.ts
+!ctxman.js
+!LICENSE
+!bin/
+!lib/
+!.ctxman/llm-profiles.json
+!.ctxman/custom-profiles.example.json
+!.ctxman/profiles/
+!.ctxman/templates/
+!.ctxman/wizard-profiles/
+
+# Never, even inside the directories above
+**/node_modules
+**/.DS_Store
+**/*.log

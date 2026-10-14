@@ -6,7 +6,7 @@ class Ctxman < Formula
   license "MIT"
   version "2.3.5"
 
-  depends_on "node@20"
+  depends_on "node"
 
   def install
     # Install npm package

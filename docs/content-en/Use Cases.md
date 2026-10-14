@@ -31,7 +31,7 @@ Method-level filtering further enhances context optimization through `.methodinc
 
 ## Codebase Analysis
 
-The ctxman tool provides comprehensive insights into token distribution across the codebase, identifying large files and methods while tracking complexity over time. Using exact token counting via tiktoken (GPT-4 compatible), it delivers accurate metrics that help maintain optimal code health. In the absence of tiktoken, the tool falls back to smart estimation with ~95% accuracy.
+The ctxman tool provides comprehensive insights into token distribution across the codebase, identifying large files and methods while tracking complexity over time. Using tiktoken counts in the target model's encoding (exact for OpenAI models, approximate for other vendors), it delivers accurate metrics that help maintain optimal code health. If tiktoken cannot be loaded, the tool falls back to smart estimation with ~95% accuracy.
 
 Key analytical features include:
 
@@ -92,7 +92,7 @@ To maximize effectiveness when using the ctxman tool, follow these best practice
 
 **Performance Optimization**: The tool is optimized for performance, but analyzing very large codebases may benefit from method-level filtering to reduce processing overhead. Enable method-level analysis only when necessary.
 
-**Exact Token Counting**: Install the `tiktoken` package (`npm install tiktoken`) for GPT-4 compatible exact token counting. Without it, the tool uses estimation with ~95% accuracy.
+**Token Counting**: tiktoken is installed with ctxman; its counts are exact for OpenAI models and approximate for Claude, Gemini and other vendors. For exact Claude counts, run `ctxman count --model claude-sonnet-5-5 --api` (needs `@anthropic-ai/sdk` and `ANTHROPIC_API_KEY`).
 
 **Regular Monitoring**: Integrate the tool into regular development workflows through pre-commit hooks or scheduled scripts to maintain awareness of codebase growth and complexity trends.
 

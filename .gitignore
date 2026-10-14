@@ -50,6 +50,21 @@ logs/
 
 # Generated vector store for `ctxman ask` (rebuilt on demand, per project)
 .ctxman/self-knowledge/
+.ctxman/rag-store/
+
+# Per-project runtime state written by the CLI (snapshots, context versions,
+# performance metrics, multi-repo config) - local to each checkout
+.ctxman/metrics/
+.ctxman/snapshots/
+.ctxman/versions/
+.ctxman/repos.json
+dependency-context.json
+
+# Temporary config dirs created by test/multi-repo-manager.test.js
+.ctxman-test-*/
+
+# Working notes from AI agent sessions (kept out of the repo and out of ctxman's own context)
+.agents/
 
 # v3.0.0 Cache directory
 .context-cache/

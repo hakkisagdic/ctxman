@@ -33,7 +33,7 @@ describe('LLMDetector Final Coverage', () => {
 
     // Should return fallback
     expect(profiles.default.name).toBe('Unknown Model');
-    expect(profiles.profiles['gpt-4o']).toBeDefined();
+    expect(profiles.profiles['claude-sonnet-5-5']).toBeDefined();
   });
 
   test('detectFromConfig returns configured model', async () => {

@@ -83,7 +83,7 @@ The interactive mode is ideal for first-time users and those who want to explore
 
 ## Understanding the Analysis Output
 
-When you run the ctxman tool, it produces a detailed analysis report that includes several key pieces of information. The output begins with metadata about the analysis process, including the project root directory, configuration mode (INCLUDE or EXCLUDE), and token calculation method (exact using tiktoken or estimated).
+When you run the ctxman tool, it produces a detailed analysis report that includes several key pieces of information. The output begins with metadata about the analysis process, including the project root directory, configuration mode (INCLUDE or EXCLUDE), and token calculation method (tiktoken with the encoding it uses, or estimated).
 
 The main report includes:
 
@@ -95,7 +95,7 @@ The main report includes:
 - Top 5 largest files by token count
 - Top 5 largest directories by token count
 
-Understanding token counts is crucial for LLM context management. The tool uses tiktoken for GPT-4 compatible exact counting when available, falling back to estimation with approximately 95% accuracy if tiktoken is not installed. The verbose output (enabled by default) shows all included files, providing transparency into what contributes to your token count.
+Understanding token counts is crucial for LLM context management. The tool counts with tiktoken, which is installed with it, in the target model's encoding: exact for OpenAI models, approximate for Claude, Gemini and other vendors (`ctxman count --api` counts Claude models exactly). If tiktoken cannot be loaded, it falls back to estimation with approximately 95% accuracy. The verbose output (enabled by default) shows all included files, providing transparency into what contributes to your token count.
 
 ```mermaid
 flowchart TD
@@ -362,10 +362,11 @@ When getting started with the ctxman tool, you may encounter a few common issues
 
 **Understanding verbose output**: The tool's verbose output (enabled by default) can be overwhelming for beginners. It shows all included files, token counts, and detailed statistics. To reduce output, use the `--no-verbose` flag, though this is not recommended as it reduces transparency about what files are being analyzed.
 
-**Interpreting token counts**: The tool uses tiktoken for exact token counting when available. If you haven't installed tiktoken, the tool falls back to estimation mode. To ensure exact counts, install tiktoken:
+**Interpreting token counts**: The startup line shows how tokens are counted, for example `✅ Exact (using tiktoken) · cl100k_base`. tiktoken matches OpenAI's tokenizers; for Claude, Gemini and other vendors the counts are approximate. To count for one model, and exactly for Claude through Anthropic's API:
 
 ```bash
-npm install tiktoken
+ctxman count --model gpt-5.5
+ctxman count --model claude-sonnet-5-5 --api
 ```
 
 **Configuration file issues**: A common source of confusion is the interaction between `.contextinclude` and `.contextignore`. Remember that `.contextinclude` takes priority - if it exists, the tool operates in INCLUDE mode and ignores `.contextignore`. If you're not seeing expected files, check whether a `.contextinclude` file exists.

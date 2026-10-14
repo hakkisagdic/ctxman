@@ -33,7 +33,7 @@ npm link
 
 ## Requirements
 
-- **Node.js**: Version 20.0.0 or higher
+- **Node.js**: Version 22 or newer (tested on 22 LTS and 24 LTS; see `.nvmrc`)
 - **npm**: Version 8.0.0 or higher
 
 Check your Node.js version:

@@ -1,0 +1,778 @@
+{
+  "checked": "2026-10-09",
+  "roadmapUrl": "https://github.com/hakkisagdic/ctxman/issues/34",
+  "legend": {
+    "en": {
+      "yes": "Yes",
+      "partial": "Partly or limited",
+      "no": "No",
+      "unknown": "Not documented",
+      "note": "hover for details",
+      "notesTitle": "Notes on individual cells",
+      "sourcesTitle": "Sources and method"
+    },
+    "tr": {
+      "yes": "Evet",
+      "partial": "Kısmen veya sınırlı",
+      "no": "Hayır",
+      "unknown": "Belgelenmemiş",
+      "note": "ayrıntı için üzerine gelin",
+      "notesTitle": "Hücrelerle ilgili notlar",
+      "sourcesTitle": "Kaynaklar ve yöntem"
+    }
+  },
+  "columns": [
+    {
+      "id": "ctxman",
+      "name": "ctxman",
+      "kind": {
+        "en": "open source, local",
+        "tr": "açık kaynak, yerel"
+      },
+      "landing": true,
+      "url": "https://github.com/hakkisagdic/ctxman"
+    },
+    {
+      "id": "repomix",
+      "name": "Repomix",
+      "kind": {
+        "en": "open source",
+        "tr": "açık kaynak"
+      },
+      "landing": true,
+      "url": "https://github.com/yamadashy/repomix"
+    },
+    {
+      "id": "gitingest",
+      "name": "Gitingest",
+      "kind": {
+        "en": "open source",
+        "tr": "açık kaynak"
+      },
+      "landing": false,
+      "url": "https://github.com/coderamp-labs/gitingest"
+    },
+    {
+      "id": "code2prompt",
+      "name": "code2prompt",
+      "kind": {
+        "en": "open source",
+        "tr": "açık kaynak"
+      },
+      "landing": false,
+      "url": "https://github.com/mufeedvh/code2prompt"
+    },
+    {
+      "id": "aider",
+      "name": "Aider repo map",
+      "kind": {
+        "en": "open source",
+        "tr": "açık kaynak"
+      },
+      "landing": false,
+      "url": "https://github.com/Aider-AI/aider"
+    },
+    {
+      "id": "sourcegraph",
+      "name": "Sourcegraph",
+      "kind": {
+        "en": "enterprise",
+        "tr": "kurumsal"
+      },
+      "landing": true,
+      "url": "https://sourcegraph.com"
+    },
+    {
+      "id": "copilot",
+      "name": "GitHub Copilot",
+      "kind": {
+        "en": "enterprise",
+        "tr": "kurumsal"
+      },
+      "landing": true,
+      "url": "https://github.com/features/copilot"
+    },
+    {
+      "id": "augment",
+      "name": "Augment Code",
+      "kind": {
+        "en": "enterprise",
+        "tr": "kurumsal"
+      },
+      "landing": false,
+      "url": "https://www.augmentcode.com"
+    },
+    {
+      "id": "unblocked",
+      "name": "Unblocked",
+      "kind": {
+        "en": "enterprise",
+        "tr": "kurumsal"
+      },
+      "landing": true,
+      "url": "https://getunblocked.com"
+    }
+  ],
+  "groups": [
+    {
+      "id": "context",
+      "label": {
+        "en": "Context",
+        "tr": "Bağlam"
+      }
+    },
+    {
+      "id": "interfaces",
+      "label": {
+        "en": "Interfaces",
+        "tr": "Arayüzler"
+      }
+    },
+    {
+      "id": "enterprise",
+      "label": {
+        "en": "Deployment and governance",
+        "tr": "Kurulum ve yönetişim"
+      }
+    }
+  ],
+  "rows": [
+    {
+      "id": "no_server",
+      "group": "context",
+      "landing": true,
+      "label": {
+        "en": "Runs without an account or server",
+        "tr": "Hesap veya sunucu olmadan çalışır"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "yes",
+        "gitingest": "yes",
+        "code2prompt": "yes",
+        "aider": "yes",
+        "sourcegraph": "no",
+        "copilot": "no",
+        "augment": "no",
+        "unblocked": "no"
+      },
+      "notes": {
+        "sourcegraph": {
+          "en": "Needs a Sourcegraph instance",
+          "tr": "Bir Sourcegraph sunucusu gerekir"
+        }
+      }
+    },
+    {
+      "id": "exact_tokens",
+      "group": "context",
+      "landing": true,
+      "label": {
+        "en": "Token counts you can see, per file",
+        "tr": "Dosya başına görünen token sayısı"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "yes",
+        "gitingest": "partial",
+        "code2prompt": "partial",
+        "aider": "partial",
+        "sourcegraph": "unknown",
+        "copilot": "unknown",
+        "augment": "unknown",
+        "unblocked": "unknown"
+      },
+      "notes": {
+        "gitingest": {
+          "en": "Total count only",
+          "tr": "Yalnızca toplam sayı"
+        },
+        "code2prompt": {
+          "en": "Its README calls the counts estimates",
+          "tr": "README sayıları tahmin olarak tanımlıyor"
+        },
+        "aider": {
+          "en": "/tokens shows the chat usage",
+          "tr": "/tokens sohbetteki kullanımı gösterir"
+        }
+      }
+    },
+    {
+      "id": "method_tokens",
+      "group": "context",
+      "landing": false,
+      "label": {
+        "en": "Token counts per function",
+        "tr": "Fonksiyon başına token sayısı"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "no",
+        "gitingest": "unknown",
+        "code2prompt": "no",
+        "aider": "unknown",
+        "sourcegraph": "unknown",
+        "copilot": "unknown",
+        "augment": "unknown",
+        "unblocked": "unknown"
+      }
+    },
+    {
+      "id": "budget",
+      "group": "context",
+      "landing": true,
+      "label": {
+        "en": "Fit context into a token budget",
+        "tr": "Bağlamı bir token bütçesine sığdırma"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "partial",
+        "gitingest": "no",
+        "code2prompt": "no",
+        "aider": "partial",
+        "sourcegraph": "partial",
+        "copilot": "unknown",
+        "augment": "partial",
+        "unblocked": "partial"
+      },
+      "notes": {
+        "repomix": {
+          "en": "--token-budget fails the run when over; it does not pick files",
+          "tr": "--token-budget aşımda çalıştırmayı durdurur; dosya seçmez"
+        },
+        "aider": {
+          "en": "The repo map is trimmed to --map-tokens",
+          "tr": "Repo haritası --map-tokens sınırına kırpılır"
+        }
+      }
+    },
+    {
+      "id": "compress",
+      "group": "context",
+      "landing": false,
+      "label": {
+        "en": "Signatures-only view of the code",
+        "tr": "Kodun yalnızca imzalardan oluşan görünümü"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "yes",
+        "gitingest": "unknown",
+        "code2prompt": "partial",
+        "aider": "yes",
+        "sourcegraph": "unknown",
+        "copilot": "unknown",
+        "augment": "unknown",
+        "unblocked": "unknown"
+      },
+      "notes": {
+        "code2prompt": {
+          "en": "--entity-map in a feature build",
+          "tr": "Özel derlemede --entity-map"
+        }
+      }
+    },
+    {
+      "id": "code_graph",
+      "group": "context",
+      "landing": false,
+      "label": {
+        "en": "Dependency or symbol graph",
+        "tr": "Bağımlılık veya sembol grafiği"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "no",
+        "gitingest": "unknown",
+        "code2prompt": "partial",
+        "aider": "yes",
+        "sourcegraph": "yes",
+        "copilot": "unknown",
+        "augment": "partial",
+        "unblocked": "partial"
+      },
+      "notes": {
+        "code2prompt": {
+          "en": "--entity-map lists entities, no graph",
+          "tr": "--entity-map varlıkları listeler, grafik yok"
+        }
+      }
+    },
+    {
+      "id": "pr_context",
+      "group": "context",
+      "landing": false,
+      "label": {
+        "en": "Pull-request context or review",
+        "tr": "Pull request bağlamı veya incelemesi"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "partial",
+        "gitingest": "unknown",
+        "code2prompt": "yes",
+        "aider": "unknown",
+        "sourcegraph": "partial",
+        "copilot": "yes",
+        "augment": "yes",
+        "unblocked": "yes"
+      },
+      "notes": {
+        "repomix": {
+          "en": "--include-diffs adds working-tree and staged diffs",
+          "tr": "--include-diffs çalışma ağacı ve stage diff'lerini ekler"
+        }
+      }
+    },
+    {
+      "id": "history",
+      "group": "context",
+      "landing": true,
+      "label": {
+        "en": "Commit history and decisions in context",
+        "tr": "Commit geçmişi ve kararlar bağlamda"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "yes",
+        "gitingest": "unknown",
+        "code2prompt": "yes",
+        "aider": "unknown",
+        "sourcegraph": "yes",
+        "copilot": "unknown",
+        "augment": "unknown",
+        "unblocked": "yes"
+      },
+      "notes": {
+        "ctxman": {
+          "en": "ctxman why and ctxman pr mine commits, references, owners and ADRs",
+          "tr": "ctxman why ve ctxman pr; commit, referans, sahip ve ADR bilgilerini çıkarır"
+        },
+        "sourcegraph": {
+          "en": "commit_search and diff_search MCP tools",
+          "tr": "commit_search ve diff_search MCP araçları"
+        },
+        "unblocked": {
+          "en": "Code, PRs and team discussions",
+          "tr": "Kod, PR ve ekip tartışmaları"
+        }
+      }
+    },
+    {
+      "id": "non_code",
+      "group": "context",
+      "landing": true,
+      "label": {
+        "en": "Tickets, chat and wiki as sources",
+        "tr": "Kaynak olarak ticket, sohbet ve wiki"
+      },
+      "values": {
+        "ctxman": "no",
+        "repomix": "no",
+        "gitingest": "unknown",
+        "code2prompt": "no",
+        "aider": "unknown",
+        "sourcegraph": "partial",
+        "copilot": "yes",
+        "augment": "yes",
+        "unblocked": "yes"
+      }
+    },
+    {
+      "id": "search",
+      "group": "context",
+      "landing": false,
+      "label": {
+        "en": "Ranked or semantic code search",
+        "tr": "Sıralı veya anlamsal kod araması"
+      },
+      "values": {
+        "ctxman": "partial",
+        "repomix": "partial",
+        "gitingest": "unknown",
+        "code2prompt": "no",
+        "aider": "no",
+        "sourcegraph": "partial",
+        "copilot": "yes",
+        "augment": "yes",
+        "unblocked": "unknown"
+      },
+      "notes": {
+        "ctxman": {
+          "en": "BM25 ranked search; embeddings through the optional `ctxman ask`",
+          "tr": "BM25 sıralı arama; isteğe bağlı `ctxman ask` ile gömme vektörleri"
+        },
+        "repomix": {
+          "en": "grep over a packed output (MCP)",
+          "tr": "Paketlenmiş çıktı üzerinde grep (MCP)"
+        }
+      }
+    },
+    {
+      "id": "redaction",
+      "group": "context",
+      "landing": true,
+      "label": {
+        "en": "Secrets masked before export",
+        "tr": "Dışa aktarmadan önce sırların maskelenmesi"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "partial",
+        "gitingest": "unknown",
+        "code2prompt": "unknown",
+        "aider": "unknown",
+        "sourcegraph": "unknown",
+        "copilot": "unknown",
+        "augment": "unknown",
+        "unblocked": "unknown"
+      },
+      "notes": {
+        "repomix": {
+          "en": "Secretlint leaves suspicious files out instead of masking",
+          "tr": "Secretlint şüpheli dosyaları maskelemek yerine dışarıda bırakır"
+        }
+      }
+    },
+    {
+      "id": "multi_repo",
+      "group": "context",
+      "landing": false,
+      "label": {
+        "en": "Several repositories at once",
+        "tr": "Aynı anda birden çok repo"
+      },
+      "values": {
+        "ctxman": "partial",
+        "repomix": "no",
+        "gitingest": "no",
+        "code2prompt": "no",
+        "aider": "unknown",
+        "sourcegraph": "yes",
+        "copilot": "yes",
+        "augment": "yes",
+        "unblocked": "yes"
+      },
+      "notes": {
+        "ctxman": {
+          "en": "--multi-repo over configured local repositories; no shared index",
+          "tr": "Yapılandırılmış yerel repolar üzerinde --multi-repo; ortak indeks yok"
+        }
+      }
+    },
+    {
+      "id": "cli",
+      "group": "interfaces",
+      "landing": false,
+      "label": {
+        "en": "Command line",
+        "tr": "Komut satırı"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "yes",
+        "gitingest": "yes",
+        "code2prompt": "yes",
+        "aider": "yes",
+        "sourcegraph": "yes",
+        "copilot": "yes",
+        "augment": "yes",
+        "unblocked": "yes"
+      }
+    },
+    {
+      "id": "mcp",
+      "group": "interfaces",
+      "landing": true,
+      "label": {
+        "en": "MCP server for agents",
+        "tr": "Ajanlar için MCP sunucusu"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "yes",
+        "gitingest": "unknown",
+        "code2prompt": "yes",
+        "aider": "unknown",
+        "sourcegraph": "yes",
+        "copilot": "yes",
+        "augment": "yes",
+        "unblocked": "yes"
+      }
+    },
+    {
+      "id": "api",
+      "group": "interfaces",
+      "landing": false,
+      "label": {
+        "en": "Library or HTTP API",
+        "tr": "Kütüphane veya HTTP API"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "yes",
+        "gitingest": "yes",
+        "code2prompt": "yes",
+        "aider": "partial",
+        "sourcegraph": "yes",
+        "copilot": "yes",
+        "augment": "partial",
+        "unblocked": "yes"
+      }
+    },
+    {
+      "id": "ci",
+      "group": "interfaces",
+      "landing": false,
+      "label": {
+        "en": "GitHub Action for CI",
+        "tr": "CI için GitHub Action"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "yes",
+        "gitingest": "unknown",
+        "code2prompt": "unknown",
+        "aider": "unknown",
+        "sourcegraph": "unknown",
+        "copilot": "unknown",
+        "augment": "unknown",
+        "unblocked": "unknown"
+      }
+    },
+    {
+      "id": "rules",
+      "group": "enterprise",
+      "landing": false,
+      "label": {
+        "en": "Include/exclude rules in the repository",
+        "tr": "Repoda include/exclude kuralları"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "yes",
+        "gitingest": "yes",
+        "code2prompt": "yes",
+        "aider": "yes",
+        "sourcegraph": "yes",
+        "copilot": "yes",
+        "augment": "yes",
+        "unblocked": "partial"
+      }
+    },
+    {
+      "id": "policy",
+      "group": "enterprise",
+      "landing": true,
+      "label": {
+        "en": "Organisation-wide exclusion policy",
+        "tr": "Kurum çapında hariç tutma politikası"
+      },
+      "values": {
+        "ctxman": "partial",
+        "repomix": "no",
+        "gitingest": "no",
+        "code2prompt": "no",
+        "aider": "no",
+        "sourcegraph": "yes",
+        "copilot": "yes",
+        "augment": "unknown",
+        "unblocked": "partial"
+      },
+      "notes": {
+        "ctxman": {
+          "en": ".ctxman/policy.json or CTXMAN_POLICY, enforced by the CLI, API and MCP server; not a barrier against a local user",
+          "tr": ".ctxman/policy.json veya CTXMAN_POLICY; CLI, API ve MCP sunucusu uygular; yerel kullanıcıya karşı bir engel değildir"
+        }
+      }
+    },
+    {
+      "id": "audit",
+      "group": "enterprise",
+      "landing": false,
+      "label": {
+        "en": "Audit log of what was shared",
+        "tr": "Paylaşılanların denetim kaydı"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "no",
+        "gitingest": "no",
+        "code2prompt": "no",
+        "aider": "no",
+        "sourcegraph": "yes",
+        "copilot": "yes",
+        "augment": "partial",
+        "unblocked": "yes"
+      }
+    },
+    {
+      "id": "sso",
+      "group": "enterprise",
+      "landing": true,
+      "label": {
+        "en": "SSO, SCIM and roles",
+        "tr": "SSO, SCIM ve roller"
+      },
+      "values": {
+        "ctxman": "no",
+        "repomix": "no",
+        "gitingest": "no",
+        "code2prompt": "no",
+        "aider": "no",
+        "sourcegraph": "yes",
+        "copilot": "yes",
+        "augment": "yes",
+        "unblocked": "yes"
+      },
+      "notes": {
+        "ctxman": {
+          "en": "No accounts: it runs on your machine",
+          "tr": "Hesap yok: makinenizde çalışır"
+        }
+      }
+    },
+    {
+      "id": "self_hosted",
+      "group": "enterprise",
+      "landing": false,
+      "label": {
+        "en": "Self-hosted or air-gapped",
+        "tr": "Kendi sunucunuzda veya internetsiz"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "yes",
+        "gitingest": "yes",
+        "code2prompt": "yes",
+        "aider": "yes",
+        "sourcegraph": "yes",
+        "copilot": "partial",
+        "augment": "unknown",
+        "unblocked": "yes"
+      }
+    },
+    {
+      "id": "open_source",
+      "group": "enterprise",
+      "landing": true,
+      "label": {
+        "en": "Open source",
+        "tr": "Açık kaynak"
+      },
+      "values": {
+        "ctxman": "yes",
+        "repomix": "yes",
+        "gitingest": "yes",
+        "code2prompt": "yes",
+        "aider": "yes",
+        "sourcegraph": "no",
+        "copilot": "partial",
+        "augment": "no",
+        "unblocked": "no"
+      }
+    }
+  ],
+  "sources": {
+    "repomix": [
+      "https://github.com/yamadashy/repomix",
+      "https://raw.githubusercontent.com/yamadashy/repomix/main/README.md",
+      "https://registry.npmjs.org/repomix"
+    ],
+    "gitingest": [
+      "https://github.com/coderamp-labs/gitingest",
+      "https://raw.githubusercontent.com/coderamp-labs/gitingest/main/README.md",
+      "https://raw.githubusercontent.com/coderamp-labs/gitingest/main/src/gitingest/__main__.py",
+      "https://pypi.org/project/gitingest/"
+    ],
+    "code2prompt": [
+      "https://github.com/mufeedvh/code2prompt",
+      "https://raw.githubusercontent.com/mufeedvh/code2prompt/main/README.md",
+      "https://raw.githubusercontent.com/mufeedvh/code2prompt/main/crates/code2prompt/src/args.rs",
+      "https://crates.io/api/v1/crates/code2prompt"
+    ],
+    "aider": [
+      "https://github.com/Aider-AI/aider",
+      "https://raw.githubusercontent.com/Aider-AI/aider/main/aider/website/docs/repomap.md",
+      "https://raw.githubusercontent.com/Aider-AI/aider/main/aider/website/docs/config/options.md",
+      "https://raw.githubusercontent.com/Aider-AI/aider/main/aider/website/docs/languages.md",
+      "https://raw.githubusercontent.com/Aider-AI/aider/main/aider/website/docs/usage/copypaste.md",
+      "https://raw.githubusercontent.com/Aider-AI/aider/main/aider/website/docs/scripting.md"
+    ],
+    "sourcegraph": [
+      "https://sourcegraph.com/docs/api/mcp",
+      "https://sourcegraph.com/docs/",
+      "https://sourcegraph.com/docs/deep-search",
+      "https://sourcegraph.com/docs/context-filters",
+      "https://sourcegraph.com/docs/cody",
+      "https://sourcegraph.com/docs/cody/core-concepts/context"
+    ],
+    "copilot": [
+      "https://docs.github.com/en/copilot/concepts/context/repository-indexing",
+      "https://docs.github.com/en/copilot/concepts/context/spaces",
+      "https://docs.github.com/en/copilot/concepts/content-exclusion-for-github-copilot",
+      "https://docs.github.com/en/copilot/concepts/context/mcp",
+      "https://docs.github.com/en/copilot/concepts/models/bring-your-own-key",
+      "https://docs.github.com/en/enterprise-server@latest/copilot/copilot-on-ghes/about-copilot-on-ghes"
+    ],
+    "augment": [
+      "https://www.augmentcode.com/changelog/context-engine-mcp-in-ga",
+      "https://www.augmentcode.com/blog/context-engine-mcp-now-live",
+      "https://docs.augmentcode.com/setup-augment/workspace-indexing",
+      "https://docs.augmentcode.com/cli/rules",
+      "https://docs.augmentcode.com/codereview/overview",
+      "https://docs.augmentcode.com/codereview/enterprise-features"
+    ],
+    "unblocked": [
+      "https://getunblocked.com/context-engine/",
+      "https://getunblocked.com/blog/data-shield/",
+      "https://docs.getunblocked.com/team-settings/sso",
+      "https://getunblocked.com/ai-info/",
+      "https://getunblocked.com/pricing/",
+      "https://docs.getunblocked.com/billing/unblocked-plans"
+    ]
+  },
+  "method": {
+    "en": "Open-source tools: their READMEs, CLI help and package registries. Enterprise products: official documentation and pricing pages. “Not documented” means we found no official source either way. Checked 2026-10-09; products change quickly.",
+    "tr": "Açık kaynak araçlar: README, CLI yardımı ve paket kayıtları. Kurumsal ürünler: resmi dokümantasyon ve fiyat sayfaları. “Belgelenmemiş”, iki yönde de resmi kaynak bulamadığımız anlamına gelir. 2026-10-09 tarihinde kontrol edildi; ürünler hızla değişir."
+  },
+  "roadmap": [
+    {
+      "id": "N1",
+      "landing": true,
+      "title": {
+        "en": "Discussions in `ctxman why`",
+        "tr": "Tartışmalar `ctxman why` içinde"
+      },
+      "body": {
+        "en": "On request, read the pull-request and issue discussions behind the references `ctxman why` finds, from GitHub or GitLab.",
+        "tr": "İstenirse `ctxman why`ın bulduğu referansların ardındaki pull request ve issue tartışmalarını GitHub veya GitLab'dan okumak."
+      }
+    },
+    {
+      "id": "N2",
+      "landing": true,
+      "title": {
+        "en": "Semantic search over MCP",
+        "tr": "MCP üzerinden anlamsal arama"
+      },
+      "body": {
+        "en": "The local embedding index of `ctxman ask` as an MCP tool, ranked together with BM25.",
+        "tr": "`ctxman ask`ın yerel gömme vektörü indeksini, BM25 ile birlikte sıralayan bir MCP aracı olarak sunmak."
+      }
+    },
+    {
+      "id": "N3",
+      "landing": true,
+      "title": {
+        "en": "Several repositories at once",
+        "tr": "Aynı anda birden çok repo"
+      },
+      "body": {
+        "en": "`ctxman map`, `search` and `pack` across the repositories of a workspace, with one budget.",
+        "tr": "Bir çalışma alanındaki repolar üzerinde tek bütçeyle `ctxman map`, `search` ve `pack`."
+      }
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+---
+title: Vitrin
+description: ctxman kendi reposunda — CLI, MCP sunucusu ve REST API'nin bir betikle yeniden üretilen gerçek çıktıları.
+---
+
+<script setup>
+import data from '../.vitepress/data/showcase.json';
+import Terminal from '../.vitepress/components/Terminal.vue';
+import TokenFunnel from '../.vitepress/components/TokenFunnel.vue';
+
+const ex = data.examples;
+const n = (value) => value.toLocaleString('tr-TR');
+const json = (value) => JSON.stringify(value, null, 2);
+const budget = [
+  `tutulan: ${ex.budget.keptFiles}/${ex.budget.projectFiles} dosya, ${n(ex.budget.keptTokens)}/${n(ex.budget.projectTokens)} token`,
+  '',
+  ...ex.budget.sample.map((file) => `${String(n(file.tokens)).padStart(7)}  ${file.path}`),
+  '      …',
+].join('\n');
+</script>
+
+# Vitrin: ctxman kendi reposunda
+
+Bu sayfadaki her sayı ve çıktı, ctxman'in bu reponun `{{ data.meta.commit }}` commit'indeki
+({{ data.meta.commitDate.slice(0, 10) }}) bir klonu üzerinde, tiktoken ile birebir sayılarak
+çalıştırılmasından gelir. Bunu yapan betik,
+[`website/scripts/build-showcase.mjs`](https://github.com/hakkisagdic/ctxman/blob/main/website/scripts/build-showcase.mjs),
+CLI'yi, MCP sunucusunu ve REST API'yi çalıştırır. Sayfadaki hiçbir şey elle düzenlenmedi.
+
+<TokenFunnel lang="tr" />
+
+## 1. Her şeyle başlayın
+
+Hiç yapılandırma yok, yalnızca git'in izlediği dosyalar:
+
+<Terminal title="~/ctxman" :command="ex.raw.command" :output="ex.raw.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+Tüm token'ların beşte birinden fazlası masaüstü uygulamasının tek bir derlenmiş paketi (`html/assets/*.js`);
+sonraki üç kayıt lock dosyaları ve depoya eklenmiş bir metin dökümü. Bunların hiçbiri bir modele
+kodu anlatmaz.
+
+## 2. Modele gerekmeyeni çıkarın
+
+`.contextignore`, `.gitignore` söz dizimini kullanır. Beş satır derleme çıktılarını ve lock
+dosyalarını dışarıda bırakır:
+
+<Terminal title=".contextignore" :output="ex.contextignore.config" copy-label="Kopyala" copied-label="Kopyalandı" />
+<Terminal title="~/ctxman" :command="ex.contextignore.command" :output="ex.contextignore.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+{{ n(ex.raw.tokens) }} → {{ n(ex.contextignore.tokens) }} token. Bu 1M'lik bir pencereye sığar ama
+konuşmaya pek yer bırakmaz ve üçte ikisinden fazlası hâlâ dokümantasyon, testler ve web sitesidir.
+
+## 3. Yalnızca kaynak kodu tutun ve sığıp sığmadığına bakın
+
+`.contextinclude` mantığı tersine çevirir: yalnızca eşleşenler analiz edilir. `--target-model`
+sonucu modelin bağlam penceresiyle karşılaştırır:
+
+<Terminal title=".contextinclude" :output="ex.contextinclude.config" copy-label="Kopyala" copied-label="Kopyalandı" />
+<Terminal title="~/ctxman" :command="ex.contextinclude.command" :output="ex.contextinclude.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+{{ ex.contextinclude.files }} dosya ve {{ n(ex.contextinclude.tokens) }} token: ctxman'in tüm kaynak
+kodu Claude Sonnet 5.5'in 1M penceresine rahatça sığıyor; başlangıca göre %{{ data.stats.reduction }} daha az.
+
+Claude kendi tokenizer'ıyla sayar; bu yüzden bir OpenAI kodlamasıyla yapılan sayım yaklaşıktır.
+`ctxman count` elinizdeki sayının hangi türden olduğunu ve birebir sayıyı nasıl alacağınızı söyler;
+OpenAI modelleri için modelin kendi kodlamasını kullanır:
+
+<Terminal title="~/ctxman" :command="ex.count.command" :output="ex.count.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+<Terminal title="~/ctxman" :command="ex.count.gptCommand" :output="ex.count.gptOutput" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+`ctxman count --model claude-sonnet-5-5 --api`, maskelenmiş metni Anthropic'in ücretsiz
+count_tokens uç noktasına gönderir ve Claude'un birebir sayısını verir.
+
+## 4. Aynı bağlam, daha az token
+
+`--context-export` bağlamı varsayılan olarak JSON yazar; `-o toon` bunun yerine resmi
+[TOON](https://github.com/toon-format/toon) kodlayıcısını kullanır. İki dışa aktarımın token sayıları:
+
+| Bağlam                                                        | JSON                             | TOON                             | Tasarruf                         |
+| ------------------------------------------------------------- | -------------------------------- | -------------------------------- | -------------------------------- |
+| Dosya listesi                                                 | {{ n(ex.formats.files.json) }}   | {{ n(ex.formats.files.toon) }}   | %{{ ex.formats.files.saving }}   |
+| Metot haritası (`-m`), {{ n(ex.formats.totalMethods) }} metot | {{ n(ex.formats.methods.json) }} | {{ n(ex.formats.methods.toon) }} | %{{ ex.formats.methods.saving }} |
+
+TOON en çok tek tip listelerde kazandırır; her satırında ad, satır ve token sayısı olan bir metot
+haritası gibi:
+
+<Terminal title="llm-context.toon" :command="ex.formats.command" :output="ex.formats.excerpt" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+## 5. Bir modülün metot haritası
+
+`-m` ile her metot satır numarası ve kendi token sayısıyla gelir. Burada yalnızca dört çekirdek modül:
+
+<Terminal title=".contextinclude" :output="ex.methods.config" copy-label="Kopyala" copied-label="Kopyalandı" />
+<Terminal title="llm-context.toon" :command="ex.methods.command" :output="ex.methods.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+Modülün haritasının tamamı {{ n(ex.methods.tokens) }} token.
+
+## 6. Yalnızca değişenler
+
+`--changed-since`, herhangi bir çalıştırmayı bir daldan, etiketten veya commit'ten bu yana değişen
+dosyalarla sınırlar; örneğin bir pull request'in tabanından:
+
+<Terminal title="~/ctxman" :command="ex.changed.command" :output="ex.changed.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+## 7. 700 token'da repo haritası
+
+`ctxman map`, dosyaları import grafiği üzerinde PageRank, son git hareketleri ve sembol
+referanslarına göre sıralar; bütçe dolana kadar her dosyanın fonksiyonlarını satır ve token
+sayısıyla listeler:
+
+<Terminal title="~/ctxman" :command="ex.map.command" :output="ex.map.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+## 8. Bir commit için inceleme bağlamı
+
+`ctxman pr`, bir dal veya commit aralığı hakkında inceleyicinin ihtiyaç duyduğunu yazar: özet,
+commit mesajları, değişen dosyalar, değişen her metodun kaynağı, diff ve ilgili testler; `--budget`
+altında kalmak için en az önemli kısımları çıkarır. Burada `ctxman count`'u ekleyen commit için
+(sayfa kısa kalsın diye diff hariç):
+
+<Terminal title="~/ctxman" :command="ex.pr.command" :output="ex.pr.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+## 9. Bütçe içinde dosya içerikleri
+
+`ctxman pack`, dosyaların kendisini bir model için tek belge olarak yazar: önce ağaç, sonra her
+dosya, en sonda talimatlarınız. `--compress` ile yalnızca imzalar kalır ve fonksiyon gövdeleri tek
+satırlık bir yer tutucuya dönüşür; `--budget`, bütçeyi `ctxman map`ın en üst sıraya koyduğu
+dosyalarla doldurur. Burada dört çekirdek modül {{ n(ex.pack.tokens) }} token'da:
+
+<Terminal title="~/ctxman" :command="ex.pack.command" :output="ex.pack.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+## 10. Kod neden böyle?
+
+`ctxman why`, git'in ve reponun bir fonksiyon hakkında kaydettiklerini toplar: satırlarını
+değiştiren commit'ler tam mesajlarıyla, içlerindeki referanslar, sahipler, onunla birlikte değişen
+dosyalar, notlar ve testler. Hiçbir şey makineden çıkmaz:
+
+<Terminal title="~/ctxman" :command="ex.why.command" :output="ex.why.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+## 11. Sırlar özete girmez
+
+Bir yapılandırma dosyasında kimlik bilgisi unutulmuş küçük bir proje (iki anahtar da sahte):
+
+<Terminal title="src/config.js" :output="ex.redaction.source" copy-label="Kopyala" copied-label="Kopyalandı" />
+<Terminal title="payments-service" :command="ex.redaction.command" :output="ex.redaction.output" copy-label="Kopyala" copied-label="Kopyalandı" />
+<Terminal title="digest.txt" :output="ex.redaction.digest" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+Bilinen biçimler (AWS, GitHub, GitLab, Slack, Stripe, Google, OpenAI ve Anthropic anahtarları, PEM
+özel anahtarları) varsayılan olarak maskelenir; `--no-redact` onları korur.
+
+## 12. MCP ile sorun
+
+`ctxman mcp`, stdio üzerinden Model Context Protocol konuşur; Claude Desktop, Claude Code, Cursor ve
+diğer MCP istemcileri ctxman'i doğrudan çağırabilir. `ctxman mcp install --client claude-desktop`
+onu istemcinin yapılandırmasına ekler; `--npx` ile yazdığı kayıt şudur:
+
+<Terminal title="claude_desktop_config.json" :output="ex.mcpConfig" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+Sunucu {{ ex.mcp.tools.length }}
+araç sunar — {{ ex.mcp.tools.join(', ') }} — ayrıca dosya kaynakları ve prompt'lar. İstemcinin
+gönderdiği ve ctxman'in yanıtladığı haliyle bir `list_methods` çağrısı:
+
+<Terminal title="tools/call" :output="json(ex.mcp.request)" copy-label="Kopyala" copied-label="Kopyalandı" />
+<Terminal title="result" :output="json(ex.mcp.response)" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+## 13. REST üzerinden kesin token bütçesi
+
+`ctxman serve` yerel bir REST API başlatır. `targetTokens` ile `POST /api/v1/context`, bütçeyi en
+üst sıradaki dosyalarla (önce çekirdek kod) doldurur ve asla aşmaz:
+
+<Terminal title="ctxman serve" :command="ex.budget.request" :output="budget" copy-label="Kopyala" copied-label="Kopyalandı" />
+
+## Bu sayfayı yeniden üretin
+
+```bash
+npm ci
+node website/scripts/build-showcase.mjs
+```
+
+Betik repoyu geçici bir klasöre klonlar, yukarıdaki her adımı çalıştırır ve bu sayfanın ve ana
+sayfanın okuduğu `website/.vitepress/data/showcase.json` dosyasını yazar.

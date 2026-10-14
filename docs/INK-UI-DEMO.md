@@ -24,7 +24,7 @@ node test/test-ink-ui.js
 
 ### Gereksinimler
 
-- ✅ Node.js 14+
+- ✅ Node.js 22+
 - ✅ Ink dependencies yüklü (`npm install`)
 - ✅ Interactive terminal (iTerm2, Terminal.app, gnome-terminal)
 - ❌ VSCode integrated terminal (Raw mode desteklemiyor)

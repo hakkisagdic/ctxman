@@ -5,7 +5,6 @@
 [![npm version](https://badge.fury.io/js/ctxman.svg)](https://www.npmjs.com/package/ctxman)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/ctxman.svg)](https://nodejs.org)
-[![codecov](https://codecov.io/gh/hakkisagdic/ctxman/branch/main/graph/badge.svg)](https://codecov.io/gh/hakkisagdic/ctxman)
 [![Documentation](https://img.shields.io/badge/docs-complete-brightgreen)](docs/)
 
 **AI Development Platform** with plugin architecture, Git integration, REST API, and watch mode. Supporting 14+ programming languages with method-level filtering, automatic LLM optimization, and real-time analysis. Perfect for AI-assisted development workflows.
@@ -63,7 +62,7 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 
 ## Files
 
-- **`ctxman.js`** - Main LLM context analysis script with exact token counting
+- **`ctxman.js`** - Main LLM context analysis script with token counting
 - **`.contextignore`** - Files to exclude from token calculation (EXCLUDE mode)
 - **`.contextinclude`** - Files to include in token calculation (INCLUDE mode)
 - **`README.md`** - This documentation file
@@ -77,8 +76,20 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 - 🔀 **Git Integration** - Analyze only changed files, diff analysis, author tracking
 - 👁️ **Watch Mode** - Real-time file monitoring and auto-analysis
 - 🌐 **REST API** - HTTP server for programmatic access (6 endpoints)
-- ⚡ **Performance** - Caching system, parallel processing (5-10x faster)
+- ⚡ **Performance** - Scans ~2,000 files in under 100 ms and counts 2.6M tokens in about 6 s with tiktoken; watch mode re-analyzes only changed files
 - 🏗️ **Modular Core** - Scanner, Analyzer, ContextBuilder, Reporter
+
+### 🧰 Context Commands
+
+- 📦 **`ctxman pack`** - File contents in one LLM-ready document (Claude XML, Markdown, JSON) with signatures-only compression and a hard token budget
+- 🗺️ **`ctxman map`** - Ranked repository map (import graph + git history) within a token budget
+- 🔍 **`ctxman pr`** - Review context for a branch: log, changed methods, diff, related tests
+- 🧭 **`ctxman why`** - Why code looks as it does: commits, linked issues and PRs, owners, co-changed files, ADRs and tests from local git history
+- 🔎 **`ctxman search`** - Ranked (BM25) search over functions and code chunks
+- 🔢 **`ctxman count`** - Token count for one model, exact for Claude through Anthropic's API
+- 🔌 **`ctxman mcp`** - MCP server with one-command setup for Claude Desktop, Claude Code, Cursor, VS Code and Windsurf
+- 🛡️ **`ctxman policy` / `ctxman audit`** - Export policy (deny rules, required redaction, token limits) and an audit log
+- 🤖 **GitHub Action and Docker image** - Token budgets and model fit as a CI check
 
 ### 🎨 User Interface
 
@@ -88,7 +99,7 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 
 ### 🔢 Token Analysis
 
-- ✅ **Exact token counting** using tiktoken (GPT-4 compatible)
+- ✅ **Token counting with tiktoken** using the target model's encoding (o200k_base or cl100k_base): exact for OpenAI models up to GPT-5.x, approximate for GPT-6 and other vendors; exact Claude counts with `ctxman count --api`
 - 🌍 **Multi-language support** - 14+ languages: JavaScript, TypeScript, Python, PHP, Ruby, Java, Kotlin, C#, Go, Rust, Swift, C/C++, Scala
 - 🎯 **Method-level analysis** - Analyze tokens per function/method
 - 📊 **Detailed reporting** - by file type, largest files, statistics
@@ -96,6 +107,7 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 ### 🎯 Filtering & Configuration
 
 - 🚫 **Dual ignore system** - respects both `.gitignore` and context ignore rules
+- 🤝 **Other AI tools' ignore files** - `.cursorignore`, `.aiexclude`, `.aiderignore` and others on request (`--respect-ignore-files`)
 - 📋 **Include/Exclude modes** - `.contextinclude` takes priority over `.contextignore`
 - 🔍 **Method filtering** - `.methodinclude` and `.methodignore` for granular control
 - 🎯 **Core application focus** - configured to analyze only essential code files
@@ -121,7 +133,7 @@ ctxman
 The wizard provides a user-friendly interface to:
 
 - Select your use case (Bug Fix, Feature, Code Review, etc.)
-- Choose target LLM (Claude, GPT-4, Gemini, etc.)
+- Choose target LLM (Claude, GPT, Gemini, etc.)
 - Pick output format (TOON, JSON, YAML, etc.)
 
 **Note:** Wizard mode uses Ink terminal UI. If you experience visual artifacts, use CLI mode with `--cli` flag.
@@ -155,31 +167,199 @@ export ANTHROPIC_API_KEY=sk-...
 ctxman  # Automatically optimizes for Claude
 
 # Explicit model selection
-ctxman --target-model claude-sonnet-4.5
-ctxman --target-model gpt-4o
-ctxman --target-model gemini-2.0-flash
+ctxman --target-model claude-sonnet-5-5
+ctxman --target-model gpt-6.1-sol
+ctxman --target-model gemini-3.8-flash
 
 # List all supported models
 ctxman --list-llms
 
 # Context fit analysis
-ctxman --cli --target-model claude-sonnet-4.5
+ctxman --cli --target-model claude-sonnet-5-5
 # Output:
 # 📊 Context Window Analysis:
-#    Target Model: Claude Sonnet 4.5
-#    Available Context: 200,000 tokens
+#    Target Model: Claude Sonnet 5.5
+#    Available Context: 1,000,000 tokens
 #    Your Repository: 181,480 tokens
 #    ✅ PERFECT FIT! Your entire codebase fits in one context.
 ```
 
-Supported LLM models (9+ models):
+Some of the supported models (run `ctxman --list-llms` for the full list, checked 2026-10-09):
 
-- **Anthropic**: Claude Sonnet 4.5, Claude Opus 4
-- **OpenAI**: GPT-4 Turbo, GPT-4o, GPT-4o Mini
-- **Google**: Gemini 1.5 Pro, Gemini 2.0 Flash
-- **DeepSeek**: DeepSeek Coder, DeepSeek Chat
+| Vendor    | Model ID                 | Context | Output | $ in/out per 1M tokens |
+| --------- | ------------------------ | ------- | ------ | ---------------------- |
+| Anthropic | `claude-fable-5-1`       | 1M      | 128K   | $10 / $50              |
+| Anthropic | `claude-opus-5-5`        | 1M      | 128K   | $4 / $20               |
+| Anthropic | `claude-sonnet-5-5`      | 1M      | 128K   | $2 / $10               |
+| Anthropic | `claude-haiku-5-5`       | 1M      | 128K   | $0.10 / $0.50          |
+| OpenAI    | `gpt-6-astra`            | 1.05M   | 128K   | $10 / $50              |
+| OpenAI    | `gpt-6.1-sol`            | 1.05M   | 128K   | $2 / $10               |
+| OpenAI    | `gpt-6-luna`             | 1.05M   | 128K   | $0.10 / $0.50          |
+| OpenAI    | `gpt-5.5`                | 1.05M   | 128K   | $5 / $30               |
+| Google    | `gemini-3.1-pro-preview` | 1.05M   | 65K    | $2 / $12               |
+| Google    | `gemini-3.8-flash`       | 1.05M   | 65K    | $0.75 / $3.75          |
+| DeepSeek  | `deepseek-flash`         | 1.05M   | 393K   | $0.30 / $1.20          |
+| Mistral   | `mistral-medium-3-5`     | 256K    | -      | $1.50 / $7.50          |
+| xAI       | `grok-4.7`               | 500K    | -      | $2 / $6                |
+| Qwen      | `qwen3-coder-plus`       | 1M      | 65K    | $1 / $5                |
+| Meta      | `llama-4-maverick`       | 1M      | -      | -                      |
+
+Prices are list prices for the base tier; several models charge a higher rate above a prompt
+size, which `ctxman --estimate-cost` applies. `ctxman --list-llms` also shows each model's status
+(preview, legacy, deprecated) and `--list-llms --all` adds retired models. Earlier ids such as
+`claude-sonnet-4.5` still resolve through aliases. `claude-sonnet-5-5` is the default model of the
+wizard, the built-in templates and profiles, and `ctxman count`.
 
 Custom models supported via `.ctxman/custom-profiles.json`
+
+#### Token counts per model
+
+ctxman counts with tiktoken, which is installed with it, using the target model's encoding:
+`o200k_base` for OpenAI models since GPT-4o and `cl100k_base` otherwise. The counts are exact for
+OpenAI models up to GPT-5.x. Claude, Gemini and the other vendors' models use their own
+tokenizers (and OpenAI has not published GPT-6's encoding), so their counts are approximate.
+`ctxman count` counts a project, or piped text, for one model and checks it against the window;
+with `--api` it counts Claude models exactly through Anthropic's count_tokens API:
+
+```bash
+ctxman count --model gpt-5.5                     # exact (o200k_base)
+ctxman count --model claude-sonnet-5-5           # approximate, suggests --api
+ctxman count --model claude-sonnet-5-5 --api     # exact; needs @anthropic-ai/sdk and ANTHROPIC_API_KEY
+ctxman count - --model claude-opus-5-5 --api < digest.txt   # piped text
+```
+
+`--api` sends the (secret-redacted) text to Anthropic; counting is free and generates nothing.
+
+### 📦 Pack a Codebase into One Prompt
+
+`ctxman pack` writes the directory tree, then every file, then your instructions, as one document
+for a model: Anthropic's `<documents>` XML by default, or Markdown, plain text or JSON.
+
+```bash
+ctxman pack -o context.xml                          # tree + every file, Anthropic XML
+ctxman pack --style markdown --copy                 # Markdown to the clipboard
+ctxman pack --compress --budget 100k --instructions task.md
+git ls-files -z -- '*.py' | ctxman pack --stdin -0 --line-numbers
+ctxman pack --target-model gpt-6.1-sol --max-tokens 120k -q -o ctx.xml   # CI guard, exit 2
+ctxman pack --split 150k -o context.xml             # context.1.xml, context.2.xml, ...
+```
+
+`--compress` keeps signatures and replaces function bodies with a one-line placeholder,
+`--budget` fills the budget with the files `ctxman map` ranks highest and never goes over, and
+secrets are redacted. Your instructions go last, after the long material, as Anthropic recommends
+for long context. Details: [docs/commands/pack.md](docs/commands/pack.md).
+
+### 🗺️ Repository Map
+
+The shape of a codebase in a fixed token budget: the most important files, ranked by PageRank
+over the import graph (JS/TS, Python, Go, Java/Kotlin/Scala, C#, PHP, Ruby, C/C++, Rust), recent
+git activity and symbol references, with one line per function (line, signature, tokens).
+
+```bash
+ctxman map                              # 2048 tokens of the current project
+ctxman map --tokens 4096 --style markdown
+ctxman map --focus src/server.js        # rank around the file you are working on
+ctxman map --important-last -o map.txt  # best files last, next to your question
+ctxman map --graph --style dot | dot -Tsvg > deps.svg
+```
+
+Details: [docs/commands/map.md](docs/commands/map.md).
+
+### 🔍 Pull-Request Context
+
+Everything a reviewer (or a model) needs about a branch, in one document: summary, commit log,
+changed files, the full source of every changed method, deleted methods, the diff and related
+tests, with your question last.
+
+```bash
+ctxman pr                                    # HEAD against origin/HEAD, main or master
+ctxman pr --base release/2.x --budget 30k    # drops the least important parts to fit
+ctxman pr --staged --ask "Is this safe to merge?" --copy
+ctxman pr --style xml -o review.xml
+```
+
+Details: [docs/commands/pr.md](docs/commands/pr.md).
+
+### 🧭 Why Is the Code Like This?
+
+The local, offline answer to "why is this here?": `ctxman why` collects what git and the
+repository record about a file, a function or a line range.
+
+```bash
+ctxman why src/cart.js:total                   # function / method / class (Class.method)
+ctxman why src/cart.js#L40-L72 --patches       # line range, with each commit's diff
+ctxman why lib/server.js --since "1 year ago"  # whole file, following renames
+ctxman why src/cart.js:total --ask "Why round here?" --budget 8k --copy
+```
+
+It gathers the commits that changed the code with their full messages, the issues, PRs and
+tickets they reference (linked for GitHub, GitLab and Bitbucket), co-authors and reviewers, blame
+ownership, files that usually change with it, ADRs, docs, changelog entries and comments that
+mention it, TODOs inside it and the tests that use it, with secrets redacted. Platforms such as
+Unblocked answer this from Slack, Jira and Confluence on their servers; ctxman covers what git and
+the repository know, on your machine. Details: [docs/commands/why.md](docs/commands/why.md).
+
+### 🔎 Ranked Search and Symbols
+
+```bash
+ctxman search "parse config file"            # BM25 over functions and code chunks
+ctxman search getUserName --limit 5 --json
+```
+
+`getUserName`, `get_user_name` and `get-user-name` all match "get user name". The same engine
+backs the MCP `search_code` tool (`type: "ranked"`), and `get_symbol` returns a function's full
+source by name. Details: [docs/commands/search.md](docs/commands/search.md).
+
+### 🔌 MCP Server Setup
+
+```bash
+ctxman mcp install --client claude-desktop   # or claude-code, cursor, vscode, windsurf
+ctxman mcp install --client claude-code --scope project --root .
+ctxman mcp config --client cursor            # print the snippet only
+ctxman mcp                                   # run the server (stdio)
+```
+
+The installer merges into the client's configuration and keeps a `.bak` of the previous file.
+`--root` confines every tool to one directory. Tools: `analyze_codebase`, `generate_context`,
+`git_diff`, `search_code`, `list_methods`, `repo_map`, `pr_context`, `get_symbol`,
+`count_tokens`, `explain_history`, `pack_context`. Details:
+[docs/commands/mcp.md](docs/commands/mcp.md).
+
+### 🛡️ Export Policy and Audit Log
+
+A policy in the repository (`.ctxman/policy.json`), or one an organisation points to with
+`CTXMAN_POLICY`, applies to the CLI, the REST API and the MCP server alike:
+
+```bash
+ctxman policy init       # starter policy: deny .env, keys and secrets/, require redaction
+ctxman policy check      # validate and show the effective policy
+ctxman audit             # what was exported, when, by whom, how many tokens
+ctxman --cli --respect-ignore-files .cursorignore,.aiexclude   # honour other AI tools' ignore files
+```
+
+Denied files never leave the analysis, `--no-redact` and oversized exports are refused (exit
+code 3), and every export is appended to an audit log with a hash of what was written, never the
+content. It is a team and organisation control, not a barrier against a local user. Details:
+[docs/commands/policy.md](docs/commands/policy.md).
+
+### 🤖 CI and Docker
+
+```yaml
+# .github/workflows/ctxman.yml
+- uses: hakkisagdic/ctxman@main # pin a release tag or commit
+  with:
+    changed-since: ${{ github.event.pull_request.base.sha }}
+    max-tokens: 50000 # fail the job above this budget
+    target-model: claude-sonnet-5-5
+```
+
+```bash
+docker build -t ctxman .
+docker run --rm -v "$PWD:/work" ctxman --cli
+docker run -i --rm -v "$PWD:/work" ctxman mcp --root /work   # MCP over stdio
+```
+
+Details: [docs/commands/ci.md](docs/commands/ci.md).
 
 ### 🔀 Git Integration (v3.0.0)
 
@@ -192,8 +372,8 @@ ctxman --changed-since main
 ctxman --changed-since HEAD~5
 ctxman --changed-since v2.3.0
 
-# With author information
-ctxman --changed-only --with-authors
+# Only the uncommitted changes
+ctxman --changed-only
 
 # Output:
 # 🔀 Git Integration - Analyzing Changed Files
@@ -265,7 +445,7 @@ Ctxman includes real-world test repositories for validation:
 cd test-repos/express
 
 # Run full test suite
-ctxman --cli -m --target-model claude-sonnet-4.5
+ctxman --cli -m --target-model claude-sonnet-5-5
 
 # Git integration test
 ctxman --changed-since v5.0.0
@@ -335,8 +515,8 @@ The tool is configured to focus on **core application logic only**:
 # Interactive analysis with export selection
 ctxman
 
-# Quiet mode (no file listing)
-ctxman --no-verbose
+# List every analysed file with its token count
+ctxman --cli --verbose
 
 # With detailed JSON report
 ctxman --save-report
@@ -412,39 +592,30 @@ ctxman --help
 ### Available Options
 
 - `--save-report`, `-s` - Save detailed JSON report
-- `--no-verbose` - Disable file listing (verbose is default)
+- `--verbose`, `-v` - List every analysed file with its token count
 - `--context-export` - Generate LLM context file list (saves as llm-context.json)
 - `--context-clipboard` - Copy LLM context directly to clipboard
-- `--detailed-context` - Use detailed context format (8.6k chars, default is compact 1.2k)
+- `-o`, `--output FORMAT` - Context format: json (default), toon, yaml, markdown, csv, xml
 - `--help`, `-h` - Show help message
 
 ## LLM Context Export
 
-The token calculator can generate optimized file lists for LLM consumption, with two format options:
+The token calculator can generate optimized file lists for LLM consumption.
 
-### Ultra-Compact Format (Default)
+### Context Format
 
-- **Size**: ~2.3k characters (structured JSON)
-- **Content**: Project metadata and organized file paths without token counts
-- **Format**: Identical to llm-context.json file - complete JSON structure
-- **Perfect for**: LLM consumption, programmatic processing, structured data needs
+- **Content**: Project metadata and file paths grouped by directory; `-m` lists methods with
+  line numbers and token counts instead
+- **Format**: JSON by default; `-o toon|yaml|markdown|csv|xml` picks another encoding
+- **Same everywhere**: The clipboard gets exactly what `llm-context.<format>` contains
 - **Usage**: `--context-clipboard` or `--context-export`
-
-### Detailed Format (Legacy)
-
-- **Size**: ~8.6k characters (comprehensive)
-- **Content**: Full paths, categories, importance scores, directory stats
-- **Perfect for**: Initial project analysis, comprehensive documentation
-- **Usage**: `--detailed-context --context-clipboard`
 
 ### Features
 
-- **Smart file selection** - Top files by token count and importance
-- **Directory grouping** - Common prefix compression saves space
-- **Token abbreviation** - "12k" instead of "12,388 tokens"
-- **Extension removal** - ".js" removed to save characters
-- **Cross-platform clipboard** - Works on macOS, Linux, and Windows
-- **Multiple output formats** - JSON file or clipboard ready text
+- **Directory grouping** - Each directory is listed once with its file names
+- **TOON encoding** - `-o toon` uses the official TOON encoder: fewer tokens than JSON
+- **Method level** - `-m` adds every method with its line number and token count
+- **Cross-platform clipboard** - Works on macOS, Linux, and Windows, and falls back to a file
 
 ### Usage
 
@@ -455,16 +626,13 @@ ctxman --context-export
 # Copy minimal context directly to clipboard (2.3k chars JSON - identical to file)
 ctxman --context-clipboard
 
-# Copy detailed context to clipboard (8.6k chars)
-ctxman --detailed-context --context-clipboard
-
 # Combine with regular analysis
 ctxman --save-report --context-clipboard
 ```
 
 ### Output Format Examples
 
-**Compact Format (JSON - 2.3k chars):**
+**JSON (default):**
 
 ```json
 {
@@ -485,38 +653,12 @@ ctxman --save-report --context-clipboard
 }
 ```
 
-**Detailed Format (8.6k chars):**
-
-````
-# cloudstack-go-mcp-proxy Codebase Context
-
-**Project:** 64 files, 181,480 tokens
-
-**Core Files (Top 20):**
-1. `utility-mcp/src/server/CloudStackUtilityMCP.js` (12,388 tokens, server)
-2. `utility-mcp/src/handlers/workflow-handlers.js` (11,007 tokens, handler)
-...
-
-**All Files:**
-```json
-[{"path": "file.js", "t": 1234, "c": "core", "i": 85}]
-````
-
 **Use Cases**
-
-**Compact Format (2.3k chars JSON):**
 
 1. **LLM Integration** - Structured data for AI assistants with complete project context
 2. **Programmatic Processing** - JSON format for automated tools and scripts
 3. **Context Sharing** - Identical format in clipboard and file exports
 4. **Development Workflows** - Consistent structure for CI/CD and automation
-
-**Detailed Format (8.6k chars):**
-
-1. **Architecture Planning** - Comprehensive project overview for major decisions
-2. **New Team Member Onboarding** - Complete codebase understanding
-3. **Documentation Generation** - Full project structure analysis
-4. **Code Review Preparation** - Detailed file relationships and importance
 
 **General Use Cases:**
 
@@ -605,6 +747,9 @@ FILE: src/utils.js
 - **Token Estimates**: Formatted as "1.2k" or "1.5M"
 - **Sorted Output**: Files sorted by token count (largest first)
 - **Filter Compatible**: Respects all `.gitignore` and context ignore rules
+- **Secret Redaction**: Known credential formats (AWS access key IDs, GitHub/GitLab/npm/Slack
+  tokens, Stripe live keys, Google/OpenAI/Anthropic API keys, PEM private keys) are replaced
+  with `[REDACTED:<type>]` and counted in the console output. Pass `--no-redact` to keep them.
 
 ### Use Cases
 
@@ -697,13 +842,16 @@ src/**/*.js
 
 ## Installation
 
-For exact token counting, install tiktoken:
+tiktoken is a dependency of ctxman, so token counting works out of the box (exact for OpenAI
+models, approximate for other vendors; see [Token counts per model](#token-counts-per-model)). If
+tiktoken cannot be loaded, the tool falls back to smart estimation (~95% accuracy).
+
+For exact Claude counts with `ctxman count --api`, install Anthropic's SDK and set your API key:
 
 ```bash
-npm install tiktoken
+npm install -g @anthropic-ai/sdk   # next to a global ctxman; without -g for a project install
+export ANTHROPIC_API_KEY=sk-ant-...
 ```
-
-Without tiktoken, the tool uses smart estimation (~95% accuracy).
 
 ## Output Example
 
@@ -742,8 +890,7 @@ Perfect for LLM context window optimization:
 - **Focused development** = Essential code for AI-assisted development
 - **Context efficiency** = Maximum useful code per token
 - **Dual mode flexibility** = Precise include/exclude control
-- **Ultra-minimal export** = 1k chars (89% reduction) for frequent AI interactions
-- **Detailed export** = 8.6k chars for comprehensive analysis when needed
+- **Compact export** = Paths grouped by directory, in JSON or TOON, for frequent AI interactions
 
 ## Integration
 
@@ -796,7 +943,7 @@ _Created by Hakkı Sağdıç_
 🔧 **Method-level analysis** - Extract and analyze specific methods from JavaScript/TypeScript/Rust/C#/Go/Java
 📋 **Dual filtering system** - Include/exclude files and methods with pattern matching  
 📊 **LLM context optimization** - Generate ultra-compact context for AI assistants  
-🎯 **Exact token counting** - Uses tiktoken for GPT-4 compatible counts  
+🎯 **Token counting** - tiktoken with the target model's encoding (exact for OpenAI models)  
 📤 **Multiple export formats** - JSON reports, clipboard, file exports  
 📦 **NPM package** - Use programmatically or as global CLI tool  
 🔍 **Pattern matching** - Wildcards and regex support for flexible filtering  
@@ -1151,6 +1298,9 @@ ctxman --save-report --context-export
 
 # Development debugging
 ctxman --method-level --verbose
+
+# Token count for one model (exact for Claude with --api)
+ctxman count --model claude-sonnet-5-5 --api
 ```
 
 ## 💻 Programmatic API
@@ -1232,12 +1382,16 @@ const filteredMethods = methods.filter((method) =>
 
 ## Requirements
 
-- **Node.js**: >= 14.0.0
-- **tiktoken**: ^1.0.0 (optional, for exact token counts)
+- **Node.js**: 22 or newer (tested on 22 LTS and 24 LTS)
+- **tiktoken**: ^1.0.22 (installed with ctxman; token counting)
+- **@anthropic-ai/sdk** (optional, install it yourself; used only by `ctxman count --api`)
+- **@xenova/transformers** and **@lancedb/lancedb** (optional dependencies, used only by
+  `ctxman ask` for local semantic search). npm installs them by default; skip them with
+  `npm install -g ctxman --omit=optional` if you do not need `ask`.
 
 ## License
 
-MIT License - see LICENSE file for details
+MIT License - see [LICENSE](LICENSE) for details
 
 ## Contributing
 

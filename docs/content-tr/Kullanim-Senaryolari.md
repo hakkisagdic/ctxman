@@ -31,7 +31,7 @@ Method seviyesinde filtreleme, `.methodinclude` ve `.methodignore` konfigürasyo
 
 ## Kod Tabanı Analizi
 
-ctxman aracı, kod tabanı genelinde token dağılımı hakkında kapsamlı içgörüler sağlar, büyük dosya ve methodları tanımlar ve karmaşıklığı zaman içinde izler. tiktoken aracılığıyla kesin token sayımı kullanarak (GPT-4 uyumlu), optimal kod sağlığını korumaya yardımcı olan doğru metrikler sunar. tiktoken yokluğunda, araç ~%95 doğrulukla akıllı tahmine geri döner.
+ctxman aracı, kod tabanı genelinde token dağılımı hakkında kapsamlı içgörüler sağlar, büyük dosya ve methodları tanımlar ve karmaşıklığı zaman içinde izler. Hedef modelin encoding'iyle tiktoken sayımı kullanarak (OpenAI modelleri için kesin, diğer sağlayıcılar için yaklaşık), optimal kod sağlığını korumaya yardımcı olan doğru metrikler sunar. tiktoken yüklenemezse araç ~%95 doğrulukla akıllı tahmine geri döner.
 
 Temel analitik özellikler şunları içerir:
 
@@ -92,7 +92,7 @@ ctxman aracını kullanırken verimliliği maksimize etmek için şu en iyi uygu
 
 **Performans Optimizasyonu**: Araç performans için optimize edilmiştir, ancak çok büyük kod tabanlarını analiz etmek, işleme yükünü azaltmak için method seviyesinde filtrelemeden faydalanabilir. Method seviyesinde analizi yalnızca gerekli olduğunda etkinleştirin.
 
-**Kesin Token Sayımı**: GPT-4 uyumlu kesin token sayımı için `tiktoken` paketini yükleyin (`npm install tiktoken`). Onsuz, araç ~%95 doğrulukla tahmin kullanır.
+**Token Sayımı**: tiktoken ctxman ile birlikte kurulur; sayımları OpenAI modelleri için kesin, Claude, Gemini ve diğer sağlayıcılar için yaklaşıktır. Claude için kesin sayım: `ctxman count --model claude-sonnet-5-5 --api` (`@anthropic-ai/sdk` ve `ANTHROPIC_API_KEY` gerekir).
 
 **Düzenli İzleme**: Kod tabanı büyümesi ve karmaşıklık eğilimleri hakkında farkındalığı sürdürmek için aracı pre-commit hook'ları veya planlı scriptler aracılığıyla düzenli geliştirme iş akışlarına entegre edin.
 

@@ -110,7 +110,7 @@ TokenCalculator-->>TokenCalculator : Return fileInfo with methods
 
 The integration process begins in the `analyzeFile` method of TokenCalculator, which checks if method-level analysis is enabled. If so, it calls `analyzeFileMethods` to process the file content. This function first extracts all methods using the MethodAnalyzer, then iterates through each method to determine if it should be included based on filtering rules.
 
-For each included method, the system extracts the method content and calculates tokens using the same mechanism as for entire files. The token calculation uses the tiktoken library for exact GPT-4 compatible counts when available, falling back to estimation based on character counts per file type when tiktoken is not installed.
+For each included method, the system extracts the method content and calculates tokens using the same mechanism as for entire files. The token calculation uses the tiktoken library in the target model's encoding (exact for OpenAI models, approximate for other vendors), falling back to estimation based on character counts per file type when tiktoken cannot be loaded.
 
 **Diagram sources**
 

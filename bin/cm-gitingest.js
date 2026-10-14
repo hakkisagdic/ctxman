@@ -4,8 +4,9 @@
  * Generate GitIngest digest from GitHub repositories
  */
 
-const GitUtils = require('../lib/utils/git-utils');
-const { getLogger } = require('../lib/utils/logger');
+import GitUtils from '../lib/utils/git-utils.js';
+import { getLogger } from '../lib/utils/logger.js';
+import { loadPolicy } from '../lib/policy/policy.js';
 
 const logger = getLogger({ level: 'info' });
 
@@ -27,7 +28,7 @@ async function main() {
   const outputFile = outputIndex !== -1 ? args[outputIndex + 1] : null;
 
   const branchIndex = args.findIndex((arg) => arg === '--branch' || arg === '-b');
-  const branch = branchIndex !== -1 ? args[branchIndex + 1] : 'main';
+  const branch = branchIndex !== -1 ? args[branchIndex + 1] : null;
 
   const chunkSize = args.includes('--chunk-size')
     ? parseInt(args[args.findIndex((arg) => arg === '--chunk-size') + 1])
@@ -43,24 +44,30 @@ async function main() {
       outputDir: 'docs',
     });
 
-    // Get repository info first
+    // Repository info is informational: an API error (rate limit, renamed repo) must not
+    // stop the clone
     console.log('📋 Fetching repository information...');
     const repoInfo = gitUtils.parseGitHubURL(url);
-    repoInfo.branch = branch; // Override branch if specified
-
-    const repoData = await gitUtils.getRepositoryInfo(repoInfo);
-    console.log(`\n📊 Repository Info:`);
-    console.log(`   Name: ${repoData.fullName}`);
-    console.log(`   Description: ${repoData.description || 'N/A'}`);
-    console.log(`   Stars: ⭐ ${repoData.stars.toLocaleString()}`);
-    console.log(`   Language: ${repoData.language || 'Multiple'}`);
-    console.log(`   Default Branch: ${repoData.defaultBranch}`);
+    try {
+      const repoData = await gitUtils.getRepositoryInfo(repoInfo);
+      console.log(`\n📊 Repository Info:`);
+      console.log(`   Name: ${repoData.fullName}`);
+      console.log(`   Description: ${repoData.description || 'N/A'}`);
+      console.log(`   Stars: ⭐ ${(repoData.stars ?? 0).toLocaleString()}`);
+      console.log(`   Language: ${repoData.language || 'Multiple'}`);
+      console.log(`   Default Branch: ${repoData.defaultBranch}`);
+    } catch (error) {
+      console.log(`⚠️  Could not fetch repository info (${error.message}); continuing`);
+    }
 
     // Generate GitIngest
     const options = {
       outputFile,
+      branch,
       cleanup: !keepClone,
       shallow,
+      // Policy of the current directory and CTXMAN_POLICY (deny rules apply to the clone)
+      policy: loadPolicy(process.cwd()),
       formatterOptions: chunkSize
         ? {
             chunking: {
@@ -91,7 +98,8 @@ async function main() {
   } catch (error) {
     console.error('\n❌ Error:', error.message);
     logger.error('GitHub GitIngest failed', { error: error.message });
-    process.exit(1);
+    // 2: invalid policy file, 3: export refused by the policy
+    process.exit(error.exitCode ?? 1);
   }
 }
 
@@ -104,7 +112,9 @@ function printHelp() {
   console.log(
     '  -o, --output FILE        Output file path (default: docs/{repo}-gitingest-{hash}.txt)'
   );
-  console.log('  -b, --branch BRANCH      Branch to clone (default: main)');
+  console.log(
+    "  -b, --branch BRANCH      Branch to clone (default: the repository's default branch)"
+  );
   console.log('  -v, --verbose            Verbose output');
   console.log("  --keep-clone             Keep cloned repository (don't cleanup)");
   console.log('  --full-clone             Full clone (default: shallow)');

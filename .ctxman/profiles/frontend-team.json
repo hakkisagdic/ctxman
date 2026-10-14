@@ -13,7 +13,7 @@
       "components/**",
       "pages/**"
     ],
-    "targetModel": "claude-sonnet-4.5",
+    "targetModel": "claude-sonnet-5-5",
     "methodLevel": true,
     "methodInclude": ["*Component", "*Hook", "*Context", "*Provider"]
   }

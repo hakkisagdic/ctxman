@@ -159,8 +159,21 @@ describe('ToonFormatter Coverage', () => {
   });
 
   describe('Decode', () => {
-    test('decode throws error for sync', () => {
-      expect(() => formatter.decode('project: test')).toThrow('Synchronous decoder not available');
+    test('decode reads TOON synchronously', () => {
+      expect(formatter.decode('project: test')).toEqual({ project: 'test' });
+    });
+
+    test('encode writes TOON the official decoder reads back', async () => {
+      const data = {
+        project: { root: 'x', totalFiles: 2 },
+        files: [
+          { path: 'a.js', tokens: 1 },
+          { path: 'b.js', tokens: 2 },
+        ],
+        paths: { 'src/': ['a.js', 'b.js'] },
+      };
+
+      expect(await formatter.decodeAsync(formatter.encode(data))).toEqual(data);
     });
   });
 

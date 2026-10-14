@@ -48,7 +48,6 @@ describe('FormatConverter', () => {
     });
 
     test('throws on unsupported formats', () => {
-      expect(() => converter.parse('content', 'toon')).toThrow('not yet implemented');
       expect(() => converter.parse('content', 'xml')).toThrow('not yet implemented');
       expect(() => converter.parse('content', 'markdown')).toThrow('not yet implemented');
       expect(() => converter.parse('content', 'unknown')).toThrow('Unknown format');
@@ -85,8 +84,6 @@ describe('FormatConverter', () => {
       const result = converter.parseYAML(input);
       expect(result.items).toEqual(['item1', 'item2']);
     });
-
-    // Removed nested object test as the simple parser doesn't support indentation/nesting
   });
 
   describe('CSV Parsing Details', () => {

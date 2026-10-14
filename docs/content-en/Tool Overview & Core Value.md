@@ -265,18 +265,18 @@ GenerateContext --> End([End Analysis])
 
 ## Token Counting and Context Generation
 
-The ctxman tool provides accurate token counting capabilities essential for LLM context optimization. It uses the tiktoken library for exact token counting compatible with GPT-4, falling back to smart estimation when tiktoken is not available. The token counting system is designed to provide ~95% accuracy even without the tiktoken dependency, making it accessible for various development environments.
+The ctxman tool provides accurate token counting capabilities essential for LLM context optimization. It uses the tiktoken library, installed with ctxman, in the target model's encoding: exact for OpenAI models, approximate for Claude, Gemini and other vendors (`ctxman count --api` counts Claude models exactly). It falls back to smart estimation (~95% accuracy) if tiktoken cannot be loaded.
 
-The token counting process involves reading file content, calculating tokens based on character-to-token ratios specific to file extensions, and aggregating statistics across the codebase. For exact counting, the tool uses the cl100k_base encoding from tiktoken, which is the same encoding used by GPT-4, ensuring precise context window management. The estimation system uses predefined character-per-token ratios for different file types (e.g., 3.2 for JavaScript, 4.0 for Markdown) to provide reliable approximations.
+The token counting process involves reading file content, calculating tokens based on character-to-token ratios specific to file extensions, and aggregating statistics across the codebase. With tiktoken, the tool uses `o200k_base` for OpenAI models since GPT-4o and `cl100k_base` otherwise (the encoding of GPT-4 and GPT-3.5). The estimation system uses predefined character-per-token ratios for different file types (e.g., 3.2 for JavaScript, 4.0 for Markdown) to provide reliable approximations.
 
 Context generation is a key feature that produces optimized file lists for LLM consumption in two formats: ultra-compact (default) and detailed. The ultra-compact format generates a structured JSON representation of ~2.3k characters that includes project metadata and organized file paths without token counts, while the detailed format produces ~8.6k characters of comprehensive information including full paths, categories, importance scores, and directory statistics. Both formats use identical JSON structures, ensuring consistency between clipboard and file exports.
 
 ```mermaid
 flowchart LR
 A[Read File Content] --> B{tiktoken Available?}
-B --> |Yes| C[Use cl100k_base Encoding]
+B --> |Yes| C[Use o200k_base or cl100k_base Encoding]
 B --> |No| D[Use Smart Estimation]
-C --> E[Calculate Exact Token Count]
+C --> E[Calculate Token Count]
 D --> F[Apply Extension-Specific Ratios]
 F --> G[Estimate Token Count]
 E --> H[Aggregate Statistics]

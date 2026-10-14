@@ -4,8 +4,8 @@
  * Handles version updates and channel switching
  */
 
-const Updater = require('../lib/utils/updater');
-const { getLogger } = require('../lib/utils/logger');
+import Updater from '../lib/utils/updater.js';
+import { getLogger } from '../lib/utils/logger.js';
 
 const logger = getLogger({ level: 'info' });
 

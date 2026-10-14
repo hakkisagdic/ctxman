@@ -58,7 +58,7 @@ ctxman serve --port 3000 --auth-token gizli-anahtariniz
 | `--port`       | 3000       | Dinlenecek port numarası              |
 | `--host`       | localhost  | Bağlanılacak host adresi              |
 | `--auth-token` | null       | İsteğe bağlı kimlik doğrulama token'ı |
-| `--cors`       | true       | CORS başlıklarını etkinleştir         |
+| `--cors`       | kapalı     | CORS başlıklarını gönder              |
 
 ## Kimlik Doğrulama
 
@@ -395,7 +395,7 @@ Parametrelere göre optimize edilmiş LLM bağlamı oluşturun.
 | -------------- | ------- | ------- | ------------------------------------------------------------ |
 | `path`         | string  | Hayır   | Proje yolu (varsayılan: mevcut dizin)                        |
 | `methodLevel`  | boolean | Hayır   | Method seviyesi analizini dahil et                           |
-| `targetModel`  | string  | Hayır   | Hedef LLM modeli (örn. "claude-sonnet-4.5")                  |
+| `targetModel`  | string  | Hayır   | Hedef LLM modeli (örn. "claude-sonnet-5-5")                  |
 | `targetTokens` | number  | Hayır   | Hedef token bütçesi                                          |
 | `useCase`      | string  | Hayır   | Kullanım durumu şablonu (bug-fix, feature, code-review, vb.) |
 
@@ -407,7 +407,7 @@ curl -X POST http://localhost:3000/api/v1/context \
   -d '{
     "path": "/proje/yolu",
     "methodLevel": true,
-    "targetModel": "claude-sonnet-4.5",
+    "targetModel": "claude-sonnet-5-5",
     "targetTokens": 50000
   }'
 ```
@@ -437,8 +437,8 @@ curl -X POST http://localhost:3000/api/v1/context \
     }
   },
   "metadata": {
-    "targetModel": "claude-sonnet-4.5",
-    "contextWindow": 200000,
+    "targetModel": "claude-sonnet-5-5",
+    "contextWindow": 1000000,
     "fitStatus": "fits",
     "recommendedFormat": "toon"
   }
@@ -548,7 +548,7 @@ curl "http://localhost:3000/api/v1/diff?since=main" > diff.json
 # 5. Claude için bağlam oluştur
 curl -X POST http://localhost:3000/api/v1/context \
   -H "Content-Type: application/json" \
-  -d '{"targetModel": "claude-sonnet-4.5"}' > context.json
+  -d '{"targetModel": "claude-sonnet-5-5"}' > context.json
 ```
 
 ### CI/CD Entegrasyonu
@@ -606,20 +606,29 @@ async function generateContext(options) {
 // Kullanım
 const analysis = await analyzeProject('/proje/yolu');
 const context = await generateContext({
-  targetModel: 'claude-sonnet-4.5',
+  targetModel: 'claude-sonnet-5-5',
   methodLevel: true,
 });
 ```
 
 ## CORS
 
-CORS varsayılan olarak etkindir. Aşağıdaki başlıklar ayarlanır:
+CORS varsayılan olarak kapalıdır: açıkken tarayıcınızda açık herhangi bir web sayfası sunucunun
+yanıtlarını okuyabilir. `--cors` verildiğinde (tercihen `--auth-token` ile birlikte) şu başlıklar
+gönderilir:
 
 ```
 Access-Control-Allow-Origin: *
 Access-Control-Allow-Methods: GET, POST, OPTIONS
 Access-Control-Allow-Headers: Content-Type, Authorization
 ```
+
+## Host Kontrolü
+
+Loopback adresine bağlıyken (varsayılan `localhost`) sunucu yalnızca `Host` başlığı `localhost`,
+`127.0.0.1` veya `[::1]` olan isteklere yanıt verir, diğerlerine `403 Forbidden host` döner. Bu,
+web sayfalarından gelen DNS rebinding saldırılarını engeller. `--host` ile başka bir adrese
+bağlanınca kontrol kapanır; bu durumda `--auth-token` kullanın.
 
 ## Rate Limiting
 

@@ -2,6 +2,108 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
+## [3.1.0] - 2026-10-14
+
+### Added
+
+- `ctxman pack`: file contents in one LLM-ready document (Anthropic `<documents>` XML, Markdown,
+  plain, JSON) with the tree first and instructions last; `--compress` (signatures only),
+  `--budget` (ranked by `ctxman map`, never exceeded), `--split`, `--target-model` fit, a
+  `--max-tokens` CI guard (exit 2) and `--stdin`/`-0` file lists; secrets redacted. Library
+  `packContext`; MCP tool `pack_context`.
+- `ctxman map`: ranked repository map within a token budget. PageRank over the import graph
+  (JS/TS, Python, Go, Java/Kotlin/Scala, C#, PHP, Ruby, C/C++, Rust) blended with git change
+  frequency and symbol references; `--focus`, `--important-last`, text/markdown/json/dot,
+  `--graph`. Library: `buildRepoGraph`, `rankFiles`, `renderRepoMap`; MCP tool `repo_map`.
+- `ctxman pr`: review context for a branch, the staged changes or the working tree: summary,
+  commit log, changed files, full source of changed and deleted methods, the diff and related
+  tests, with `--budget`, `--ask`, markdown/xml/json. Library: `buildPrContext`; MCP tool
+  `pr_context`.
+- `ctxman why <file>[:symbol|#L10-L40]`: offline "why is the code like this?" context from git
+  history: commits with full messages, linked issues, PRs and tickets, trailers, blame ownership,
+  co-change coupling, related ADRs, docs and comments, TODOs and tests, as markdown, xml or json
+  within a token budget. Library `explainHistory()`; MCP tool `explain_history`.
+- `ctxman search`: ranked (BM25) search over methods and code chunks, with identifier splitting;
+  the MCP `search_code` tool takes `type: "ranked"`, and the new `get_symbol` tool returns a
+  function's source by name.
+- MCP tool `count_tokens`: token count of a project or a text for a model and the fit in its
+  window.
+- `ctxman mcp`: starts the MCP server; `ctxman mcp install|uninstall|config --client` writes the
+  configuration of Claude Desktop, Claude Code, Cursor, VS Code and Windsurf (with a `.bak` of the
+  previous file); `--root` confines every tool to one directory.
+- Export policy (`.ctxman/policy.json`, or `CTXMAN_POLICY` for an organisation): deny rules,
+  required redaction, an export token limit and allowed target models, enforced by the CLI, the
+  REST API and the MCP server; an audit log of every export; `ctxman policy check|init`,
+  `ctxman audit`, and `--respect-ignore-files` for other AI tools' ignore files (`.cursorignore`,
+  `.aiexclude`, `.aiderignore` and others).
+- GitHub Action (`uses: hakkisagdic/ctxman@<ref>`): token counts, a token budget that fails the
+  job, model fit, a job summary and an optional context artifact. A Docker image (`Dockerfile`,
+  published to ghcr.io on release tags) for the CLI and the MCP server.
+- `ctxman count [path|-] --model ID [--api] [--json]`: token count of a project or piped text for
+  a model, checked against its context window. `--api` counts Claude models exactly through
+  Anthropic's count_tokens endpoint (secrets are redacted before sending).
+- `--list-llms` shows context window, output limit, price and status per model; `--all` adds
+  retired models.
+- GitIngest digests mask known credential formats (cloud/API keys, tokens, PEM private keys) as
+  `[REDACTED:<type>]` by default; `--no-redact` keeps them.
+- `TokenCalculator.analyze()` for scan + analysis without console output or exports.
+
+### Changed
+
+- Model data refreshed (checked 2026-10-09): 44 current models from Anthropic, OpenAI, Google,
+  DeepSeek, Mistral, xAI, Qwen and Meta with the providers' API ids, windows, output limits, prices
+  (including long-prompt rates) and status. Old ids such as `claude-sonnet-4.5` still resolve;
+  deprecated and retired models warn and name a replacement. The default target model is
+  `claude-sonnet-5-5`.
+- `--estimate-cost` reads prices from the model profiles, applies long-prompt rates and caps the
+  assumed response at the model's output limit.
+- Counting uses `o200k_base` for OpenAI models since GPT-4o (`cl100k_base` otherwise), and counts
+  for models with their own tokenizers are labelled approximate.
+- tiktoken is a regular dependency, so a default install counts exactly.
+- Node.js 22 or newer is required (Node 20 reached end of life on 2026-04-30); CI tests 22.x and
+  24.x.
+- `@xenova/transformers` and `@lancedb/lancedb` are optional dependencies, loaded only by
+  `ctxman ask`; install with `--omit=optional` to skip them (451 MB → 55 MB).
+- `@toon-format/toon` 4.1.1: `ToonFormatter.encodeAsync()` now writes an empty array as `key: []`.
+- Token counting reuses one tiktoken encoder: ~20-25x faster analysis when tiktoken is installed.
+- REST API (`ctxman serve`): CORS is off unless `--cors` is given, and on a loopback host requests
+  with a foreign `Host` header get 403 (DNS rebinding).
+- MCP HTTP transport (`bin/mcp-server.js --transport=sse`): binds to 127.0.0.1 with `Host`
+  validation, CORS only with `--cors`, `--host=` to bind elsewhere.
+- `-o/--output` sets the format of `--context-export`/`--context-clipboard` (JSON by default), and
+  TOON output uses the official `@toon-format/toon` encoder.
+
+### Fixed
+
+- `ctxman pr` and `ctxman why` (and the MCP `pr_context` / `explain_history` tools) leave files denied by the export policy out; `why` on a denied file exits with code 3
+- Per-method token counts no longer stop at `{}` in parameter defaults or destructuring
+  (`log(level, meta = {}) {`), which counted such methods at a few tokens.
+- `ctxman --cli | head` and the other commands that print to stdout exit quietly when the pipe
+  closes instead of crashing with EPIPE.
+- **Security:** git commands run without a shell, and user-supplied refs (REST `?since=`, MCP
+  `git_diff`, `--changed-since`, `ctxman github` branches) are validated before reaching git.
+- `ctxman github` and the update scripts crashed on start (CommonJS `require` in ESM).
+- Watch mode failed on every changed file, and `GET /api/v1/methods` returned 500 (`path` not
+  imported).
+- Error and fallback paths in the CLI, init wizard, LSP server and updater threw
+  `ReferenceError`.
+- npm audit advisories (proxy-addr, sharp, @modelcontextprotocol/sdk, qs, hono and others).
+- The release workflow validates the tag against `package.json` and takes notes from this file.
+- Added the missing LICENSE file and repository metadata.
+- `**` in `.gitignore`/`.contextignore`/`.contextinclude` patterns did not cross directories, and
+  `.contextinclude` (include mode) and watch-mode ignore checks did not apply.
+- `--changed-only`/`--changed-since` analyzed the whole repository instead of the changed files.
+- `--chunk` wrote a single digest instead of chunk files.
+- `ctxman github`: the branch from the URL or `--branch` is cloned, and a GitHub API error (rate
+  limit, private repository) no longer crashes the command.
+- The `targetModel` from `~/.ctxman/config.json` is read again, and files skipped by
+  `.contextignore`/`.contextinclude` are counted separately from `.gitignore`.
+- MCP: `file://` resources stay inside the project, refuse non-source files such as `.env` and
+  redact secrets; `search_code` and `list_methods` honour their documented options; the HTTP
+  transport answered every request with "Parse error"; the server reports the package version.
+- Context token budgets (`targetTokens`, MCP `maxTokens`) are no longer exceeded, and the
+  `changed-first` strategy orders by modification time.
+
 ## [3.0.0] - 2025-11-05
 
 ### 🚀 MAJOR: Platform Foundation - Plugin Architecture & Git Integration

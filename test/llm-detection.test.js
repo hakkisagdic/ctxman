@@ -36,9 +36,9 @@ describe('LLM Detection (v2.3.7)', () => {
       const models = LLMDetector.listProfiles();
       expect(Array.isArray(models)).toBe(true);
       expect(models.length).toBeGreaterThan(0);
-      expect(models).toContain('claude-sonnet-4.5');
-      expect(models).toContain('gpt-4o');
-      expect(models).toContain('gemini-2.0-flash');
+      expect(models).toContain('claude-sonnet-5-5');
+      expect(models).toContain('gpt-6.1-sol');
+      expect(models).toContain('gemini-3.8-flash');
     });
 
     test('Should get model list with details', () => {
@@ -46,7 +46,7 @@ describe('LLM Detection (v2.3.7)', () => {
       expect(Array.isArray(modelList)).toBe(true);
       expect(modelList.length).toBeGreaterThan(0);
 
-      const claude = modelList.find((m) => m.id === 'claude-sonnet-4.5');
+      const claude = modelList.find((m) => m.id === 'claude-sonnet-5-5');
       expect(claude).toBeDefined();
       expect(claude.vendor).toBe('Anthropic');
       expect(claude.contextWindow).toBeGreaterThan(0);

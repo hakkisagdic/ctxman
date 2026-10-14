@@ -1,27 +1,11 @@
 #!/usr/bin/env node
 
-import MCPServer from '../lib/api/mcp/server.js';
-import { HttpSseTransport } from '../lib/api/mcp/transports/HttpSseTransport.js';
-
-const args = process.argv.slice(2);
-const transportType = args.includes('--transport=sse') ? 'sse' : 'stdio';
-const port = args.find((arg) => arg.startsWith('--port='))?.split('=')[1] || 3000;
-const apiKey = args.find((arg) => arg.startsWith('--api-key='))?.split('=')[1];
-
-const server = new MCPServer();
+// Kept for existing client configurations; `ctxman mcp` starts the same server
+import { parseServerArgs, startMcpServer } from '../lib/api/mcp/start.js';
 
 async function main() {
   try {
-    if (transportType === 'sse') {
-      const transport = new HttpSseTransport({
-        port: parseInt(port),
-        auth: apiKey ? { apiKey } : undefined,
-      });
-      await transport.start();
-      await server.start(transport.transport);
-    } else {
-      await server.start();
-    }
+    await startMcpServer(parseServerArgs(process.argv.slice(2), { strict: false }));
   } catch (error) {
     console.error('Fatal error running MCP server:', error);
     process.exit(1);

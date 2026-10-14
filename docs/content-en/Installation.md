@@ -22,7 +22,7 @@
 
 Before installing the ctxman tool, ensure your system meets the following requirements:
 
-- **Node.js**: Version 14.0.0 or higher (specified in package.json under "engines")
+- **Node.js**: Version 22 or newer (specified in package.json under "engines")
 - **npm**: Node Package Manager, typically installed with Node.js
 
 These prerequisites are essential for both global and local installations of the package. The tool is designed to work across different operating systems including macOS, Linux, and Windows, leveraging Node.js's cross-platform capabilities for consistent behavior.
@@ -67,21 +67,23 @@ Local installation ensures that all team members use the same version of the too
 
 ## Token Counting Configuration
 
-The ctxman tool provides two methods for token counting, with an optional dependency that enhances accuracy.
+The ctxman tool provides two methods for token counting; tiktoken, which provides the main one, is installed with ctxman.
 
-### Exact Token Counting with tiktoken
+### Token Counting with tiktoken
 
-For precise token counting that matches GPT-4's tokenization, install the tiktoken package:
+tiktoken is a dependency of ctxman, so no extra installation is needed. The tool uses the target model's encoding: `o200k_base` for OpenAI models since GPT-4o and `cl100k_base` otherwise. Counts are exact for OpenAI models up to GPT-5.x and approximate for GPT-6 and for Claude, Gemini and other vendors, whose models use their own tokenizers.
+
+For exact Claude counts, install Anthropic's SDK (optional) and use `ctxman count --api`, which sends the secret-redacted text to Anthropic's free count_tokens API:
 
 ```bash
-npm install tiktoken
+npm install @anthropic-ai/sdk
+export ANTHROPIC_API_KEY=sk-ant-...
+ctxman count --model claude-sonnet-5-5 --api
 ```
-
-When tiktoken is available, the tool uses exact token counting by loading the cl100k_base encoding (used by GPT-4). This provides the most accurate token counts for LLM context management.
 
 ### Fallback to Smart Estimation
 
-If tiktoken is not installed, the tool automatically falls back to a smart estimation algorithm with approximately 95% accuracy. The estimation uses character-to-token ratios specific to file types:
+If tiktoken cannot be loaded, the tool automatically falls back to a smart estimation algorithm with approximately 95% accuracy. The estimation uses character-to-token ratios specific to file types:
 
 - JavaScript/TypeScript: 3.2 characters per token
 - JSON: 2.5 characters per token
@@ -204,7 +206,7 @@ ctxman --context-clipboard
 ctxman --method-level --context-clipboard
 ```
 
-The tool provides immediate feedback during execution, showing whether it's using exact token counting (with tiktoken) or estimation, the analysis mode (INCLUDE/EXCLUDE), and summary statistics upon completion.
+The tool provides immediate feedback during execution, showing whether it's counting with tiktoken (and with which encoding) or estimating, the analysis mode (INCLUDE/EXCLUDE), and summary statistics upon completion.
 
 **Section sources**
 
@@ -293,8 +295,8 @@ If tiktoken fails to install, the tool automatically falls back to estimation mo
 # Clear npm cache
 npm cache clean --force
 
-# Reinstall with fresh dependencies
-npm install tiktoken
+# Reinstall ctxman with fresh dependencies (tiktoken included)
+npm install -g ctxman
 ```
 
 ### Configuration Issues

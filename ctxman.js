@@ -10,6 +10,54 @@ import path from 'path';
 import TokenCalculator from './lib/analyzers/token-calculator.js';
 import GitIngestFormatter from './lib/formatters/gitingest-formatter.js';
 import TokenUtils from './lib/utils/token-utils.js';
+import { loadPolicy } from './lib/policy/policy.js';
+import { enforceExport, PolicyViolationError } from './lib/policy/enforce.js';
+import { recordExport } from './lib/policy/audit.js';
+
+/**
+ * Apply the export policy of `projectRoot` to a digest built from a saved file list:
+ * denied files are dropped (the list may predate the policy) and the rest is checked
+ * @returns {{files: object[], audit: Function}} Remaining files, and a function that logs
+ *   the written digest
+ */
+function applyDigestPolicy(projectRoot, files, tokens, command) {
+  const policy = loadPolicy(projectRoot);
+  if (!policy.active) return { files, audit: () => {} };
+
+  const { kept, removed } = policy.filterFiles(files);
+  if (removed.length > 0) {
+    console.log(`🛡️  Removed ${removed.length} file(s) denied by the export policy`);
+  }
+  const event = {
+    command,
+    root: projectRoot,
+    format: 'gitingest',
+    files: kept,
+    tokens,
+    removedByPolicy: removed.length,
+  };
+  try {
+    enforceExport(policy, event);
+  } catch (error) {
+    if (error instanceof PolicyViolationError) {
+      recordExport(policy, { ...event, outcome: 'refused', violations: error.violations });
+    }
+    throw error;
+  }
+
+  const audit = (digestPath, formatter) => {
+    if (!policy.audit.enabled) return;
+    const written = formatter.chunkFiles?.length ? formatter.chunkFiles : [digestPath];
+    recordExport(policy, {
+      ...event,
+      destination: digestPath,
+      outputFiles: written.length > 1 ? written : undefined,
+      redactions: formatter.redactions,
+      text: written.map((file) => fs.readFileSync(file)),
+    });
+  };
+  return { files: kept, audit };
+}
 
 /**
  * Generate GitIngest digest from token-analysis-report.json
@@ -35,17 +83,26 @@ function generateDigestFromReport(reportPath) {
     console.log(`✅ Report loaded: ${report.files.length} files`);
     console.log('📄 Generating GitIngest digest from report...\n');
 
-    const formatter = new GitIngestFormatter(projectRoot, report.summary, report.files);
+    const reportTokens = report.files.reduce((sum, file) => sum + (Number(file.tokens) || 0), 0);
+    const guarded = applyDigestPolicy(
+      projectRoot,
+      report.files,
+      reportTokens,
+      'cli --gitingest-from-report'
+    );
+    const formatter = new GitIngestFormatter(projectRoot, report.summary, guarded.files);
 
     const digestPath = path.join(process.cwd(), 'digest.txt');
     const digestSize = formatter.saveToFile(digestPath);
+    guarded.audit(digestPath, formatter);
 
     console.log(`💾 GitIngest digest saved to: digest.txt`);
     console.log(`📊 Digest size: ${(digestSize / 1024).toFixed(1)} KB`);
     console.log(`✨ Generated from: ${path.basename(reportPath)}`);
   } catch (error) {
     console.error(`❌ Error processing report: ${error.message}`);
-    process.exit(1);
+    // 2: invalid policy file, 3: export refused by the policy
+    process.exit(error.exitCode ?? 1);
   }
 }
 
@@ -101,17 +158,24 @@ function generateDigestFromContext(contextPath) {
       totalLines: 0,
     };
 
-    const formatter = new GitIngestFormatter(process.cwd(), stats, files);
+    const guarded = applyDigestPolicy(
+      process.cwd(),
+      files,
+      stats.totalTokens,
+      'cli --gitingest-from-context'
+    );
+    const formatter = new GitIngestFormatter(process.cwd(), stats, guarded.files);
 
     const digestPath = path.join(process.cwd(), 'digest.txt');
     const digestSize = formatter.saveToFile(digestPath);
+    guarded.audit(digestPath, formatter);
 
     console.log(`💾 GitIngest digest saved to: digest.txt`);
     console.log(`📊 Digest size: ${(digestSize / 1024).toFixed(1)} KB`);
     console.log(`✨ Generated from: ${path.basename(contextPath)}`);
   } catch (error) {
     console.error(`❌ Error processing context: ${error.message}`);
-    process.exit(1);
+    process.exit(error.exitCode ?? 1);
   }
 }
 
@@ -148,6 +212,13 @@ async function main(args = process.argv.slice(2)) {
     methodLevel: args.includes('--method-level') || args.includes('-m'),
     gitingest: args.includes('--gitingest') || args.includes('-g'),
   };
+
+  try {
+    options.policy = loadPolicy(process.cwd());
+  } catch (error) {
+    console.error(`❌ ${error.message}`);
+    process.exit(error.exitCode ?? 2);
+  }
 
   printStartupInfo();
 

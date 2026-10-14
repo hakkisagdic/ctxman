@@ -97,18 +97,8 @@
       "properties": {
         "ctxman.targetModel": {
           "type": "string",
-          "enum": [
-            "gpt-4",
-            "gpt-4-turbo",
-            "gpt-3.5-turbo",
-            "claude-3-opus",
-            "claude-3-sonnet",
-            "claude-3-haiku",
-            "llama-2-70b",
-            "gemini-pro"
-          ],
-          "default": "gpt-4",
-          "description": "Target LLM model for token estimation"
+          "default": "claude-sonnet-5-5",
+          "markdownDescription": "Target LLM model for token estimation and the context-window check: any model id from `ctxman --list-llms`, e.g. `claude-sonnet-5-5`, `claude-opus-5-5`, `gpt-6.1-sol`, `gemini-3.8-flash`"
         },
         "ctxman.budget": {
           "type": "number",

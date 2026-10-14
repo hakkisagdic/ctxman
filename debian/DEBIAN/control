@@ -3,7 +3,7 @@ Version: 2.3.5
 Section: devel
 Priority: optional
 Architecture: all
-Depends: nodejs (>= 14.0.0), npm (>= 6.0.0)
+Depends: nodejs (>= 22.0.0), npm (>= 10.0.0)
 Maintainer: Hakkı Sağdıç <hakkisagdic@gmail.com>
 Homepage: https://github.com/hakkisagdic/ctxman
 Description: Universal LLM context manager with method-level filtering

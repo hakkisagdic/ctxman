@@ -83,7 +83,7 @@ Bu, analiz sürecini başlatır, .gitignore kurallarına ve calculator'a özgü 
 
 ## Analiz Çıktısını Anlama
 
-ctxman aracını çalıştırdığınızda, çeşitli önemli bilgi parçalarını içeren detaylı bir analiz raporu üretir. Çıktı, proje kök dizini, yapılandırma modu (INCLUDE veya EXCLUDE) ve token hesaplama yöntemi (tiktoken kullanarak kesin veya tahmini) dahil olmak üzere analiz süreci hakkında metadata ile başlar.
+ctxman aracını çalıştırdığınızda, çeşitli önemli bilgi parçalarını içeren detaylı bir analiz raporu üretir. Çıktı, proje kök dizini, yapılandırma modu (INCLUDE veya EXCLUDE) ve token hesaplama yöntemi (kullanılan encoding ile tiktoken veya tahmini) dahil olmak üzere analiz süreci hakkında metadata ile başlar.
 
 Ana rapor şunları içerir:
 
@@ -95,7 +95,7 @@ Ana rapor şunları içerir:
 - Token sayısına göre en büyük 5 dosya
 - Token sayısına göre en büyük 5 dizin
 
-Token sayılarını anlamak, LLM context yönetimi için çok önemlidir. Araç, mevcut olduğunda GPT-4 uyumlu kesin sayım için tiktoken kullanır, tiktoken kurulu değilse yaklaşık %95 doğrulukla tahmini yönteme geri döner. Verbose çıktı (varsayılan olarak etkin) tüm dahil edilen dosyaları gösterir ve token sayınıza neyin katkıda bulunduğu konusunda şeffaflık sağlar.
+Token sayılarını anlamak, LLM context yönetimi için çok önemlidir. Araç, kendisiyle birlikte kurulan tiktoken ile hedef modelin encoding'ini kullanarak sayar: OpenAI modelleri için kesin, Claude, Gemini ve diğer sağlayıcılar için yaklaşık (`ctxman count --api` Claude modellerini kesin sayar). tiktoken yüklenemezse yaklaşık %95 doğrulukla tahmini yönteme geri döner. Verbose çıktı (varsayılan olarak etkin) tüm dahil edilen dosyaları gösterir ve token sayınıza neyin katkıda bulunduğu konusunda şeffaflık sağlar.
 
 ```mermaid
 flowchart TD
@@ -362,10 +362,11 @@ ctxman aracına başlarken birkaç yaygın sorunla karşılaşabilirsiniz. Bunla
 
 **Verbose çıktıyı anlama**: Aracın verbose çıktısı (varsayılan olarak etkin) yeni başlayanlar için bunaltıcı olabilir. Tüm dahil edilen dosyaları, token sayılarını ve detaylı istatistikleri gösterir. Çıktıyı azaltmak için `--no-verbose` bayrağını kullanın, ancak hangi dosyaların analiz edildiği konusunda şeffaflığı azalttığı için bu önerilmez.
 
-**Token sayılarını yorumlama**: Araç, mevcut olduğunda kesin token sayımı için tiktoken kullanır. tiktoken'ı kurmadıysanız, araç tahmin moduna geri döner. Kesin sayımları sağlamak için tiktoken'ı kurun:
+**Token sayılarını yorumlama**: Başlangıç satırı token'ların nasıl sayıldığını gösterir, örneğin `✅ Exact (using tiktoken) · cl100k_base`. tiktoken OpenAI'ın tokenizer'larıyla eşleşir; Claude, Gemini ve diğer sağlayıcılarda sayımlar yaklaşıktır. Tek bir model için saymak, Claude'u da Anthropic API'siyle kesin saymak için:
 
 ```bash
-npm install tiktoken
+ctxman count --model gpt-5.5
+ctxman count --model claude-sonnet-5-5 --api
 ```
 
 **Yapılandırma dosyası sorunları**: Yaygın bir kafa karışıklığı kaynağı, `.contextinclude` ve `.contextignore` arasındaki etkileşimdir. Unutmayın ki `.contextinclude` önceliklidir - mevcutsa, araç INCLUDE modunda çalışır ve `.contextignore`'u göz ardı eder. Beklenen dosyaları görmüyorsanız, bir `.contextinclude` dosyasının var olup olmadığını kontrol edin.

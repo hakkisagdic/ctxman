@@ -193,7 +193,7 @@ describe('Reporter', () => {
     test('detects known extensions', () => {
       expect(reporter.detectFormatFromPath('file.json')).toBe('json');
       expect(reporter.detectFormatFromPath('file.md')).toBe('markdown');
-      expect(reporter.detectFormatFromPath('file.txt')).toBe('gitingest');
+      expect(reporter.detectFormatFromPath('file.txt')).toBe('summary');
     });
 
     test('defaults to configured format for unknown extensions', () => {

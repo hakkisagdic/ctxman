@@ -118,11 +118,11 @@ ctxman --wizard
 ┌──────────────────────────────────────────────────────────┐
 │  Which AI model will you use?                           │
 │                                                          │
-│  ❯ Claude Opus (200k tokens)                            │
-│    Claude Sonnet (200k tokens)                          │
-│    GPT-4 Turbo (128k tokens)                            │
-│    GPT-4 (8k tokens)                                    │
-│    Gemini Pro (1M tokens)                               │
+│  ❯ Claude Opus 5.5 (1M tokens)                          │
+│    Claude Sonnet 5.5 (1M tokens)                        │
+│    GPT-6.1 Sol (1.05M tokens)                           │
+│    GPT-5.4 mini (400k tokens)                           │
+│    Gemini 3.8 Flash (1M tokens)                         │
 │    Custom (specify token limit)                         │
 └──────────────────────────────────────────────────────────┘
 ```
@@ -188,12 +188,12 @@ ctxman --wizard
 ├──────────────────────────────────────────────────────────┤
 │                                                          │
 │  Use Case: Bug Fix                                      │
-│  Target: Claude Opus (200k tokens)                      │
+│  Target: Claude Opus 5.5 (1M tokens)                    │
 │  Files: Changed + Related (estimated 45 files)          │
 │  Format: TOON                                           │
 │  Estimated tokens: 12,450                               │
 │                                                          │
-│  ✅ Within token limit (6.2% of 200k)                   │
+│  ✅ Within token limit (1.2% of 1M)                     │
 │                                                          │
 │  [Enter] Start Analysis  [Esc] Go Back                 │
 └──────────────────────────────────────────────────────────┘
@@ -255,7 +255,7 @@ ctxman --dashboard --watch
 │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 67% (43/64 files) │
 │                                                          │
 │  Current: src/analyzers/method-analyzer.js              │
-│  Tokens: 181,480 / 200,000 (90.7%)                      │
+│  Tokens: 181,480 / 1,000,000 (18.1%)                    │
 │  Time Elapsed: 2.3s                                     │
 │                                                          │
 │  ✓ Scanning files                                       │
@@ -488,7 +488,7 @@ node bin/cli.js --dashboard
 
 If wizard/dashboard still don't work after installing dependencies:
 
-1. Check Node.js version: `node --version` (should be 14+)
+1. Check Node.js version: `node --version` (should be 22+)
 2. Check terminal: `echo $TERM`
 3. Open issue: https://github.com/hakkisagdic/ctxman/issues
 
