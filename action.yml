@@ -82,9 +82,12 @@ runs:
   steps:
     - name: Set up Node.js
       if: inputs.node-version != ''
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7
       with:
         node-version: ${{ inputs.node-version }}
+        # The caller's project may name npm in packageManager without a lockfile, and
+        # this action installs ctxman itself, so setup-node's automatic cache stays off
+        package-manager-cache: false
 
     - name: Install ctxman
       id: install
@@ -109,7 +112,7 @@ runs:
     # Also after an exceeded budget, so the report of the failing run can be inspected
     - name: Upload context artifact
       if: ${{ !cancelled() && inputs.upload-artifact == 'true' && steps.check.outputs.output-dir != '' }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ inputs.artifact-name }}
         path: ${{ steps.check.outputs.output-dir }}
