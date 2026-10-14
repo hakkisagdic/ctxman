@@ -75,6 +75,7 @@ All notable changes to the Ctxman will be documented in this file.
 
 ### Fixed
 
+- `ctxman pr` and `ctxman why` (and the MCP `pr_context` / `explain_history` tools) leave files denied by the export policy out; `why` on a denied file exits with code 3
 - Per-method token counts no longer stop at `{}` in parameter defaults or destructuring
   (`log(level, meta = {}) {`), which counted such methods at a few tokens.
 - `ctxman --cli | head` and the other commands that print to stdout exit quietly when the pipe

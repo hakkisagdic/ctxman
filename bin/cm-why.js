@@ -165,7 +165,8 @@ async function main() {
     });
   } catch (error) {
     if (error instanceof WhyError) {
-      fail(error.message, ['INVALID_OPTION', 'INVALID_REF'].includes(error.code) ? 2 : 1);
+      const exitCode = { INVALID_OPTION: 2, INVALID_REF: 2, POLICY_DENIED: 3 }[error.code] ?? 1;
+      fail(error.message, exitCode);
     } else {
       fail(error.message);
     }

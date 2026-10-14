@@ -112,7 +112,8 @@ digest, REST or MCP response. ctxman says how many it removed, never which:
 ```
 
 Everything built on `lib/core/Scanner.js` (every REST endpoint and MCP tool, and new
-commands) loads the policy and drops denied files automatically.
+commands) loads the policy and drops denied files automatically. `ctxman pr` and `ctxman why`,
+which read from git, leave denied files out too; `why` on a denied file exits with code 3.
 
 ### Refused exports
 

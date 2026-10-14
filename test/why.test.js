@@ -795,3 +795,51 @@ describe('ctxman why', () => {
     });
   });
 });
+
+describe('explainHistory under an export policy', () => {
+  let dir;
+
+  beforeAll(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-why-policy-'));
+    const git = (...args) => execFileSync('git', args, { cwd: dir, stdio: 'pipe' });
+    const write = (file, text) => {
+      fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
+      fs.writeFileSync(path.join(dir, file), text);
+    };
+    git('init', '-q', '-b', 'main');
+    git('config', 'user.name', 'Test');
+    git('config', 'user.email', 'test@example.com');
+    write('.ctxman/policy.json', JSON.stringify({ version: 1, deny: ['secrets/**'] }));
+    write('src/app.js', 'export const a = 1;\n');
+    write('secrets/db.txt', 'password-one\n');
+    git('add', '-A');
+    git('commit', '-qm', 'init');
+    write('src/app.js', 'export const a = 2;\n');
+    write('secrets/db.txt', 'password-two\n');
+    git('commit', '-qam', 'change both');
+  });
+
+  afterAll(() => {
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('refuses a denied target and leaves denied files out of the rest', async () => {
+    await expect(explainHistory(dir, 'secrets/db.txt')).rejects.toMatchObject({
+      code: 'POLICY_DENIED',
+    });
+
+    const result = await explainHistory(dir, 'src/app.js');
+    expect(result.text).not.toContain('secrets/db.txt');
+    expect(result.text).not.toContain('password');
+  });
+
+  it('exits with code 3 from the CLI', () => {
+    const run = spawnSync(process.execPath, [CLI, 'why', 'secrets/db.txt'], {
+      cwd: dir,
+      encoding: 'utf8',
+    });
+
+    expect(run.status).toBe(3);
+    expect(run.stderr).toContain('denied by the export policy');
+  });
+});
