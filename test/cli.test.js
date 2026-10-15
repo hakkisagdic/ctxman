@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -8,17 +8,18 @@ const TEMP_DIR = path.join(process.cwd(), 'test/temp-cli');
 
 function runCommand(args, options = {}) {
   try {
-    // If input is provided, pipe it to the command
-    const command = options.input
-      ? `echo "${options.input.trim()}" | node ${CLI_PATH} ${args}`
-      : `node ${CLI_PATH} ${args}`;
-
-    const output = execSync(command, {
-      encoding: 'utf8',
-      cwd: options.cwd || process.cwd(),
-      timeout: options.timeout || 10000,
-      stdio: 'pipe',
-    });
+    // No shell: the arguments go to node as they are, and input is written to stdin
+    const output = execFileSync(
+      process.execPath,
+      [CLI_PATH, ...args.split(/\s+/).filter(Boolean)],
+      {
+        encoding: 'utf8',
+        cwd: options.cwd || process.cwd(),
+        timeout: options.timeout || 10000,
+        stdio: 'pipe',
+        input: options.input ? `${options.input.trim()}\n` : undefined,
+      }
+    );
     return { success: true, output, error: null };
   } catch (error) {
     return { success: false, output: error.stdout || '', error: error.message };
