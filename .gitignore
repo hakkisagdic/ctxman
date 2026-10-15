@@ -88,3 +88,6 @@ Thumbs.db
 CODE_IMPROVEMENTS.md
 ROADMAP.md
 docs/roadmap/
+
+# Vitest HTML report (vitest --reporter=html)
+html/

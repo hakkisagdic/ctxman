@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -8,13 +8,17 @@ const TEMP_DIR = path.join(process.cwd(), 'test/temp-gitingest-json');
 
 function runCommand(args) {
   try {
-    const command = `node ${CLI_PATH} ${args}`;
-    const output = execSync(command, {
-      encoding: 'utf8',
-      cwd: TEMP_DIR,
-      stdio: 'pipe',
-      timeout: 10000, // 10s timeout should be enough for small dir
-    });
+    // No shell: the arguments go to node as they are
+    const output = execFileSync(
+      process.execPath,
+      [CLI_PATH, ...args.split(/\s+/).filter(Boolean)],
+      {
+        encoding: 'utf8',
+        cwd: TEMP_DIR,
+        stdio: 'pipe',
+        timeout: 10000, // 10s timeout should be enough for small dir
+      }
+    );
     return { success: true, output, error: null };
   } catch (error) {
     console.error('Command failed:', error.message);
