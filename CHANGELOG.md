@@ -2,7 +2,7 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
-## [Unreleased]
+## [3.1.1] - 2026-10-15
 
 ### Added
 
@@ -25,6 +25,13 @@ All notable changes to the Ctxman will be documented in this file.
 - A line break in a logged message started what looked like a new entry in the log file; it
   is now written escaped.
 - The npm publish workflow waits for the registry to list a new version before verifying it.
+- The project detector's glob matching escaped only dots, so other regex characters in a
+  pattern (`+`, `?`, parentheses) changed its meaning or threw; only `*` is a wildcard now.
+- `ctxman init` (config generator) creates files exclusively, so a file that appears between
+  the check and the write is not overwritten without `--force`; the performance dashboard
+  reads its metrics file without a separate existence check.
+- The CLI integration tests run the CLI without a shell, and the Vitest HTML report that had
+  been committed under `html/` is removed and ignored.
 
 ## [3.1.0] - 2026-10-14
 
