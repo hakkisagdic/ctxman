@@ -1948,3 +1948,128 @@ export function packWorkspace(
   repos: WorkspaceRepoInput[],
   options?: Omit<PackOptions, 'files' | 'cwd'>
 ): Promise<WorkspacePackResult>;
+
+// ============================================
+// RAG Vector Stores & Embedding Providers (v3.2.0)
+// ============================================
+
+export class LocalHashEmbeddingProvider {
+  dimension: number;
+  constructor(dimension?: number);
+  embed(text: string): Promise<number[]>;
+}
+
+export class AutoEmbeddingProvider {
+  modelName?: string;
+  constructor(options?: { modelName?: string });
+  init(): Promise<void>;
+  embed(text: string): Promise<number[]>;
+}
+
+export class SqliteVectorStore {
+  storagePath: string;
+  dbPath: string;
+  constructor(embeddingProvider: any, storagePath?: string);
+  init(): Promise<void>;
+  addDocument(text: string, metadata?: Record<string, any>): Promise<void>;
+  addDocuments(
+    docs: Array<{ text: string; id?: string; metadata?: Record<string, any> }>
+  ): Promise<void>;
+  search(
+    queryText: string,
+    limit?: number
+  ): Promise<Array<{ id?: string; text: string; score: number; metadata: Record<string, any> }>>;
+  deleteTable(): Promise<void>;
+  count(): number;
+  close(): void;
+}
+
+// ============================================
+// Task-Driven Auto Context (v3.2.0)
+// ============================================
+
+export interface TaskContextOptions {
+  budget?: number | string;
+  format?: 'markdown' | 'json' | 'xml';
+  searchMode?: 'hybrid' | 'bm25' | 'semantic';
+  redact?: boolean;
+  output?: string;
+  model?: string;
+  limit?: number;
+}
+
+export interface TaskContextResult {
+  query: string;
+  format: string;
+  budget: number;
+  totalTokens: number;
+  text: string;
+  seeds: Array<{ file: string; score: number; kind?: string; name?: string }>;
+  files: Array<{ path: string; hop: number; compressed: boolean; tokens: number; lines: number }>;
+  omitted: Array<{ path: string; reason: string }>;
+  redactions: { total: number };
+}
+
+export function buildTaskContext(
+  root: string,
+  taskQuery: string,
+  options?: TaskContextOptions
+): Promise<TaskContextResult>;
+
+// ============================================
+// Failure Diagnosis (v3.2.0)
+// ============================================
+
+export interface DiagnoseFailureOptions {
+  budget?: number | string;
+  format?: 'markdown' | 'json';
+  redact?: boolean;
+  windowLines?: number;
+  output?: string;
+}
+
+export interface DiagnoseFailureResult {
+  frames: Array<any>;
+  implicatedFiles: string[];
+  totalTokens: number;
+  budget: number;
+  text: string;
+  history: Array<{ file: string; text: string; tokens: number }>;
+  neighbors: string[];
+  redactions: { total: number };
+}
+
+export function diagnoseFailure(
+  root: string,
+  traceOrLog: string,
+  options?: DiagnoseFailureOptions
+): Promise<DiagnoseFailureResult>;
+
+// ============================================
+// Institutional Memory Bridge (v3.2.0)
+// ============================================
+
+export interface AnalyzerCitation {
+  id: string;
+  kind: string;
+  title: string;
+  snippet: string;
+  url: string | null;
+  author: string | null;
+  timestamp: string | null;
+  refs: string[];
+  score: number;
+}
+
+export interface QueryAnalyzerOptions {
+  file?: string;
+  symbol?: string;
+  commits?: string[];
+  limit?: number;
+  redact?: boolean;
+}
+
+export function queryAnalyzerCitations(
+  rootOrDbPath: string,
+  options?: QueryAnalyzerOptions
+): AnalyzerCitation[];

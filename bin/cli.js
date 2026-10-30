@@ -104,6 +104,16 @@ async function main() {
     return;
   }
 
+  if (command === 'task') {
+    runSubcommand('./cm-task.js', args.slice(1));
+    return;
+  }
+
+  if (command === 'diagnose') {
+    runSubcommand('./cm-diagnose.js', args.slice(1));
+    return;
+  }
+
   if (args.includes('--help') || args.includes('-h')) {
     printHelp();
     return;
@@ -712,6 +722,18 @@ function printHelp() {
   console.log('Git Integration (v3.0.0):');
   console.log('  --changed-only           Analyze only files with uncommitted changes');
   console.log('  --changed-since REF      Analyze files changed since commit/branch');
+  console.log();
+  console.log('Task-Driven Context (v3.2.0):');
+  console.log('  task "<goal>" [options]  Build task-driven context bundle around a goal');
+  console.log('    --budget TOKENS        Token budget (default: 32000, supports 32k)');
+  console.log('    --model MODEL          Optimize for specific target model');
+  console.log('    --format FORMAT        markdown (default), json, xml');
+  console.log();
+  console.log('Failure Diagnosis (v3.2.0):');
+  console.log('  diagnose [file|text]     Analyze stack traces and failure logs');
+  console.log('    --stdin                Read failure log or stack trace from stdin');
+  console.log('    --budget TOKENS        Token budget (default: 24000)');
+  console.log('    --json                 Output in JSON format');
   console.log();
   console.log('Platform Features (v3.0.0):');
   console.log('  serve [options]          Start REST API server');

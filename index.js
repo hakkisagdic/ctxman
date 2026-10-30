@@ -60,6 +60,17 @@ import {
   packWorkspace,
 } from './lib/workspace/index.js';
 
+// RAG Stores & Embedding Providers (v3.2.0)
+import { SqliteVectorStore } from './lib/rag/stores/SqliteVectorStore.js';
+import { LocalHashEmbeddingProvider, AutoEmbeddingProvider } from './lib/rag/EmbeddingProvider.js';
+
+// Task-Driven Auto Context & Failure Diagnosis (v3.2.0)
+import { buildTaskContext } from './lib/task/index.js';
+import { diagnoseFailure } from './lib/diagnose/index.js';
+
+// Institutional Memory Bridge (v3.2.0)
+import { queryAnalyzerCitations } from './lib/why/analyzer-bridge.js';
+
 // Search, symbol lookup, token counting, RAG & export policy
 import { searchProject } from './lib/search/bm25.js';
 import { hybridSearch } from './lib/search/hybrid.js';
@@ -133,6 +144,18 @@ export {
   mapWorkspace,
   searchWorkspace,
   packWorkspace,
+
+  // RAG Stores & Embedding Providers (v3.2.0)
+  SqliteVectorStore,
+  LocalHashEmbeddingProvider,
+  AutoEmbeddingProvider,
+
+  // Task-Driven Auto Context & Failure Diagnosis (v3.2.0)
+  buildTaskContext,
+  diagnoseFailure,
+
+  // Institutional Memory Bridge (v3.2.0)
+  queryAnalyzerCitations,
 
   // Search, symbols, counting, RAG & policy
   searchProject,

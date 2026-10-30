@@ -2,6 +2,31 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
+## [3.2.0] - 2026-10-30
+
+### Added
+
+- **Zero-Native-Binary SqliteVectorStore & AutoEmbeddingProvider**:
+  - `SqliteVectorStore` using Node 22/24 built-in `node:sqlite` (`DatabaseSync`), storing chunks, metadata, and float32 vector embeddings in `<storePath>/index.sqlite` with SHA-256 incremental upsert (skips unchanged content) and exact cosine similarity search.
+  - `LocalHashEmbeddingProvider`: deterministic 256-dimensional L2-normalized feature-hashing over identifier tokens and character trigrams, zero dependencies, 100% offline.
+  - `AutoEmbeddingProvider`: uses `@xenova/transformers` if installed and `CTXMAN_EMBEDDER !== 'local'`, otherwise seamlessly falls back to `LocalHashEmbeddingProvider` without model download or network failure.
+  - Registered `'sqlite'` as default store in `VectorStoreFactory` and `lib/rag/ask.js` (`ctxman ask` and `ctxman search --hybrid` work completely offline with zero optional binary packages).
+- **Task-Driven Auto Context (`ctxman task` + `buildTaskContext` + MCP `task_context`)**:
+  - Discovers seed files and symbols via `hybridSearch`.
+  - Gathers 1-hop full code and 2-hop compressed signatures around seeds, combined with architectural `renderRepoMap` overview.
+  - Fitted strictly within `--budget` (default 32000, supporting shorthand like `32k`), enforcing `.ctxman/policy.json` (`Scanner` deny rules) and `redactSecrets` Data Shield.
+  - Formats: markdown, json, xml. CLI `ctxman task`, library `buildTaskContext()`, and MCP tool `task_context`.
+- **Failure / Stack-Trace Root-Cause Bundle (`ctxman diagnose` + `diagnoseFailure` + MCP `diagnose_failure`)**:
+  - Parses stack trace frames across Node/TS/JS, Python (`File "...", line N`), Go, Rust, Java/C#, Vitest failure lines.
+  - Resolves in-repo files safely inside project root.
+  - Extracts enclosing method code window, 1-hop neighborhood, and recent git history (`explainHistory`) within `--budget` (default 24000).
+  - CLI `ctxman diagnose`, library `diagnoseFailure()`, and MCP tool `diagnose_failure`.
+- **Institutional Memory Bridge (`ctxman why --analyzer-db` / `--analyzer`)**:
+  - `lib/why/analyzer-bridge.js` queries `@plansmithai/analyzer`'s SQLite `documents` table (`.plansmith/analyzer.sqlite`) for matching file and symbol references across commits, PRs, issues, Slack, Linear, and Jira.
+  - Attaches secret-redacted `institutionalCitations` to `explainHistory` output, CLI `ctxman why`, and budget trimming.
+- **Public API & TypeScript Definitions**:
+  - Exported `SqliteVectorStore`, `LocalHashEmbeddingProvider`, `AutoEmbeddingProvider`, `buildTaskContext`, `diagnoseFailure`, `queryAnalyzerCitations` from `index.js` with full TypeScript signatures in `index.d.ts`.
+
 ## [Unreleased]
 
 ### Added

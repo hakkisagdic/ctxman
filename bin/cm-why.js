@@ -43,6 +43,8 @@ Options:
       --since <date>        Only commits after this date ("2024-01-01", "6 months ago")
       --rev <ref>           Explain the code as of this revision (default: working tree)
       --patches             Include each commit's diff of the target
+      --analyzer-db <path>  Query @plansmithai/analyzer SQLite DB for institutional citations
+      --analyzer            Enable analyzer citations from .plansmith/analyzer.sqlite
       --discussions         Fetch referenced GitHub/GitLab issue, PR and MR discussions
                             (uses GITHUB_TOKEN/GH_TOKEN or GITLAB_TOKEN when set)
       --max-discussions <n> Maximum remote discussions to fetch (default: 10)
@@ -72,6 +74,8 @@ const OPTIONS = {
   since: { type: 'string' },
   rev: { type: 'string' },
   patches: { type: 'boolean' },
+  'analyzer-db': { type: 'string' },
+  analyzer: { type: 'boolean' },
   discussions: { type: 'boolean' },
   'max-discussions': { type: 'string' },
   'max-comments': { type: 'string' },
@@ -117,6 +121,9 @@ function summarize(result) {
   const parts = [
     plural(data.history.commits.length, 'commit'),
     plural(references, 'reference'),
+    ...(data.institutionalCitations?.length
+      ? [plural(data.institutionalCitations.length, 'institutional citation')]
+      : []),
     ...(data.discussions?.length ? [plural(data.discussions.length, 'discussion')] : []),
     plural(data.ownership?.authors.length ?? 0, 'author'),
     plural(data.coupling?.files.length ?? 0, 'co-changed file'),
@@ -168,6 +175,8 @@ async function main() {
       rev: values.rev,
       patches: values.patches,
       discussions: values.discussions,
+      analyzerDb: values['analyzer-db'],
+      analyzer: values.analyzer,
       maxDiscussions: values['max-discussions'],
       maxComments: values['max-comments'],
       couplingWindow: values['coupling-window'],
