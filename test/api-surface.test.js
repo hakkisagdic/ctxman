@@ -59,6 +59,7 @@ describe('Public API surface (index.js & index.d.ts)', () => {
       'describeFocus',
       'FocusError',
       'searchProject',
+      'hybridSearch',
       'getSymbol',
       'countForModel',
       'askCodebase',

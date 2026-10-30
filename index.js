@@ -54,6 +54,7 @@ import { focusContext, describeFocus, FocusError } from './lib/focus/index.js';
 
 // Search, symbol lookup, token counting, RAG & export policy
 import { searchProject } from './lib/search/bm25.js';
+import { hybridSearch } from './lib/search/hybrid.js';
 import { getSymbol } from './lib/search/symbols.js';
 import { countForModel } from './lib/count/index.js';
 import { askCodebase } from './lib/rag/ask.js';
@@ -121,6 +122,7 @@ export {
 
   // Search, symbols, counting, RAG & policy
   searchProject,
+  hybridSearch,
   getSymbol,
   countForModel,
   askCodebase,

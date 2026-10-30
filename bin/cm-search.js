@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * ctxman search: ranked (BM25) search over the methods and code chunks of a project
+ * ctxman search: ranked (BM25, semantic, or RRF hybrid) search over methods and code chunks
  *
- *   ctxman search "<query>" [path] [--limit N] [--max-tokens N] [--json] [--full]
+ *   ctxman search "<query>" [path] [--hybrid | --mode bm25|semantic|hybrid]
+ *                 [--limit N] [--max-tokens N] [--json] [--full]
  *                 [--no-redact] [-o FILE] [--copy]
  */
 
@@ -11,6 +12,7 @@ import fs from 'fs';
 import path from 'path';
 import { parseArgs } from 'util';
 import { searchProject, DEFAULT_LIMIT, DEFAULT_MAX_TOKENS } from '../lib/search/bm25.js';
+import { hybridSearch, SEARCH_MODES } from '../lib/search/hybrid.js';
 import { getLogger } from '../lib/utils/logger.js';
 import ClipboardUtils from '../lib/utils/clipboard-utils.js';
 import { exitOnBrokenPipe } from '../lib/utils/cli-output.js';
@@ -23,6 +25,8 @@ const PREVIEW_LINES = 8;
 const OPTIONS = {
   limit: { type: 'string', short: 'n' },
   'max-tokens': { type: 'string' },
+  hybrid: { type: 'boolean' },
+  mode: { type: 'string' },
   json: { type: 'boolean' },
   full: { type: 'boolean' },
   'no-redact': { type: 'boolean' },
@@ -36,19 +40,21 @@ const write = (text) => process.stdout.write(text);
 console.log = console.info = console.debug = console.error;
 
 function printHelp() {
-  write(`ctxman search - Ranked code search (BM25 over methods and code chunks)
+  write(`ctxman search - Ranked code search (BM25, semantic, or Reciprocal Rank Fusion hybrid)
 
 Usage:
   ctxman search "<query>" [path] [options]
 
-The query is a few words or identifiers. Identifiers are split into words (getUserName,
-get_user_name and get-user-name all mean "get user name"), and a chunk is a method or
-function, or a window of up to 40 lines of the code outside them. .gitignore,
-.contextignore and .contextinclude apply.
+The query is a few words, identifiers, or a natural-language phrase. Identifiers are split
+into words (getUserName, get_user_name and get-user-name all mean "get user name"), and a
+chunk is a method or function, or a window of up to 40 lines of the code outside them.
+.gitignore, .contextignore, .contextinclude, and .ctxman/policy.json apply.
 
 Options:
   -n, --limit <n>        Number of results (default: ${DEFAULT_LIMIT})
   --max-tokens <n>       Token budget for the returned code (default: ${DEFAULT_MAX_TOKENS})
+  --hybrid               Fuse BM25 lexical search with local vector embeddings via RRF
+  --mode <mode>          bm25 (default), hybrid, or semantic
   --full                 Print whole chunks instead of the first ${PREVIEW_LINES} lines
   --json                 Print the results as JSON
   --no-redact            Do not redact secrets in the returned code
@@ -58,6 +64,7 @@ Options:
 
 Examples:
   ctxman search "parse config file"
+  ctxman search "how authentication sessions expire" --hybrid
   ctxman search getUserName ./services/api --limit 5
   ctxman search "retry backoff" --json | jq '.results[].file'
 `);
@@ -73,14 +80,29 @@ function positiveInteger(value, name) {
   return number;
 }
 
+function resolveMode(values) {
+  if (values.hybrid && values.mode !== undefined && values.mode !== 'hybrid') {
+    throw new UsageError(`Cannot combine --hybrid with --mode ${values.mode}`);
+  }
+  const mode = values.hybrid ? 'hybrid' : (values.mode ?? 'bm25');
+  if (!SEARCH_MODES.includes(mode)) {
+    throw new UsageError(`--mode must be one of ${SEARCH_MODES.join(', ')}, got "${mode}"`);
+  }
+  return mode;
+}
+
 /**
  * Human-readable listing
- * @param {ReturnType<typeof searchProject>} result
+ * @param {object} result
  * @param {boolean} full - Whole chunks instead of a preview
  * @returns {string}
  */
 function formatResults(result, full) {
-  const header = `Ranked search for "${result.query}" in ${result.root} (${result.files} files, ${result.chunks} chunks)\n`;
+  const modeLabel =
+    result.effectiveMode && result.effectiveMode !== 'bm25'
+      ? `${result.effectiveMode === 'hybrid' ? 'Hybrid (BM25 + semantic RRF)' : 'Semantic'} search`
+      : 'Ranked search';
+  const header = `${modeLabel} for "${result.query}" in ${result.root} (${result.files} files, ${result.chunks} chunks)\n`;
   if (result.results.length === 0) return `${header}\nNo matches.\n`;
 
   const width = String(result.results.length).length;
@@ -88,8 +110,17 @@ function formatResults(result, full) {
     const label = hit.name
       ? `  ${hit.parent ? `${hit.parent}.` : ''}${hit.name} (${hit.kind})`
       : '';
+    const ranks =
+      hit.bm25Rank !== undefined || hit.semanticRank !== undefined
+        ? ` [${[
+            hit.bm25Rank ? `bm25 #${hit.bm25Rank}` : null,
+            hit.semanticRank ? `sem #${hit.semanticRank}` : null,
+          ]
+            .filter(Boolean)
+            .join(', ')}]`
+        : '';
     const lines = [
-      `${String(i + 1).padStart(width)}. ${hit.file}:${hit.startLine}-${hit.endLine}${label}  score ${hit.score}`,
+      `${String(i + 1).padStart(width)}. ${hit.file}:${hit.startLine}-${hit.endLine}${label}  score ${hit.score}${ranks}`,
     ];
     if (hit.text === null) {
       lines.push('    (code left out: token budget reached)');
@@ -110,7 +141,7 @@ function formatResults(result, full) {
   return `${header}\n${blocks.join('\n\n')}\n`;
 }
 
-function main() {
+async function main() {
   let values;
   let positionals;
   try {
@@ -127,6 +158,8 @@ function main() {
     printHelp();
     return;
   }
+
+  const mode = resolveMode(values);
 
   // A last positional that names a directory is the project; the rest is the query
   let root = process.cwd();
@@ -146,11 +179,26 @@ function main() {
 
   // Scan and analyzer progress lines are noise here; LOG_LEVEL still overrides
   getLogger().level = process.env.LOG_LEVEL || 'warn';
-  const result = searchProject(root, query, {
-    limit,
-    maxTokens,
-    redact: values['no-redact'] !== true,
-  });
+  const redact = values['no-redact'] !== true;
+
+  const result =
+    mode === 'bm25'
+      ? searchProject(root, query, { limit, maxTokens, redact })
+      : await hybridSearch(root, query, {
+          mode,
+          limit,
+          maxTokens,
+          redact,
+          onProgress: (event) => {
+            if (event === 'indexing') {
+              console.error('Building local semantic embedding index (.ctxman/self-knowledge)...');
+            }
+          },
+        });
+
+  if (Array.isArray(result.warnings)) {
+    for (const warning of result.warnings) console.error(`Warning: ${warning}`);
+  }
 
   const output = values.json
     ? `${JSON.stringify(result, null, 2)}\n`
@@ -166,7 +214,7 @@ function main() {
 }
 
 try {
-  main();
+  await main();
 } catch (error) {
   console.error(`Error: ${error.message}`);
   if (error instanceof UsageError) {

@@ -257,8 +257,10 @@ describe('ctxman mcp', () => {
     );
     expect(tools.find((t) => t.name === 'search_code').inputSchema.properties.type.enum).toEqual([
       'regex',
+      'substring',
       'semantic',
       'ranked',
+      'hybrid',
     ]);
 
     const ranked = toolText(responses.get(2));

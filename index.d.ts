@@ -1855,3 +1855,46 @@ export function focusContext(
 ): Promise<FocusResult>;
 
 export function describeFocus(result: FocusResult): string;
+
+// ============================================
+// Hybrid Search (BM25 + Semantic RRF)
+// ============================================
+
+export type HybridSearchMode = 'bm25' | 'semantic' | 'hybrid';
+
+export interface HybridSearchOptions extends SearchProjectOptions {
+  mode?: HybridSearchMode;
+  rrfK?: number;
+  bm25Weight?: number;
+  semanticWeight?: number;
+  fallbackToBm25?: boolean;
+  onProgress?: (event: 'indexing' | 'indexed') => void;
+  createStore?: (storePath: string) => unknown;
+}
+
+export interface HybridSearchHit extends SearchHit {
+  bm25Rank: number | null;
+  semanticRank: number | null;
+  bm25Score: number | null;
+  semanticScore: number | null;
+}
+
+export interface HybridSearchResult {
+  query: string;
+  mode: HybridSearchMode;
+  effectiveMode: HybridSearchMode;
+  semanticAvailable: boolean;
+  indexed: boolean;
+  root: string;
+  files: number;
+  chunks: number;
+  tokens: number;
+  warnings: string[];
+  results: HybridSearchHit[];
+}
+
+export function hybridSearch(
+  root: string,
+  query: string,
+  options?: HybridSearchOptions
+): Promise<HybridSearchResult>;
