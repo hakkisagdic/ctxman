@@ -1766,3 +1766,58 @@ export function loadPolicy(
   rootPath: string,
   options?: { env?: NodeJS.ProcessEnv }
 ): Policy;
+
+// ============================================
+// Focused Neighborhood Context (`ctxman focus`)
+// ============================================
+
+export type FocusDirection = 'both' | 'imports' | 'importers';
+
+export interface FocusOptions extends Omit<PackOptions, 'files'> {
+  /** Graph traversal hops (default: 1; 0 = target file only) */
+  depth?: number;
+  /** Traversal direction (default: 'both') */
+  direction?: FocusDirection;
+  /** Include outgoing imports (default: true) */
+  imports?: boolean;
+  /** Include incoming importers (default: true) */
+  importers?: boolean;
+  /** Include test files in neighborhood (default: true) */
+  includeTests?: boolean;
+  /** Git commits mined for tie-breaking PageRank (default: 0) */
+  history?: number;
+  /** Explicit rank order override */
+  rankOrder?: string[];
+}
+
+export interface FocusNeighbor {
+  path: string;
+  distance: number;
+  relation: 'import' | 'importer' | 'both';
+  score: number;
+}
+
+export interface FocusMetadata {
+  target: string;
+  depth: number;
+  direction: FocusDirection;
+  inGraph: boolean;
+  neighbors: FocusNeighbor[];
+}
+
+export interface FocusResult extends PackResult {
+  focus: FocusMetadata;
+}
+
+export class FocusError extends Error {
+  code: string;
+  constructor(code: string, message: string);
+}
+
+export function focusContext(
+  root: string,
+  target: string,
+  options?: FocusOptions
+): Promise<FocusResult>;
+
+export function describeFocus(result: FocusResult): string;

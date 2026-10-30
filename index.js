@@ -49,6 +49,9 @@ import { explainHistory } from './lib/why/index.js';
 // File contents in one document (`ctxman pack`)
 import { packContext } from './lib/pack/index.js';
 
+// Import/importer neighborhood context (`ctxman focus`)
+import { focusContext, describeFocus, FocusError } from './lib/focus/index.js';
+
 // Search, symbol lookup, token counting, RAG & export policy
 import { searchProject } from './lib/search/bm25.js';
 import { getSymbol } from './lib/search/symbols.js';
@@ -110,6 +113,11 @@ export {
 
   // Packed file contents
   packContext,
+
+  // Focused neighborhood context (`ctxman focus`)
+  focusContext,
+  describeFocus,
+  FocusError,
 
   // Search, symbols, counting, RAG & policy
   searchProject,
