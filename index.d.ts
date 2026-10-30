@@ -1155,6 +1155,20 @@ export interface ExplainHistoryOptions {
   rev?: string;
   /** Include each commit's diff of the target */
   patches?: boolean;
+  /** Fetch referenced GitHub/GitLab issue, PR and MR discussions (default false) */
+  discussions?: boolean;
+  /** Maximum remote discussions fetched (default 10) */
+  maxDiscussions?: number;
+  /** Maximum comments fetched per discussion (default 5) */
+  maxComments?: number;
+  /** Per-request timeout in milliseconds (default 5000) */
+  discussionTimeoutMs?: number;
+  /** Explicit GitHub/GitLab API token override */
+  token?: string;
+  /** Custom fetch implementation */
+  fetch?: typeof globalThis.fetch;
+  /** Environment override for token lookup */
+  env?: NodeJS.ProcessEnv;
   /** Commits of the file examined for co-changes (default 500, 0 = off) */
   couplingWindow?: number;
   /** Co-changed files listed (default 10) */
@@ -1242,6 +1256,26 @@ export interface ExplainHistoryData {
     coAuthors: Array<{ value: string; commits: string[] }>;
     reviewers: Array<{ value: string; commits: string[] }>;
   };
+  discussions: Array<{
+    id: string;
+    number: number;
+    repo: string;
+    provider: 'github' | 'gitlab';
+    kind: 'issue' | 'pr' | 'mr';
+    title: string;
+    state: string;
+    author: string;
+    createdAt: string | null;
+    url: string | null;
+    labels: string[];
+    body: string;
+    commits: string[];
+    comments: Array<{
+      author: string;
+      createdAt: string | null;
+      body: string;
+    }>;
+  }>;
   ownership: {
     startLine: number | null;
     endLine: number | null;

@@ -30,7 +30,8 @@ Explain why code looks the way it does: the commits that shaped it (with their
 messages), the issues, tickets and URLs they reference, blame ownership, files
 that change together with it, docs / ADRs / changelog entries / comments that
 mention it, TODO-style notes inside it and the tests that reference it. Built
-from the local git history; no network access.
+from the local git history (offline by default; opt in to --discussions for
+GitHub/GitLab issue, PR and MR context).
 
 Targets (paths are relative to the current directory, inside the repository):
   <file>                    The whole file (history follows renames)
@@ -42,10 +43,14 @@ Options:
       --since <date>        Only commits after this date ("2024-01-01", "6 months ago")
       --rev <ref>           Explain the code as of this revision (default: working tree)
       --patches             Include each commit's diff of the target
+      --discussions         Fetch referenced GitHub/GitLab issue, PR and MR discussions
+                            (uses GITHUB_TOKEN/GH_TOKEN or GITLAB_TOKEN when set)
+      --max-discussions <n> Maximum remote discussions to fetch (default: 10)
+      --max-comments <n>    Maximum comments fetched per discussion (default: 5)
       --coupling-window <n> Commits of the file examined for co-changes (default: 500, 0 = off)
       --budget <tokens>     Keep the output within this many tokens (8000 or 8k); drops
-                            patches, related text, tests, coupling details and older
-                            commits first
+                            patches, discussions, related text, tests, coupling details
+                            and older commits first
       --style <style>       markdown (default), xml or json
       --json                Same as --style json
       --ask <question>      Append a question at the end of the document
@@ -56,6 +61,7 @@ Options:
 
 Examples:
   ctxman why src/cart.js:total
+  ctxman why src/cart.js:total --discussions
   ctxman why src/cart.js#L40-L72 --patches --budget 8000
   ctxman why lib/server.js --since "1 year ago" --style xml -o why.xml
   ctxman why src/cart.js:total --ask "Why do we round here instead of in applyDiscount?" --copy
@@ -66,6 +72,9 @@ const OPTIONS = {
   since: { type: 'string' },
   rev: { type: 'string' },
   patches: { type: 'boolean' },
+  discussions: { type: 'boolean' },
+  'max-discussions': { type: 'string' },
+  'max-comments': { type: 'string' },
   'coupling-window': { type: 'string' },
   budget: { type: 'string' },
   style: { type: 'string' },
@@ -108,6 +117,7 @@ function summarize(result) {
   const parts = [
     plural(data.history.commits.length, 'commit'),
     plural(references, 'reference'),
+    ...(data.discussions?.length ? [plural(data.discussions.length, 'discussion')] : []),
     plural(data.ownership?.authors.length ?? 0, 'author'),
     plural(data.coupling?.files.length ?? 0, 'co-changed file'),
     plural(data.related.length, 'related snippet'),
@@ -157,6 +167,9 @@ async function main() {
       since: values.since,
       rev: values.rev,
       patches: values.patches,
+      discussions: values.discussions,
+      maxDiscussions: values['max-discussions'],
+      maxComments: values['max-comments'],
       couplingWindow: values['coupling-window'],
       budget: parseTokenCount(values.budget),
       style: values.json ? 'json' : values.style,
