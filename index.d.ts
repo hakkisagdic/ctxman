@@ -20,6 +20,8 @@ export interface TokenCalculatorOptions {
   gitingest?: boolean;
   targetModel?: string;
   dashboard?: boolean;
+  cache?: boolean | "memory" | "disk" | CacheManagerOptions | CacheManager;
+  cachePath?: string;
 }
 
 /**
@@ -1420,3 +1422,347 @@ export interface PackResult {
  * BUDGET_TOO_SMALL, SPLIT_TOO_SMALL).
  */
 export function packContext(root: string, options?: PackOptions): Promise<PackResult>;
+
+// ============================================
+// Core v3 Modular Pipeline & Cache
+// ============================================
+
+export interface CacheManagerOptions {
+  enabled?: boolean;
+  strategy?: 'disk' | 'memory';
+  ttl?: number;
+  path?: string;
+  maxEntries?: number;
+  maxSize?: number;
+}
+
+export interface CacheMeta {
+  size?: number;
+  namespace?: string;
+  encoding?: string;
+  methodLevel?: boolean;
+  extraKey?: string;
+}
+
+export class CacheManager {
+  constructor(options?: CacheManagerOptions);
+  options: Required<CacheManagerOptions>;
+  stats: {
+    hits: number;
+    misses: number;
+    writes: number;
+    evictions: number;
+    errors: number;
+  };
+  get(filePath: string, modifiedTime: number | Date | null, meta?: CacheMeta): Record<string, unknown> | null;
+  set(filePath: string, analysis: Record<string, unknown>, modifiedTime: number | Date | null, meta?: CacheMeta): void;
+  isExpired(
+    cacheTimestamp: number,
+    cacheModifiedTime: number | null,
+    currentModifiedTime: number | Date | null,
+    cachedSize?: number | null,
+    currentSize?: number | null
+  ): boolean;
+  getCacheKey(filePath: string, meta?: CacheMeta): string;
+  clear(): void;
+  prune(): void;
+  getStats(): {
+    hits: number;
+    misses: number;
+    writes: number;
+    evictions: number;
+    errors: number;
+    totalRequests: number;
+    hitRate: number;
+    cacheSize: number;
+  };
+}
+
+export function resolveCacheManager(
+  cacheOption: boolean | 'memory' | 'disk' | CacheManagerOptions | CacheManager | null | undefined,
+  defaults?: CacheManagerOptions
+): CacheManager | null;
+
+export interface ScannedFile {
+  path: string;
+  relativePath: string;
+  name: string;
+  extension: string;
+  size: number;
+  modified: Date;
+  created: Date;
+}
+
+export interface ScannerOptions {
+  respectGitignore?: boolean;
+  followSymlinks?: boolean;
+  maxDepth?: number;
+  policy?: Policy | false | null;
+  respectIgnoreFiles?: string | string[];
+  env?: NodeJS.ProcessEnv;
+}
+
+export class Scanner {
+  constructor(rootPath: string, options?: ScannerOptions);
+  rootPath: string;
+  scan(): ScannedFile[];
+  isDenied(relativePath: string): boolean;
+  shouldIgnore(relativePath: string, fullPath?: string): boolean;
+  getPolicy(): Policy | null;
+  getStats(): {
+    filesScanned: number;
+    directoriesTraversed: number;
+    filesIgnored: number;
+    filesDenied: number;
+    errors: number;
+  };
+  reset(): void;
+}
+
+export interface AnalyzerOptions {
+  methodLevel?: boolean;
+  parallel?: boolean;
+  maxWorkers?: number;
+  targetModel?: string | null;
+  encoding?: string;
+  cache?: boolean | 'memory' | 'disk' | CacheManagerOptions | CacheManager;
+  cachePath?: string;
+}
+
+export interface AnalyzedFile {
+  path: string;
+  relativePath: string;
+  name: string;
+  extension: string;
+  size: number;
+  modified: Date | number;
+  tokens: number;
+  lines: number;
+  language: string;
+  methods?: MethodInfo[];
+  methodCount?: number;
+}
+
+export interface AnalyzerStats {
+  totalFiles: number;
+  totalTokens: number;
+  totalSize: number;
+  totalMethods: number;
+  totalLines: number;
+  byLanguage: Record<string, { files: number; tokens: number; size: number }>;
+  largestFiles: Array<{ path: string; tokens: number; size: number }>;
+  analysisTime: number;
+  cacheHits?: number;
+  cacheMisses?: number;
+}
+
+export class Analyzer {
+  constructor(options?: AnalyzerOptions);
+  analyze(files: ScannedFile[]): Promise<{ files: AnalyzedFile[]; stats: AnalyzerStats }>;
+  analyzeFile(fileInfo: ScannedFile): Promise<AnalyzedFile | null>;
+  getStats(): AnalyzerStats;
+  reset(): void;
+  getLanguageDistribution(): Array<{
+    language: string;
+    files: number;
+    tokens: number;
+    size: number;
+    percentage: number;
+  }>;
+}
+
+export interface ContextBuilderOptions {
+  targetModel?: string | null;
+  targetTokens?: number | null;
+  useCase?: string;
+  includeTests?: boolean;
+  includeDocumentation?: boolean;
+  methodLevel?: boolean;
+  priorityStrategy?: 'balanced' | 'changed-first' | 'core-first';
+}
+
+export class ContextBuilder {
+  constructor(options?: ContextBuilderOptions);
+  build(analysisResult: { files: AnalyzedFile[]; stats: AnalyzerStats }): Record<string, unknown>;
+  getSummary(context: Record<string, unknown>): string;
+}
+
+export interface ReporterOptions {
+  format?: string;
+  outputPath?: string | null;
+  clipboard?: boolean;
+  verbose?: boolean;
+}
+
+export class Reporter {
+  constructor(options?: ReporterOptions);
+  report(context: Record<string, unknown>, stats: AnalyzerStats): Promise<void>;
+  exportToFile(context: Record<string, unknown>, outputPath: string): Promise<void>;
+  exportToClipboard(context: Record<string, unknown>): Promise<void>;
+  generateSummary(context: Record<string, unknown>): string;
+}
+
+// ============================================
+// Search, Symbol Lookup, Token Counting, RAG & Policy
+// ============================================
+
+export interface SearchProjectOptions {
+  limit?: number;
+  maxTokens?: number;
+  redact?: boolean;
+  windowLines?: number;
+}
+
+export interface SearchHit {
+  file: string;
+  name: string | null;
+  kind: string;
+  parent?: string;
+  startLine: number;
+  endLine: number;
+  score: number;
+  tokens: number;
+  text: string | null;
+  truncated?: boolean;
+}
+
+export interface SearchProjectResult {
+  query: string;
+  root: string;
+  files: number;
+  chunks: number;
+  tokens: number;
+  results: SearchHit[];
+}
+
+export function searchProject(
+  root: string,
+  query: string,
+  options?: SearchProjectOptions
+): SearchProjectResult;
+
+export interface GetSymbolOptions {
+  file?: string;
+  limit?: number;
+  maxTokens?: number;
+  redact?: boolean;
+}
+
+export interface SymbolMatch {
+  name: string;
+  kind: string;
+  parent?: string;
+  file: string;
+  startLine: number;
+  endLine: number;
+  tokens: number;
+  source: string;
+  truncated?: boolean;
+}
+
+export interface GetSymbolResult {
+  query: string;
+  match: 'exact' | 'case-insensitive' | 'none';
+  total: number;
+  symbols: SymbolMatch[];
+  suggestions?: Array<{
+    name: string;
+    kind: string;
+    parent?: string;
+    file: string;
+    startLine: number;
+  }>;
+}
+
+export function getSymbol(
+  root: string,
+  query: string,
+  options?: GetSymbolOptions
+): GetSymbolResult;
+
+export interface CountForModelOptions {
+  model?: string;
+  text?: string;
+  api?: boolean;
+  client?: unknown;
+  onProgress?: (done: number, total: number) => void;
+}
+
+export interface CountForModelResult {
+  model: string;
+  modelName: string;
+  vendor: string;
+  files: number;
+  encoding: string;
+  localTokens: number;
+  tokens: number;
+  method: 'local' | 'anthropic-api';
+  exact: boolean;
+  contextWindow: number;
+  fits: boolean;
+  percentOfWindow: number;
+  requests?: number;
+  ratio?: number | null;
+  largestFiles: Array<{ path: string; tokens: number }>;
+}
+
+export function countForModel(
+  root: string,
+  options?: CountForModelOptions
+): Promise<CountForModelResult>;
+
+export interface AskCodebaseOptions {
+  limit?: number;
+  redact?: boolean;
+  maxChars?: number;
+  onProgress?: (event: 'indexing' | 'indexed') => void;
+  createStore?: (storePath: string) => unknown;
+}
+
+export interface AskCodebaseResult {
+  query: string;
+  indexed: boolean;
+  results: Array<{
+    file: string;
+    score: number | null;
+    text: string;
+    truncated: boolean;
+  }>;
+  removedByPolicy: number;
+  redactions: number;
+}
+
+export function askCodebase(
+  root: string,
+  query: string,
+  options?: AskCodebaseOptions
+): Promise<AskCodebaseResult>;
+
+export class Policy {
+  active: boolean;
+  requireRedaction: boolean;
+  maxExportTokens: number | null;
+  allowedModels: string[] | null;
+  ignoreFiles: string[];
+  audit: { enabled: boolean; path: string };
+  sources: Array<{ scope: string; file: string }>;
+  isDenied(relativePath: string): boolean;
+  isAuditLog(relativePath: string): boolean;
+  toJSON(): Record<string, unknown>;
+}
+
+export class PolicyConfigError extends Error {
+  file: string;
+  errors: string[];
+  exitCode: number;
+}
+
+export class PolicyViolationError extends Error {
+  violations: Array<Record<string, unknown>>;
+  exitCode: number;
+}
+
+export function loadPolicy(
+  rootPath: string,
+  options?: { env?: NodeJS.ProcessEnv }
+): Policy;

@@ -7,6 +7,13 @@
 import TokenCalculator from './lib/analyzers/token-calculator.js';
 import MethodAnalyzer from './lib/analyzers/method-analyzer.js';
 
+// Core v3 modular pipeline & cache
+import { Scanner } from './lib/core/Scanner.js';
+import { Analyzer } from './lib/core/Analyzer.js';
+import { ContextBuilder } from './lib/core/ContextBuilder.js';
+import { Reporter } from './lib/core/Reporter.js';
+import { CacheManager, resolveCacheManager } from './lib/cache/CacheManager.js';
+
 // Parsers
 import GitIgnoreParser from './lib/parsers/gitignore-parser.js';
 import MethodFilterParser from './lib/parsers/method-filter-parser.js';
@@ -38,13 +45,29 @@ import { buildRepoGraph, rankFiles, renderRepoMap } from './lib/map/index.js';
 
 // Code history explanation (`ctxman why`)
 import { explainHistory } from './lib/why/index.js';
+
 // File contents in one document (`ctxman pack`)
 import { packContext } from './lib/pack/index.js';
+
+// Search, symbol lookup, token counting, RAG & export policy
+import { searchProject } from './lib/search/bm25.js';
+import { getSymbol } from './lib/search/symbols.js';
+import { countForModel } from './lib/count/index.js';
+import { askCodebase } from './lib/rag/ask.js';
+import { loadPolicy, Policy, PolicyConfigError, PolicyViolationError } from './lib/policy/index.js';
 
 export {
   // Analyzers
   TokenCalculator,
   MethodAnalyzer,
+
+  // Core v3 pipeline & cache
+  Scanner,
+  Analyzer,
+  ContextBuilder,
+  Reporter,
+  CacheManager,
+  resolveCacheManager,
 
   // Parsers
   GitIgnoreParser,
@@ -84,8 +107,19 @@ export {
 
   // Code history explanation (`ctxman why`)
   explainHistory,
+
   // Packed file contents
   packContext,
+
+  // Search, symbols, counting, RAG & policy
+  searchProject,
+  getSymbol,
+  countForModel,
+  askCodebase,
+  loadPolicy,
+  Policy,
+  PolicyConfigError,
+  PolicyViolationError,
 };
 
 // Alias for backward compatibility
