@@ -1,6 +1,6 @@
 {
   "version": "4.0.0",
-  "lastUpdated": "2026-10-09",
+  "lastUpdated": "2026-10-30",
   "description": "Context windows, output limits and list prices (USD per 1M tokens, standard tier) of current models. Check prices with the provider before budgeting.",
   "sources": {
     "Anthropic": [
@@ -390,7 +390,7 @@
           {
             "above": 272000,
             "input": 20,
-            "output": 75.0
+            "output": 75
           }
         ]
       },
@@ -421,7 +421,7 @@
           {
             "above": 272000,
             "input": 4,
-            "output": 15.0
+            "output": 15
           }
         ]
       },
@@ -485,7 +485,7 @@
           {
             "above": 272000,
             "input": 4,
-            "output": 18.0
+            "output": 18
           }
         ]
       },
@@ -515,7 +515,7 @@
           {
             "above": 272000,
             "input": 10,
-            "output": 45.0
+            "output": 45
           }
         ]
       },
@@ -606,7 +606,7 @@
       "supportedLanguages": "all",
       "strengths": ["json-mode", "function-calling"],
       "tier": "frontier",
-      "status": "deprecated",
+      "status": "retired",
       "pricing": {
         "input": 10,
         "output": 30

@@ -67,15 +67,15 @@
     }
   },
   "devDependencies": {
-    "@playwright/test": "^1.56.1",
+    "@playwright/test": "^1.58.1",
     "@vitejs/plugin-vue": "^6.0.2",
     "@vue/test-utils": "^2.4.6",
-    "electron": "^39.2.3",
-    "electron-builder": "^26.0.12",
+    "electron": "^45.1.0",
+    "electron-builder": "^26.18.0",
     "jsdom": "^27.2.0",
-    "playwright": "^1.56.1",
+    "playwright": "^1.58.1",
     "vite": "^7.2.4",
-    "vitest": "^4.0.13",
+    "vitest": "^4.0.18",
     "vue": "^3.5.24"
   }
 }

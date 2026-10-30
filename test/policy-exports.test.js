@@ -27,7 +27,7 @@ describe('policy enforcement on exports', () => {
   let savedEnv;
 
   beforeEach(() => {
-    root = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-policy-exports-'));
+    root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-policy-exports-')));
     for (const [file, content] of Object.entries(PROJECT)) {
       fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
       fs.writeFileSync(path.join(root, file), content);
