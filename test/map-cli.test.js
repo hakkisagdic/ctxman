@@ -167,7 +167,7 @@ describe('MCP repo_map tool', () => {
     );
     const tool = tools.find((t) => t.name === 'repo_map');
 
-    expect(Object.keys(tool.inputSchema.properties)).toEqual(['path', 'tokens', 'focus']);
+    expect(Object.keys(tool.inputSchema.properties)).toEqual(['path', 'tokens', 'focus', 'repos']);
     expect(tool.inputSchema.required).toEqual(['path']);
   });
 

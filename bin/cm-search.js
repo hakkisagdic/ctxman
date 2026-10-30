@@ -3,7 +3,7 @@
 /**
  * ctxman search: ranked (BM25, semantic, or RRF hybrid) search over methods and code chunks
  *
- *   ctxman search "<query>" [path] [--hybrid | --mode bm25|semantic|hybrid]
+ *   ctxman search "<query>" [path] [--repo DIR] [--hybrid | --mode bm25|semantic|hybrid]
  *                 [--limit N] [--max-tokens N] [--json] [--full]
  *                 [--no-redact] [-o FILE] [--copy]
  */
@@ -13,6 +13,7 @@ import path from 'path';
 import { parseArgs } from 'util';
 import { searchProject, DEFAULT_LIMIT, DEFAULT_MAX_TOKENS } from '../lib/search/bm25.js';
 import { hybridSearch, SEARCH_MODES } from '../lib/search/hybrid.js';
+import { searchWorkspace } from '../lib/workspace/index.js';
 import { getLogger } from '../lib/utils/logger.js';
 import ClipboardUtils from '../lib/utils/clipboard-utils.js';
 import { exitOnBrokenPipe } from '../lib/utils/cli-output.js';
@@ -25,6 +26,7 @@ const PREVIEW_LINES = 8;
 const OPTIONS = {
   limit: { type: 'string', short: 'n' },
   'max-tokens': { type: 'string' },
+  repo: { type: 'string', multiple: true },
   hybrid: { type: 'boolean' },
   mode: { type: 'string' },
   json: { type: 'boolean' },
@@ -53,6 +55,7 @@ chunk is a method or function, or a window of up to 40 lines of the code outside
 Options:
   -n, --limit <n>        Number of results (default: ${DEFAULT_LIMIT})
   --max-tokens <n>       Token budget for the returned code (default: ${DEFAULT_MAX_TOKENS})
+  --repo <dir>           Search across multiple repository roots under one token budget (repeatable)
   --hybrid               Fuse BM25 lexical search with local vector embeddings via RRF
   --mode <mode>          bm25 (default), hybrid, or semantic
   --full                 Print whole chunks instead of the first ${PREVIEW_LINES} lines
@@ -65,6 +68,7 @@ Options:
 Examples:
   ctxman search "parse config file"
   ctxman search "how authentication sessions expire" --hybrid
+  ctxman search "invoice total" --repo ../api --repo ../billing
   ctxman search getUserName ./services/api --limit 5
   ctxman search "retry backoff" --json | jq '.results[].file'
 `);
@@ -160,13 +164,18 @@ async function main() {
   }
 
   const mode = resolveMode(values);
+  const extraRepos = values.repo ?? [];
+  if (extraRepos.length > 0 && mode !== 'bm25') {
+    throw new UsageError('Multi-repository --repo search currently uses BM25 lexical mode');
+  }
 
   // A last positional that names a directory is the project; the rest is the query
-  let root = process.cwd();
+  let explicitRoot = null;
   const last = positionals.at(-1);
   if (positionals.length > 1 && fs.statSync(last, { throwIfNoEntry: false })?.isDirectory()) {
-    root = path.resolve(positionals.pop());
+    explicitRoot = path.resolve(positionals.pop());
   }
+  const root = explicitRoot ?? process.cwd();
   const query = positionals.join(' ').trim();
   if (!query) throw new UsageError('Missing query: ctxman search "<query>" [path]');
 
@@ -181,20 +190,28 @@ async function main() {
   getLogger().level = process.env.LOG_LEVEL || 'warn';
   const redact = values['no-redact'] !== true;
 
-  const result =
-    mode === 'bm25'
-      ? searchProject(root, query, { limit, maxTokens, redact })
-      : await hybridSearch(root, query, {
-          mode,
-          limit,
-          maxTokens,
-          redact,
-          onProgress: (event) => {
-            if (event === 'indexing') {
-              console.error('Building local semantic embedding index (.ctxman/self-knowledge)...');
-            }
-          },
-        });
+  let result;
+  if (extraRepos.length > 0) {
+    const repoList = [
+      ...(explicitRoot ? [explicitRoot] : []),
+      ...extraRepos.map((r) => path.resolve(r)),
+    ];
+    result = searchWorkspace(repoList, query, { limit, maxTokens, redact });
+  } else if (mode === 'bm25') {
+    result = searchProject(root, query, { limit, maxTokens, redact });
+  } else {
+    result = await hybridSearch(root, query, {
+      mode,
+      limit,
+      maxTokens,
+      redact,
+      onProgress: (event) => {
+        if (event === 'indexing') {
+          console.error('Building local semantic embedding index (.ctxman/self-knowledge)...');
+        }
+      },
+    });
+  }
 
   if (Array.isArray(result.warnings)) {
     for (const warning of result.warnings) console.error(`Warning: ${warning}`);

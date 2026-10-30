@@ -25,6 +25,8 @@ are listed with one line per function (line, signature, tokens) until the budget
 
 Options:
   -t, --tokens N           Token budget for the map (default: 2048)
+      --repo DIR           Additional repository root for a multi-repo workspace map
+                           under one shared token budget (repeatable)
   -f, --focus PATH         Bias the ranking toward a file or folder and its neighbours
                            (repeatable)
       --history N          Commits of git history to mine for change frequency
@@ -47,6 +49,7 @@ Score:
 Examples:
   ctxman map                                # map of the current directory, 2048 tokens
   ctxman map --tokens 4096 --style markdown
+  ctxman map --repo ../api --repo ../web --tokens 4096
   ctxman map src --focus src/server.js      # around the file you are working on
   ctxman map --important-last -o map.txt    # best files last, next to your question
   ctxman map --graph --style dot | dot -Tsvg > deps.svg
@@ -61,6 +64,7 @@ Examples:
 function parseArgs(argv) {
   const options = {
     root: null,
+    repos: [],
     tokens: undefined,
     focus: [],
     history: undefined,
@@ -102,6 +106,9 @@ function parseArgs(argv) {
       case '-t':
       case '--tokens':
         options.tokens = integer(arg, value(), 1);
+        break;
+      case '--repo':
+        options.repos.push(value());
         break;
       case '-f':
       case '--focus':
@@ -191,19 +198,38 @@ async function main() {
   getLogger({ level: process.env.LOG_LEVEL || 'warn', logToFile: false });
   console.log = console.info = console.debug = console.error;
   const { renderRepoMap } = await import('../lib/map/index.js');
+  const { mapWorkspace } = await import('../lib/workspace/index.js');
   const { default: ClipboardUtils } = await import('../lib/utils/clipboard-utils.js');
 
-  const root = path.resolve(options.root ?? '.');
-  const result = renderRepoMap(root, {
-    tokens: options.tokens,
-    focus: options.focus.map((entry) => focusPath(root, entry)),
-    history: options.history,
-    order: options.order,
-    importantLast: options.importantLast,
-    style: options.style,
-    graph: options.graph,
-    redact: options.redact,
-  });
+  let result;
+  if (options.repos.length > 0) {
+    const repoList = [
+      ...(options.root !== null ? [path.resolve(options.root)] : []),
+      ...options.repos.map((r) => path.resolve(r)),
+    ];
+    result = mapWorkspace(repoList, {
+      tokens: options.tokens,
+      focus: options.focus,
+      history: options.history,
+      order: options.order,
+      importantLast: options.importantLast,
+      style: options.style,
+      graph: options.graph,
+      redact: options.redact,
+    });
+  } else {
+    const root = path.resolve(options.root ?? '.');
+    result = renderRepoMap(root, {
+      tokens: options.tokens,
+      focus: options.focus.map((entry) => focusPath(root, entry)),
+      history: options.history,
+      order: options.order,
+      importantLast: options.importantLast,
+      style: options.style,
+      graph: options.graph,
+      redact: options.redact,
+    });
+  }
 
   if (options.output) {
     fs.writeFileSync(options.output, result.output);
@@ -219,6 +245,7 @@ async function main() {
   for (const warning of result.warnings) console.error(`warning: ${warning}`);
   const { stats } = result;
   const parts = [];
+  if (result.repos?.length > 1) parts.push(`${result.repos.length} repos`);
   if (options.graph || result.style === 'dot') {
     parts.push(`${stats.edges} edges between ${stats.files} files`);
   } else {
@@ -232,7 +259,7 @@ async function main() {
   const redacted = Object.values(stats.redactions).reduce((sum, count) => sum + count, 0);
   if (redacted > 0) parts.push(`${redacted} secrets redacted`);
   parts.push(formatMs(stats.timings.total));
-  console.error(`ctxman map: ${parts.join(' · ')}`);
+  console.error(`ctxman map: ${parts.join(' \u00b7 ')}`);
   if (options.output) console.error(`Map written to ${options.output}`);
 }
 

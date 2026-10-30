@@ -52,6 +52,14 @@ import { packContext } from './lib/pack/index.js';
 // Import/importer neighborhood context (`ctxman focus`)
 import { focusContext, describeFocus, FocusError } from './lib/focus/index.js';
 
+// Multi-repository workspace (`--repo`)
+import {
+  resolveWorkspaceRepos,
+  mapWorkspace,
+  searchWorkspace,
+  packWorkspace,
+} from './lib/workspace/index.js';
+
 // Search, symbol lookup, token counting, RAG & export policy
 import { searchProject } from './lib/search/bm25.js';
 import { hybridSearch } from './lib/search/hybrid.js';
@@ -119,6 +127,12 @@ export {
   focusContext,
   describeFocus,
   FocusError,
+
+  // Multi-repository workspace
+  resolveWorkspaceRepos,
+  mapWorkspace,
+  searchWorkspace,
+  packWorkspace,
 
   // Search, symbols, counting, RAG & policy
   searchProject,

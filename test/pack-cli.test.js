@@ -392,6 +392,7 @@ describe('pack_context MCP tool', () => {
       'instructions',
       'budget',
       'targetModel',
+      'repos',
     ]);
     expect(tool.inputSchema.required).toEqual(['path']);
   });

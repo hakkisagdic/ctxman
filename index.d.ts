@@ -1898,3 +1898,51 @@ export function hybridSearch(
   query: string,
   options?: HybridSearchOptions
 ): Promise<HybridSearchResult>;
+
+// ============================================
+// Multi-Repository Workspace (`--repo`)
+// ============================================
+
+export type WorkspaceRepoInput = string | { path: string; alias?: string };
+
+export interface ResolvedWorkspaceRepo {
+  alias: string;
+  root: string;
+  realRoot?: string;
+  policy?: Policy;
+}
+
+export function resolveWorkspaceRepos(repos: WorkspaceRepoInput[]): ResolvedWorkspaceRepo[];
+
+export interface WorkspaceMapResult extends RepoMapResult {
+  repos: Array<{ alias: string; root: string }>;
+}
+
+export function mapWorkspace(
+  repos: WorkspaceRepoInput[],
+  options?: RepoMapOptions
+): WorkspaceMapResult;
+
+export interface WorkspaceSearchHit extends SearchHit {
+  repo: string;
+}
+
+export interface WorkspaceSearchResult extends Omit<SearchProjectResult, 'results'> {
+  repos: Array<{ alias: string; root: string }>;
+  results: WorkspaceSearchHit[];
+}
+
+export function searchWorkspace(
+  repos: WorkspaceRepoInput[],
+  query: string,
+  options?: SearchProjectOptions
+): WorkspaceSearchResult;
+
+export interface WorkspacePackResult extends PackResult {
+  repos: Array<{ alias: string; root: string }>;
+}
+
+export function packWorkspace(
+  repos: WorkspaceRepoInput[],
+  options?: Omit<PackOptions, 'files' | 'cwd'>
+): Promise<WorkspacePackResult>;

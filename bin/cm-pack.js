@@ -25,6 +25,8 @@ and .contextinclude decide which files are included; binary files and files over
 are skipped. Secrets (API keys, tokens, private keys) are masked.
 
 Selection:
+      --repo DIR           Pack multiple repository roots into one document under a
+                           shared token budget, prefixed by repo name (repeatable)
       --include GLOB       Only files matching GLOB (repeatable or comma-separated)
       --exclude GLOB       Leave out files matching GLOB (repeatable or comma-separated)
       --stdin              Read the file list from stdin, one path per line, instead of
@@ -62,6 +64,7 @@ Output:
 
 Examples:
   ctxman pack -o context.xml
+  ctxman pack --repo ../api --repo ../web --budget 80k -o workspace.xml
   ctxman pack src --include "**/*.ts" --exclude "**/*.test.ts" --style markdown
   ctxman pack --compress --budget 100k --instructions task.md --copy
   git ls-files -z -- '*.py' | ctxman pack --stdin -0 --line-numbers
@@ -93,6 +96,7 @@ function parseSize(text, flag) {
 }
 
 const VALUE_OPTIONS = {
+  '--repo': 'repos',
   '--include': 'include',
   '--exclude': 'exclude',
   '--max-file-size': 'maxFileSize',
@@ -131,7 +135,7 @@ const FLAG_OPTIONS = {
  * @returns {object}
  */
 function parseArgs(argv) {
-  const options = { include: [], exclude: [], tree: true, redact: true, paths: [] };
+  const options = { repos: [], include: [], exclude: [], tree: true, redact: true, paths: [] };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--') {
@@ -146,7 +150,9 @@ function parseArgs(argv) {
       else if (i + 1 < argv.length) value = argv[++i];
       else throw new Error(`${name} needs a value`);
       const key = VALUE_OPTIONS[name];
-      if (key === 'include' || key === 'exclude') {
+      if (key === 'repos') {
+        options.repos.push(value);
+      } else if (key === 'include' || key === 'exclude') {
         options[key].push(...value.split(',').filter((glob) => glob.trim()));
       } else {
         options[key] = value;
@@ -163,6 +169,9 @@ function parseArgs(argv) {
 
   if (options.paths.length > 1) {
     throw new Error(`Expected one project path, got ${options.paths.length}`);
+  }
+  if (options.repos.length > 0 && options.stdin) {
+    throw new Error('--repo cannot be combined with --stdin');
   }
   if (options.style !== undefined && !STYLES.includes(options.style)) {
     throw new Error(`--style must be one of ${STYLES.join(', ')}`);
@@ -220,8 +229,10 @@ function display(file) {
 function printSummary(result, extras) {
   const lines = [];
   const style = result.style;
+  const repoLabel =
+    result.repos?.length > 1 ? ` across ${formatNumber(result.repos.length)} repos` : '';
   lines.push(
-    `ctxman pack: ${formatNumber(result.files.length)} file(s), ` +
+    `ctxman pack: ${formatNumber(result.files.length)} file(s)${repoLabel}, ` +
       `${formatNumber(result.totalTokens)} tokens (${style}, ${result.encoding})`
   );
   if (result.budget) {
@@ -313,7 +324,8 @@ async function main() {
 
   try {
     const { packContext } = await import('../lib/pack/index.js');
-    const root = path.resolve(args.paths[0] ?? '.');
+    const { packWorkspace } = await import('../lib/workspace/index.js');
+    const { PolicyConfigError, PolicyViolationError } = await import('../lib/policy/index.js');
     const output = args.output ? path.resolve(args.output) : null;
 
     const options = {
@@ -344,7 +356,26 @@ async function main() {
       options.cwd = process.cwd();
     }
 
-    const result = await packContext(root, options);
+    let result;
+    try {
+      if (args.repos.length > 0) {
+        const repoList = [
+          ...(args.paths.length > 0 ? [path.resolve(args.paths[0])] : []),
+          ...args.repos.map((r) => path.resolve(r)),
+        ];
+        result = await packWorkspace(repoList, options);
+      } else {
+        const root = path.resolve(args.paths[0] ?? '.');
+        result = await packContext(root, options);
+      }
+    } catch (error) {
+      if (error instanceof PolicyConfigError || error instanceof PolicyViolationError) {
+        process.stderr.write(`Error: ${error.message}\n`);
+        process.exitCode = error.exitCode;
+        return;
+      }
+      throw error;
+    }
     const extras = [];
 
     if (args.maxTokens && result.totalTokens > args.maxTokens) {
