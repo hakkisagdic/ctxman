@@ -81,11 +81,12 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 
 ### 🧰 Context Commands
 
-- 📦 **`ctxman pack`** - File contents in one LLM-ready document (Claude XML, Markdown, JSON) with signatures-only compression and a hard token budget
-- 🗺️ **`ctxman map`** - Ranked repository map (import graph + git history) within a token budget
+- 📦 **`ctxman pack`** - File contents in one LLM-ready document (Claude XML, Markdown, JSON) with signatures-only compression, a hard token budget, and multi-repo `--repo` packing
+- 🎯 **`ctxman focus`** - Pack a file or symbol together with its `N`-hop import neighborhood within a token budget (`docs/commands/focus.md`)
+- 🗺️ **`ctxman map`** - Ranked repository map (import graph + git history) within a token budget (`--repo` for multi-repo)
 - 🔍 **`ctxman pr`** - Review context for a branch: log, changed methods, diff, related tests
-- 🧭 **`ctxman why`** - Why code looks as it does: commits, linked issues and PRs, owners, co-changed files, ADRs and tests from local git history
-- 🔎 **`ctxman search`** - Ranked (BM25) search over functions and code chunks
+- 🧭 **`ctxman why`** - Why code looks as it does: commits, linked issues and PRs, optional GitHub/GitLab discussions (`--discussions`), owners, co-changed files, ADRs and tests
+- 🔎 **`ctxman search`** - Ranked (BM25) and hybrid BM25 + semantic vector RRF (`--hybrid`) search over functions and code chunks across one or more `--repo` roots
 - 🔢 **`ctxman count`** - Token count for one model, exact for Claude through Anthropic's API
 - 🔌 **`ctxman mcp`** - MCP server with one-command setup for Claude Desktop, Claude Code, Cursor, VS Code and Windsurf
 - 🛡️ **`ctxman policy` / `ctxman audit`** - Export policy (deny rules, required redaction, token limits) and an audit log
@@ -184,7 +185,7 @@ ctxman --cli --target-model claude-sonnet-5-5
 #    ✅ PERFECT FIT! Your entire codebase fits in one context.
 ```
 
-Some of the supported models (run `ctxman --list-llms` for the full list, checked 2026-10-09):
+Some of the supported models (run `ctxman --list-llms` for the full list, checked 2026-10-30):
 
 | Vendor    | Model ID                 | Context | Output | $ in/out per 1M tokens |
 | --------- | ------------------------ | ------- | ------ | ---------------------- |
@@ -322,7 +323,7 @@ ctxman mcp                                   # run the server (stdio)
 The installer merges into the client's configuration and keeps a `.bak` of the previous file.
 `--root` confines every tool to one directory. Tools: `analyze_codebase`, `generate_context`,
 `git_diff`, `search_code`, `list_methods`, `repo_map`, `pr_context`, `get_symbol`,
-`count_tokens`, `explain_history`, `pack_context`, `check_policy`, `audit_log`, `ask_codebase`.
+`count_tokens`, `explain_history`, `pack_context`, `focus_context`, `check_policy`, `audit_log`, `ask_codebase`.
 Details:
 [docs/commands/mcp.md](docs/commands/mcp.md).
 

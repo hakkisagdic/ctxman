@@ -10,6 +10,10 @@
     "docs:preview": "vitepress preview"
   },
   "devDependencies": {
-    "vitepress": "^1.6.3"
+    "vitepress": "^1.6.4"
+  },
+  "overrides": {
+    "esbuild": "^0.28.2",
+    "vite": "^7.3.7"
   }
 }

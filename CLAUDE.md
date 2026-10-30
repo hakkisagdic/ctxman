@@ -6,25 +6,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ctxman** is an AI Development Platform with plugin architecture, Git integration, REST API, and real-time analysis capabilities. It provides method-level filtering and per-model token counting for 14+ programming languages, generating optimized context for AI assistants.
 
-**Core Capabilities (v3.0.0):**
+**Core Capabilities (v3.x):**
 
 - **Plugin Architecture**: Modular system for languages and exporters
-- **Git Integration**: Analyze changed files, diff analysis, author tracking
+- **Git Integration**: Analyze changed files, diff analysis, author tracking, GitHub/GitLab history discussions
 - **Watch Mode**: Real-time file monitoring and auto-analysis
-- **REST API**: HTTP server with 6 endpoints for programmatic access
-- **Performance**: Fast scanning and a reused tiktoken encoder; watch mode re-analyzes only changed files (analysis runs single-threaded)
+- **REST API & MCP Server**: HTTP server with 6 endpoints and MCP server with 15 tools
+- **Performance**: Fast scanning, reused tiktoken encoders, and disk/memory `CacheManager` caching across `Analyzer`, `TokenCalculator`, and `MCPServer`; watch mode re-analyzes only changed files (analysis runs single-threaded)
 - **LLM Optimization**: Auto-detect target LLM and optimize context
 - **Multi-language**: 14+ languages with method-level analysis
 - **Multiple Formats**: TOON (40-50% reduction), JSON, YAML, CSV, XML, GitIngest, Markdown
 
 ## Architecture
 
-### v3.0.0 Modular Architecture
+### v3.0.0+ Modular Architecture
 
 **Core Modules** (`lib/core/`):
 
 - `Scanner.js` - File system scanning with ignore rules (~1,900 text files of a 2,600-file tree in ~75 ms; discovery only)
-- `Analyzer.js` - Token & method analysis (sequential; the `parallel` option is not implemented)
+- `Analyzer.js` - Token & method analysis with optional `CacheManager` disk/memory caching (sequential; the `parallel` option is not implemented)
 - `ContextBuilder.js` - Smart context generation with LLM optimization
 - `Reporter.js` - Multi-format report generation
 
@@ -51,12 +51,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Context Commands** (each a `bin/cm-<name>.js` subcommand with a library module):
 
-- `lib/pack/` - `ctxman pack`: selection, budget (map ranking), signatures-only compression, split, renderers (xml/markdown/plain/json)
+- `lib/pack/` - `ctxman pack`: selection, budget (map ranking), signatures-only compression, split, renderers (xml/markdown/plain/json), and multi-repo `--repo` packing
+- `lib/focus/` - `ctxman focus`: directional BFS neighborhood slice (`--depth N`, default 2) around a target file/symbol (`imports` + `importers` without shared-hub explosion), packed target-first within `--budget`
 - `lib/count/` - `ctxman count`: token count for one model; `lib/utils/claude-token-counter.js` counts Claude models exactly through Anthropic's count_tokens API (`--api`)
-- `lib/map/` - `ctxman map`: import graph (`imports.js`, `resolver.js`), PageRank + git history + symbol references (`rank.js`), budgeted rendering (`render.js`)
+- `lib/map/` - `ctxman map`: import graph (`imports.js`, `resolver.js`), PageRank + git history + symbol references (`rank.js`), budgeted rendering (`render.js`), and multi-repo `--repo` maps
 - `lib/pr/` - `ctxman pr`: branch review context (diff parsing, changed methods, related tests, budgeted rendering)
-- `lib/why/` - `ctxman why`: history of a file, symbol or line range (`git log -L`), references, blame ownership, co-change coupling, related docs and tests
-- `lib/search/` - `ctxman search` and the MCP `search_code` (ranked) / `get_symbol` tools: BM25 over methods and code chunks
+- `lib/why/` - `ctxman why`: history of a file, symbol or line range (`git log -L`), references, blame ownership, co-change coupling, related docs and tests, plus optional GitHub/GitLab PR/MR/issue discussions (`--discussions`, `discussions.js`)
+- `lib/search/` - `ctxman search` and the MCP `search_code` / `get_symbol` tools: BM25 over methods and code chunks, hybrid BM25 + semantic vector RRF fusion (`--hybrid`, `hybrid.js`), and multi-repo `--repo` search
+- `lib/workspace/` - multi-repository workspace orchestration (`resolveWorkspaceRepos`, `mapWorkspace`, `searchWorkspace`, `packWorkspace`) under `<alias>/<path>` namespaces and a single shared token budget
 - `lib/policy/` - export policy (`.ctxman/policy.json`, `CTXMAN_POLICY`), enforcement, audit log, AI-tool ignore files; `ctxman policy` / `ctxman audit`
 - `lib/api/mcp/` - `ctxman mcp` (`start.js`), client setup (`install.js`), `--root` sandbox (`sandbox.js`)
 - `action.yml`, `scripts/action/` - GitHub Action; `Dockerfile` - container image
@@ -64,7 +66,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Performance** (`lib/cache/`):
 
-- `CacheManager.js` - Disk/memory caching system (not yet wired into the analysis pipeline)
+- `CacheManager.js` - Disk/memory caching system (`resolveCacheManager`, SHA-256 discriminated keys, `mtimeMs` + `size` invalidation), wired into `Analyzer`, `TokenCalculator` (`--cache` / `--no-cache`), and `MCPServer`
 
 **Legacy Components** (backward compatible):
 
@@ -76,8 +78,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Entry Points**:
 
-- `index.js` - Module exports for programmatic API
-- `bin/cli.js` - CLI interface with wizard, serve, watch commands
+- `index.js` - Module exports for programmatic API (`index.d.ts` TypeScript declarations kept 1:1 in sync)
+- `bin/cli.js` - CLI interface with wizard, serve, watch, and context subcommands
 
 ### Filtering System
 
@@ -100,14 +102,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Uses the tiktoken library (a regular dependency, so a plain `npm install ctxman` counts with it) with the encoding of `--target-model`: `o200k_base` for OpenAI models since GPT-4o, `cl100k_base` otherwise and when no model is given (`TokenUtils.encodingFor`, `encodingForModel` in `lib/utils/tokenizer-adapter.js`). Counts are exact for OpenAI models up to GPT-5.x; for GPT-6 (encoding unpublished), Claude, Gemini and other vendors they are approximate and labelled so. `ctxman count [path|-] --model ID [--api] [--json]` (`bin/cm-count.js`, `lib/count/`) counts for one model; with `--api` it counts Claude models exactly through Anthropic's count_tokens API (`lib/utils/claude-token-counter.js`; needs the optional `@anthropic-ai/sdk` and `ANTHROPIC_API_KEY`, sends secret-redacted text). Falls back to smart estimation (~95% accuracy) based on file extension if tiktoken cannot be loaded. Each encoder is built once and reused (building one costs ~150 ms).
 
-Model data (ids, context/output windows, prices with long-prompt tiers, status, aliases) lives in `.ctxman/llm-profiles.json` (checked 2026-10-09) and is read by `lib/utils/llm-detector.js`, `--list-llms` and `--estimate-cost`. `DEFAULT_TARGET_MODEL` is `claude-sonnet-5-5`; old ids such as `claude-sonnet-4.5` resolve through aliases.
+Model data (ids, context/output windows, prices with long-prompt tiers, status, aliases) lives in `.ctxman/llm-profiles.json` (checked 2026-10-30) and is read by `lib/utils/llm-detector.js`, `--list-llms` and `--estimate-cost`. `DEFAULT_TARGET_MODEL` is `claude-sonnet-5-5`; old ids such as `claude-sonnet-4.5` resolve through aliases.
 
 ## Development Commands
 
 ### Testing
 
 ```bash
-npm test                  # Run basic tests
+npm test                  # Run full Vitest suite
 npm run test:all          # Run all test suites
 npm run test:v3           # v3.0.0 core tests (12 tests)
 npm run test:llm          # LLM detection tests
@@ -128,7 +130,7 @@ ctxman --save-report     # Detailed JSON report
 ctxman -m --context-clipboard  # Method-level to clipboard
 ```
 
-### v3.0.0 Platform Commands
+### Platform & Context Commands
 
 ```bash
 npm run serve                     # Start API server (port 3000)
@@ -137,9 +139,12 @@ ctxman --changed-only    # Analyze only changed files
 ctxman --changed-since main  # Analyze changes since branch
 ctxman --list-llms       # List supported LLM models (--all adds retired ones)
 ctxman count --model claude-sonnet-5-5 --api  # Token count for one model (exact for Claude with --api)
-ctxman map --tokens 4096 # Ranked repository map within a token budget
+ctxman map --tokens 4096 # Ranked repository map within a token budget (--repo for multi-repo)
+ctxman focus src/server.js --depth 2 --budget 20k  # Import-neighborhood slice around a file
 ctxman pr --base main    # Review context for the current branch
-ctxman search "query"    # Ranked code search
+ctxman why src/server.js --discussions  # Git history + GitHub/GitLab PR/issue discussions
+ctxman search "query" --hybrid  # Hybrid BM25 + semantic vector RRF code search
+ctxman pack --repo ../api --repo ../web --budget 80k  # Multi-repo pack under shared budget
 ctxman mcp install --client claude-code  # MCP server setup
 ctxman policy check      # Validate the export policy; ctxman audit lists exports
 ```
@@ -286,6 +291,6 @@ When no export flags provided, prompts user to choose:
 
 - ES6 class syntax for core components
 - Regex-based parsing (no AST dependencies)
-- Graceful fallbacks (estimation if tiktoken cannot be loaded, clipboard fallback to file)
-- Minimal dependencies (heavy or networked extras such as `@anthropic-ai/sdk` or the `ask` search stack stay optional)
-- No TypeScript, pure JavaScript for maximum portability
+- Graceful fallbacks (estimation if tiktoken cannot be loaded, clipboard fallback to file, BM25 fallback when optional vector packages are absent)
+- Minimal dependencies (heavy or networked extras such as `@anthropic-ai/sdk` or the `ask`/semantic search stack stay optional)
+- No TypeScript, pure JavaScript for maximum portability (`index.d.ts` declarations maintained alongside `index.js`)

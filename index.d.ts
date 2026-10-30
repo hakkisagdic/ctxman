@@ -20,7 +20,7 @@ export interface TokenCalculatorOptions {
   gitingest?: boolean;
   targetModel?: string;
   dashboard?: boolean;
-  cache?: boolean | "memory" | "disk" | CacheManagerOptions | CacheManager;
+  cache?: boolean | 'memory' | 'disk' | CacheManagerOptions | CacheManager;
   cachePath?: string;
 }
 
@@ -1488,8 +1488,17 @@ export class CacheManager {
     evictions: number;
     errors: number;
   };
-  get(filePath: string, modifiedTime: number | Date | null, meta?: CacheMeta): Record<string, unknown> | null;
-  set(filePath: string, analysis: Record<string, unknown>, modifiedTime: number | Date | null, meta?: CacheMeta): void;
+  get(
+    filePath: string,
+    modifiedTime: number | Date | null,
+    meta?: CacheMeta
+  ): Record<string, unknown> | null;
+  set(
+    filePath: string,
+    analysis: Record<string, unknown>,
+    modifiedTime: number | Date | null,
+    meta?: CacheMeta
+  ): void;
   isExpired(
     cacheTimestamp: number,
     cacheModifiedTime: number | null,
@@ -1708,11 +1717,7 @@ export interface GetSymbolResult {
   }>;
 }
 
-export function getSymbol(
-  root: string,
-  query: string,
-  options?: GetSymbolOptions
-): GetSymbolResult;
+export function getSymbol(root: string, query: string, options?: GetSymbolOptions): GetSymbolResult;
 
 export interface CountForModelOptions {
   model?: string;
@@ -1796,10 +1801,7 @@ export class PolicyViolationError extends Error {
   exitCode: number;
 }
 
-export function loadPolicy(
-  rootPath: string,
-  options?: { env?: NodeJS.ProcessEnv }
-): Policy;
+export function loadPolicy(rootPath: string, options?: { env?: NodeJS.ProcessEnv }): Policy;
 
 // ============================================
 // Focused Neighborhood Context (`ctxman focus`)

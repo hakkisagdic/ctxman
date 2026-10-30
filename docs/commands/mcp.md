@@ -167,39 +167,52 @@ $ ctxman mcp uninstall --client claude-desktop
 
 ## Tools
 
-| Tool               | Arguments                                                     | Returns                                                                             |
-| ------------------ | ------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `analyze_codebase` | `path`                                                        | Statistics and token counts                                                         |
-| `generate_context` | `path`, `template?`, `maxTokens?`                             | LLM context                                                                         |
-| `git_diff`         | `path`, `branch?`                                             | `git diff <branch>`                                                                 |
-| `search_code`      | `path`, `query`, `type?` (`regex`, `semantic`, `ranked`)      | Matching lines; with `ranked`, the best matching code chunks (below)                |
-| `list_methods`     | `path` (directory or file), `file?`                           | Methods per file                                                                    |
-| `get_symbol`       | `path`, `name`, `file?`, `redact?`                            | Source of a named method, function or class                                         |
-| `repo_map`         | `path`, `tokens?`, `focus?`                                   | Ranked repository map within a token budget (`ctxman map`)                          |
-| `pr_context`       | `path`, `base?`, `head?`, `budget?`, `style?`                 | Review context for a branch (`ctxman pr`)                                           |
-| `count_tokens`     | `path` or `text`, `model?`, `top?`                            | Token count for a model and the fit in its window (`ctxman count`)                  |
-| `explain_history`  | `path`, `target`, `limit?`, `budget?`, `since?`               | Why code looks as it does: git history, references, owners, tests                   |
-| `pack_context`     | `path`, `include?`, `exclude?`, `files?`, `style?`, `budget?` | File contents in one LLM-ready document (`ctxman pack`)                             |
-| `check_policy`     | `path`                                                        | The effective export policy, or why its files are invalid (`ctxman policy check`)   |
-| `audit_log`        | `path`, `since?`, `limit?`                                    | Exports recorded in the policy's audit log (`ctxman audit`)                         |
-| `ask_codebase`     | `path`, `query`, `limit?`                                     | Files closest in meaning to a question, from a local embedding index (`ctxman ask`) |
+| Tool               | Arguments                                                                                 | Returns                                                                             |
+| ------------------ | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `analyze_codebase` | `path`                                                                                    | Statistics and token counts                                                         |
+| `generate_context` | `path`, `template?`, `maxTokens?`                                                         | LLM context                                                                         |
+| `git_diff`         | `path`, `branch?`                                                                         | `git diff <branch>`                                                                 |
+| `search_code`      | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?` | Matching lines or ranked/hybrid code chunks (below)                                 |
+| `list_methods`     | `path` (directory or file), `file?`                                                       | Methods per file                                                                    |
+| `get_symbol`       | `path`, `name`, `file?`, `redact?`                                                        | Source of a named method, function or class                                         |
+| `repo_map`         | `path`, `tokens?`, `focus?`, `repos?`                                                     | Ranked repository map within a token budget (`ctxman map`)                          |
+| `pr_context`       | `path`, `base?`, `head?`, `budget?`, `style?`                                             | Review context for a branch (`ctxman pr`)                                           |
+| `count_tokens`     | `path` or `text`, `model?`, `top?`                                                        | Token count for a model and the fit in its window (`ctxman count`)                  |
+| `explain_history`  | `path`, `target`, `limit?`, `budget?`, `since?`, `discussions?`, `maxDiscussions?`        | Why code looks as it does: git history, references, owners, tests, PR/issue threads |
+| `pack_context`     | `path`, `include?`, `exclude?`, `files?`, `style?`, `budget?`, `repos?`                   | File contents in one LLM-ready document (`ctxman pack`)                             |
+| `focus_context`    | `path`, `target`, `depth?`, `direction?`, `style?`, `compress?`, `budget?`                | Import-neighborhood slice around a file or symbol (`ctxman focus`)                  |
+| `check_policy`     | `path`                                                                                    | The effective export policy, or why its files are invalid (`ctxman policy check`)   |
+| `audit_log`        | `path`, `since?`, `limit?`                                                                | Exports recorded in the policy's audit log (`ctxman audit`)                         |
+| `ask_codebase`     | `path`, `query`, `limit?`                                                                 | Files closest in meaning to a question, from a local embedding index (`ctxman ask`) |
 
-`explain_history` also takes `patches?` (each commit's diff); see [`ctxman why`](why.md).
+`explain_history` also takes `patches?` (each commit's diff) and `discussions?` (GitHub/GitLab PR,
+MR and issue threads referenced in commit history); see [`ctxman why`](why.md).
+
+`focus_context` packs `target` together with its `depth`-hop import neighborhood (`direction`:
+`'both'`, `'imports'`, or `'importers'`, default `'both'`) within `budget` (default 20,000 tokens);
+see [`ctxman focus`](focus.md).
+
+`repo_map`, `search_code` (`ranked`, `semantic`, `hybrid`), and `pack_context` accept an optional
+`repos` array of repository directories to run across a multi-repository workspace under a single
+shared token budget, prefixing paths with `<alias>/<path>`. When `--root` is active, every entry in
+`repos` must also resolve inside the sandbox root.
 
 `audit_log` reads only the logs the policy names (or `.ctxman/audit.log`); no argument names
-another file. `ask_codebase` needs the optional `@xenova/transformers` and `@lancedb/lancedb`
-packages; the first call builds the index and downloads the embedding model, which can take
-minutes. Files left out by the ignore files or denied by the export policy are not indexed or
-returned, and secrets in the snippets are redacted.
+another file. `ask_codebase` (and `search_code` with `type: "semantic"` or `"hybrid"`) uses the
+optional `@xenova/transformers` and `@lancedb/lancedb` packages; when those packages are not
+installed, `type: "hybrid"` falls back cleanly to BM25 (`degraded: true`). Files left out by the
+ignore files or denied by the export policy are not indexed or returned, and secrets in the
+snippets are redacted.
 
-### `search_code` with `type: "ranked"`
+### `search_code` with `type: "ranked"` or `type: "hybrid"`
 
 BM25 ranking over code chunks: each method/function found by the method analyzers is a chunk,
 and the code outside them (or a whole file without methods) is cut into windows of up to 40
 lines. Identifiers are split into words, so `getUserName`, `get_user_name` and "user name" match
-each other. Extra arguments: `limit` (default 10), `maxTokens` (token budget for the returned
-code, default 4000) and `redact` (default true). See [search.md](search.md) for the ranking
-details.
+each other. With `type: "hybrid"`, BM25 chunks and local vector similarity hits are fused via
+Reciprocal Rank Fusion (`1 / (k + rank)`). Extra arguments: `limit` (default 10), `maxTokens`
+(token budget for the returned code, default 4000) and `redact` (default true). See
+[search.md](search.md) for the ranking details.
 
 ```json
 {
@@ -253,7 +266,8 @@ details.
 ```
 
 The index is kept in memory per project and rebuilt only for files whose modification time or
-size changed, so later queries are fast. `regex` (the default) and `semantic` behave as before.
+size changed, so later queries are fast. `regex` (the default) and `substring` perform line-level
+matching.
 
 ### `get_symbol`
 
@@ -279,7 +293,7 @@ narrows to the methods of a class (for Go, of the receiver type). Every match is
       "parent": "SessionStore",
       "file": "src/session.js",
       "startLine": 6,
-"      "endLine": 8,
+      "endLine": 8,
       "tokens": 14,
       "source": "  expireSession(id) {\n    this.sessions.delete(id);\n  }"
     }
@@ -302,8 +316,8 @@ anything else is an error instead of an empty analysis.
 With `--root <dir>` (or the `CTXMAN_MCP_ROOT` environment variable; `--root` wins) the server
 also:
 
-- rejects any tool `path` outside `<dir>` after resolving symlinks, so `..`, absolute paths
-  elsewhere and symlinks pointing out are refused;
+- rejects any tool `path` (and every `repos` entry) outside `<dir>` after resolving symlinks, so
+  `..`, absolute paths elsewhere and symlinks pointing out are refused;
 - resolves relative paths against `<dir>`, and uses `<dir>` when a tool call has no `path`;
 - applies the same rule to the `projectPath` and `filePath` arguments of the prompts;
 - serves `file://codebase/...` resources from `<dir>`;

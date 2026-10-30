@@ -11,6 +11,7 @@ ctxman pack                                   # current directory, XML, to stdou
 ctxman pack -o context.xml                    # to a file
 ctxman pack src --style markdown --copy       # Markdown, to the clipboard
 ctxman pack --compress --budget 100k --instructions task.md -o context.xml
+ctxman pack --repo ../api --repo ../web --budget 80k -o workspace.xml   # multi-repo shared budget
 ```
 
 The document goes to stdout (or to `-o`/`--copy`); a summary goes to stderr:
@@ -88,6 +89,7 @@ comes after the files, just before the instructions.
 | Option                 | Default | Description                                                                           |
 | ---------------------- | ------- | ------------------------------------------------------------------------------------- |
 | `[path]`               | `.`     | Project root                                                                          |
+| `--repo DIR`           |         | Include repository `DIR` in a multi-repository workspace pack (`<alias>/<path>`)      |
 | `--include GLOB`       |         | Only files matching GLOB; repeatable or comma-separated                               |
 | `--exclude GLOB`       |         | Leave out files matching GLOB; repeatable or comma-separated                          |
 | `--stdin`              | off     | Read the file list from stdin (one path per line) instead of scanning                 |
@@ -272,7 +274,7 @@ ctxman pack --compress --target-model gpt-4o --max-tokens 120k -q -o context.xml
 ## Library and MCP
 
 ```js
-import { packContext } from 'ctxman';
+import { packContext, packWorkspace } from 'ctxman';
 
 const result = await packContext('/path/to/project', {
   style: 'markdown',
@@ -286,6 +288,8 @@ result.text; // the document
 result.totalTokens; // its tokens
 result.omitted; // [{path, tokens}] left out by the budget
 result.parts; // with `split`: [{index, text, tokens, files}]
+
+const ws = await packWorkspace(['../api', '../web'], { budget: 80000, compress: true });
 ```
 
 Errors are `PackError`s with a `code` (`ROOT_NOT_FOUND`, `PATH_OUTSIDE_ROOT`,
@@ -293,11 +297,12 @@ Errors are `PackError`s with a `code` (`ROOT_NOT_FOUND`, `PATH_OUTSIDE_ROOT`,
 `index.d.ts` for every field.
 
 The MCP server (`ctxman mcp`) offers the same as the `pack_context` tool, with `path`,
-`include`, `exclude`, `files` (project-relative), `style`, `compress`, `lineNumbers`,
-`tree`, `instructions` (text), `budget` and `targetModel`. Its budget defaults to 20,000
-tokens so a whole project does not flood the client's context; secrets are always
-redacted, and with `ctxman mcp --root` both `path` and `files` must stay inside the root.
-It returns the document and a one-line summary.
+`repos` (optional array of repository roots for multi-repo packing), `include`, `exclude`,
+`files` (project-relative), `style`, `compress`, `lineNumbers`, `tree`, `instructions`
+(text), `budget` and `targetModel`. Its budget defaults to 20,000 tokens so a whole
+project does not flood the client's context; secrets are always redacted, and with
+`ctxman mcp --root` `path`, `repos` and `files` must stay inside the root. It returns the
+document and a one-line summary.
 
 ## Limits
 

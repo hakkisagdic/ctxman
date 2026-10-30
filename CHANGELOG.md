@@ -2,6 +2,43 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- `ctxman focus <file>[:symbol] [--depth N]`: packs a target file or symbol together with its
+  `N`-hop import neighborhood (`--direction both|imports|importers`, directional BFS avoiding
+  shared-hub explosion) within `--budget`, always ranking the target file first. Library
+  `focusContext()`, `describeFocus()`, `FocusError`; MCP tool `focus_context`.
+- `ctxman why --discussions`: enriches git history explanations with GitHub REST API v3 (and GHE)
+  and GitLab REST API v4 pull-request, merge-request and issue discussion threads (`--max-discussions`,
+  `--max-comments`), secret-redacted and dropped cleanly before commits under tight token budgets.
+  Library `fetchDiscussions()`; MCP `explain_history` `discussions` and `maxDiscussions` options.
+- `ctxman search --hybrid` (`--mode bm25|semantic|hybrid`): combines BM25 code-chunk ranking with
+  local semantic vector search via Reciprocal Rank Fusion (`1 / (k + rank)`), projecting file-level
+  semantic hits onto code chunks and degrading cleanly to BM25 (`degraded: true`) when optional
+  vector dependencies are absent. Library `hybridSearch()`; MCP `search_code` `type: "hybrid"`
+  and `type: "substring"`.
+- Multi-repository workspace support (`--repo <dir>`) across `ctxman map`, `ctxman search` and
+  `ctxman pack`, and `repos` on MCP `repo_map`, `search_code` and `pack_context`: merges multiple
+  repositories under `<alias>/<path>` namespaces within a single shared token budget while
+  enforcing per-repository export policies and MCP `--root` sandboxing. Library
+  `resolveWorkspaceRepos()`, `mapWorkspace()`, `searchWorkspace()`, `packWorkspace()`.
+- Public API exports and TypeScript declarations (`index.js`, `index.d.ts`) for v3 core and
+  platform modules: `Scanner`, `Analyzer`, `ContextBuilder`, `Reporter`, `CacheManager`,
+  `PluginManager`, `LanguagePlugin`, `ExporterPlugin`, `GitClient`, `DiffAnalyzer`,
+  `BlameTracker`, `FileWatcher`, `IncrementalAnalyzer`, `APIServer`, `MCPServer`.
+
+### Changed
+
+- `CacheManager` is now wired into `Analyzer`, `TokenCalculator` (`--cache` / `--no-cache`) and
+  `MCPServer`, using SHA-256 discriminated keys and exact `mtimeMs` + `size` invalidation;
+  `.context-cache/` is ignored by default.
+- Model profiles checked (2026-10-30): `gpt-4-turbo` marked `retired` (retired 2026-09-30) with
+  `gpt-5.5` as its replacement.
+- Dependencies updated across root, `website/` and `desktop-app/`, and the stale `website/public/CNAME`
+  file was removed.
+
 ## [3.1.1] - 2026-10-15
 
 ### Added

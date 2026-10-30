@@ -8,6 +8,7 @@ git activity (as in yek) and how often other files mention a file's functions.
 ```bash
 ctxman map                          # current directory, 2048 tokens, text
 ctxman map path/to/project --tokens 4096
+ctxman map --repo ../api --repo ../web --tokens 4096   # multi-repository workspace map
 ```
 
 ```text
@@ -34,7 +35,8 @@ and any warnings go to stderr.
 | Option               | Default | Description                                                                                       |
 | -------------------- | ------- | ------------------------------------------------------------------------------------------------- |
 | `[path]`             | `.`     | Project root                                                                                      |
-| `-t, --tokens N`     | `2048`  | Token budget of the rendered map                                                                  |
+| `--repo DIR`         |         | Include repository `DIR` in a multi-repository workspace map (`<alias>/<path>`); repeatable       |
+| `-t, --tokens N`     | `2048`  | Token budget of the rendered map (shared across all `--repo` roots when set)                      |
 | `-f, --focus PATH`   |         | Bias the ranking toward a file or folder and the files next to it in the import graph; repeatable |
 | `--history N`        | `300`   | Commits of git history to mine for change frequency; `0` disables                                 |
 | `--order rank\|path` | `rank`  | Order of the files in the output                                                                  |
@@ -48,7 +50,7 @@ and any warnings go to stderr.
 | `-q, --quiet`        |         | No summary or warnings on stderr                                                                  |
 
 A focus path may be project-relative, relative to the current directory, or absolute; it
-must stay inside the project.
+must stay inside the project (or use `<alias>/<path>` when `--repo` is active).
 
 ## How files are ranked
 
@@ -126,15 +128,17 @@ characters (minified bundles) are left out and counted in the summary.
 ## Library and MCP
 
 ```js
-import { buildRepoGraph, rankFiles, renderRepoMap } from 'ctxman';
+import { buildRepoGraph, rankFiles, renderRepoMap, mapWorkspace } from 'ctxman';
 
 const graph = buildRepoGraph('.', { history: 300 }); // nodes, edges, history counts
 const ranked = rankFiles(graph, { focus: ['src/server.js'] }); // best first
 const { output, files, tokens } = renderRepoMap('.', { tokens: 1024, style: 'markdown' });
+const ws = mapWorkspace(['../api', '../web'], { tokens: 4096 }); // shared budget across repos
 ```
 
 The MCP server exposes the tool `repo_map` with `path` (project root), optional
-`tokens` and `focus` (array of project-relative paths); it returns the text map.
+`tokens`, `focus` (array of project-relative paths), and `repos` (array of repository roots
+for a multi-repo map); it returns the text map.
 
 ## Limits
 
@@ -145,6 +149,6 @@ The MCP server exposes the tool `repo_map` with `path` (project root), optional
 - Not resolved: `package.json` `exports`/`imports`, tsconfig `extends`, Python
   namespace-package tricks, PHP `include_path`, C include paths from build files.
 - Function lines come from ctxman's method analyzer, so its false positives (a call
-  followed by `{`) and misses appear in the map.
+  followed by `{}`) and misses appear in the map.
 - Token counts per function are of the function's source text; file headers count the
   whole file.
