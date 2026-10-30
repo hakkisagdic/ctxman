@@ -7,13 +7,7 @@
  */
 
 import fs from 'fs';
-import { diagnoseFailure } from '../lib/diagnose/index.js';
-import { parseBudget } from '../lib/task/index.js';
-import ClipboardUtils from '../lib/utils/clipboard-utils.js';
 import { getLogger } from '../lib/utils/logger.js';
-
-getLogger({ level: 'error', logToFile: false });
-console.log = console.info = console.debug = console.error;
 
 function printHelp() {
   process.stdout.write(`ctxman diagnose - root-cause context bundle for stack traces & test failures
@@ -54,8 +48,14 @@ async function main() {
   const argv = process.argv.slice(2);
   if (argv.includes('-h') || argv.includes('--help')) {
     printHelp();
-    process.exit(0);
+    return;
   }
+
+  getLogger({ level: process.env.LOG_LEVEL || 'error', logToFile: false });
+  console.log = console.info = console.debug = console.error;
+
+  const { diagnoseFailure } = await import('../lib/diagnose/index.js');
+  const { parseBudget } = await import('../lib/task/index.js');
 
   let inputArg = null;
   let useStdin = false;
@@ -66,39 +66,46 @@ async function main() {
   let copy = false;
   let quiet = false;
 
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i];
+  try {
+    for (let i = 0; i < argv.length; i++) {
+      const arg = argv[i];
 
-    if (arg === '--stdin') {
-      useStdin = true;
-    } else if (arg === '--budget') {
-      budget = parseBudget(argv[++i], '--budget');
-    } else if (arg.startsWith('--budget=')) {
-      budget = parseBudget(arg.slice('--budget='.length), '--budget');
-    } else if (arg === '--json') {
-      format = 'json';
-    } else if (arg === '--no-redact') {
-      redact = false;
-    } else if (arg === '-o' || arg === '--output') {
-      outputFile = argv[++i];
-    } else if (arg.startsWith('-o=')) {
-      outputFile = arg.slice('-o='.length);
-    } else if (arg.startsWith('--output=')) {
-      outputFile = arg.slice('--output='.length);
-    } else if (arg === '--copy') {
-      copy = true;
-    } else if (arg === '-q' || arg === '--quiet') {
-      quiet = true;
-    } else if (!arg.startsWith('-')) {
-      if (inputArg === null) {
-        inputArg = arg;
+      if (arg === '--stdin') {
+        useStdin = true;
+      } else if (arg === '--budget') {
+        budget = parseBudget(argv[++i]);
+      } else if (arg.startsWith('--budget=')) {
+        budget = parseBudget(arg.slice('--budget='.length));
+      } else if (arg === '--json') {
+        format = 'json';
+      } else if (arg === '--no-redact') {
+        redact = false;
+      } else if (arg === '-o' || arg === '--output') {
+        outputFile = argv[++i];
+      } else if (arg.startsWith('-o=')) {
+        outputFile = arg.slice('-o='.length);
+      } else if (arg.startsWith('--output=')) {
+        outputFile = arg.slice('--output='.length);
+      } else if (arg === '--copy') {
+        copy = true;
+      } else if (arg === '-q' || arg === '--quiet') {
+        quiet = true;
+      } else if (!arg.startsWith('-')) {
+        if (inputArg === null) {
+          inputArg = arg;
+        } else {
+          inputArg += ` ${arg}`;
+        }
       } else {
-        inputArg += ` ${arg}`;
+        process.stderr.write(`Unknown option: ${arg}\n`);
+        process.exitCode = 2;
+        return;
       }
-    } else {
-      process.stderr.write(`Unknown option: ${arg}\n`);
-      process.exit(2);
     }
+  } catch (error) {
+    process.stderr.write(`Error: ${error.message}\n`);
+    process.exitCode = 2;
+    return;
   }
 
   let traceText = '';
@@ -114,7 +121,8 @@ async function main() {
 
   if (!traceText || !traceText.trim()) {
     process.stderr.write('Error: Failure log or stack trace is required.\n');
-    process.exit(2);
+    process.exitCode = 2;
+    return;
   }
 
   try {
@@ -127,6 +135,7 @@ async function main() {
     });
 
     if (copy) {
+      const { default: ClipboardUtils } = await import('../lib/utils/clipboard-utils.js');
       await ClipboardUtils.copy(result.text);
       if (!quiet) {
         process.stderr.write(`Copied ${result.totalTokens} tokens to clipboard.\n`);
@@ -145,8 +154,13 @@ async function main() {
     }
   } catch (error) {
     process.stderr.write(`Error: ${error.message}\n`);
-    process.exit(1);
+    process.exitCode = 1;
   }
 }
+
+process.stdout.on('error', (error) => {
+  if (error.code !== 'EPIPE') throw error;
+  process.exit(process.exitCode ?? 0);
+});
 
 main();
