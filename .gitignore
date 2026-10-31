@@ -91,3 +91,6 @@ docs/roadmap/
 
 # Vitest HTML report (vitest --reporter=html)
 html/
+
+# plansmith analyzer index
+.plansmith/
