@@ -2073,3 +2073,55 @@ export function queryAnalyzerCitations(
   rootOrDbPath: string,
   options?: QueryAnalyzerOptions
 ): AnalyzerCitation[];
+
+// ============================================
+// Expert Finder ("Who knows about this?")
+// ============================================
+
+export class WhoError extends Error {
+  constructor(message: string);
+}
+
+export interface FindExpertsOptions {
+  limit?: number;
+  commitWindow?: number;
+  halfLifeDays?: number;
+  since?: string;
+  style?: "markdown" | "xml" | "json";
+  nowMs?: number;
+}
+
+export interface ExpertEntry {
+  name: string;
+  email: string | null;
+  score: number;
+  blameLines: number;
+  blameShare: number;
+  commits: number;
+  commitShare: number;
+  recencyShare: number;
+  additions: number;
+  deletions: number;
+  lastActive: string | null;
+  isCodeOwner: boolean;
+  codeOwnerHandles: string[];
+  filesTouched: number;
+  recentCommits: Array<{ sha: string; date: string | null; subject: string }>;
+}
+
+export interface FindExpertsResult {
+  data: {
+    target: { query: string; mode: string; label: string; files: string[] };
+    codeOwners: { file: string | null; owners: string[] };
+    totalAuthors: number;
+    experts: ExpertEntry[];
+  };
+  experts: ExpertEntry[];
+  text: string;
+}
+
+export function findExperts(
+  projectDir: string,
+  target: string,
+  options?: FindExpertsOptions
+): Promise<FindExpertsResult>;

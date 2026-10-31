@@ -94,6 +94,11 @@ async function main() {
     return;
   }
 
+  if (command === 'who') {
+    runSubcommand('./cm-who.js', args.slice(1));
+    return;
+  }
+
   if (command === 'pack') {
     runSubcommand('./cm-pack.js', args.slice(1));
     return;

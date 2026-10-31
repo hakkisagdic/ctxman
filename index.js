@@ -45,6 +45,7 @@ import { buildRepoGraph, rankFiles, renderRepoMap } from './lib/map/index.js';
 
 // Code history explanation (`ctxman why`)
 import { explainHistory } from './lib/why/index.js';
+import { findExperts, WhoError } from './lib/who/index.js';
 
 // File contents in one document (`ctxman pack`)
 import { packContext } from './lib/pack/index.js';
@@ -130,6 +131,8 @@ export {
 
   // Code history explanation (`ctxman why`)
   explainHistory,
+  findExperts,
+  WhoError,
 
   // Packed file contents
   packContext,
