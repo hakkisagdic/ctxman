@@ -98,6 +98,7 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
       expect(text).toContain('find_experts');
       expect(text).toContain('task_context');
       expect(text).toContain('diagnose_failure');
+      expect(text).toContain('query_knowledge_graph');
       expect(text).toContain('SqliteVectorStore');
     }
   });

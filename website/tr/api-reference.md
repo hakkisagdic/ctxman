@@ -1,6 +1,6 @@
 # API Referansı
 
-Ctxman v3.2 CLI komutları, 18 araçlı MCP sunucusu, REST API ve programatik kütüphane dışa aktarımları için tam referans.
+Ctxman v3.2 CLI komutları, 19 araçlı MCP sunucusu, REST API ve programatik kütüphane dışa aktarımları için tam referans.
 
 ## CLI Referansı
 
@@ -133,7 +133,7 @@ ctxman audit --since 7d --limit 20
 
 ### `ctxman mcp`
 
-18 araçlı MCP sunucusunu (`stdio` veya `sse`) çalıştırır veya istemci yapılandırmalarını kurar:
+19 araçlı MCP sunucusunu (`stdio` veya `sse`) çalıştırır veya istemci yapılandırmalarını kurar:
 
 ```bash
 ctxman mcp install --client claude-desktop
@@ -150,28 +150,86 @@ ctxman watch --debounce 1000
 ctxman serve --port 3000
 ```
 
-## MCP Sunucu Araçları (18 Araç)
+## MCP Sunucu Araçları (19 Araç)
 
-| Araç               | Temel Argümanlar                                                                              | Açıklama                                                       |
-| ------------------ | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `analyze_codebase` | `path`                                                                                        | Depo token istatistikleri ve dosya dökümü                      |
-| `generate_context` | `path`, `template?`, `maxTokens?`                                                             | Şablon tabanlı LLM bağlamı                                     |
-| `git_diff`         | `path`, `branch?`                                                                             | Doğrulanmış `git diff <branch>`                                |
-| `search_code`      | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`     | Satır araması veya BM25 / hibrit RRF kod parçası araması       |
-| `list_methods`     | `path`, `file?`                                                                               | Dosya başına çıkarılan fonksiyonlar                            |
-| `get_symbol`       | `path`, `name`, `file?`, `redact?`                                                            | İsimle fonksiyon, metot veya sınıfın tam kaynak kodu           |
-| `repo_map`         | `path`, `tokens?`, `focus?`, `repos?`                                                         | PageRank depo haritası (`ctxman map`)                          |
-| `pr_context`       | `path`, `base?`, `head?`, `budget?`, `style?`                                                 | Pull-request inceleme paketi (`ctxman pr`)                     |
-| `count_tokens`     | `path` veya `text`, `model?`, `top?`                                                          | Modele duyarlı token sayımı ve pencere uyumu (`ctxman count`)  |
-| `explain_history`  | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?` | Git arkeolojisi ve kurumsal hafıza atıfları (`ctxman why`)     |
-| `pack_context`     | `path`, `include?`, `exclude?`, `files?`, `style?`, `compress?`, `budget?`, `repos?`          | Paketlenmiş kod tabanı belgesi (`ctxman pack`)                 |
-| `focus_context`    | `path`, `file`, `depth?`, `direction?`, `style?`, `compress?`, `budget?`                      | Yönlü `N`-hop import komşuluğu (`ctxman focus`)                |
-| `check_policy`     | `path`                                                                                        | Etkin `.ctxman/policy.json` doğrulaması (`ctxman policy`)      |
-| `audit_log`        | `path`, `since?`, `limit?`                                                                    | SHA-256 dışa aktarım denetim günlüğü (`ctxman audit`)          |
-| `ask_codebase`     | `path`, `query`, `limit?`                                                                     | Çevrimdışı SQLite semantik arama (`ctxman ask`)                |
-| `task_context`     | `path`, `task`, `budget?`, `format?`, `model?`                                                | Otomatik görev bağlam paketi (`ctxman task`)                   |
-| `diagnose_failure` | `path`, `trace`, `budget?`, `format?`                                                         | Stack-trace kök neden teşhisi (`ctxman diagnose`)              |
-| `find_experts`     | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                         | Blame + güncellik + CODEOWNERS uzman sıralaması (`ctxman who`) |
+| Araç                    | Temel Argümanlar                                                                              | Açıklama                                                              |
+| ----------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `analyze_codebase`      | `path`                                                                                        | Depo token istatistikleri ve dosya dökümü                             |
+| `generate_context`      | `path`, `template?`, `maxTokens?`                                                             | Şablon tabanlı LLM bağlamı                                            |
+| `git_diff`              | `path`, `branch?`                                                                             | Doğrulanmış `git diff <branch>`                                       |
+| `search_code`           | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`     | Satır araması veya BM25 / hibrit RRF kod parçası araması              |
+| `list_methods`          | `path`, `file?`                                                                               | Dosya başına çıkarılan fonksiyonlar                                   |
+| `get_symbol`            | `path`, `name`, `file?`, `redact?`                                                            | İsimle fonksiyon, metot veya sınıfın tam kaynak kodu                  |
+| `repo_map`              | `path`, `tokens?`, `focus?`, `repos?`                                                         | PageRank depo haritası (`ctxman map`)                                 |
+| `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`                                                 | Pull-request inceleme paketi (`ctxman pr`)                            |
+| `count_tokens`          | `path` veya `text`, `model?`, `top?`                                                          | Modele duyarlı token sayımı ve pencere uyumu (`ctxman count`)         |
+| `explain_history`       | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?` | Git arkeolojisi ve kurumsal hafıza atıfları (`ctxman why`)            |
+| `pack_context`          | `path`, `include?`, `exclude?`, `files?`, `style?`, `compress?`, `budget?`, `repos?`          | Paketlenmiş kod tabanı belgesi (`ctxman pack`)                        |
+| `focus_context`         | `path`, `file`, `depth?`, `direction?`, `style?`, `compress?`, `budget?`                      | Yönlü `N`-hop import komşuluğu (`ctxman focus`)                       |
+| `check_policy`          | `path`                                                                                        | Etkin `.ctxman/policy.json` doğrulaması (`ctxman policy`)             |
+| `audit_log`             | `path`, `since?`, `limit?`                                                                    | SHA-256 dışa aktarım denetim günlüğü (`ctxman audit`)                 |
+| `ask_codebase`          | `path`, `query`, `limit?`                                                                     | Çevrimdışı SQLite semantik arama (`ctxman ask`)                       |
+| `task_context`          | `path`, `task`, `budget?`, `format?`, `model?`                                                | Otomatik görev bağlam paketi (`ctxman task`)                          |
+| `diagnose_failure`      | `path`, `trace`, `budget?`, `format?`                                                         | Stack-trace kök neden teşhisi (`ctxman diagnose`)                     |
+| `find_experts`          | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                         | Blame + güncellik + CODEOWNERS uzman sıralaması (`ctxman who`)        |
+| `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`                                     | Kalıcı SQLite bilgi grafiği ve `IncrementalAnalyzer` önbellek sorgusu |
+
+### `query_knowledge_graph` Örnek Kullanımı
+
+Dosya düğümlerini, fonksiyon/metot bildirimlerini ve import/bağımlılık kenarlarını doğrudan `.ctxman/self-knowledge/index.sqlite` ve önbellekteki `IncrementalAnalyzer` durumundan sorgular:
+
+```json
+{
+  "name": "query_knowledge_graph",
+  "arguments": {
+    "path": "/path/to/repo",
+    "file": "lib/watch/IncrementalAnalyzer.js",
+    "depth": 1,
+    "query": "bootstrapSync",
+    "limit": 20,
+    "refresh": false
+  }
+}
+```
+
+Örnek yanıt çıktısı:
+
+```json
+{
+  "path": "/path/to/repo",
+  "bootstrapped": false,
+  "cached": true,
+  "stats": {
+    "totalNodes": 42,
+    "totalEdges": 68,
+    "vectorDocuments": 42,
+    "cachedFiles": 5
+  },
+  "nodes": [
+    {
+      "path": "lib/watch/IncrementalAnalyzer.js",
+      "language": "javascript",
+      "bytes": 14820,
+      "methods": [
+        {
+          "name": "bootstrapSync",
+          "line": 175,
+          "signature": "async bootstrapSync(root = this.projectRoot)"
+        }
+      ],
+      "symbolRefs": 3,
+      "unresolvedImports": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "lib/watch/IncrementalAnalyzer.js",
+      "to": "lib/rag/stores/SqliteVectorStore.js",
+      "weight": 1
+    }
+  ]
+}
+```
 
 ## Programatik API (`index.js`)
 

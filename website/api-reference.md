@@ -1,6 +1,6 @@
 # API Reference
 
-Complete reference for Ctxman v3.2 CLI commands, 18-tool MCP server, REST API, and programmatic library exports.
+Complete reference for Ctxman v3.2 CLI commands, 19-tool MCP server, REST API, and programmatic library exports.
 
 ## CLI Reference
 
@@ -133,7 +133,7 @@ ctxman audit --since 7d --limit 20
 
 ### `ctxman mcp`
 
-Run the 18-tool MCP server (`stdio` or `sse`) or install client configurations:
+Run the 19-tool MCP server (`stdio` or `sse`) or install client configurations:
 
 ```bash
 ctxman mcp install --client claude-desktop
@@ -150,28 +150,86 @@ ctxman watch --debounce 1000
 ctxman serve --port 3000
 ```
 
-## MCP Server Tools (18 Tools)
+## MCP Server Tools (19 Tools)
 
-| Tool               | Key Arguments                                                                                 | Description                                                     |
-| ------------------ | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `analyze_codebase` | `path`                                                                                        | Repository token statistics and file breakdown                  |
-| `generate_context` | `path`, `template?`, `maxTokens?`                                                             | Template-driven LLM context                                     |
-| `git_diff`         | `path`, `branch?`                                                                             | Validated `git diff <branch>`                                   |
-| `search_code`      | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`     | Line search or BM25 / hybrid RRF code-chunk search              |
-| `list_methods`     | `path`, `file?`                                                                               | Extracted methods per file                                      |
-| `get_symbol`       | `path`, `name`, `file?`, `redact?`                                                            | Full source of a named function, method, or class               |
-| `repo_map`         | `path`, `tokens?`, `focus?`, `repos?`                                                         | PageRank repository map (`ctxman map`)                          |
-| `pr_context`       | `path`, `base?`, `head?`, `budget?`, `style?`                                                 | Pull-request review bundle (`ctxman pr`)                        |
-| `count_tokens`     | `path` or `text`, `model?`, `top?`                                                            | Model-aware token count and context window fit (`ctxman count`) |
-| `explain_history`  | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?` | Git archaeology & institutional citations (`ctxman why`)        |
-| `pack_context`     | `path`, `include?`, `exclude?`, `files?`, `style?`, `compress?`, `budget?`, `repos?`          | Packed codebase document (`ctxman pack`)                        |
-| `focus_context`    | `path`, `file`, `depth?`, `direction?`, `style?`, `compress?`, `budget?`                      | Directional `N`-hop import neighborhood (`ctxman focus`)        |
-| `check_policy`     | `path`                                                                                        | Effective `.ctxman/policy.json` validation (`ctxman policy`)    |
-| `audit_log`        | `path`, `since?`, `limit?`                                                                    | SHA-256 export audit trail (`ctxman audit`)                     |
-| `ask_codebase`     | `path`, `query`, `limit?`                                                                     | Offline SQLite semantic search (`ctxman ask`)                   |
-| `task_context`     | `path`, `task`, `budget?`, `format?`, `model?`                                                | Automatic task context bundle (`ctxman task`)                   |
-| `diagnose_failure` | `path`, `trace`, `budget?`, `format?`                                                         | Stack-trace root-cause diagnosis (`ctxman diagnose`)            |
-| `find_experts`     | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                         | Blame + recency + CODEOWNERS expert ranking (`ctxman who`)      |
+| Tool                    | Key Arguments                                                                                 | Description                                                             |
+| ----------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `analyze_codebase`      | `path`                                                                                        | Repository token statistics and file breakdown                          |
+| `generate_context`      | `path`, `template?`, `maxTokens?`                                                             | Template-driven LLM context                                             |
+| `git_diff`              | `path`, `branch?`                                                                             | Validated `git diff <branch>`                                           |
+| `search_code`           | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`     | Line search or BM25 / hybrid RRF code-chunk search                      |
+| `list_methods`          | `path`, `file?`                                                                               | Extracted methods per file                                              |
+| `get_symbol`            | `path`, `name`, `file?`, `redact?`                                                            | Full source of a named function, method, or class                       |
+| `repo_map`              | `path`, `tokens?`, `focus?`, `repos?`                                                         | PageRank repository map (`ctxman map`)                                  |
+| `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`                                                 | Pull-request review bundle (`ctxman pr`)                                |
+| `count_tokens`          | `path` or `text`, `model?`, `top?`                                                            | Model-aware token count and context window fit (`ctxman count`)         |
+| `explain_history`       | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?` | Git archaeology & institutional citations (`ctxman why`)                |
+| `pack_context`          | `path`, `include?`, `exclude?`, `files?`, `style?`, `compress?`, `budget?`, `repos?`          | Packed codebase document (`ctxman pack`)                                |
+| `focus_context`         | `path`, `file`, `depth?`, `direction?`, `style?`, `compress?`, `budget?`                      | Directional `N`-hop import neighborhood (`ctxman focus`)                |
+| `check_policy`          | `path`                                                                                        | Effective `.ctxman/policy.json` validation (`ctxman policy`)            |
+| `audit_log`             | `path`, `since?`, `limit?`                                                                    | SHA-256 export audit trail (`ctxman audit`)                             |
+| `ask_codebase`          | `path`, `query`, `limit?`                                                                     | Offline SQLite semantic search (`ctxman ask`)                           |
+| `task_context`          | `path`, `task`, `budget?`, `format?`, `model?`                                                | Automatic task context bundle (`ctxman task`)                           |
+| `diagnose_failure`      | `path`, `trace`, `budget?`, `format?`                                                         | Stack-trace root-cause diagnosis (`ctxman diagnose`)                    |
+| `find_experts`          | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                         | Blame + recency + CODEOWNERS expert ranking (`ctxman who`)              |
+| `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`                                     | Query persistent SQLite knowledge graph and `IncrementalAnalyzer` cache |
+
+### `query_knowledge_graph` Example Usage
+
+Query file nodes, method declarations, and import/dependency edges directly from `.ctxman/self-knowledge/index.sqlite` and the cached `IncrementalAnalyzer` state:
+
+```json
+{
+  "name": "query_knowledge_graph",
+  "arguments": {
+    "path": "/path/to/repo",
+    "file": "lib/watch/IncrementalAnalyzer.js",
+    "depth": 1,
+    "query": "bootstrapSync",
+    "limit": 20,
+    "refresh": false
+  }
+}
+```
+
+Example response payload:
+
+```json
+{
+  "path": "/path/to/repo",
+  "bootstrapped": false,
+  "cached": true,
+  "stats": {
+    "totalNodes": 42,
+    "totalEdges": 68,
+    "vectorDocuments": 42,
+    "cachedFiles": 5
+  },
+  "nodes": [
+    {
+      "path": "lib/watch/IncrementalAnalyzer.js",
+      "language": "javascript",
+      "bytes": 14820,
+      "methods": [
+        {
+          "name": "bootstrapSync",
+          "line": 175,
+          "signature": "async bootstrapSync(root = this.projectRoot)"
+        }
+      ],
+      "symbolRefs": 3,
+      "unresolvedImports": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "lib/watch/IncrementalAnalyzer.js",
+      "to": "lib/rag/stores/SqliteVectorStore.js",
+      "weight": 1
+    }
+  ]
+}
+```
 
 ## Programmatic API (`index.js`)
 
