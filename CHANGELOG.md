@@ -6,6 +6,11 @@ All notable changes to the Ctxman will be documented in this file.
 
 ### Added
 
+- **Cross-File AST Symbol Call Graph (`buildCallGraph`, `map`, `focus`, `task`, `diagnose`)**:
+  - Added `lib/map/call-graph.js` (`buildCallGraph`, `extractFileCallSites`, `extractCallsFromSource`, `stripCommentsAndStrings`) to extract comment/string-stripped symbol call sites per method and resolve cross-file `caller -> callee` edges across direct imports, 1-hop barrel re-exports (`index.js` / `index.ts`), and unique repository-wide symbols.
+  - `ctxman map`: added `-c, --call-graph` and `--focus <file:symbol>` support, annotating mapped methods with `-> path:callee`, rendering `file:caller -> file:callee` in `--graph --call-graph` and dashed call edges in `--style dot --call-graph`, and personalizing PageRank toward direct symbol call neighbors (weight `0.85`).
+  - `ctxman focus`: added `<file>:<symbol>`, `-s, --symbol`, `--calls-only`, `--callers-only`, and `--calls` / `--no-calls` (plus MCP `focus_context` `symbol` and `callGraph` parameters), traversing intra-file helper closures and cross-file symbol call edges while prioritizing direct symbol call neighbors under token budgets.
+  - `ctxman task` & `ctxman diagnose`: prioritized 1-hop and 2-hop cross-file AST symbol call edges (including intra-file helper closures and barrel re-exports) in `buildTaskContext` and `diagnoseFailure`, added `--calls` / `--no-calls` CLI flags, and annotated `## Related 1-Hop Neighborhood` in diagnosis reports with `caller -> callee` relationships.
 - **Incremental Watch RAG & Knowledge Graph Sync (`ctxman watch`)**:
   - `IncrementalAnalyzer` synchronizes changed and deleted files into `SqliteVectorStore` in real time during watch mode: re-chunks and upserts vectors for modified files, updates `graph_nodes` and `graph_edges` import relationships with `resolveImport`, and prunes removed files via `deleteByFilePath()` and `deleteGraphFile()`.
   - Enforces `.ctxman/policy.json` deny rules and `redactSecrets` Data Shield before persisting any vector chunk or graph node.
