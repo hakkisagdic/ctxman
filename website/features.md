@@ -6,16 +6,16 @@ Ctxman is a local-first AI Code Intelligence & Context Engineering Platform desi
 
 ### Repository Map & Neighborhood Focus (`map` & `focus`)
 
-- **PageRank Repository Map (`ctxman map`)**: Ranks files across 14+ languages using PageRank over the import graph blended with git change frequency and symbol references, fitting function signatures into any token budget
-- **Directional Import Focus (`ctxman focus`)**: Packs a target file or symbol together with its `N`-hop outgoing imports and incoming importers (`--direction both|imports|importers`) without shared-hub explosion
+- **PageRank Repository Map & AST Call Graph (`ctxman map`)**: Ranks files across 14+ languages using PageRank over the import graph blended with git change frequency, symbol references, and cross-file AST symbol call edges (`--call-graph`, `--focus file:symbol`), fitting function signatures into any token budget
+- **Directional Import & Symbol Call Focus (`ctxman focus`)**: Packs a target file or symbol (`<file>:<symbol>`) together with its `N`-hop outgoing imports/callees and incoming importers/callers (`--direction both|imports|importers`, `--calls-only`, `--callers-only`, including intra-file helper closures and barrel re-exports) without shared-hub explosion
 - **Multi-Repo Workspaces (`--repo <dir>`)**: Merge multiple repositories under `<alias>/<path>` namespaces within a single shared token budget
 
 ```bash
-# Ranked repository map within 2,000 tokens
-ctxman map --tokens 2000
+# Ranked repository map with cross-file AST symbol call annotations
+ctxman map --tokens 2000 --call-graph
 
-# 2-hop import neighborhood around a file
-ctxman focus lib/why/index.js --depth 2 --budget 16k
+# 1-hop AST symbol call & import neighborhood around a function
+ctxman focus lib/why/index.js:explainHistory --depth 1 --budget 16k
 ```
 
 ### Code Archaeology (`why`) & Expert Finder (`who`)
@@ -33,8 +33,8 @@ ctxman who "hybrid search RRF"
 
 ### Task Context (`task`), Failure Diagnosis (`diagnose`) & PR Review (`pr`)
 
-- **Task-Driven Auto Context (`ctxman task`)**: Discovers seed files via hybrid BM25 + vector search, gathers 1-hop full code and 2-hop compressed signatures, and prepends an architectural repo map within `--budget` (default `32000`)
-- **Stack-Trace Root-Cause Bundle (`ctxman diagnose`)**: Parses Node/TS/JS, Python, Go, Rust, Java, C#, and Vitest stack traces, extracting enclosing methods, 1-hop neighbors, and recent git commits (`explainHistory`) within `--budget` (default `24000`)
+- **Task-Driven Auto Context (`ctxman task`)**: Discovers seed files and symbols via hybrid BM25 + vector search, prioritizes 1-hop cross-file AST symbol callers/callees (plus import neighbors) as full code and 2-hop compressed signatures, and prepends an architectural repo map within `--budget` (default `32000`)
+- **Stack-Trace Root-Cause Bundle (`ctxman diagnose`)**: Parses Node/TS/JS, Python, Go, Rust, Java, C#, and Vitest stack traces, extracting enclosing methods, 1-hop AST symbol call & import neighbors (`caller -> callee`), and recent git commits (`explainHistory`) within `--budget` (default `24000`)
 - **Pull Request Context (`ctxman pr`)**: Assembles branch summary, commit log, changed methods, unified diff, and related tests for code review
 
 ```bash
@@ -49,10 +49,10 @@ ctxman pr --base main --budget 24k
 - **Offline `AutoEmbeddingProvider`**: Uses `@xenova/transformers` when installed and falls back automatically to deterministic 256-dim `LocalHashEmbeddingProvider`
 - **Reciprocal Rank Fusion (`ctxman search --hybrid`)**: Fuses BM25 code-chunk ranking (`k1 = 1.5, b = 0.75`) with semantic vector similarity (`1 / (k + rank)`)
 
-### 18-Tool MCP Server (`ctxman mcp`)
+### 19-Tool MCP Server (`ctxman mcp`)
 
 - **One-Command Client Setup**: `ctxman mcp install --client claude-desktop|claude-code|cursor|vscode|windsurf`
-- **18 Specialized Tools**: `analyze_codebase`, `generate_context`, `git_diff`, `search_code`, `list_methods`, `get_symbol`, `repo_map`, `pr_context`, `count_tokens`, `explain_history`, `pack_context`, `focus_context`, `check_policy`, `audit_log`, `ask_codebase`, `task_context`, `diagnose_failure`, and `find_experts`
+- **19 Specialized Tools**: `analyze_codebase`, `generate_context`, `git_diff`, `search_code`, `list_methods`, `get_symbol`, `repo_map`, `pr_context`, `count_tokens`, `explain_history`, `pack_context`, `focus_context`, `check_policy`, `audit_log`, `ask_codebase`, `task_context`, `diagnose_failure`, `find_experts`, and `query_knowledge_graph`
 - **Root Sandbox (`--root <dir>`)**: Confines every tool, resource, prompt, multi-repo path, and analyzer DB path to the sandbox directory
 
 ## 🚀 Platform Features

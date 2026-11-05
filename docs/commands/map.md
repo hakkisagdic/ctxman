@@ -3,11 +3,14 @@
 `ctxman map` gives an LLM a compact overview of a codebase: the most important files,
 each with one line per function (line number, signature, tokens), trimmed to a token
 budget. Importance comes from the import graph (PageRank, as in Aider's repo map), recent
-git activity (as in yek) and how often other files mention a file's functions.
+git activity (as in yek), how often other files mention a file's functions, and
+cross-file AST symbol call edges (`buildCallGraph`).
 
 ```bash
 ctxman map                          # current directory, 2048 tokens, text
 ctxman map path/to/project --tokens 4096
+ctxman map --call-graph             # annotate methods with cross-file callees (-> file:callee)
+ctxman map --focus src/auth.js:verifyToken --call-graph
 ctxman map --repo ../api --repo ../web --tokens 4096   # multi-repository workspace map
 ```
 
@@ -19,38 +22,44 @@ lib/utils/logger.js (score 0.887, 1714 tokens)
   270: function getLogger(options = {}) [29 tok]
 lib/rag/Indexer.js (score 0.245, 651 tokens)
   16: constructor(vectorStore) [23 tok]
-  36: async index(sourceName, options = {}) [393 tok]
+  36: async index(sourceName, options = {}) [393 tok] -> lib/utils/logger.js:getLogger
 index.js (score 0.219, 425 tokens)
 ```
 
 Each header shows the file's score (0 to 1) and the tokens of the whole file; each
 function line shows its line number, its declaration on one line (multi-line parameter
 lists are joined, bodies cut off, at most 120 characters) and the tokens of its body.
+When `-c, --call-graph` is enabled, functions that invoke cross-file symbols are
+annotated with `-> targetFile:callee`.
 
 The map goes to stdout; a one-line summary (files, tokens used, edges, history, time)
 and any warnings go to stderr.
 
 ## Options
 
-| Option               | Default | Description                                                                                       |
-| -------------------- | ------- | ------------------------------------------------------------------------------------------------- |
-| `[path]`             | `.`     | Project root                                                                                      |
-| `--repo DIR`         |         | Include repository `DIR` in a multi-repository workspace map (`<alias>/<path>`); repeatable       |
-| `-t, --tokens N`     | `2048`  | Token budget of the rendered map (shared across all `--repo` roots when set)                      |
-| `-f, --focus PATH`   |         | Bias the ranking toward a file or folder and the files next to it in the import graph; repeatable |
-| `--history N`        | `300`   | Commits of git history to mine for change frequency; `0` disables                                 |
-| `--order rank\|path` | `rank`  | Order of the files in the output                                                                  |
-| `--important-last`   | off     | Highest-ranked file at the end (rank order only)                                                  |
-| `--style STYLE`      | `text`  | `text`, `markdown`, `json` or `dot` (Graphviz)                                                    |
-| `--json`             |         | Same as `--style json`                                                                            |
-| `--graph`            | off     | Print the dependency edges instead of the map                                                     |
-| `-o, --output FILE`  |         | Write to a file instead of stdout                                                                 |
-| `--copy`             |         | Copy to the clipboard instead of stdout                                                           |
-| `--no-redact`        |         | Do not mask secrets in signatures                                                                 |
-| `-q, --quiet`        |         | No summary or warnings on stderr                                                                  |
+| Option               | Default | Description                                                                                                       |
+| -------------------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
+| `[path]`             | `.`     | Project root                                                                                                      |
+| `--repo DIR`         |         | Include repository `DIR` in a multi-repository workspace map (`<alias>/<path>`); repeatable                       |
+| `-t, --tokens N`     | `2048`  | Token budget of the rendered map (shared across all `--repo` roots when set)                                      |
+| `-f, --focus TARGET` |         | Bias ranking toward a file, folder, or `file:symbol` (and its import + AST call neighbors); repeatable            |
+| `-c, --call-graph`   | off     | Annotate functions with cross-file AST symbol calls (`-> path:callee`) and include call edges in `--graph`/`json` |
+| `--history N`        | `300`   | Commits of git history to mine for change frequency; `0` disables                                                 |
+| `--order rank\|path` | `rank`  | Order of the files in the output                                                                                  |
+| `--important-last`   | off     | Highest-ranked file at the end (rank order only)                                                                  |
+| `--style STYLE`      | `text`  | `text`, `markdown`, `json` or `dot` (Graphviz)                                                                    |
+| `--json`             |         | Same as `--style json`                                                                                            |
+| `--graph`            | off     | Print the dependency edges instead of the map (or `file:caller -> file:callee` with `--call-graph`)               |
+| `-o, --output FILE`  |         | Write to a file instead of stdout                                                                                 |
+| `--copy`             |         | Copy to the clipboard instead of stdout                                                                           |
+| `--no-redact`        |         | Do not mask secrets in signatures                                                                                 |
+| `-q, --quiet`        |         | No summary or warnings on stderr                                                                                  |
 
 A focus path may be project-relative, relative to the current directory, or absolute; it
-must stay inside the project (or use `<alias>/<path>` when `--repo` is active).
+must stay inside the project (or use `<alias>/<path>` when `--repo` is active). Passing
+`--focus file:symbol` biases PageRank toward the target file (weight `1.0`), files linked
+by direct AST symbol calls to or from `symbol` (weight `0.85`), and 1-hop import neighbors
+(weight `0.5`).
 
 ## How files are ranked
 
@@ -68,9 +77,10 @@ wP = 0.70   wH = 0.25   wS = 0.05
   so files many others build on rank high. Damping 0.85; the rank of files without
   imports (dangling nodes) is redistributed like the random jump, so all scores sum to 1;
   power iteration stops when the L1 change drops below n × 1e-10 (at most 200 rounds).
-- **Focus** personalises the random jump: 90% of it goes to the focus files (weight 1)
-  and the files they import or are imported by (weight 0.5), 10% stays uniform so
-  unrelated files keep a rank.
+- **Focus** personalises the random jump: 90% of it goes to the focus files (weight 1),
+  files connected via direct symbol call edges when `--focus file:symbol` is used
+  (weight 0.85), and the files they import or are imported by (weight 0.5); 10% stays
+  uniform so unrelated files keep a rank.
 - **Change frequency** counts, for each file, the commits among the last `--history`
   (merges excluded) that touched it. The logarithm keeps one hot file from flattening
   the rest.
@@ -91,16 +101,19 @@ estimate when tiktoken is missing) and the lowest-ranked files are dropped until
 so the output never exceeds `--tokens`. Markdown counts its title too.
 
 With `--style json` the document holds `files` (the map entries — the same files the text
-map would include — with per-function signatures and tokens), `nodes` (every file with
-rank, score, raw PageRank, change count, symbol references, focus and inclusion flags),
-`edges` (`from`, `to`, `weight`) and `stats`. Only `files` follows the budget; `tokens`
+map would include — with per-function signatures, tokens, and `calls` when `--call-graph`
+is enabled), `nodes` (every file with rank, score, raw PageRank, change count, symbol
+references, focus and inclusion flags), `edges` (`from`, `to`, `weight`), `callEdges`
+(`fromFile`, `fromSymbol`, `toFile`, `toSymbol`, `count`, `line` when `--call-graph` is
+enabled), and `stats` (including `callEdges`). Only `files` follows the budget; `tokens`
 is the size of the equivalent text map.
 
 `--graph` (and `--style dot`) print the whole graph without a budget:
 
 ```bash
-ctxman map --graph                       # "a.js -> b.js" lines
-ctxman map --style dot | dot -Tsvg > deps.svg
+ctxman map --graph                       # "a.js -> b.js" import lines
+ctxman map --graph --call-graph          # "a.js:caller -> b.js:callee" symbol call lines
+ctxman map --style dot --call-graph | dot -Tsvg > deps.svg   # dashed edges for symbol calls
 ```
 
 ## Which imports are resolved
@@ -128,17 +141,21 @@ characters (minified bundles) are left out and counted in the summary.
 ## Library and MCP
 
 ```js
-import { buildRepoGraph, rankFiles, renderRepoMap, mapWorkspace } from 'ctxman';
+import { buildRepoGraph, buildCallGraph, rankFiles, renderRepoMap, mapWorkspace } from 'ctxman';
 
-const graph = buildRepoGraph('.', { history: 300 }); // nodes, edges, history counts
-const ranked = rankFiles(graph, { focus: ['src/server.js'] }); // best first
-const { output, files, tokens } = renderRepoMap('.', { tokens: 1024, style: 'markdown' });
+const graph = buildRepoGraph('.', { history: 300 }); // nodes, edges, callEdges, history counts
+const ranked = rankFiles(graph, { focus: ['src/server.js:handleRequest'] }); // best first
+const { output, files, tokens } = renderRepoMap('.', {
+  tokens: 1024,
+  style: 'markdown',
+  callGraph: true,
+});
 const ws = mapWorkspace(['../api', '../web'], { tokens: 4096 }); // shared budget across repos
 ```
 
 The MCP server exposes the tool `repo_map` with `path` (project root), optional
-`tokens`, `focus` (array of project-relative paths), and `repos` (array of repository roots
-for a multi-repo map); it returns the text map.
+`tokens`, `focus` (array of project-relative paths or `file:symbol` targets), and `repos`
+(array of repository roots for a multi-repo map); it returns the text map.
 
 ## Limits
 

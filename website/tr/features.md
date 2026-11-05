@@ -6,16 +6,16 @@ Ctxman, modern geliştirici ve yapay zeka ajanı iş akışları için tasarlanm
 
 ### Depo Haritası ve Odaklı Komşuluk (`map` & `focus`)
 
-- **PageRank Depo Haritası (`ctxman map`)**: 14+ dilde import grafiği üzerindeki PageRank değerini git değişim sıklığı ve sembol referanslarıyla birleştirerek en önemli dosya ve fonksiyon imzalarını token bütçesine sığdırır
-- **Yönlü Import Komşuluğu (`ctxman focus`)**: Hedef dosya veya sembolü `N`-hop giden import'ları ve gelen importer'ları (`--direction both|imports|importers`) ile ortak hub patlamasına yol açmadan paketler
+- **PageRank Depo Haritası ve AST Çağrı Grafiği (`ctxman map`)**: 14+ dilde import grafiği üzerindeki PageRank değerini git değişim sıklığı, sembol referansları ve dosyalar arası AST sembol çağrı kenarlarıyla (`--call-graph`, `--focus file:symbol`) birleştirerek en önemli dosya ve fonksiyon imzalarını token bütçesine sığdırır
+- **Yönlü Import ve Sembol Çağrı Komşuluğu (`ctxman focus`)**: Hedef dosya veya sembolü (`<file>:<symbol>`) `N`-hop giden import/çağrılanlar ve gelen importer/çağıranlar (`--direction both|imports|importers`, `--calls-only`, `--callers-only`, dosya içi yardımcı fonksiyon kapanışı ve barrel re-export çözümlemesi dahil) ile ortak hub patlamasına yol açmadan paketler
 - **Çoklu Depo Çalışma Alanı (`--repo <dir>`)**: Birden fazla depoyu `<alias>/<path>` ad alanları altında tek bir paylaşılan token bütçesinde birleştirir
 
 ```bash
-# 2.000 token bütçeli sıralı depo haritası
-ctxman map --tokens 2000
+# Dosyalar arası AST sembol çağrılarıyla 2.000 token bütçeli sıralı depo haritası
+ctxman map --tokens 2000 --call-graph
 
-# Bir dosya etrafında 2-hop import komşuluğu
-ctxman focus lib/why/index.js --depth 2 --budget 16k
+# Bir fonksiyon etrafında 1-hop AST sembol çağrı ve import komşuluğu
+ctxman focus lib/why/index.js:explainHistory --depth 1 --budget 16k
 ```
 
 ### Kod Arkeolojisi (`why`) ve Uzman Bulucu (`who`)
@@ -33,8 +33,8 @@ ctxman who "hybrid search RRF"
 
 ### Görev Bağlamı (`task`), Hata Teşhisi (`diagnose`) ve PR İnceleme (`pr`)
 
-- **Görev Odaklı Otomatik Bağlam (`ctxman task`)**: Hibrit BM25 + vektör araması ile tohum dosyaları bulur, 1-hop tam kod ve 2-hop sıkıştırılmış imzaları mimari depo haritasıyla `--budget` (varsayılan `32000`) içinde birleştirir
-- **Stack-Trace Kök Neden Paketi (`ctxman diagnose`)**: Node/TS/JS, Python, Go, Rust, Java, C# ve Vitest yığın izlerini ayrıştırır; çevreleyen fonksiyonları, 1-hop komşuları ve yakın git commit'lerini (`explainHistory`) `--budget` (varsayılan `24000`) içinde sunar
+- **Görev Odaklı Otomatik Bağlam (`ctxman task`)**: Hibrit BM25 + vektör araması ile tohum dosya ve sembolleri bulur, 1-hop dosyalar arası AST sembol çağıran/çağrılanları (ve import komşularını) tam kod ve 2-hop sıkıştırılmış imzalar olarak mimari depo haritasıyla `--budget` (varsayılan `32000`) içinde birleştirir
+- **Stack-Trace Kök Neden Paketi (`ctxman diagnose`)**: Node/TS/JS, Python, Go, Rust, Java, C# ve Vitest yığın izlerini ayrıştırır; çevreleyen fonksiyonları, 1-hop AST sembol çağrı ve import komşularını (`caller -> callee`) ve yakın git commit'lerini (`explainHistory`) `--budget` (varsayılan `24000`) içinde sunar
 - **Pull Request Bağlamı (`ctxman pr`)**: Kod incelemesi için branch özeti, commit günlüğü, değişen fonksiyonların tam kodu, diff ve ilgili testleri toplar
 
 ```bash
@@ -49,10 +49,10 @@ ctxman pr --base main --budget 24k
 - **Çevrimdışı `AutoEmbeddingProvider`**: `@xenova/transformers` kuruluysa kullanır, aksi halde deterministik 256 boyutlu `LocalHashEmbeddingProvider`'a otomatik geçer
 - **Reciprocal Rank Fusion (`ctxman search --hybrid`)**: BM25 kod parçası sıralamasını (`k1 = 1.5, b = 0.75`) semantik vektör benzerliği ile (`1 / (k + rank)`) birleştirir
 
-### 18 Araçlı MCP Sunucusu (`ctxman mcp`)
+### 19 Araçlı MCP Sunucusu (`ctxman mcp`)
 
 - **Tek Komutla İstemci Kurulumu**: `ctxman mcp install --client claude-desktop|claude-code|cursor|vscode|windsurf`
-- **18 Uzmanlaşmış Araç**: `analyze_codebase`, `generate_context`, `git_diff`, `search_code`, `list_methods`, `get_symbol`, `repo_map`, `pr_context`, `count_tokens`, `explain_history`, `pack_context`, `focus_context`, `check_policy`, `audit_log`, `ask_codebase`, `task_context`, `diagnose_failure` ve `find_experts`
+- **19 Uzmanlaşmış Araç**: `analyze_codebase`, `generate_context`, `git_diff`, `search_code`, `list_methods`, `get_symbol`, `repo_map`, `pr_context`, `count_tokens`, `explain_history`, `pack_context`, `focus_context`, `check_policy`, `audit_log`, `ask_codebase`, `task_context`, `diagnose_failure`, `find_experts` ve `query_knowledge_graph`
 - **Kök Dizin Sandbox (`--root <dir>`)**: Tüm araçları, kaynakları, istemleri, çoklu depo yollarını ve analyzer DB yollarını sandbox diziniyle sınırlar
 
 ## 🚀 Platform Özellikleri
