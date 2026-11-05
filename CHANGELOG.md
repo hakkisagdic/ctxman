@@ -7,10 +7,16 @@ All notable changes to the Ctxman will be documented in this file.
 ### Added
 
 - **Zero-Native-Binary SqliteVectorStore & AutoEmbeddingProvider**:
-  - `SqliteVectorStore` using Node 22/24 built-in `node:sqlite` (`DatabaseSync`), storing chunks, metadata, and float32 vector embeddings in `<storePath>/index.sqlite` with SHA-256 incremental upsert (skips unchanged content) and exact cosine similarity search.
+  - `SqliteVectorStore` using Node 22/24 built-in `node:sqlite` (`DatabaseSync`), storing chunks, metadata, float32 vector embeddings, and knowledge graph nodes/edges in `<storePath>/index.sqlite` with SHA-256 incremental upsert (skips unchanged content) and exact cosine similarity search.
   - `LocalHashEmbeddingProvider`: deterministic 256-dimensional L2-normalized feature-hashing over identifier tokens and character trigrams, zero dependencies, 100% offline.
   - `AutoEmbeddingProvider`: uses `@xenova/transformers` if installed and `CTXMAN_EMBEDDER !== 'local'`, otherwise seamlessly falls back to `LocalHashEmbeddingProvider` without model download or network failure.
   - Registered `'sqlite'` as default store in `VectorStoreFactory` and `lib/rag/ask.js` (`ctxman ask` and `ctxman search --hybrid` work completely offline with zero optional binary packages).
+- **Incremental Watch RAG & Knowledge Graph Sync (`ctxman watch`)**:
+  - `IncrementalAnalyzer` synchronizes changed and deleted files into `SqliteVectorStore` in real time during watch mode: re-chunks and upserts vectors for modified files, updates `graph_nodes` and `graph_edges` import relationships with `resolveImport`, and prunes removed files via `deleteByFilePath()` and `deleteGraphFile()`.
+  - Enforces `.ctxman/policy.json` deny rules and `redactSecrets` Data Shield before persisting any vector chunk or graph node.
+- **Knowledge Graph MCP Tool (`query_knowledge_graph` — 19-Tool MCP Server)**:
+  - Added `query_knowledge_graph` to `MCPServer` (expanding `ctxman mcp` to 19 tools), supporting directional `N`-hop neighborhood traversal (`direction: "both" | "imports" | "importers"`, `depth: 1..5`), symbol substring filtering, and top-degree hub ranking.
+  - Queries the live in-memory `IncrementalAnalyzer` graph cache when active and automatically falls back to persisted `SqliteVectorStore` `graph_nodes` and `graph_edges` tables in `.ctxman/rag-index/index.sqlite`.
 - **Task-Driven Auto Context (`ctxman task` + `buildTaskContext` + MCP `task_context`)**:
   - Discovers seed files and symbols via `hybridSearch`.
   - Gathers 1-hop full code and 2-hop compressed signatures around seeds, combined with architectural `renderRepoMap` overview.
@@ -21,48 +27,36 @@ All notable changes to the Ctxman will be documented in this file.
   - Resolves in-repo files safely inside project root.
   - Extracts enclosing method code window, 1-hop neighborhood, and recent git history (`explainHistory`) within `--budget` (default 24000).
   - CLI `ctxman diagnose`, library `diagnoseFailure()`, and MCP tool `diagnose_failure`.
-- **Institutional Memory Bridge (`ctxman why --analyzer-db` / `--analyzer`)**:
+- **Expert Finder (`ctxman who` + `findExperts` + MCP `find_experts`)**:
+  - Ranks code and domain experts across files, symbols (`file:symbol`), line ranges (`file#L10-L40`), directories, and natural-language topics by fusing surviving `git blame -w` line share (`0.45`), recency-decayed commits (`0.35`, 90-day half-life), total commits (`0.20`), and `CODEOWNERS` stewardship (`+0.15`).
+  - Library `findExperts()`, `WhoError`; CLI `ctxman who`; MCP tool `find_experts`.
+- **Institutional Memory Bridge (`ctxman why --analyzer-db` / `--analyzer` + MCP `explain_history`)**:
   - `lib/why/analyzer-bridge.js` queries `@plansmithai/analyzer`'s SQLite `documents` table (`.plansmith/analyzer.sqlite`) for matching file and symbol references across commits, PRs, issues, Slack, Linear, and Jira.
-  - Attaches secret-redacted `institutionalCitations` to `explainHistory` output, CLI `ctxman why`, and budget trimming.
+  - Attaches secret-redacted `institutionalCitations` to `explainHistory` output, CLI `ctxman why`, and MCP `explain_history` (`analyzer` and `analyzerDb` parameters with `--root` sandbox enforcement).
+- **Focused Import Neighborhood (`ctxman focus` + `focusContext` + MCP `focus_context`)**:
+  - `ctxman focus <file>[:symbol] [--depth N]` packs a target file or symbol together with its `N`-hop import neighborhood (`--direction both|imports|importers`, directional BFS avoiding shared-hub explosion) within `--budget`, always ranking the target file first. Library `focusContext()`, `describeFocus()`, `FocusError`; MCP tool `focus_context`.
+- **GitHub & GitLab Discussion Enrichment (`ctxman why --discussions`)**:
+  - Enriches git history explanations with GitHub REST API v3 (and GHE) and GitLab REST API v4 pull-request, merge-request, and issue discussion threads (`--max-discussions`, `--max-comments`), secret-redacted and dropped cleanly before commits under tight token budgets. Library `fetchDiscussions()`; MCP `explain_history` `discussions` and `maxDiscussions` options.
+- **Hybrid BM25 + Semantic Search (`ctxman search --hybrid`)**:
+  - Combines BM25 code-chunk ranking with local semantic vector search via Reciprocal Rank Fusion (`1 / (k + rank)`), projecting file-level semantic hits onto code chunks and degrading cleanly to BM25 (`degraded: true`) when optional vector dependencies are absent. Library `hybridSearch()`; MCP `search_code` `type: "hybrid"` and `type: "substring"`.
+- **Multi-Repository Workspace Support (`--repo <dir>`)**:
+  - Cross-repository `ctxman map`, `ctxman search`, and `ctxman pack`, and `repos` on MCP `repo_map`, `search_code`, and `pack_context`: merges multiple repositories under `<alias>/<path>` namespaces within a single shared token budget while enforcing per-repository export policies and MCP `--root` sandboxing. Library `resolveWorkspaceRepos()`, `mapWorkspace()`, `searchWorkspace()`, `packWorkspace()`.
+- **Architecture Decision Records & Cross-Repo Knowledge Graph Documentation**:
+  - Added ADR catalog (`docs/adr/ADR_CATALOG.md`, `ADR-001`, `ADR-002`, `ADR-003`), cross-repo knowledge graph summary (`docs/adr/knowledge-graph.md`), and VitePress pages (`/adr`, `/knowledge-graph`, `/tr/adr`, `/tr/knowledge-graph`) with `query_knowledge_graph` Mermaid architecture flowcharts.
 - **Public API & TypeScript Definitions**:
-  - Exported `SqliteVectorStore`, `LocalHashEmbeddingProvider`, `AutoEmbeddingProvider`, `buildTaskContext`, `diagnoseFailure`, `queryAnalyzerCitations` from `index.js` with full TypeScript signatures in `index.d.ts`.
-
-## [Unreleased]
-
-### Added
-
-- `ctxman focus <file>[:symbol] [--depth N]`: packs a target file or symbol together with its
-  `N`-hop import neighborhood (`--direction both|imports|importers`, directional BFS avoiding
-  shared-hub explosion) within `--budget`, always ranking the target file first. Library
-  `focusContext()`, `describeFocus()`, `FocusError`; MCP tool `focus_context`.
-- `ctxman why --discussions`: enriches git history explanations with GitHub REST API v3 (and GHE)
-  and GitLab REST API v4 pull-request, merge-request and issue discussion threads (`--max-discussions`,
-  `--max-comments`), secret-redacted and dropped cleanly before commits under tight token budgets.
-  Library `fetchDiscussions()`; MCP `explain_history` `discussions` and `maxDiscussions` options.
-- `ctxman search --hybrid` (`--mode bm25|semantic|hybrid`): combines BM25 code-chunk ranking with
-  local semantic vector search via Reciprocal Rank Fusion (`1 / (k + rank)`), projecting file-level
-  semantic hits onto code chunks and degrading cleanly to BM25 (`degraded: true`) when optional
-  vector dependencies are absent. Library `hybridSearch()`; MCP `search_code` `type: "hybrid"`
-  and `type: "substring"`.
-- Multi-repository workspace support (`--repo <dir>`) across `ctxman map`, `ctxman search` and
-  `ctxman pack`, and `repos` on MCP `repo_map`, `search_code` and `pack_context`: merges multiple
-  repositories under `<alias>/<path>` namespaces within a single shared token budget while
-  enforcing per-repository export policies and MCP `--root` sandboxing. Library
-  `resolveWorkspaceRepos()`, `mapWorkspace()`, `searchWorkspace()`, `packWorkspace()`.
-- Public API exports and TypeScript declarations (`index.js`, `index.d.ts`) for v3 core and
-  platform modules: `Scanner`, `Analyzer`, `ContextBuilder`, `Reporter`, `CacheManager`,
-  `PluginManager`, `LanguagePlugin`, `ExporterPlugin`, `GitClient`, `DiffAnalyzer`,
-  `BlameTracker`, `FileWatcher`, `IncrementalAnalyzer`, `APIServer`, `MCPServer`.
+  - Exported `SqliteVectorStore`, `LocalHashEmbeddingProvider`, `AutoEmbeddingProvider`, `buildTaskContext`, `diagnoseFailure`, `findExperts`, `WhoError`, `queryAnalyzerCitations`, `focusContext`, `describeFocus`, `FocusError`, `hybridSearch`, `fetchDiscussions`, `resolveWorkspaceRepos`, `mapWorkspace`, `searchWorkspace`, `packWorkspace`, and v3 core modules (`Scanner`, `Analyzer`, `ContextBuilder`, `Reporter`, `CacheManager`, `PluginManager`, `LanguagePlugin`, `ExporterPlugin`, `GitClient`, `DiffAnalyzer`, `BlameTracker`, `FileWatcher`, `IncrementalAnalyzer`, `APIServer`, `MCPServer`) from `index.js` with full TypeScript signatures in `index.d.ts`.
 
 ### Changed
 
-- `CacheManager` is now wired into `Analyzer`, `TokenCalculator` (`--cache` / `--no-cache`) and
-  `MCPServer`, using SHA-256 discriminated keys and exact `mtimeMs` + `size` invalidation;
-  `.context-cache/` is ignored by default.
-- Model profiles checked (2026-10-30): `gpt-4-turbo` marked `retired` (retired 2026-09-30) with
-  `gpt-5.5` as its replacement.
-- Dependencies updated across root, `website/` and `desktop-app/`, and the stale `website/public/CNAME`
-  file was removed.
+- `CacheManager` is now wired into `Analyzer`, `TokenCalculator` (`--cache` / `--no-cache`), and `MCPServer`, using SHA-256 discriminated keys and exact `mtimeMs` + `size` invalidation; `.context-cache/` is ignored by default.
+- Model profiles checked (2026-10-30): `gpt-4-turbo` marked `retired` (retired 2026-09-30) with `gpt-5.5` as its replacement.
+- Dependencies updated across root, `website/`, and `desktop-app/`, and the stale `website/public/CNAME` file was removed.
+
+### Fixed
+
+- `task_context` and `diagnose_failure` MCP tools now accept `args.dir` or default to `process.cwd()` when `path` is omitted.
+- Enforced strict token budget ceilings and pure JSON stdout in `ctxman task`.
+- Stabilized LLM auto-detection environment variable isolation and broken-pipe timeout handling in the test suite.
 
 ## [3.1.1] - 2026-10-15
 
