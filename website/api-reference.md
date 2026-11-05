@@ -1,511 +1,278 @@
 # API Reference
 
-Complete reference for Ctxman CLI, REST API, and programmatic usage.
+Complete reference for Ctxman v3.2 CLI commands, 18-tool MCP server, REST API, and programmatic library exports.
 
 ## CLI Reference
 
-### Global Options
+### Global & Analysis Options
 
-| Option      | Alias | Description                   | Default           |
-| ----------- | ----- | ----------------------------- | ----------------- |
-| `--cli`     | `-c`  | Run in CLI mode (skip wizard) | `false`           |
-| `--help`    | `-h`  | Show help                     | -                 |
-| `--version` | `-v`  | Show version                  | -                 |
-| `--path`    | `-p`  | Directory to analyze          | Current directory |
-| `--output`  | `-o`  | Output file path              | `stdout`          |
+| Option                   | Alias | Description                                             | Default             |
+| ------------------------ | ----- | ------------------------------------------------------- | ------------------- |
+| `--cli`                  | `-c`  | Run in CLI mode (skip wizard)                           | `false`             |
+| `--help`                 | `-h`  | Show help                                               | -                   |
+| `--version`              | `-v`  | Show version                                            | -                   |
+| `--method-level`         | `-m`  | Enable method-level token analysis                      | `false`             |
+| `--target-model`         | `-t`  | Target LLM profile ID (e.g. `claude-sonnet-5-5`)        | `claude-sonnet-5-5` |
+| `--list-llms`            |       | List 44+ LLM profiles (`--all` includes retired models) | -                   |
+| `--output`               | `-o`  | Output format (`toon`, `json`, `markdown`, `yaml`, ...) | `json`              |
+| `--gitingest`            | `-g`  | Generate GitIngest digest (`digest.txt`)                | `false`             |
+| `--changed-only`         |       | Analyze only working-tree modified files                | `false`             |
+| `--changed-since`        |       | Analyze files changed since a git ref                   | -                   |
+| `--with-authors`         |       | Include git blame author attribution                    | `false`             |
+| `--cache` / `--no-cache` |       | Enable or bypass SHA-256 disk/memory analysis cache     | `true`              |
+| `--no-redact`            |       | Disable automatic secret redaction                      | `false`             |
 
-### Analysis Options
+## CLI Subcommands (v3.2)
 
-| Option               | Description                        | Default |
-| -------------------- | ---------------------------------- | ------- |
-| `--method-level`     | Enable method-level token analysis | `false` |
-| `--token-count`      | Calculate exact token counts       | `true`  |
-| `--tiktoken`         | Use tiktoken for exact counting    | `true`  |
-| `--include-comments` | Include comments in analysis       | `false` |
+### `ctxman map [dir]`
 
-### Output Format Options
-
-| Option        | Description                              |
-| ------------- | ---------------------------------------- |
-| `--toon`      | Output in TOON format (40-50% reduction) |
-| `--gitingest` | Output in GitIngest format               |
-| `--json`      | Output as JSON                           |
-| `--markdown`  | Output as Markdown                       |
-
-### Git Integration Options
-
-| Option                  | Description                   |
-| ----------------------- | ----------------------------- |
-| `--git-diff <ref>`      | Analyze files changed in diff |
-| `--git-diff --cached`   | Analyze staged changes        |
-| `--git-branch <branch>` | Compare with branch           |
-| `--git-author <author>` | Filter by author              |
-
-### Watch Mode Options
-
-| Option               | Description        | Default |
-| -------------------- | ------------------ | ------- |
-| `--interval <ms>`    | Debounce interval  | `1000`  |
-| `--ignore <pattern>` | Patterns to ignore | -       |
-
-### Server Options
-
-| Option          | Description     | Default     |
-| --------------- | --------------- | ----------- |
-| `--port <port>` | API server port | `3000`      |
-| `--host <host>` | API server host | `localhost` |
-
-## CLI Commands
-
-### `ctxman` (Default)
-
-Start interactive wizard mode:
+Generate a PageRank-ranked repository map with function/class signatures within a token budget:
 
 ```bash
-ctxman
+ctxman map --tokens 2048 --focus lib/why/index.js
+ctxman map --repo ../plansmith --repo ../plansmith-desktop --tokens 4096
 ```
 
-### `ctxman watch`
+### `ctxman focus <file>[:symbol]`
 
-Start watch mode:
+Pack a target file or symbol together with its `N`-hop import/importer neighborhood:
 
 ```bash
-ctxman watch [options]
+ctxman focus lib/api/mcp/server.js --depth 2 --direction both --budget 20k
 ```
 
-### `ctxman serve`
+### `ctxman pack [dir]`
 
-Start REST API server:
+Pack repository files into one LLM-ready document (`xml`, `markdown`, `plain`, `json`):
 
 ```bash
-ctxman serve [options]
+ctxman pack --budget 32k --compress --style xml
+ctxman pack --include "lib/**/*.js" --max-tokens 50000
 ```
 
-### `ctxman config`
+### `ctxman pr [dir]`
 
-Manage configuration:
+Assemble pull-request review context (summary, commit log, changed methods, diff, and related tests):
 
 ```bash
-# Show current configuration
-ctxman config show
-
-# Set configuration value
-ctxman config set output.format toon
+ctxman pr --base main --head HEAD --budget 24k
 ```
 
-## REST API
+### `ctxman why <target>`
 
-### Base URL
+Explain why a file, symbol (`file:symbol`), or line range (`file#L10-L40`) looks the way it does:
 
-```
-http://localhost:3000/api
-```
-
-### Authentication
-
-Currently, the API runs locally without authentication. For production use, add a reverse proxy with authentication.
-
-### Endpoints
-
-#### POST /api/analyze
-
-Analyze code in a directory.
-
-**Request Body:**
-
-```json
-{
-  "path": "./src",
-  "methodLevel": true,
-  "outputFormat": "json",
-  "exclude": ["*.test.js"],
-  "include": []
-}
+```bash
+ctxman why lib/why/index.js:explainHistory
+ctxman why lib/why/index.js:explainHistory --discussions --analyzer
+ctxman why lib/why/index.js#L1-L80 --patches --budget 12k
 ```
 
-**Response:**
+### `ctxman who <target-or-topic>`
 
-```json
-{
-  "success": true,
-  "data": {
-    "totalTokens": 12345,
-    "totalFiles": 42,
-    "files": [
-      {
-        "path": "src/index.js",
-        "tokens": 234,
-        "lines": 45,
-        "methods": []
-      }
-    ]
-  }
-}
+Rank code and domain experts using surviving `git blame -w` share (`0.45`), recency-decayed commits (`0.35`, 90-day half-life), total commits (`0.20`), and `CODEOWNERS` (`+0.15`):
+
+```bash
+ctxman who lib/why/index.js:explainHistory
+ctxman who lib/rag
+ctxman who "hybrid search RRF" --limit 5 --style json
 ```
 
-#### GET /api/status
+### `ctxman task "<goal>"`
 
-Get server status.
+Build a task-driven context bundle (hybrid search seeds + 1-hop full code + 2-hop compressed signatures + architectural repo map):
 
-**Response:**
-
-```json
-{
-  "status": "running",
-  "uptime": 3600,
-  "version": "3.0.0"
-}
+```bash
+ctxman task "add OAuth token refresh retry logic" --budget 32k --format markdown
 ```
 
-#### GET /api/config
+### `ctxman diagnose [trace]`
 
-Get current configuration.
+Parse multi-language stack traces and failure logs into a root-cause bundle (implicated frames, enclosing methods, 1-hop neighbors, and recent git commits):
 
-**Response:**
-
-```json
-{
-  "output": {
-    "format": "json",
-    "file": null
-  },
-  "analysis": {
-    "methodLevel": true,
-    "tokenCount": true
-  }
-}
+```bash
+npm test 2>&1 | ctxman diagnose --budget 24k
+ctxman diagnose --file ci-failure.log --format json
 ```
 
-#### POST /api/config
+### `ctxman search "<query>"`
 
-Update configuration.
+Search methods and code chunks with BM25, local SQLite vector embeddings, or Reciprocal Rank Fusion (`--hybrid`):
 
-**Request Body:**
-
-```json
-{
-  "output": {
-    "format": "markdown"
-  }
-}
+```bash
+ctxman search "expire session" --limit 10
+ctxman search "sqlite vector cosine similarity" --hybrid
 ```
 
-**Response:**
+### `ctxman ask "<question>"`
 
-```json
-{
-  "success": true,
-  "config": {
-    "output": {
-      "format": "markdown"
-    }
-  }
-}
+Query the local SQLite semantic index (`.ctxman/self-knowledge/index.sqlite`):
+
+```bash
+ctxman ask "how does export policy redaction work?"
 ```
 
-#### POST /api/cache/clear
+### `ctxman count [path|-]`
 
-Clear the analysis cache.
+Count tokens for a specific LLM model (or verify exact Claude counts via Anthropic's `count_tokens` API):
 
-**Response:**
-
-```json
-{
-  "success": true,
-  "message": "Cache cleared"
-}
+```bash
+ctxman count . --model gpt-5.5
+ctxman count . --model claude-opus-5-5 --api --json
 ```
 
-#### GET /health
+### `ctxman policy` & `ctxman audit`
 
-Health check endpoint.
+Validate `.ctxman/policy.json` Data Shield rules and inspect the SHA-256 export audit trail:
 
-**Response:**
-
-```json
-{
-  "status": "healthy",
-  "timestamp": "2024-01-15T10:30:00Z"
-}
+```bash
+ctxman policy init
+ctxman policy check
+ctxman audit --since 7d --limit 20
 ```
 
-## Programmatic API
+### `ctxman mcp`
 
-### Installation
+Run the 18-tool MCP server (`stdio` or `sse`) or install client configurations:
+
+```bash
+ctxman mcp install --client claude-desktop
+ctxman mcp install --client claude-code --npx
+ctxman mcp --root /path/to/project
+```
+
+### `ctxman watch` & `ctxman serve`
+
+Start live file watching or the local REST API server:
+
+```bash
+ctxman watch --debounce 1000
+ctxman serve --port 3000
+```
+
+## MCP Server Tools (18 Tools)
+
+| Tool               | Key Arguments                                                                                 | Description                                                     |
+| ------------------ | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `analyze_codebase` | `path`                                                                                        | Repository token statistics and file breakdown                  |
+| `generate_context` | `path`, `template?`, `maxTokens?`                                                             | Template-driven LLM context                                     |
+| `git_diff`         | `path`, `branch?`                                                                             | Validated `git diff <branch>`                                   |
+| `search_code`      | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`     | Line search or BM25 / hybrid RRF code-chunk search              |
+| `list_methods`     | `path`, `file?`                                                                               | Extracted methods per file                                      |
+| `get_symbol`       | `path`, `name`, `file?`, `redact?`                                                            | Full source of a named function, method, or class               |
+| `repo_map`         | `path`, `tokens?`, `focus?`, `repos?`                                                         | PageRank repository map (`ctxman map`)                          |
+| `pr_context`       | `path`, `base?`, `head?`, `budget?`, `style?`                                                 | Pull-request review bundle (`ctxman pr`)                        |
+| `count_tokens`     | `path` or `text`, `model?`, `top?`                                                            | Model-aware token count and context window fit (`ctxman count`) |
+| `explain_history`  | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?` | Git archaeology & institutional citations (`ctxman why`)        |
+| `pack_context`     | `path`, `include?`, `exclude?`, `files?`, `style?`, `compress?`, `budget?`, `repos?`          | Packed codebase document (`ctxman pack`)                        |
+| `focus_context`    | `path`, `file`, `depth?`, `direction?`, `style?`, `compress?`, `budget?`                      | Directional `N`-hop import neighborhood (`ctxman focus`)        |
+| `check_policy`     | `path`                                                                                        | Effective `.ctxman/policy.json` validation (`ctxman policy`)    |
+| `audit_log`        | `path`, `since?`, `limit?`                                                                    | SHA-256 export audit trail (`ctxman audit`)                     |
+| `ask_codebase`     | `path`, `query`, `limit?`                                                                     | Offline SQLite semantic search (`ctxman ask`)                   |
+| `task_context`     | `path`, `task`, `budget?`, `format?`, `model?`                                                | Automatic task context bundle (`ctxman task`)                   |
+| `diagnose_failure` | `path`, `trace`, `budget?`, `format?`                                                         | Stack-trace root-cause diagnosis (`ctxman diagnose`)            |
+| `find_experts`     | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                         | Blame + recency + CODEOWNERS expert ranking (`ctxman who`)      |
+
+## Programmatic API (`index.js`)
+
+### Installation & Import
 
 ```bash
 npm install ctxman
 ```
 
-### Import
-
 ```javascript
-import ctxman from 'ctxman';
-// or
-const ctxman = require('ctxman');
+import {
+  // Code Intelligence & Agents
+  buildRepoGraph,
+  rankFiles,
+  renderRepoMap,
+  focusContext,
+  packContext,
+  buildPrContext,
+  explainHistory,
+  queryAnalyzerCitations,
+  findExperts,
+  buildTaskContext,
+  diagnoseFailure,
+
+  // Search, Symbols, Counting & Offline SQLite RAG
+  searchProject,
+  hybridSearch,
+  getSymbol,
+  countForModel,
+  askCodebase,
+  SqliteVectorStore,
+  AutoEmbeddingProvider,
+  LocalHashEmbeddingProvider,
+
+  // Multi-Repo Workspace & Governance Policy
+  resolveWorkspaceRepos,
+  mapWorkspace,
+  searchWorkspace,
+  packWorkspace,
+  loadPolicy,
+  Policy,
+
+  // Core v3 Pipeline
+  Scanner,
+  Analyzer,
+  ContextBuilder,
+  Reporter,
+  CacheManager,
+  TokenCalculator,
+} from 'ctxman';
 ```
 
-### Methods
-
-#### `ctxman.analyze(options)`
-
-Analyze code in a directory.
+### Code Intelligence Examples
 
 ```javascript
-const result = await ctxman.analyze({
-  path: './src',
-  methodLevel: true,
-  outputFormat: 'json',
-  exclude: ['*.test.js'],
+// 1. Ranked Repository Map
+const map = renderRepoMap('/path/to/repo', { tokens: 2048, focus: ['lib/why/index.js'] });
+console.log(map.output);
+
+// 2. Explain History with Institutional Citations
+const why = await explainHistory('/path/to/repo', 'lib/why/index.js:explainHistory', {
+  analyzer: true,
+  budget: 12000,
 });
+console.log(why.text);
 
-console.log(result.totalTokens);
-console.log(result.files);
+// 3. Find Domain Experts
+const who = await findExperts('/path/to/repo', 'hybrid search RRF', { limit: 5 });
+console.log(who.experts);
+
+// 4. Task-Driven Context & Failure Diagnosis
+const taskBundle = await buildTaskContext('/path/to/repo', 'add retry backoff', { budget: 32000 });
+const diagReport = await diagnoseFailure('/path/to/repo', errorStackText, { budget: 24000 });
 ```
 
-**Options:**
+## REST API (`ctxman serve`)
 
-| Option         | Type       | Default  | Description                  |
-| -------------- | ---------- | -------- | ---------------------------- |
-| `path`         | `string`   | `'.'`    | Directory to analyze         |
-| `methodLevel`  | `boolean`  | `false`  | Enable method-level analysis |
-| `outputFormat` | `string`   | `'json'` | Output format                |
-| `exclude`      | `string[]` | `[]`     | Patterns to exclude          |
-| `include`      | `string[]` | `[]`     | Patterns to include          |
+### Base URL
 
-**Returns:** `Promise<AnalysisResult>`
-
-#### `ctxman.watch(options)`
-
-Start watch mode.
-
-```javascript
-const watcher = ctxman.watch({
-  path: './src',
-  interval: 1000,
-  onChange: (result) => {
-    console.log('Analysis updated:', result.totalTokens);
-  },
-  onError: (error) => {
-    console.error('Watch error:', error);
-  },
-});
-
-// Stop watching
-watcher.stop();
+```text
+http://127.0.0.1:3000/api/v1
 ```
 
-**Options:**
+### Endpoints
 
-| Option     | Type       | Default | Description            |
-| ---------- | ---------- | ------- | ---------------------- |
-| `path`     | `string`   | `'.'`   | Directory to watch     |
-| `interval` | `number`   | `1000`  | Debounce interval (ms) |
-| `onChange` | `function` | -       | Callback on change     |
-| `onError`  | `function` | -       | Callback on error      |
-
-**Returns:** `Watcher` object with `stop()` method.
-
-#### `ctxman.serve(options)`
-
-Start REST API server.
-
-```javascript
-const server = await ctxman.serve({
-  port: 3000,
-  host: 'localhost',
-});
-
-// Stop server
-server.stop();
-```
-
-**Options:**
-
-| Option | Type     | Default       | Description |
-| ------ | -------- | ------------- | ----------- |
-| `port` | `number` | `3000`        | Server port |
-| `host` | `string` | `'localhost'` | Server host |
-
-**Returns:** `Promise<Server>` object with `stop()` method.
-
-#### `ctxman.configure(options)`
-
-Set global configuration.
-
-```javascript
-ctxman.configure({
-  defaultOutputFormat: 'toon',
-  defaultMethodLevel: true,
-});
-```
-
-### Types
-
-```typescript
-interface AnalysisResult {
-  totalTokens: number;
-  totalFiles: number;
-  totalLines: number;
-  files: FileResult[];
-  methods?: MethodResult[];
-}
-
-interface FileResult {
-  path: string;
-  tokens: number;
-  lines: number;
-  language: string;
-  methods?: MethodResult[];
-}
-
-interface MethodResult {
-  name: string;
-  tokens: number;
-  lines: number;
-  file: string;
-}
-
-interface Watcher {
-  stop(): void;
-}
-
-interface Server {
-  stop(): Promise<void>;
-}
-```
+- `GET /api/v1/docs` — OpenAPI endpoint listing
+- `POST /api/v1/analyze` — Analyze repository files and token counts
+- `GET /api/v1/methods?file=<path>` — Extract methods for a file or project
+- `GET /api/v1/stats` — Cached repository statistics
+- `GET /api/v1/diff?since=<ref>` — Git diff analysis (`isValidGitRef` validated)
+- `POST /api/v1/context` — Build policy-checked LLM context
 
 ## Exit Codes
 
-| Code | Description         |
-| ---- | ------------------- |
-| 0    | Success             |
-| 1    | General error       |
-| 2    | Invalid arguments   |
-| 3    | Configuration error |
-| 4    | Analysis error      |
-| 5    | File system error   |
-
-## Error Handling
-
-### CLI Errors
-
-Errors are written to stderr with a descriptive message:
-
-```bash
-ctxman --invalid-option
-# Error: Unknown option '--invalid-option'
-# Run 'ctxman --help' for usage information.
-```
-
-### API Errors
-
-API errors return JSON with error details:
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "ANALYSIS_ERROR",
-    "message": "Failed to analyze directory",
-    "details": "Permission denied: /root/secret"
-  }
-}
-```
-
-## Rate Limiting
-
-The REST API includes built-in rate limiting:
-
-- **Window**: 15 minutes
-- **Max Requests**: 100 per IP
-
-Override in configuration:
-
-```javascript
-ctxman.serve({
-  rateLimit: {
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-  },
-});
-```
-
-## Caching
-
-### Cache Configuration
-
-```javascript
-ctxman.configure({
-  cache: {
-    enabled: true,
-    ttl: 3600000, // 1 hour
-    directory: '.ctxman/cache',
-  },
-});
-```
-
-### Cache Invalidation
-
-```bash
-# Clear cache via CLI
-ctxman cache clear
-
-# Clear cache via API
-curl -X POST http://localhost:3000/api/cache/clear
-```
-
-## Examples
-
-### Basic Analysis
-
-```javascript
-import ctxman from 'ctxman';
-
-const result = await ctxman.analyze({ path: './src' });
-console.log(`Total tokens: ${result.totalTokens}`);
-```
-
-### Method-Level Analysis
-
-```javascript
-const result = await ctxman.analyze({
-  path: './src',
-  methodLevel: true,
-});
-
-result.files.forEach((file) => {
-  console.log(`\n${file.path}:`);
-  file.methods?.forEach((method) => {
-    console.log(`  ${method.name}: ${method.tokens} tokens`);
-  });
-});
-```
-
-### Watch Mode with Server
-
-```javascript
-import ctxman from 'ctxman';
-
-// Start server
-const server = await ctxman.serve({ port: 3000 });
-
-// Start watch mode
-const watcher = ctxman.watch({
-  path: './src',
-  onChange: (result) => {
-    console.log(`Analysis updated: ${result.totalTokens} tokens`);
-  },
-});
-
-// Cleanup on exit
-process.on('SIGINT', async () => {
-  watcher.stop();
-  await server.stop();
-  process.exit(0);
-});
-```
+| Code | Description                                              |
+| ---- | -------------------------------------------------------- |
+| `0`  | Success                                                  |
+| `1`  | General or runtime error                                 |
+| `2`  | Invalid CLI arguments or `--max-tokens` budget exceeded  |
+| `3`  | Export policy violation (`.ctxman/policy.json` deny/cap) |
 
 ---
 
-Need help? Check the [Troubleshooting Guide](https://github.com/hakkisagdic/ctxman/blob/main/docs/content-en/Troubleshooting.md) or open an [issue on GitHub](https://github.com/hakkisagdic/ctxman/issues).
+Need help? Check the [ADR Catalog](/adr), [Knowledge Graph](/knowledge-graph), or open an [issue on GitHub](https://github.com/hakkisagdic/ctxman/issues).

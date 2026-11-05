@@ -1,6 +1,59 @@
 # Features
 
-Ctxman is a powerful AI Development Platform with a comprehensive set of features designed for modern development workflows.
+Ctxman is a local-first AI Code Intelligence & Context Engineering Platform designed for modern developer and agent workflows.
+
+## 🧠 Code Intelligence & Archaeology (v3.2)
+
+### Repository Map & Neighborhood Focus (`map` & `focus`)
+
+- **PageRank Repository Map (`ctxman map`)**: Ranks files across 14+ languages using PageRank over the import graph blended with git change frequency and symbol references, fitting function signatures into any token budget
+- **Directional Import Focus (`ctxman focus`)**: Packs a target file or symbol together with its `N`-hop outgoing imports and incoming importers (`--direction both|imports|importers`) without shared-hub explosion
+- **Multi-Repo Workspaces (`--repo <dir>`)**: Merge multiple repositories under `<alias>/<path>` namespaces within a single shared token budget
+
+```bash
+# Ranked repository map within 2,000 tokens
+ctxman map --tokens 2000
+
+# 2-hop import neighborhood around a file
+ctxman focus lib/why/index.js --depth 2 --budget 16k
+```
+
+### Code Archaeology (`why`) & Expert Finder (`who`)
+
+- **Why Is the Code Like This? (`ctxman why`)**: Explains any file, symbol (`file:symbol`), or line range (`file#L10-L40`) using git history, PR/issue references, remote GitHub/GitLab discussions (`--discussions`), `@plansmithai/analyzer` SQLite institutional citations (`--analyzer-db`), blame ownership, co-change coupling, ADRs, TODOs, and tests
+- **Who Knows About This? (`ctxman who`)**: Ranks domain experts by fusing surviving `git blame -w` line ownership (`0.45`), exponentially decayed commit history (`0.35`, 90-day half-life), total commit share (`0.20`), and `CODEOWNERS` stewardship (`+0.15`), with automatic BM25 topic-to-file resolution
+
+```bash
+# Explain a function with institutional memory citations
+ctxman why lib/why/index.js:explainHistory --analyzer
+
+# Find top experts for a file, symbol, directory, or topic
+ctxman who "hybrid search RRF"
+```
+
+### Task Context (`task`), Failure Diagnosis (`diagnose`) & PR Review (`pr`)
+
+- **Task-Driven Auto Context (`ctxman task`)**: Discovers seed files via hybrid BM25 + vector search, gathers 1-hop full code and 2-hop compressed signatures, and prepends an architectural repo map within `--budget` (default `32000`)
+- **Stack-Trace Root-Cause Bundle (`ctxman diagnose`)**: Parses Node/TS/JS, Python, Go, Rust, Java, C#, and Vitest stack traces, extracting enclosing methods, 1-hop neighbors, and recent git commits (`explainHistory`) within `--budget` (default `24000`)
+- **Pull Request Context (`ctxman pr`)**: Assembles branch summary, commit log, changed methods, unified diff, and related tests for code review
+
+```bash
+ctxman task "add OAuth token refresh retry logic" --budget 32k
+npm test 2>&1 | ctxman diagnose --budget 20k
+ctxman pr --base main --budget 24k
+```
+
+### Offline SQLite RAG & Hybrid Search (`search` & `ask`)
+
+- **Zero-Native-Binary `SqliteVectorStore`**: Built on Node.js 22/24 `node:sqlite` (`DatabaseSync`) with SHA-256 incremental indexing in `.ctxman/self-knowledge/index.sqlite`
+- **Offline `AutoEmbeddingProvider`**: Uses `@xenova/transformers` when installed and falls back automatically to deterministic 256-dim `LocalHashEmbeddingProvider`
+- **Reciprocal Rank Fusion (`ctxman search --hybrid`)**: Fuses BM25 code-chunk ranking (`k1 = 1.5, b = 0.75`) with semantic vector similarity (`1 / (k + rank)`)
+
+### 18-Tool MCP Server (`ctxman mcp`)
+
+- **One-Command Client Setup**: `ctxman mcp install --client claude-desktop|claude-code|cursor|vscode|windsurf`
+- **18 Specialized Tools**: `analyze_codebase`, `generate_context`, `git_diff`, `search_code`, `list_methods`, `get_symbol`, `repo_map`, `pr_context`, `count_tokens`, `explain_history`, `pack_context`, `focus_context`, `check_policy`, `audit_log`, `ask_codebase`, `task_context`, `diagnose_failure`, and `find_experts`
+- **Root Sandbox (`--root <dir>`)**: Confines every tool, resource, prompt, multi-repo path, and analyzer DB path to the sandbox directory
 
 ## 🚀 Platform Features
 
@@ -35,11 +88,11 @@ Seamlessly integrate with your Git workflow:
 - **Branch Comparison**: Compare branches
 
 ```bash
-# Analyze changed files in the last commit
-ctxman --git-diff HEAD~1
+# Analyze changed files since a ref
+ctxman --changed-since HEAD~1
 
-# Analyze files changed in a specific branch
-ctxman --git-branch feature/new-feature
+# Build full PR review context against main
+ctxman pr --base main
 ```
 
 ### Watch Mode
@@ -56,7 +109,7 @@ Real-time file monitoring for instant feedback:
 ctxman watch
 
 # Watch with specific options
-ctxman watch --interval 1000 --output json
+ctxman watch --debounce 1000
 ```
 
 ### REST API
@@ -65,15 +118,12 @@ HTTP server for programmatic access:
 
 - **6 Endpoints**: Full API coverage
 - **JSON Responses**: Standard REST format
-- **CORS Support**: Cross-origin requests
+- **DNS Rebinding Protection**: Loopback Host validation by default (`--cors` when needed)
 - **Health Check**: Monitor server status
 
 ```bash
 # Start API server
-ctxman serve
-
-# API is available at http://localhost:3000
-curl http://localhost:3000/api/analyze
+ctxman serve --port 3000
 ```
 
 ## 🎨 User Interface
@@ -83,7 +133,7 @@ curl http://localhost:3000/api/analyze
 User-friendly guided setup for beginners:
 
 - **Step-by-Step Process**: Clear guidance through options
-- **Smart Defaults**: Sensible default values
+- **6 Built-In Profiles**: Code Review, Security Audit, LLM Explain, Documentation, Minimal, Full
 - **Input Validation**: Catch errors early
 - **Help Text**: Contextual help at every step
 
@@ -92,9 +142,9 @@ User-friendly guided setup for beginners:
 Traditional command-line interface for power users:
 
 - **Direct Commands**: Skip the wizard
-- **Shell Integration**: Perfect for scripts
-- **Exit Codes**: Proper error handling
-- **Piping Support**: Chain with other tools
+- **Shell Integration**: Perfect for scripts and CI pipelines
+- **Exit Codes**: Proper error handling (including policy exit code `3` and budget guard exit code `2`)
+- **Piping Support**: Clean `EPIPE` handling when piped to `head` or other tools
 
 ## 🔢 Token Analysis
 
@@ -106,8 +156,8 @@ Accurate token counting for LLM planning:
   `cl100k_base` otherwise); counts for models with their own tokenizer are marked approximate
 - **Exact for Claude**: `ctxman count --model claude-opus-5-5 --api` asks Anthropic's
   count_tokens API (free; secrets are redacted first)
-- **Current models**: `ctxman --list-llms` lists windows, output limits and prices of 40+ models
-- **Per-File Analysis**: Detailed breakdown
+- **Current models**: `ctxman --list-llms` lists windows, output limits and prices of 44+ models
+- **Per-File & Per-Method Analysis**: Detailed breakdown
 
 ### Multi-Language Support
 
@@ -115,7 +165,7 @@ Analyze code in 14+ programming languages:
 
 | Language   | Extensions      | Features                     |
 | ---------- | --------------- | ---------------------------- |
-| JavaScript | .js, .jsx, .mjs | Full AST analysis            |
+| JavaScript | .js, .jsx, .mjs | Full AST & method analysis   |
 | TypeScript | .ts, .tsx       | Type-aware analysis          |
 | Python     | .py             | Method-level analysis        |
 | PHP        | .php            | Class and function analysis  |
@@ -123,127 +173,35 @@ Analyze code in 14+ programming languages:
 | Java       | .java           | Class and method analysis    |
 | Kotlin     | .kt             | Function analysis            |
 | C#         | .cs             | Class and method analysis    |
-| Go         | .go             | Function analysis            |
+| Go         | .go             | Function & receiver analysis |
 | Rust       | .rs             | Function and struct analysis |
 | Swift      | .swift          | Function analysis            |
 | C/C++      | .c, .cpp, .h    | Function analysis            |
 | Scala      | .scala          | Class and function analysis  |
 
-### Method-Level Analysis
+## 🎯 Filtering, Policy & Governance
 
-Get granular insights into your code:
-
-- **Per-Function Tokens**: Token count for each function
-- **Complexity Metrics**: Understand code complexity
-- **Largest Functions**: Identify token-heavy code
-- **Optimization Tips**: Suggestions for reduction
-
-## 🎯 Filtering & Configuration
-
-### Dual Ignore System
-
-Flexible file filtering:
+### Dual Ignore System & AI Tool Ignore Files
 
 - **.gitignore Support**: Respect Git ignore rules
-- **.contextignore**: Custom ignore patterns
-- **.contextinclude**: Include-only mode
-- **Priority System**: Clear precedence rules
+- **.contextignore / .contextinclude**: Custom exclude or include-only patterns
+- **.methodinclude / .methodignore**: Granular method-level filtering
+- **--respect-ignore-files**: Honor `.cursorignore`, `.aiexclude`, `.aiderignore`, and more
 
-### Method Filtering
+### Export Policy & Data Shield (`.ctxman/policy.json`)
 
-Granular control over analysis:
-
-- **.methodinclude**: Include specific methods
-- **.methodignore**: Exclude specific methods
-- **Pattern Matching**: Wildcards and regex support
-- **Performance**: Skip unnecessary analysis
+- **Path Deny Rules**: Prevent sensitive files from ever entering exports, RAG indexes, or MCP responses
+- **Automatic Secret Redaction**: Masks cloud keys, tokens, and PEM private keys as `[REDACTED:<type>]`
+- **Token Caps & Model Allowlists**: Enforce organization-wide export limits (`CTXMAN_POLICY`)
+- **Append-Only Audit Trail (`ctxman audit`)**: Records every export with timestamp, command, file count, token count, and SHA-256 digest
 
 ## 📊 Output Formats
 
-### TOON Format
-
-40-50% token reduction with optimized output:
-
-- **Compact Structure**: Minimized redundancy
-- **Semantic Preservation**: Keep meaning intact
-- **LLM Optimized**: Perfect for AI consumption
-- **Backward Compatible**: Easy to convert back
-
-### GitIngest Format
-
-GitHub-ready output format:
-
-- **Markdown Compatible**: Works with GitHub
-- **Syntax Highlighting**: Proper code blocks
-- **File Trees**: Visual directory structure
-- **Line Numbers**: Reference specific lines
-
-### Standard Formats
-
-Multiple output options:
-
-- **JSON**: Machine-readable
-- **Markdown**: Documentation-ready
-- **Plain Text**: Simple and clean
-- **Custom**: Build your own with plugins
-
-## ⚡ Performance
-
-### Caching System
-
-Speed up repeated analyses:
-
-- **Intelligent Cache**: Only re-analyze changed files
-- **Configurable TTL**: Set cache expiration
-- **Cache Invalidation**: Manual or automatic
-- **Memory Efficient**: Low overhead
-
-### Measured Speed
-
-Handle large codebases efficiently (4-vCPU Linux VM, Node.js 22):
-
-- **Fast Scanning**: ~1,900 files discovered with ignore rules in ~75 ms
-- **Token Counting**: 1,135 files / 2.6M tokens counted with tiktoken in ~6 s
-- **Progress Reporting**: Track analysis progress
-
-## 🔧 Configuration
-
-### Flexible Configuration
-
-Multiple configuration options:
-
-- **JSON Config**: Structured configuration
-- **CLI Flags**: Quick overrides
-- **Environment Variables**: CI/CD integration
-- **Defaults**: Sensible out-of-the-box behavior
-
-### Example Configuration
-
-```json
-{
-  "output": {
-    "format": "toon",
-    "file": "output.md"
-  },
-  "analysis": {
-    "methodLevel": true,
-    "tokenCount": true
-  },
-  "exclude": ["node_modules", "dist", "*.test.js"]
-}
-```
-
-## 🔐 Security
-
-### Safe by Default
-
-Security-first approach:
-
-- **No External Calls**: All processing is local
-- **File Validation**: Safe file handling
-- **Memory Limits**: Prevent resource exhaustion
-- **Input Sanitization**: Clean all inputs
+- **Anthropic `<documents>` XML (`ctxman pack`)**: Structured LLM-ready context with `--compress` signature extraction
+- **TOON Format**: 40-50% token reduction with official `@toon-format/toon` encoding
+- **GitIngest Format**: Single-file or smart-chunked Markdown digest
+- **JSON, Markdown, YAML, CSV, XML**: Ready for automation and CI pipelines
 
 ---
 
-Ready to get started? Check out our [Getting Started Guide](/getting-started) or try the [Interactive Demo](/demo).
+Ready to get started? Check out our [Getting Started Guide](/getting-started), browse the [ADR Catalog](/adr) and [Knowledge Graph](/knowledge-graph), or try the [Interactive Demo](/demo).

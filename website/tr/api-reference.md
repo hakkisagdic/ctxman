@@ -1,469 +1,278 @@
 # API Referansı
 
-Ctxman CLI, REST API ve programatik kullanım için tam referans.
+Ctxman v3.2 CLI komutları, 18 araçlı MCP sunucusu, REST API ve programatik kütüphane dışa aktarımları için tam referans.
 
 ## CLI Referansı
 
-### Global Seçenekler
+### Genel ve Analiz Seçenekleri
 
-| Seçenek     | Kısa | Açıklama                              | Varsayılan    |
-| ----------- | ---- | ------------------------------------- | ------------- |
-| `--cli`     | `-c` | CLI modunda çalıştır (sihirbazı atla) | `false`       |
-| `--help`    | `-h` | Yardımı göster                        | -             |
-| `--version` | `-v` | Sürümü göster                         | -             |
-| `--path`    | `-p` | Analiz edilecek dizin                 | Geçerli dizin |
-| `--output`  | `-o` | Çıktı dosya yolu                      | `stdout`      |
+| Seçenek                  | Kısa | Açıklama                                                          | Varsayılan          |
+| ------------------------ | ---- | ----------------------------------------------------------------- | ------------------- |
+| `--cli`                  | `-c` | CLI modunda çalıştır (sihirbazı atla)                             | `false`             |
+| `--help`                 | `-h` | Yardımı göster                                                    | -                   |
+| `--version`              | `-v` | Sürümü göster                                                     | -                   |
+| `--method-level`         | `-m` | Fonksiyon düzeyinde token analizini etkinleştir                   | `false`             |
+| `--target-model`         | `-t` | Hedef LLM profil kimliği (örn. `claude-sonnet-5-5`)               | `claude-sonnet-5-5` |
+| `--list-llms`            |      | 44+ LLM profilini listele (`--all` emekli modelleri de içerir)    | -                   |
+| `--output`               | `-o` | Çıktı formatı (`toon`, `json`, `markdown`, `yaml`, ...)           | `json`              |
+| `--gitingest`            | `-g` | GitIngest özeti oluştur (`digest.txt`)                            | `false`             |
+| `--changed-only`         |      | Sadece çalışma ağacında değişen dosyaları analiz et               | `false`             |
+| `--changed-since`        |      | Belirli bir git referansından beri değişen dosyaları analiz et    | -                   |
+| `--with-authors`         |      | Git blame yazar bilgisini dahil et                                | `false`             |
+| `--cache` / `--no-cache` |      | SHA-256 disk/bellek önbelleğini etkinleştir veya devre dışı bırak | `true`              |
+| `--no-redact`            |      | Otomatik sır maskelemeyi devre dışı bırak                         | `false`             |
 
-### Analiz Seçenekleri
+## CLI Alt Komutları (v3.2)
 
-| Seçenek              | Açıklama                                     | Varsayılan |
-| -------------------- | -------------------------------------------- | ---------- |
-| `--method-level`     | Yöntem düzeyinde token analizini etkinleştir | `false`    |
-| `--token-count`      | Kesin token sayılarını hesapla               | `true`     |
-| `--tiktoken`         | Kesin sayım için tiktoken kullan             | `true`     |
-| `--include-comments` | Analize yorumları dahil et                   | `false`    |
+### `ctxman map [dir]`
 
-### Çıktı Formatı Seçenekleri
-
-| Seçenek       | Açıklama                               |
-| ------------- | -------------------------------------- |
-| `--toon`      | TOON formatında çıktı (%40-50 azaltma) |
-| `--gitingest` | GitIngest formatında çıktı             |
-| `--json`      | JSON olarak çıktı                      |
-| `--markdown`  | Markdown olarak çıktı                  |
-
-### Git Entegrasyonu Seçenekleri
-
-| Seçenek                 | Açıklama                             |
-| ----------------------- | ------------------------------------ |
-| `--git-diff <ref>`      | Diff'te değişen dosyaları analiz et  |
-| `--git-diff --cached`   | Sahnelenmiş değişiklikleri analiz et |
-| `--git-branch <branch>` | Branch ile karşılaştır               |
-| `--git-author <author>` | Yazara göre filtrele                 |
-
-### İzleme Modu Seçenekleri
-
-| Seçenek              | Açıklama              | Varsayılan |
-| -------------------- | --------------------- | ---------- |
-| `--interval <ms>`    | Gecikme aralığı       | `1000`     |
-| `--ignore <pattern>` | Yoksayılacak kalıplar | -          |
-
-### Sunucu Seçenekleri
-
-| Seçenek         | Açıklama          | Varsayılan  |
-| --------------- | ----------------- | ----------- |
-| `--port <port>` | API sunucu portu  | `3000`      |
-| `--host <host>` | API sunucu host'u | `localhost` |
-
-## CLI Komutları
-
-### `ctxman` (Varsayılan)
-
-İnteraktif sihirbaz modunu başlat:
+Token bütçesi içinde fonksiyon ve sınıf imzalarıyla PageRank sıralamalı depo haritası üretir:
 
 ```bash
-ctxman
+ctxman map --tokens 2048 --focus lib/why/index.js
+ctxman map --repo ../plansmith --repo ../plansmith-desktop --tokens 4096
 ```
 
-### `ctxman watch`
+### `ctxman focus <file>[:symbol]`
 
-İzleme modunu başlat:
+Hedef dosya veya sembolü `N`-hop import/importer komşuluğuyla paketler:
 
 ```bash
-ctxman watch [seçenekler]
+ctxman focus lib/api/mcp/server.js --depth 2 --direction both --budget 20k
 ```
 
-### `ctxman serve`
+### `ctxman pack [dir]`
 
-REST API sunucusunu başlat:
+Depo dosyalarını tek bir LLM belgesinde (`xml`, `markdown`, `plain`, `json`) paketler:
 
 ```bash
-ctxman serve [seçenekler]
+ctxman pack --budget 32k --compress --style xml
+ctxman pack --include "lib/**/*.js" --max-tokens 50000
 ```
 
-### `ctxman config`
+### `ctxman pr [dir]`
 
-Yapılandırmayı yönet:
+Pull-request inceleme bağlamı (özet, commit günlüğü, değişen fonksiyonlar, diff ve ilgili testler) oluşturur:
 
 ```bash
-# Geçerli yapılandırmayı göster
-ctxman config show
-
-# Yapılandırma değeri ayarla
-ctxman config set output.format toon
+ctxman pr --base main --head HEAD --budget 24k
 ```
 
-## REST API
+### `ctxman why <target>`
 
-### Temel URL
+Bir dosya, sembol (`file:symbol`) veya satır aralığının (`file#L10-L40`) neden öyle göründüğünü açıklar:
 
-```
-http://localhost:3000/api
-```
-
-### Kimlik Doğrulama
-
-Şu anda API kimlik doğrulama olmadan yerel olarak çalışır. Üretim kullanımı için, kimlik doğrulama ile ters proxy ekleyin.
-
-### Uç Noktalar
-
-#### POST /api/analyze
-
-Bir dizindeki kodu analiz et.
-
-**İstek Gövdesi:**
-
-```json
-{
-  "path": "./src",
-  "methodLevel": true,
-  "outputFormat": "json",
-  "exclude": ["*.test.js"],
-  "include": []
-}
+```bash
+ctxman why lib/why/index.js:explainHistory
+ctxman why lib/why/index.js:explainHistory --discussions --analyzer
+ctxman why lib/why/index.js#L1-L80 --patches --budget 12k
 ```
 
-**Yanıt:**
+### `ctxman who <target-or-topic>`
 
-```json
-{
-  "success": true,
-  "data": {
-    "totalTokens": 12345,
-    "totalFiles": 42,
-    "files": [
-      {
-        "path": "src/index.js",
-        "tokens": 234,
-        "lines": 45,
-        "methods": []
-      }
-    ]
-  }
-}
+Yaşayan `git blame -w` payı (`0.45`), zaman aşınmalı commit geçmişi (`0.35`, 90 gün yarı ömür), toplam commit (`0.20`) ve `CODEOWNERS` (`+0.15`) sinyallerini birleştirerek uzmanları sıralar:
+
+```bash
+ctxman who lib/why/index.js:explainHistory
+ctxman who lib/rag
+ctxman who "hybrid search RRF" --limit 5 --style json
 ```
 
-#### GET /api/status
+### `ctxman task "<goal>"`
 
-Sunucu durumunu al.
+Görev açıklamasından otomatik bağlam paketi (hibrit arama tohumları + 1-hop tam kod + 2-hop sıkıştırılmış imzalar + mimari depo haritası) üretir:
 
-**Yanıt:**
-
-```json
-{
-  "status": "running",
-  "uptime": 3600,
-  "version": "3.0.0"
-}
+```bash
+ctxman task "add OAuth token refresh retry logic" --budget 32k --format markdown
 ```
 
-#### GET /api/config
+### `ctxman diagnose [trace]`
 
-Geçerli yapılandırmayı al.
+Çok dilli yığın izlerini (stack trace) ve hata günlüklerini kök neden paketine (etkilenen satırlar, çevreleyen fonksiyonlar, 1-hop komşular ve yakın git commit'leri) dönüştürür:
 
-**Yanıt:**
-
-```json
-{
-  "output": {
-    "format": "json",
-    "file": null
-  },
-  "analysis": {
-    "methodLevel": true,
-    "tokenCount": true
-  }
-}
+```bash
+npm test 2>&1 | ctxman diagnose --budget 24k
+ctxman diagnose --file ci-failure.log --format json
 ```
 
-#### POST /api/config
+### `ctxman search "<query>"`
 
-Yapılandırmayı güncelle.
+BM25, yerel SQLite vektör gömmeleri veya Reciprocal Rank Fusion (`--hybrid`) ile kod parçalarını arar:
 
-**İstek Gövdesi:**
-
-```json
-{
-  "output": {
-    "format": "markdown"
-  }
-}
+```bash
+ctxman search "expire session" --limit 10
+ctxman search "sqlite vector cosine similarity" --hybrid
 ```
 
-**Yanıt:**
+### `ctxman ask "<question>"`
 
-```json
-{
-  "success": true,
-  "config": {
-    "output": {
-      "format": "markdown"
-    }
-  }
-}
+Yerel SQLite semantik indeksini (`.ctxman/self-knowledge/index.sqlite`) doğal dille sorgular:
+
+```bash
+ctxman ask "how does export policy redaction work?"
 ```
 
-#### POST /api/cache/clear
+### `ctxman count [path|-]`
 
-Analiz önbelleğini temizle.
+Belirli bir LLM modeli için token sayar (veya Anthropic `count_tokens` API ile kesin Claude sayımı yapar):
 
-**Yanıt:**
-
-```json
-{
-  "success": true,
-  "message": "Önbellek temizlendi"
-}
+```bash
+ctxman count . --model gpt-5.5
+ctxman count . --model claude-opus-5-5 --api --json
 ```
 
-#### GET /health
+### `ctxman policy` ve `ctxman audit`
 
-Sağlık kontrolü uç noktası.
+`.ctxman/policy.json` Veri Kalkanı kurallarını doğrular ve SHA-256 dışa aktarım denetim günlüğünü inceler:
 
-**Yanıt:**
-
-```json
-{
-  "status": "healthy",
-  "timestamp": "2024-01-15T10:30:00Z"
-}
+```bash
+ctxman policy init
+ctxman policy check
+ctxman audit --since 7d --limit 20
 ```
 
-## Programatik API
+### `ctxman mcp`
 
-### Kurulum
+18 araçlı MCP sunucusunu (`stdio` veya `sse`) çalıştırır veya istemci yapılandırmalarını kurar:
+
+```bash
+ctxman mcp install --client claude-desktop
+ctxman mcp install --client claude-code --npx
+ctxman mcp --root /path/to/project
+```
+
+### `ctxman watch` ve `ctxman serve`
+
+Canlı dosya izlemeyi veya yerel REST API sunucusunu başlatır:
+
+```bash
+ctxman watch --debounce 1000
+ctxman serve --port 3000
+```
+
+## MCP Sunucu Araçları (18 Araç)
+
+| Araç               | Temel Argümanlar                                                                              | Açıklama                                                       |
+| ------------------ | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `analyze_codebase` | `path`                                                                                        | Depo token istatistikleri ve dosya dökümü                      |
+| `generate_context` | `path`, `template?`, `maxTokens?`                                                             | Şablon tabanlı LLM bağlamı                                     |
+| `git_diff`         | `path`, `branch?`                                                                             | Doğrulanmış `git diff <branch>`                                |
+| `search_code`      | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`     | Satır araması veya BM25 / hibrit RRF kod parçası araması       |
+| `list_methods`     | `path`, `file?`                                                                               | Dosya başına çıkarılan fonksiyonlar                            |
+| `get_symbol`       | `path`, `name`, `file?`, `redact?`                                                            | İsimle fonksiyon, metot veya sınıfın tam kaynak kodu           |
+| `repo_map`         | `path`, `tokens?`, `focus?`, `repos?`                                                         | PageRank depo haritası (`ctxman map`)                          |
+| `pr_context`       | `path`, `base?`, `head?`, `budget?`, `style?`                                                 | Pull-request inceleme paketi (`ctxman pr`)                     |
+| `count_tokens`     | `path` veya `text`, `model?`, `top?`                                                          | Modele duyarlı token sayımı ve pencere uyumu (`ctxman count`)  |
+| `explain_history`  | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?` | Git arkeolojisi ve kurumsal hafıza atıfları (`ctxman why`)     |
+| `pack_context`     | `path`, `include?`, `exclude?`, `files?`, `style?`, `compress?`, `budget?`, `repos?`          | Paketlenmiş kod tabanı belgesi (`ctxman pack`)                 |
+| `focus_context`    | `path`, `file`, `depth?`, `direction?`, `style?`, `compress?`, `budget?`                      | Yönlü `N`-hop import komşuluğu (`ctxman focus`)                |
+| `check_policy`     | `path`                                                                                        | Etkin `.ctxman/policy.json` doğrulaması (`ctxman policy`)      |
+| `audit_log`        | `path`, `since?`, `limit?`                                                                    | SHA-256 dışa aktarım denetim günlüğü (`ctxman audit`)          |
+| `ask_codebase`     | `path`, `query`, `limit?`                                                                     | Çevrimdışı SQLite semantik arama (`ctxman ask`)                |
+| `task_context`     | `path`, `task`, `budget?`, `format?`, `model?`                                                | Otomatik görev bağlam paketi (`ctxman task`)                   |
+| `diagnose_failure` | `path`, `trace`, `budget?`, `format?`                                                         | Stack-trace kök neden teşhisi (`ctxman diagnose`)              |
+| `find_experts`     | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                         | Blame + güncellik + CODEOWNERS uzman sıralaması (`ctxman who`) |
+
+## Programatik API (`index.js`)
+
+### Kurulum ve İçe Aktarma
 
 ```bash
 npm install ctxman
 ```
 
-### İçe Aktar
-
 ```javascript
-import ctxman from 'ctxman';
-// veya
-const ctxman = require('ctxman');
+import {
+  // Kod Zekası ve Ajanlar
+  buildRepoGraph,
+  rankFiles,
+  renderRepoMap,
+  focusContext,
+  packContext,
+  buildPrContext,
+  explainHistory,
+  queryAnalyzerCitations,
+  findExperts,
+  buildTaskContext,
+  diagnoseFailure,
+
+  // Arama, Semboller, Sayım ve Çevrimdışı SQLite RAG
+  searchProject,
+  hybridSearch,
+  getSymbol,
+  countForModel,
+  askCodebase,
+  SqliteVectorStore,
+  AutoEmbeddingProvider,
+  LocalHashEmbeddingProvider,
+
+  // Çoklu Depo Çalışma Alanı ve Yönetişim Politikası
+  resolveWorkspaceRepos,
+  mapWorkspace,
+  searchWorkspace,
+  packWorkspace,
+  loadPolicy,
+  Policy,
+
+  // Çekirdek v3 Hattı
+  Scanner,
+  Analyzer,
+  ContextBuilder,
+  Reporter,
+  CacheManager,
+  TokenCalculator,
+} from 'ctxman';
 ```
 
-### Yöntemler
-
-#### `ctxman.analyze(options)`
-
-Bir dizindeki kodu analiz et.
+### Kod Zekası Örnekleri
 
 ```javascript
-const result = await ctxman.analyze({
-  path: './src',
-  methodLevel: true,
-  outputFormat: 'json',
-  exclude: ['*.test.js'],
+// 1. Sıralı Depo Haritası
+const map = renderRepoMap('/path/to/repo', { tokens: 2048, focus: ['lib/why/index.js'] });
+console.log(map.output);
+
+// 2. Kurumsal Hafıza Atıflarıyla Kod Geçmişi Açıklama
+const why = await explainHistory('/path/to/repo', 'lib/why/index.js:explainHistory', {
+  analyzer: true,
+  budget: 12000,
 });
+console.log(why.text);
 
-console.log(result.totalTokens);
-console.log(result.files);
+// 3. Alan Uzmanlarını Bulma
+const who = await findExperts('/path/to/repo', 'hybrid search RRF', { limit: 5 });
+console.log(who.experts);
+
+// 4. Görev Bağlamı ve Hata Teşhisi
+const taskBundle = await buildTaskContext('/path/to/repo', 'add retry backoff', { budget: 32000 });
+const diagReport = await diagnoseFailure('/path/to/repo', errorStackText, { budget: 24000 });
 ```
 
-**Seçenekler:**
+## REST API (`ctxman serve`)
 
-| Seçenek        | Tip        | Varsayılan | Açıklama                            |
-| -------------- | ---------- | ---------- | ----------------------------------- |
-| `path`         | `string`   | `'.'`      | Analiz edilecek dizin               |
-| `methodLevel`  | `boolean`  | `false`    | Yöntem düzeyinde analiz etkinleştir |
-| `outputFormat` | `string`   | `'json'`   | Çıktı formatı                       |
-| `exclude`      | `string[]` | `[]`       | Hariç tutulacak kalıplar            |
-| `include`      | `string[]` | `[]`       | Dahil edilecek kalıplar             |
+### Temel URL
 
-**Döndürür:** `Promise<AnalysisResult>`
-
-#### `ctxman.watch(options)`
-
-İzleme modunu başlat.
-
-```javascript
-const watcher = ctxman.watch({
-  path: './src',
-  interval: 1000,
-  onChange: (result) => {
-    console.log('Analiz güncellendi:', result.totalTokens);
-  },
-  onError: (error) => {
-    console.error('İzleme hatası:', error);
-  },
-});
-
-// İzlemeyi durdur
-watcher.stop();
+```text
+http://127.0.0.1:3000/api/v1
 ```
 
-**Seçenekler:**
+### Uç Noktalar
 
-| Seçenek    | Tip        | Varsayılan | Açıklama                |
-| ---------- | ---------- | ---------- | ----------------------- |
-| `path`     | `string`   | `'.'`      | İzlenecek dizin         |
-| `interval` | `number`   | `1000`     | Gecikme aralığı (ms)    |
-| `onChange` | `function` | -          | Değişiklikte geri çağrı |
-| `onError`  | `function` | -          | Hatada geri çağrı       |
-
-**Döndürür:** `stop()` yöntemi olan `Watcher` nesnesi.
-
-#### `ctxman.serve(options)`
-
-REST API sunucusunu başlat.
-
-```javascript
-const server = await ctxman.serve({
-  port: 3000,
-  host: 'localhost',
-});
-
-// Sunucuyu durdur
-server.stop();
-```
-
-**Seçenekler:**
-
-| Seçenek | Tip      | Varsayılan    | Açıklama      |
-| ------- | -------- | ------------- | ------------- |
-| `port`  | `number` | `3000`        | Sunucu portu  |
-| `host`  | `string` | `'localhost'` | Sunucu host'u |
-
-**Döndürür:** `stop()` yöntemi olan `Promise<Server>` nesnesi.
-
-#### `ctxman.configure(options)`
-
-Global yapılandırma ayarla.
-
-```javascript
-ctxman.configure({
-  defaultOutputFormat: 'toon',
-  defaultMethodLevel: true,
-});
-```
-
-### Tipler
-
-```typescript
-interface AnalysisResult {
-  totalTokens: number;
-  totalFiles: number;
-  totalLines: number;
-  files: FileResult[];
-  methods?: MethodResult[];
-}
-
-interface FileResult {
-  path: string;
-  tokens: number;
-  lines: number;
-  language: string;
-  methods?: MethodResult[];
-}
-
-interface MethodResult {
-  name: string;
-  tokens: number;
-  lines: number;
-  file: string;
-}
-
-interface Watcher {
-  stop(): void;
-}
-
-interface Server {
-  stop(): Promise<void>;
-}
-```
+- `GET /api/v1/docs` — OpenAPI uç nokta listesi
+- `POST /api/v1/analyze` — Depo dosyalarını ve token sayılarını analiz et
+- `GET /api/v1/methods?file=<path>` — Bir dosya veya proje için fonksiyonları çıkar
+- `GET /api/v1/stats` — Önbelleğe alınmış depo istatistikleri
+- `GET /api/v1/diff?since=<ref>` — Git diff analizi (`isValidGitRef` korumalı)
+- `POST /api/v1/context` — Politika denetimli LLM bağlamı oluştur
 
 ## Çıkış Kodları
 
-| Kod | Açıklama             |
-| --- | -------------------- |
-| 0   | Başarılı             |
-| 1   | Genel hata           |
-| 2   | Geçersiz argümanlar  |
-| 3   | Yapılandırma hatası  |
-| 4   | Analiz hatası        |
-| 5   | Dosya sistemi hatası |
-
-## Hata İşleme
-
-### CLI Hataları
-
-Hatalar açıklayıcı bir mesaj ile stderr'e yazılır:
-
-```bash
-ctxman --invalid-option
-# Hata: Bilinmeyen seçenek '--invalid-option'
-# Kullanım bilgileri için 'ctxman --help' çalıştırın.
-```
-
-### API Hataları
-
-API hataları hata detayları ile JSON döndürür:
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "ANALYSIS_ERROR",
-    "message": "Dizin analizi başarısız",
-    "details": "İzin reddedildi: /root/secret"
-  }
-}
-```
-
-## Örnekler
-
-### Temel Analiz
-
-```javascript
-import ctxman from 'ctxman';
-
-const result = await ctxman.analyze({ path: './src' });
-console.log(`Toplam token: ${result.totalTokens}`);
-```
-
-### Yöntem Düzeyinde Analiz
-
-```javascript
-const result = await ctxman.analyze({
-  path: './src',
-  methodLevel: true,
-});
-
-result.files.forEach((file) => {
-  console.log(`\n${file.path}:`);
-  file.methods?.forEach((method) => {
-    console.log(`  ${method.name}: ${method.tokens} token`);
-  });
-});
-```
-
-### Sunucu ile İzleme Modu
-
-```javascript
-import ctxman from 'ctxman';
-
-// Sunucuyu başlat
-const server = await ctxman.serve({ port: 3000 });
-
-// İzleme modunu başlat
-const watcher = ctxman.watch({
-  path: './src',
-  onChange: (result) => {
-    console.log(`Analiz güncellendi: ${result.totalTokens} token`);
-  },
-});
-
-// Çıkışta temizle
-process.on('SIGINT', async () => {
-  watcher.stop();
-  await server.stop();
-  process.exit(0);
-});
-```
+| Kod | Açıklama                                                      |
+| --- | ------------------------------------------------------------- |
+| `0` | Başarılı                                                      |
+| `1` | Genel veya çalışma zamanı hatası                              |
+| `2` | Geçersiz CLI argümanları veya `--max-tokens` bütçe aşımı      |
+| `3` | Dışa aktarım politikası ihlali (`.ctxman/policy.json` engeli) |
 
 ---
 
-Yardım mı lazım? [Sorun Giderme Rehberi](https://github.com/hakkisagdic/ctxman/blob/main/docs/content-tr/Sorun-Giderme.md)'ni kontrol edin veya [GitHub'da bir sorun açın](https://github.com/hakkisagdic/ctxman/issues).
+Yardım mı lazım? [ADR Kataloğu](/tr/adr) ve [Bilgi Grafiği](/tr/knowledge-graph) sayfalarını inceleyin veya [GitHub'da bir sorun açın](https://github.com/hakkisagdic/ctxman/issues).
