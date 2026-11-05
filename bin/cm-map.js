@@ -27,8 +27,8 @@ Options:
   -t, --tokens N           Token budget for the map (default: 2048)
       --repo DIR           Additional repository root for a multi-repo workspace map
                            under one shared token budget (repeatable)
-  -f, --focus PATH         Bias the ranking toward a file or folder and its neighbours
-                           (repeatable)
+  -f, --focus PATH         Bias the ranking toward a file, file:symbol, or folder and its
+                           neighbours (repeatable)
       --history N          Commits of git history to mine for change frequency
                            (default: 300, 0 disables)
       --order rank|path    Order of the files in the output (default: rank)
@@ -36,6 +36,7 @@ Options:
       --style STYLE        text (default), markdown, json, dot (Graphviz)
       --json               Same as --style json
       --graph              Print the dependency edges instead of the map
+  -c, --call-graph         Include cross-file AST symbol call graph edges
   -o, --output FILE        Write to FILE instead of stdout
       --copy               Copy to the clipboard instead of stdout
       --no-redact          Do not mask secrets in signatures
@@ -49,6 +50,8 @@ Score:
 Examples:
   ctxman map                                # map of the current directory, 2048 tokens
   ctxman map --tokens 4096 --style markdown
+  ctxman map --call-graph                   # annotate methods with cross-file call targets
+  ctxman map --graph --call-graph           # print both import and symbol call edges
   ctxman map --repo ../api --repo ../web --tokens 4096
   ctxman map src --focus src/server.js      # around the file you are working on
   ctxman map --important-last -o map.txt    # best files last, next to your question
@@ -72,6 +75,7 @@ function parseArgs(argv) {
     importantLast: false,
     style: undefined,
     graph: false,
+    callGraph: false,
     output: null,
     copy: false,
     redact: true,
@@ -138,6 +142,10 @@ function parseArgs(argv) {
       case '--graph':
         options.graph = true;
         break;
+      case '-c':
+      case '--call-graph':
+        options.callGraph = true;
+        break;
       case '-o':
       case '--output':
         options.output = value();
@@ -166,12 +174,22 @@ function parseArgs(argv) {
 
 /**
  * A focus path is project-relative when it exists under the project, otherwise taken
- * from the current directory (`ctxman map ../app --focus ../app/src/a.js`)
+ * from the current directory (`ctxman map ../app --focus ../app/src/a.js`). Preserves
+ * an optional `:symbol` suffix.
  */
 function focusPath(root, entry) {
-  if (path.isAbsolute(entry) || fs.existsSync(path.resolve(root, entry))) return entry;
-  const fromCwd = path.resolve(entry);
-  return fs.existsSync(fromCwd) ? fromCwd : entry;
+  const lastColon = entry.lastIndexOf(':');
+  let pathPart = entry;
+  let symbolSuffix = '';
+  if (lastColon > 1 && !fs.existsSync(path.resolve(root, entry))) {
+    pathPart = entry.slice(0, lastColon);
+    symbolSuffix = entry.slice(lastColon);
+  }
+  if (path.isAbsolute(pathPart) || fs.existsSync(path.resolve(root, pathPart))) {
+    return `${pathPart}${symbolSuffix}`;
+  }
+  const fromCwd = path.resolve(pathPart);
+  return fs.existsSync(fromCwd) ? `${fromCwd}${symbolSuffix}` : entry;
 }
 
 function formatMs(ms) {
@@ -215,6 +233,7 @@ async function main() {
       importantLast: options.importantLast,
       style: options.style,
       graph: options.graph,
+      callGraph: options.callGraph,
       redact: options.redact,
     });
   } else {
@@ -227,6 +246,7 @@ async function main() {
       importantLast: options.importantLast,
       style: options.style,
       graph: options.graph,
+      callGraph: options.callGraph,
       redact: options.redact,
     });
   }
@@ -248,10 +268,16 @@ async function main() {
   if (result.repos?.length > 1) parts.push(`${result.repos.length} repos`);
   if (options.graph || result.style === 'dot') {
     parts.push(`${stats.edges} edges between ${stats.files} files`);
+    if (options.callGraph && stats.callEdges !== undefined) {
+      parts.push(`${stats.callEdges} call edges`);
+    }
   } else {
     parts.push(`${result.files.length} of ${stats.files} files`);
     parts.push(`${result.tokens}/${result.budget} tokens`);
     parts.push(`${stats.edges} import edges`);
+    if (options.callGraph && stats.callEdges !== undefined) {
+      parts.push(`${stats.callEdges} call edges`);
+    }
   }
   const history = result.graph.history;
   if (history.available) parts.push(`history ${history.commits} commits`);

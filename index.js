@@ -45,7 +45,7 @@ import { buildPrContext } from './lib/pr/pr-context.js';
 import { generateDigestFromReport, generateDigestFromContext } from './ctxman.js';
 
 // Repository map (`ctxman map`)
-import { buildRepoGraph, rankFiles, renderRepoMap } from './lib/map/index.js';
+import { buildRepoGraph, rankFiles, renderRepoMap, buildCallGraph } from './lib/map/index.js';
 
 // Code history explanation (`ctxman why`)
 import { explainHistory } from './lib/why/index.js';
@@ -133,6 +133,7 @@ export {
   buildRepoGraph,
   rankFiles,
   renderRepoMap,
+  buildCallGraph,
 
   // Pull-request context
   buildPrContext,

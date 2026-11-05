@@ -164,4 +164,131 @@ describe('focusContext & ctxman focus (P12)', () => {
     expect(toolRes.content[0].text).toContain('src/service.js');
     expect(toolRes.content[1].text).toContain('Focused target src/service.js');
   });
+
+  it('slices cross-file AST symbol call graph when focusing a specific function (file:symbol)', async () => {
+    // Expand service.js with a second function `archiveOld()` that calls `uploadArchive()` in archive.js,
+    // while `runService()` calls local helper `prepareRun()` -> `queryDb()` (in db.js) and barrel-exported `emitMetric()` (in telemetry/metrics.js).
+    fs.mkdirSync(path.join(root, 'src/telemetry'), { recursive: true });
+    fs.writeFileSync(
+      path.join(root, 'src/telemetry/index.js'),
+      "export { emitMetric } from './metrics.js';\n",
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(root, 'src/telemetry/metrics.js'),
+      'export function emitMetric(name) {\n  return name;\n}\n',
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(root, 'src/archive.js'),
+      'export function uploadArchive() {\n  return true;\n}\n',
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(root, 'src/service.js'),
+      [
+        "import { queryDb } from './db.js';",
+        "import { log } from './logger.js';",
+        "import { uploadArchive } from './archive.js';",
+        "import { emitMetric } from './telemetry/index.js';",
+        '',
+        'function prepareRun() {',
+        '  return queryDb();',
+        '}',
+        '',
+        'export function runService() {',
+        "  log('run');",
+        "  emitMetric('service.run');",
+        '  return prepareRun();',
+        '}',
+        '',
+        'export function archiveOld() {',
+        '  return uploadArchive();',
+        '}',
+      ].join('\n'),
+      'utf-8'
+    );
+
+    const symRes = await focusContext(root, 'src/service.js:runService', {
+      depth: 1,
+      includeTests: false,
+    });
+
+    expect(symRes.focus.target).toBe('src/service.js');
+    expect(symRes.focus.symbol).toBe('runService');
+    const symPaths = symRes.files.map((f) => f.path);
+    // Called by runService (directly or via local helper prepareRun, and through barrel index.js):
+    expect(symPaths).toContain('src/logger.js');
+    expect(symPaths).toContain('src/db.js');
+    expect(symPaths).toContain('src/telemetry/metrics.js');
+    // Caller of runService:
+    expect(symPaths).toContain('src/app.js');
+    // Imported by service.js, but ONLY called by archiveOld() (not runService()):
+    expect(symPaths).not.toContain('src/archive.js');
+    // Barrel file itself has no called symbol definition:
+    expect(symPaths).not.toContain('src/telemetry/index.js');
+    expect(symRes.focus.callEdges.length).toBeGreaterThan(0);
+    expect(describeFocus(symRes)).toContain('src/service.js:runService');
+
+    // Direction: calls-only and callers-only
+    const callsOnly = await focusContext(root, 'src/service.js', {
+      symbol: 'runService',
+      direction: 'calls',
+      depth: 1,
+      includeTests: false,
+    });
+    expect(callsOnly.files.map((f) => f.path)).not.toContain('src/app.js');
+    expect(callsOnly.files.map((f) => f.path)).toContain('src/db.js');
+
+    const callersOnly = await focusContext(root, 'src/service.js:runService', {
+      direction: 'callers',
+      depth: 1,
+      includeTests: false,
+    });
+    expect(callersOnly.files.map((f) => f.path)).toEqual(['src/service.js', 'src/app.js']);
+
+    // Unknown symbol throws SYMBOL_NOT_FOUND
+    await expect(focusContext(root, 'src/service.js:nonExistentFn')).rejects.toMatchObject({
+      code: 'SYMBOL_NOT_FOUND',
+    });
+  });
+
+  it('discovers 1-hop cross-file call neighbors via barrel re-exports in file-level focus unless callGraph is disabled', async () => {
+    fs.mkdirSync(path.join(root, 'src/telemetry'), { recursive: true });
+    fs.writeFileSync(
+      path.join(root, 'src/telemetry/index.js'),
+      "export { recordSpan } from './tracer.js';\n",
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(root, 'src/telemetry/tracer.js'),
+      'export function recordSpan(op) {\n  return op;\n}\n',
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(root, 'src/service.js'),
+      "import { recordSpan } from './telemetry/index.js';\nexport function runService() {\n  return recordSpan('svc');\n}\n",
+      'utf-8'
+    );
+
+    // At depth 1 with callGraph enabled (default), tracer.js is a direct 1-hop callee of service.js
+    const withCalls = await focusContext(root, 'src/service.js', {
+      depth: 1,
+      includeTests: false,
+    });
+    expect(withCalls.files.map((f) => f.path)).toContain('src/telemetry/tracer.js');
+    const tracerNeighbor = withCalls.focus.neighbors.find(
+      (n) => n.path === 'src/telemetry/tracer.js'
+    );
+    expect(tracerNeighbor?.relation).toBe('call');
+
+    // With callGraph: false, depth 1 only sees import neighbors (telemetry/index.js), not tracer.js
+    const withoutCalls = await focusContext(root, 'src/service.js', {
+      depth: 1,
+      callGraph: false,
+      includeTests: false,
+    });
+    expect(withoutCalls.files.map((f) => f.path)).toContain('src/telemetry/index.js');
+    expect(withoutCalls.files.map((f) => f.path)).not.toContain('src/telemetry/tracer.js');
+  });
 });

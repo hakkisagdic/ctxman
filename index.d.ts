@@ -854,6 +854,21 @@ export interface RepoMapMethod {
   line: number;
   /** Declaration on one line, secrets redacted unless `redact: false` */
   signature: string;
+  /** Identifiers invoked inside this method body */
+  calls?: string[];
+}
+
+/**
+ * Cross-file symbol call edge, caller file/symbol -> callee file/symbol.
+ */
+export interface RepoGraphCallEdge {
+  from: string;
+  caller: string;
+  callerLine: number;
+  to: string;
+  callee: string;
+  calleeLine: number;
+  weight: number;
 }
 
 /**
@@ -886,6 +901,7 @@ export interface RepoGraph {
   root: string;
   nodes: RepoGraphNode[];
   edges: RepoGraphEdge[];
+  callEdges?: RepoGraphCallEdge[];
   history: {
     available: boolean;
     requested: number;
@@ -898,6 +914,7 @@ export interface RepoGraph {
     scannedFiles: number;
     files: number;
     edges: number;
+    callEdges?: number;
     unresolvedImports: number;
     skipped: Array<{ path: string; reason: string }>;
     redactions: Record<string, number>;
@@ -921,12 +938,14 @@ export interface RankWeights {
 }
 
 export interface RankOptions {
-  /** Files or folders (project-relative or absolute) to personalise PageRank toward */
+  /** Files, folders or file:symbol targets to personalise PageRank toward */
   focus?: string[];
   /** Blend of the normalised components (default 0.70 / 0.25 / 0.05) */
   weights?: RankWeights;
   /** PageRank damping (default 0.85) */
   damping?: number;
+  /** Include cross-file AST symbol call edges in PageRank and focus expansion */
+  callGraph?: boolean;
 }
 
 export interface RankedFile {
@@ -955,6 +974,8 @@ export interface RepoMapOptions extends RepoGraphOptions, RankOptions {
   style?: 'text' | 'markdown' | 'json' | 'dot';
   /** Render the dependency edges instead of the map */
   graph?: boolean;
+  /** Annotate methods with cross-file call targets and include call edges in graph/ranking */
+  callGraph?: boolean;
 }
 
 export interface RepoMapFile {
@@ -1807,9 +1828,11 @@ export function loadPolicy(rootPath: string, options?: { env?: NodeJS.ProcessEnv
 // Focused Neighborhood Context (`ctxman focus`)
 // ============================================
 
-export type FocusDirection = 'both' | 'imports' | 'importers';
+export type FocusDirection = 'both' | 'imports' | 'importers' | 'calls' | 'callers';
 
 export interface FocusOptions extends Omit<PackOptions, 'files'> {
+  /** Target function or method name for symbol-level call graph traversal */
+  symbol?: string;
   /** Graph traversal hops (default: 1; 0 = target file only) */
   depth?: number;
   /** Traversal direction (default: 'both') */
@@ -1818,6 +1841,12 @@ export interface FocusOptions extends Omit<PackOptions, 'files'> {
   imports?: boolean;
   /** Include incoming importers (default: true) */
   importers?: boolean;
+  /** Include cross-file AST symbol call graph edges (default: true) */
+  callGraph?: boolean;
+  /** Include outgoing cross-file calls (default: true) */
+  calls?: boolean;
+  /** Include incoming cross-file callers (default: true) */
+  callers?: boolean;
   /** Include test files in neighborhood (default: true) */
   includeTests?: boolean;
   /** Git commits mined for tie-breaking PageRank (default: 0) */
@@ -1829,16 +1858,19 @@ export interface FocusOptions extends Omit<PackOptions, 'files'> {
 export interface FocusNeighbor {
   path: string;
   distance: number;
-  relation: 'import' | 'importer' | 'both';
+  relation: 'import' | 'importer' | 'call' | 'caller' | 'both';
   score: number;
 }
 
 export interface FocusMetadata {
   target: string;
+  symbol?: string | null;
   depth: number;
   direction: FocusDirection;
+  callGraph?: boolean;
   inGraph: boolean;
   neighbors: FocusNeighbor[];
+  callEdges?: RepoGraphCallEdge[];
 }
 
 export interface FocusResult extends PackResult {

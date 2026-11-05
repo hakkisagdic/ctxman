@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ctxman focus - pack a target file and its import/importer neighborhood
+ * ctxman focus - pack a target file (or file:symbol) and its import/call neighborhood
  *
  * stdout carries only the document (unless -o/--copy); summary and notices go to stderr.
  * Exit codes: 0 done, 1 error, 2 invalid policy / exceeds --max-tokens, 3 refused by policy.
@@ -14,18 +14,23 @@ const STYLES = ['xml', 'markdown', 'plain', 'json'];
 const EXIT_TOO_LARGE = 2;
 
 function printHelp() {
-  process.stdout.write(`ctxman focus - pack a file and its import/importer neighborhood
+  process.stdout.write(`ctxman focus - pack a file (or file:symbol) and its import/call neighborhood
 
-Usage: ctxman focus <file> [root] [options]
+Usage: ctxman focus <file[:symbol]> [root] [options]
 
 Resolves <file> inside the project (default root: current directory), traverses the
-repository import graph up to --depth hops (both outgoing imports and incoming importers
-by default), and packs the target file first followed by its closest neighbors.
+repository import graph and cross-file AST symbol call graph up to --depth hops (both
+outgoing imports/calls and incoming importers/callers by default), and packs the target
+file first followed by its closest neighbors.
 
 Graph Neighborhood:
-  -d, --depth N            Hops in the import graph (default: 1; 0 = target file only)
-      --imports-only       Follow only outgoing imports (dependencies of <file>)
-      --importers-only     Follow only incoming importers (files depending on <file>)
+  -d, --depth N            Hops in the import/call graph (default: 1; 0 = target file only)
+  -s, --symbol NAME        Focus the cross-file call graph around a specific function/method
+      --imports-only       Follow only outgoing imports/callees (dependencies of <file>)
+      --importers-only     Follow only incoming importers/callers (files depending on <file>)
+      --calls-only         Follow only outgoing cross-file function calls
+      --callers-only       Follow only incoming cross-file function callers
+      --no-calls           Disable cross-file AST call graph edges (module imports only)
       --no-imports         Same as --importers-only
       --no-importers       Same as --imports-only
       --no-tests           Exclude test/spec files from the neighborhood
@@ -51,6 +56,7 @@ Output:
 
 Examples:
   ctxman focus src/auth/login.ts
+  ctxman focus src/auth/login.ts:authenticate --depth 2
   ctxman focus src/auth/login.ts --depth 2 --budget 25k --style markdown
   ctxman focus lib/pack/index.js --imports-only --compress --copy
   ctxman focus src/billing.js --no-tests -o focus-billing.xml
@@ -78,6 +84,8 @@ function parseDepth(text) {
 const VALUE_OPTIONS = {
   '--depth': 'depth',
   '-d': 'depth',
+  '--symbol': 'symbol',
+  '-s': 'symbol',
   '--budget': 'budget',
   '--max-tokens': 'maxTokens',
   '--style': 'style',
@@ -91,6 +99,10 @@ const VALUE_OPTIONS = {
 const FLAG_OPTIONS = {
   '--imports-only': ['importers', false],
   '--importers-only': ['imports', false],
+  '--calls-only': ['direction', 'calls'],
+  '--callers-only': ['direction', 'callers'],
+  '--calls': ['callGraph', true],
+  '--no-calls': ['callGraph', false],
   '--no-imports': ['imports', false],
   '--no-importers': ['importers', false],
   '--no-tests': ['includeTests', false],
@@ -113,6 +125,7 @@ export function parseFocusArgs(argv) {
     depth: 1,
     imports: true,
     importers: true,
+    callGraph: true,
     includeTests: true,
     tree: true,
     redact: true,
@@ -155,7 +168,7 @@ export function parseFocusArgs(argv) {
   }
 
   options.depth = parseDepth(options.depth);
-  if (!options.imports && !options.importers && options.depth > 0) {
+  if (!options.imports && !options.importers && !options.direction && options.depth > 0) {
     throw new Error(
       'Cannot disable both --imports and --importers (use --depth 0 for target only)'
     );
@@ -181,8 +194,9 @@ function display(file) {
 function printSummary(result, extras) {
   const { focus } = result;
   const packedNeighbors = Math.max(0, result.files.length - 1);
+  const targetLabel = focus.symbol ? `${focus.target}:${focus.symbol}` : focus.target;
   const lines = [
-    `ctxman focus: ${focus.target} + ${formatNumber(packedNeighbors)}/${formatNumber(focus.neighbors.length)} neighbor(s) ` +
+    `ctxman focus: ${targetLabel} + ${formatNumber(packedNeighbors)}/${formatNumber(focus.neighbors.length)} neighbor(s) ` +
       `(depth ${focus.depth}, ${focus.direction}), ${formatNumber(result.totalTokens)} tokens (${result.style}, ${result.encoding})`,
   ];
   if (result.budget) {
@@ -230,8 +244,11 @@ async function main() {
 
     const options = {
       depth: args.depth,
+      symbol: args.symbol,
+      direction: args.direction,
       imports: args.imports,
       importers: args.importers,
+      callGraph: args.callGraph,
       includeTests: args.includeTests,
       cwd: explicitRoot ? root : process.cwd(),
       style: args.style,

@@ -222,10 +222,32 @@ describe('renderRepoMap', () => {
     expect(() => render({ history: -2 })).toThrow('history');
   });
 
+  it('renders cross-file AST symbol call targets and call graph edges when callGraph is enabled', () => {
+    const mapWithCalls = render({ callGraph: true, tokens: 4096 });
+    expect(mapWithCalls.output).toContain('-> lib/log.js:info');
+
+    const mdWithCalls = render({ callGraph: true, style: 'markdown', tokens: 4096 });
+    expect(mdWithCalls.output).toContain('-> lib/log.js:info');
+
+    const jsonWithCalls = JSON.parse(
+      render({ callGraph: true, style: 'json', tokens: 4096 }).output
+    );
+    expect(Array.isArray(jsonWithCalls.callEdges)).toBe(true);
+    expect(jsonWithCalls.callEdges.length).toBeGreaterThan(0);
+
+    const graphText = render({ graph: true, callGraph: true }).output;
+    expect(graphText).toContain('src/server.js:start -> lib/config.js:loadConfig');
+    expect(graphText).toContain('-> lib/log.js:info');
+
+    const graphDot = render({ style: 'dot', callGraph: true }).output;
+    expect(graphDot).toContain('style=dashed');
+  });
+
   it('is exported from the package entry point', () => {
     expect(API.renderRepoMap).toBe(renderRepoMap);
     expect(typeof API.buildRepoGraph).toBe('function');
     expect(typeof API.rankFiles).toBe('function');
+    expect(typeof API.buildCallGraph).toBe('function');
   });
 });
 

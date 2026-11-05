@@ -380,7 +380,7 @@ describe('repository graph', () => {
       expect(raw.nodes[0].methods[1].signature).toContain(token);
     });
 
-    it('counts mentions of a file’s function names in other files', () => {
+    it('counts mentions of a file\u2019s function names in other files', () => {
       const graph = graphOf({
         'lib/format.js': 'export function formatPrice(x) {\n  return x;\n}\n',
         'lib/unused.js': 'export function neverCalled() {\n  return 1;\n}\n',
@@ -398,6 +398,36 @@ describe('repository graph', () => {
 
       expect(() => buildRepoGraph(path.join(root, 'file.js'))).toThrow('Not a directory');
       expect(() => buildRepoGraph(root, { history: -1 })).toThrow('history');
+    });
+
+    it('builds cross-file AST symbol call graph edges across direct imports, barrel re-exports, and top-level calls while ignoring comments/strings', () => {
+      const graph = graphOf({
+        'src/core/store.js': 'export function getItem(id) {\n  return id;\n}\n',
+        'src/core/index.js': "export { getItem } from './store.js';\n",
+        'src/util/logger.js': 'export function logInfo(msg) {\n  return msg;\n}\n',
+        'src/api/handler.js': [
+          "import { getItem } from '../core/index.js';",
+          "import { logInfo } from '../util/logger.js';",
+          'export function handleRequest(id) {',
+          '  // getItem() in a comment should be ignored',
+          "  const label = 'notACall(123)';",
+          '  const msg = `${logInfo(label)}`;',
+          '  return getItem(id) + msg;',
+          '}',
+        ].join('\n'),
+        'scripts/boot.js':
+          "import { handleRequest } from '../src/api/handler.js';\nhandleRequest(42);\n",
+      });
+
+      expect(graph.stats.callEdges).toBe(3);
+      expect(graph.callEdges.map((e) => `${e.from}:${e.caller} -> ${e.to}:${e.callee}`)).toEqual([
+        'scripts/boot.js:<module> -> src/api/handler.js:handleRequest',
+        'src/api/handler.js:handleRequest -> src/core/store.js:getItem',
+        'src/api/handler.js:handleRequest -> src/util/logger.js:logInfo',
+      ]);
+
+      const handlerNode = graph.nodes.find((n) => n.path === 'src/api/handler.js');
+      expect(handlerNode.methods[0].calls).toEqual(['getItem', 'logInfo']);
     });
   });
 });
