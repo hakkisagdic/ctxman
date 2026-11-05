@@ -1011,6 +1011,15 @@ export interface RepoMapResult {
 export function buildRepoGraph(root: string, options?: RepoGraphOptions): RepoGraph;
 
 /**
+ * Build cross-file AST symbol call edges across mapped nodes and import edges
+ */
+export function buildCallGraph(
+  nodes: RepoGraphNode[],
+  edges: RepoGraphEdge[],
+  contentsByPath?: Map<string, string>
+): RepoGraphCallEdge[];
+
+/**
  * Rank the files of a graph, best first: PageRank blended with git change frequency and
  * symbol references
  */
