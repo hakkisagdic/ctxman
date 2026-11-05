@@ -92,11 +92,13 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
     expect(trSidebar).toContain('"/tr/knowledge-graph"');
   });
 
-  it('verifies CHANGELOG.md, website changelog, features, and api-reference reflect v3.2.0 and v3.2.1 in EN and TR', () => {
+  it('verifies CHANGELOG.md, website changelog, features, and api-reference reflect v3.2.0, v3.2.1, and v3.2.2 in EN and TR', () => {
     for (const rel of ['CHANGELOG.md', 'website/changelog.md', 'website/tr/changelog.md']) {
       const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+      expect(text).toContain('[3.2.2]');
       expect(text).toContain('[3.2.1]');
       expect(text).toContain('[3.2.0]');
+      expect(text).toContain('buildCallGraph');
       expect(text).toContain('SqliteVectorStore');
       expect(text).toContain('ctxman who');
       expect(text).toContain('query_knowledge_graph');
@@ -109,6 +111,7 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
       expect(text).toContain('task_context');
       expect(text).toContain('diagnose_failure');
       expect(text).toContain('query_knowledge_graph');
+      expect(text).toContain('buildCallGraph');
       expect(text).toContain('SqliteVectorStore');
     }
   });

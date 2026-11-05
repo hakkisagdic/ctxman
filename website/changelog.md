@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) on GitHub.
 
+## [3.2.2] - 2026-11-05
+
+### Added
+
+- **Cross-File AST Symbol Call Graph (`buildCallGraph`, `map`, `focus`, `task`, `diagnose`)**:
+  - Added `lib/map/call-graph.js` (`buildCallGraph`, `extractFileCallSites`, `extractCallsFromSource`, `stripCommentsAndStrings`) to extract comment/string-stripped symbol call sites per method and resolve cross-file `caller -> callee` edges across direct imports, 1-hop barrel re-exports (`index.js` / `index.ts`), and unique repository-wide symbols
+  - `ctxman map`: added `-c, --call-graph` and `--focus <file:symbol>` support, annotating mapped methods with `-> path:callee`, rendering `file:caller -> file:callee` in `--graph --call-graph` and dashed call edges in `--style dot --call-graph`, and personalizing PageRank toward direct symbol call neighbors (weight `0.85`)
+  - `ctxman focus`: added `<file>:<symbol>`, `-s, --symbol`, `--calls-only`, `--callers-only`, and `--calls` / `--no-calls` (plus MCP `focus_context` `symbol` and `callGraph` parameters), traversing intra-file helper closures and cross-file symbol call edges while prioritizing direct symbol call neighbors under token budgets
+  - `ctxman task` & `ctxman diagnose`: prioritized 1-hop and 2-hop cross-file AST symbol call edges (including intra-file helper closures and barrel re-exports) in `buildTaskContext` and `diagnoseFailure`, added `--calls` / `--no-calls` CLI flags, and annotated `## Related 1-Hop Neighborhood` in diagnosis reports with `caller -> callee` relationships
+
+### Fixed
+
+- Added `buildCallGraph` TypeScript declaration to `index.d.ts`
+
 ## [3.2.1] - 2026-11-05
 
 ### Added
@@ -111,21 +125,23 @@ For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ct
 
 ## Version History
 
-| Version | Date       | Highlights                                                                                                                 |
-| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------- |
-| 3.2.1   | 2026-11-05 | `watch` incremental RAG & knowledge graph sync, 19-tool MCP (`query_knowledge_graph`), ADR Catalog & Knowledge Graph pages |
-| 3.2.0   | 2026-10-30 | `SqliteVectorStore`, `ctxman task`, `ctxman diagnose`, `ctxman who`, `ctxman focus`, 18-tool MCP                           |
-| 3.1.1   | 2026-10-15 | MCP `check_policy`, `audit_log`, `ask_codebase`, RAG policy enforcement                                                    |
-| 3.1.0   | 2026-10-14 | `map`, `pack`, `pr`, `why`, `search`, `count`, `policy`, `audit`, `mcp install`, 44+ LLM profiles                          |
-| 3.0.0   | 2025-11-05 | Plugin architecture, Git integration, REST API, Watch mode                                                                 |
-| 2.3.7   | 2025-11-05 | LLM auto-detection, token budgeting                                                                                        |
-| 2.3.0   | 2025-11-02 | TOON format, smart GitIngest chunking, Ink UI                                                                              |
-| 2.0.0   | 2025-10-13 | Modular architecture refactoring, 14+ language support                                                                     |
+| Version | Date       | Highlights                                                                                                                   |
+| ------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| 3.2.2   | 2026-11-05 | Cross-file AST symbol call graph (`buildCallGraph`, `map --call-graph`, `focus file:symbol`, `task` & `diagnose` call edges) |
+| 3.2.1   | 2026-11-05 | `watch` incremental RAG & knowledge graph sync, 19-tool MCP (`query_knowledge_graph`), ADR Catalog & Knowledge Graph pages   |
+| 3.2.0   | 2026-10-30 | `SqliteVectorStore`, `ctxman task`, `ctxman diagnose`, `ctxman who`, `ctxman focus`, 18-tool MCP                             |
+| 3.1.1   | 2026-10-15 | MCP `check_policy`, `audit_log`, `ask_codebase`, RAG policy enforcement                                                      |
+| 3.1.0   | 2026-10-14 | `map`, `pack`, `pr`, `why`, `search`, `count`, `policy`, `audit`, `mcp install`, 44+ LLM profiles                            |
+| 3.0.0   | 2025-11-05 | Plugin architecture, Git integration, REST API, Watch mode                                                                   |
+| 2.3.7   | 2025-11-05 | LLM auto-detection, token budgeting                                                                                          |
+| 2.3.0   | 2025-11-02 | TOON format, smart GitIngest chunking, Ink UI                                                                                |
+| 2.0.0   | 2025-10-13 | Modular architecture refactoring, 14+ language support                                                                       |
 
 ## Roadmap
 
-### Delivered in v3.1 – v3.2.1
+### Delivered in v3.1 – v3.2.2
 
+- **Cross-File AST Symbol Call Graph**: Function-to-function call site extraction and cross-file resolution across `ctxman map --call-graph`, `ctxman focus <file>:<symbol>`, `ctxman task`, and `ctxman diagnose`
 - **19-Tool MCP Server & Client Installer**: Native integration for Claude Desktop, Claude Code, Cursor, VS Code, and Windsurf (`ctxman mcp`), including `query_knowledge_graph`
 - **Offline SQLite RAG, Hybrid Search & Live Watch Graph Sync**: Zero-native-binary `node:sqlite` vector & knowledge-graph index + Reciprocal Rank Fusion (`ctxman search --hybrid`, `ctxman ask`, `ctxman watch`)
 - **Code Archaeology & Expert Finder**: `ctxman why` (with GitHub/GitLab discussions and `@plansmithai/analyzer` citations) and `ctxman who`
@@ -135,7 +151,6 @@ For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ct
 ### Next Up
 
 - **Cross-Repo Live Watch Daemon**: Multi-repository file watcher synchronizing `<alias>/<path>` graph edges across sibling repositories
-- **Fine-Grained AST Symbol Call Graph**: Cross-file function-to-function call edges alongside module import edges in `ctxman map` and `ctxman focus`
 
 ### Contributing
 

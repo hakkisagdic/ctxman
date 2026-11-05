@@ -7,6 +7,20 @@ ve bu proje [Semantic Versioning](https://semver.org/spec/v2.0.0.html) takip ede
 
 Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) dosyasına bakın.
 
+## [3.2.2] - 2026-11-05
+
+### Eklendi
+
+- **Dosyalar Arası AST Sembol Çağrı Grafiği (`buildCallGraph`, `map`, `focus`, `task`, `diagnose`)**:
+  - Yorum ve dizgilerden arındırılmış fonksiyon çağrı noktalarını çıkaran ve doğrudan import'lar, 1-hop barrel re-export'lar (`index.js` / `index.ts`) ve depo genelinde benzersiz semboller üzerinden dosyalar arası `caller -> callee` kenarlarını çözümleyen `lib/map/call-graph.js` (`buildCallGraph`, `extractFileCallSites`, `extractCallsFromSource`, `stripCommentsAndStrings`) eklendi
+  - `ctxman map`: `-c, --call-graph` ve `--focus <file:symbol>` desteği, fonksiyon satırlarında `-> path:callee` açıklamaları, `--graph --call-graph` altında `file:caller -> file:callee` çıktısı, `--style dot --call-graph` içinde kesikli çağrı kenarları ve doğrudan sembol çağrı komşularına (`0.85` ağırlık) PageRank kişiselleştirmesi eklendi
+  - `ctxman focus`: `<file>:<symbol>`, `-s, --symbol`, `--calls-only`, `--callers-only` ve `--calls` / `--no-calls` (ve MCP `focus_context` `symbol` ve `callGraph` parametreleri) ile dosya içi yardımcı fonksiyon kapanışı ve dosyalar arası sembol çağrı gezintisi eklendi
+  - `ctxman task` ve `ctxman diagnose`: `buildTaskContext` ve `diagnoseFailure` içinde 1-hop ve 2-hop dosyalar arası AST sembol çağrı kenarlarına öncelik verildi, `--calls` / `--no-calls` CLI bayrakları ve teşhis raporlarında `## Related 1-Hop Neighborhood` altında `caller -> callee` açıklamaları eklendi
+
+### Düzeltildi
+
+- `index.d.ts` dosyasına `buildCallGraph` TypeScript bildirimi eklendi
+
 ## [3.2.1] - 2026-11-05
 
 ### Eklendi
@@ -113,6 +127,7 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
 
 | Sürüm | Tarih      | Öne Çıkanlar                                                                                                                    |
 | ----- | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 3.2.2 | 2026-11-05 | Dosyalar arası AST sembol çağrı grafiği (`buildCallGraph`, `map --call-graph`, `focus file:symbol`, `task` ve `diagnose`)       |
 | 3.2.1 | 2026-11-05 | `watch` artımlı RAG ve bilgi grafiği senkronu, 19 araçlı MCP (`query_knowledge_graph`), ADR Kataloğu ve Bilgi Grafiği sayfaları |
 | 3.2.0 | 2026-10-30 | `SqliteVectorStore`, `ctxman task`, `ctxman diagnose`, `ctxman who`, `ctxman focus`, 18 araçlı MCP                              |
 | 3.1.1 | 2026-10-15 | MCP `check_policy`, `audit_log`, `ask_codebase`, RAG politika doğrulaması                                                       |
@@ -124,8 +139,9 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
 
 ## Yol Haritası
 
-### v3.1 – v3.2.1 ile Tamamlananlar
+### v3.1 – v3.2.2 ile Tamamlananlar
 
+- **Dosyalar Arası AST Sembol Çağrı Grafiği**: `ctxman map --call-graph`, `ctxman focus <file>:<symbol>`, `ctxman task` ve `ctxman diagnose` genelinde fonksiyonlar arası çağrı kenarları ve barrel re-export çözümlemesi
 - **19 Araçlı MCP Sunucusu ve İstemci Kurucusu**: Claude Desktop, Claude Code, Cursor, VS Code ve Windsurf için yerleşik entegrasyon (`ctxman mcp`) ve `query_knowledge_graph` aracı
 - **Çevrimdışı SQLite RAG, Hibrit Arama ve Canlı İzleme Grafik Senkronizasyonu**: Sıfır native bağımlılıklı `node:sqlite` vektör ve bilgi grafiği indeksi + Reciprocal Rank Fusion (`ctxman search --hybrid`, `ctxman ask`, `ctxman watch`)
 - **Kod Arkeolojisi ve Uzman Bulucu**: `ctxman why` (GitHub/GitLab tartışmaları ve `@plansmithai/analyzer` kurumsal hafıza atıflarıyla) ve `ctxman who`
@@ -135,7 +151,6 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
 ### Sıradaki Geliştirmeler
 
 - **Çapraz Depo Canlı İzleme Servisi**: Kardeş depolar arasında `<alias>/<path>` grafik kenarlarını eşzamanlı güncelleyen çoklu depo izleme modu
-- **Fonksiyon Düzeyinde AST Çağrı Grafiği**: `ctxman map` ve `ctxman focus` içinde modül import kenarlarının yanı sıra dosyalar arası fonksiyon çağrı kenarları
 
 ### Katkıda Bulunma
 
