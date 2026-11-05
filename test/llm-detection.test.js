@@ -1,7 +1,36 @@
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { LLMDetector } from '../lib/utils/llm-detector.js';
 
+const LLM_ENV_KEYS = [
+  'CTXMAN_LLM',
+  'ANTHROPIC_API_KEY',
+  'OPENAI_API_KEY',
+  'GOOGLE_API_KEY',
+  'GEMINI_API_KEY',
+  'DEEPSEEK_API_KEY',
+];
+
 describe('LLM Detection (v2.3.7)', () => {
+  let savedEnv;
+
+  beforeEach(() => {
+    savedEnv = {};
+    for (const key of LLM_ENV_KEYS) {
+      savedEnv[key] = process.env[key];
+      delete process.env[key];
+    }
+  });
+
+  afterEach(() => {
+    for (const key of LLM_ENV_KEYS) {
+      if (savedEnv[key] === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = savedEnv[key];
+      }
+    }
+  });
+
   describe('Profile Loading', () => {
     test('Should load LLM profiles from JSON', () => {
       const profiles = LLMDetector.getAllProfiles();
@@ -55,25 +84,8 @@ describe('LLM Detection (v2.3.7)', () => {
 
   describe('Environment Detection', () => {
     test('Should detect "unknown" when no env keys present', () => {
-      // Clean environment
-      const oldAnthropicKey = process.env.ANTHROPIC_API_KEY;
-      const oldOpenAIKey = process.env.OPENAI_API_KEY;
-      const oldGoogleKey = process.env.GOOGLE_API_KEY;
-      const oldLLM = process.env.CTXMAN_LLM;
-
-      delete process.env.ANTHROPIC_API_KEY;
-      delete process.env.OPENAI_API_KEY;
-      delete process.env.GOOGLE_API_KEY;
-      delete process.env.CTXMAN_LLM;
-
       const detected = LLMDetector.detect();
       expect(detected).toBe('unknown');
-
-      // Restore
-      if (oldAnthropicKey) process.env.ANTHROPIC_API_KEY = oldAnthropicKey;
-      if (oldOpenAIKey) process.env.OPENAI_API_KEY = oldOpenAIKey;
-      if (oldGoogleKey) process.env.GOOGLE_API_KEY = oldGoogleKey;
-      if (oldLLM) process.env.CTXMAN_LLM = oldLLM;
     });
   });
 

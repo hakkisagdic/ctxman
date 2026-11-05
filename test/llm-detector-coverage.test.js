@@ -20,8 +20,14 @@ describe('LLM Detector Coverage', () => {
   let originalEnv;
 
   beforeEach(() => {
-    // Save original environment
+    // Save original environment and clear all LLM detection variables so host shell env never leaks
     originalEnv = { ...process.env };
+    delete process.env.CTXMAN_LLM;
+    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.GOOGLE_API_KEY;
+    delete process.env.GEMINI_API_KEY;
+    delete process.env.DEEPSEEK_API_KEY;
     vi.clearAllMocks();
   });
 
