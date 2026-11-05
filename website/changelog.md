@@ -7,32 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) on GitHub.
 
+## [3.2.1] - 2026-11-05
+
+### Added
+
+- **Incremental Watch RAG & Knowledge Graph Sync (`ctxman watch`)**:
+  - `IncrementalAnalyzer` synchronizes modified and deleted files into `SqliteVectorStore` in real time during watch mode: re-chunks and upserts vectors for changed files, updates `graph_nodes` and `graph_edges` import relationships, and prunes removed files while enforcing `.ctxman/policy.json` deny rules and secret redaction
+- **Knowledge Graph MCP Tool (`query_knowledge_graph` — 19-Tool MCP Server)**:
+  - Queries the live in-memory `IncrementalAnalyzer` graph cache when active and automatically falls back to persisted `SqliteVectorStore` `graph_nodes` and `graph_edges` tables in `.ctxman/rag-index/index.sqlite` for directional `N`-hop neighborhood traversal (`direction: "both" | "imports" | "importers"`, `depth: 1..5`), symbol filtering, and top-degree hub ranking
+- **MCP `explain_history` Institutional Memory Parity**:
+  - Added `analyzer` and `analyzerDb` options to the `explain_history` MCP tool with `--root` sandbox enforcement
+- **Architecture Decision Records & Cross-Repo Knowledge Graph Documentation**:
+  - Published [ADR Catalog](/adr) (`ADR-001`, `ADR-002`, `ADR-003`) and [Knowledge Graph](/knowledge-graph) (3,881 nodes, 3,566 vectors, 7 cross-repo edges) with `query_knowledge_graph` Mermaid architecture flowcharts and API reference examples
+
+### Fixed
+
+- Isolated LLM auto-detection environment variables in tests and stabilized broken-pipe timeout handling
+
 ## [3.2.0] - 2026-10-30
 
 ### Added
 
 - **Zero-Native-Binary `SqliteVectorStore` & `AutoEmbeddingProvider`**:
-  - `SqliteVectorStore` using Node.js 22/24 built-in `node:sqlite` (`DatabaseSync`), storing chunks, metadata, float32 vector embeddings, and knowledge graph nodes/edges in `<storePath>/index.sqlite` with SHA-256 incremental upsert and exact cosine similarity search
+  - `SqliteVectorStore` using Node.js 22/24 built-in `node:sqlite` (`DatabaseSync`), storing chunks, metadata, and float32 vector embeddings in `<storePath>/index.sqlite` with SHA-256 incremental upsert and exact cosine similarity search
   - `LocalHashEmbeddingProvider`: deterministic 256-dimensional L2-normalized feature-hashing over identifier tokens and character trigrams (zero dependencies, 100% offline)
   - `AutoEmbeddingProvider`: uses `@xenova/transformers` when installed and falls back automatically to `LocalHashEmbeddingProvider`
-- **Incremental Watch RAG & Knowledge Graph Sync (`ctxman watch`)**:
-  - `IncrementalAnalyzer` synchronizes modified and deleted files into `SqliteVectorStore` in real time during watch mode: re-chunks and upserts vectors for changed files, updates `graph_nodes` and `graph_edges` import relationships, and prunes removed files while enforcing `.ctxman/policy.json` deny rules and secret redaction
-- **Knowledge Graph MCP Tool (`query_knowledge_graph` — 19-Tool MCP Server)**:
-  - Queries the live in-memory `IncrementalAnalyzer` graph cache when active and automatically falls back to persisted `SqliteVectorStore` `graph_nodes` and `graph_edges` tables in `.ctxman/rag-index/index.sqlite` for directional `N`-hop neighborhood traversal (`direction: "both" | "imports" | "importers"`, `depth: 1..5`), symbol filtering, and top-degree hub ranking
 - **Task-Driven Auto Context (`ctxman task` + `buildTaskContext` + MCP `task_context`)**:
   - Discovers seed files and symbols via `hybridSearch`, gathers 1-hop full code and 2-hop compressed signatures, and renders a ranked `renderRepoMap` architectural overview within `--budget` (default `32000`)
 - **Failure / Stack-Trace Root-Cause Bundle (`ctxman diagnose` + `diagnoseFailure` + MCP `diagnose_failure`)**:
   - Parses stack trace frames across Node/TS/JS, Python, Go, Rust, Java, C#, and Vitest, extracting enclosing methods, 1-hop graph neighbors, and recent git history (`explainHistory`) within `--budget` (default `24000`)
 - **Expert Finder (`ctxman who` + `findExperts` + MCP `find_experts`)**:
   - Ranks code and domain experts across files, symbols (`file:symbol`), line ranges (`file#L10-L40`), directories, and natural-language topics by fusing surviving `git blame -w` line share (`0.45`), recency-decayed commits (`0.35`, 90-day half-life), total commits (`0.20`), and `CODEOWNERS` stewardship (`+0.15`)
-- **Institutional Memory Bridge (`ctxman why --analyzer-db` / `--analyzer` + MCP `explain_history`)**:
-  - Queries `@plansmithai/analyzer`'s SQLite `documents` table (`.plansmith/analyzer.sqlite`) for commits, PRs, issues, Slack, Linear, and Jira citations with automatic secret redaction and MCP `--root` sandbox enforcement
+- **Institutional Memory Bridge (`ctxman why --analyzer-db` / `--analyzer`)**:
+  - Queries `@plansmithai/analyzer`'s SQLite `documents` table (`.plansmith/analyzer.sqlite`) for commits, PRs, issues, Slack, Linear, and Jira citations with automatic secret redaction
 - **Focused Import Neighborhood (`ctxman focus` + `focusContext` + MCP `focus_context`)**:
   - Directional `N`-hop import/importer traversal (`--direction both|imports|importers`) avoiding shared-hub explosion
 - **Multi-Repository Workspace (`--repo <dir>`) & Hybrid Search (`ctxman search --hybrid`)**:
   - Cross-repo `map`, `search`, and `pack` under `<alias>/<path>` namespaces and Reciprocal Rank Fusion (`BM25 + semantic`)
-- **Architecture Decision Records & Cross-Repo Knowledge Graph**:
-  - Published [ADR Catalog](/adr) (`ADR-001`, `ADR-002`, `ADR-003`) and [Knowledge Graph](/knowledge-graph) (3,881 nodes, 3,566 vectors, 7 cross-repo edges) with `query_knowledge_graph` Mermaid architecture flowcharts
 
 ## [3.1.1] - 2026-10-15
 
@@ -100,19 +111,20 @@ For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ct
 
 ## Version History
 
-| Version | Date       | Highlights                                                                                                                                     |
-| ------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| 3.2.0   | 2026-10-30 | `SqliteVectorStore`, `ctxman task`, `ctxman diagnose`, `ctxman who`, `ctxman focus`, `watch` graph sync, 19-tool MCP (`query_knowledge_graph`) |
-| 3.1.1   | 2026-10-15 | MCP `check_policy`, `audit_log`, `ask_codebase`, RAG policy enforcement                                                                        |
-| 3.1.0   | 2026-10-14 | `map`, `pack`, `pr`, `why`, `search`, `count`, `policy`, `audit`, `mcp install`, 44+ LLM profiles                                              |
-| 3.0.0   | 2025-11-05 | Plugin architecture, Git integration, REST API, Watch mode                                                                                     |
-| 2.3.7   | 2025-11-05 | LLM auto-detection, token budgeting                                                                                                            |
-| 2.3.0   | 2025-11-02 | TOON format, smart GitIngest chunking, Ink UI                                                                                                  |
-| 2.0.0   | 2025-10-13 | Modular architecture refactoring, 14+ language support                                                                                         |
+| Version | Date       | Highlights                                                                                                                 |
+| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------- |
+| 3.2.1   | 2026-11-05 | `watch` incremental RAG & knowledge graph sync, 19-tool MCP (`query_knowledge_graph`), ADR Catalog & Knowledge Graph pages |
+| 3.2.0   | 2026-10-30 | `SqliteVectorStore`, `ctxman task`, `ctxman diagnose`, `ctxman who`, `ctxman focus`, 18-tool MCP                           |
+| 3.1.1   | 2026-10-15 | MCP `check_policy`, `audit_log`, `ask_codebase`, RAG policy enforcement                                                    |
+| 3.1.0   | 2026-10-14 | `map`, `pack`, `pr`, `why`, `search`, `count`, `policy`, `audit`, `mcp install`, 44+ LLM profiles                          |
+| 3.0.0   | 2025-11-05 | Plugin architecture, Git integration, REST API, Watch mode                                                                 |
+| 2.3.7   | 2025-11-05 | LLM auto-detection, token budgeting                                                                                        |
+| 2.3.0   | 2025-11-02 | TOON format, smart GitIngest chunking, Ink UI                                                                              |
+| 2.0.0   | 2025-10-13 | Modular architecture refactoring, 14+ language support                                                                     |
 
 ## Roadmap
 
-### Delivered in v3.1 – v3.2
+### Delivered in v3.1 – v3.2.1
 
 - **19-Tool MCP Server & Client Installer**: Native integration for Claude Desktop, Claude Code, Cursor, VS Code, and Windsurf (`ctxman mcp`), including `query_knowledge_graph`
 - **Offline SQLite RAG, Hybrid Search & Live Watch Graph Sync**: Zero-native-binary `node:sqlite` vector & knowledge-graph index + Reciprocal Rank Fusion (`ctxman search --hybrid`, `ctxman ask`, `ctxman watch`)
