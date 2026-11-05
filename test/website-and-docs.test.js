@@ -72,6 +72,13 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
       }
     }
 
+    for (const kgPage of ['website/knowledge-graph.md', 'website/tr/knowledge-graph.md']) {
+      const kgContent = fs.readFileSync(path.join(ROOT, kgPage), 'utf8');
+      expect(kgContent).toContain('query_knowledge_graph');
+      expect(kgContent).toContain('```mermaid');
+      expect(kgContent).toContain('flowchart TD');
+    }
+
     const rootNav = JSON.stringify(websiteConfig.locales.root.themeConfig.nav);
     const rootSidebar = JSON.stringify(websiteConfig.locales.root.themeConfig.sidebar);
     expect(rootNav).toContain('"/adr"');
