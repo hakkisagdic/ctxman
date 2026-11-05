@@ -15,7 +15,8 @@ function printHelp() {
 Usage: ctxman task "<goal>" [root] [options]
 
 Discovers seed files and symbols via hybrid search, traverses 1-hop full code
-and 2-hop compressed signatures around them, prepends an architectural repo map,
+and 2-hop compressed signatures around them (across module imports and the
+cross-file AST symbol call graph), prepends an architectural repo map,
 and packs everything strictly within the token budget.
 
 Options:
@@ -24,6 +25,8 @@ Options:
       --format FORMAT      Output format: markdown (default), json, xml
       --json               Shorthand for --format json
       --search-mode MODE   Search mode: hybrid (default), bm25, semantic
+      --calls              Include cross-file AST symbol call graph edges (default)
+      --no-calls           Disable AST symbol call graph edges (module imports only)
       --no-redact          Do not mask secrets
   -o, --output FILE        Write output to FILE instead of stdout
       --copy               Copy document to clipboard
@@ -55,6 +58,7 @@ async function main() {
   let model = null;
   let format = 'markdown';
   let searchMode = 'hybrid';
+  let callGraph = true;
   let redact = true;
   let outputFile = null;
   let copy = false;
@@ -85,6 +89,10 @@ async function main() {
         searchMode = argv[++i];
       } else if (arg.startsWith('--search-mode=')) {
         searchMode = arg.slice('--search-mode='.length);
+      } else if (arg === '--calls' || arg === '--call-graph') {
+        callGraph = true;
+      } else if (arg === '--no-calls' || arg === '--no-call-graph') {
+        callGraph = false;
       } else if (arg === '--no-redact') {
         redact = false;
       } else if (arg === '-o' || arg === '--output') {
@@ -129,6 +137,7 @@ async function main() {
       model,
       format,
       searchMode,
+      callGraph,
       redact,
       output: outputFile,
     });

@@ -151,6 +151,64 @@ main.process(0x0?)
       expect(result.text).not.toContain(secret);
       expect(result.redactions.total).toBeGreaterThan(0);
     });
+
+    it('discovers 1-hop cross-file call graph neighbors via barrel re-exports and annotates call edges', async () => {
+      fs.mkdirSync(path.join(tmpDir, 'src', 'gateway'), { recursive: true });
+      fs.writeFileSync(
+        path.join(tmpDir, 'src', 'gateway', 'index.js'),
+        "export { chargeCard } from './stripe.js';\n"
+      );
+      fs.writeFileSync(
+        path.join(tmpDir, 'src', 'gateway', 'stripe.js'),
+        'export function chargeCard(card, amount) {\n  return { card, amount };\n}\n'
+      );
+      fs.writeFileSync(
+        path.join(tmpDir, 'src', 'service', 'payment.js'),
+        [
+          "import { chargeCard } from '../gateway/index.js';",
+          'export class PaymentService {',
+          '  processTransaction(user, amount) {',
+          '    if (!user.card) {',
+          "      throw new Error('Missing payment method for user');",
+          '    }',
+          '    return chargeCard(user.card, amount);',
+          '  }',
+          '}',
+        ].join('\n')
+      );
+
+      const trace = `Error: Missing payment method for user
+    at PaymentService.processTransaction (${path.join(tmpDir, 'src', 'service', 'payment.js')}:5:13)`;
+
+      const withCalls = await diagnoseFailure(tmpDir, trace, {
+        format: 'markdown',
+      });
+
+      // `src/gateway/stripe.js` is discovered directly via `graph.callEdges` even though `payment.js` imports `src/gateway/index.js`
+      expect(withCalls.neighbors[0]).toBe('src/gateway/stripe.js');
+      expect(withCalls.neighbors).toContain('src/service/checkout.js');
+      expect(
+        withCalls.callEdges.some(
+          (e) =>
+            e.from === 'src/service/payment.js' &&
+            e.to === 'src/gateway/stripe.js' &&
+            e.callee === 'chargeCard'
+        )
+      ).toBe(true);
+      expect(withCalls.text).toContain(
+        'src/service/payment.js:processTransaction -> src/gateway/stripe.js:chargeCard'
+      );
+
+      // When callGraph is disabled, only direct module import neighbors (`src/gateway/index.js`, `src/service/checkout.js`) are returned
+      const withoutCalls = await diagnoseFailure(tmpDir, trace, {
+        callGraph: false,
+        format: 'json',
+      });
+      const parsedWithoutCalls = JSON.parse(withoutCalls.text);
+      expect(withoutCalls.neighbors).not.toContain('src/gateway/stripe.js');
+      expect(withoutCalls.neighbors).toContain('src/gateway/index.js');
+      expect(parsedWithoutCalls.callEdges).toEqual([]);
+    });
   });
 
   describe('cm-diagnose CLI', () => {
@@ -177,6 +235,7 @@ main.process(0x0?)
       expect(res.status).toBe(0);
       const json = JSON.parse(res.stdout);
       expect(json.implicatedFiles).toContain('src/service/payment.js');
+      expect(Array.isArray(json.callEdges)).toBe(true);
     });
 
     it('accepts error log from stdin with --stdin flag', () => {

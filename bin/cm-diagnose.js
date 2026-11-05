@@ -16,12 +16,15 @@ Usage: ctxman diagnose [log-file-or-text] [options]
 
 Parses stack trace frames across Node, TS, Python, Go, Rust, Java, C#, Vitest,
 resolves implicated files safely inside the repository, extracts enclosing method
-code windows, 1-hop graph neighbors, and recent git history packed within the budget.
+code windows, 1-hop graph neighbors (across module imports and the AST symbol
+call graph), and recent git history packed within the budget.
 
 Options:
       --stdin              Read failure log or stack trace from stdin
       --budget TOKENS      Token budget (e.g. 24000, 24k; default: 24000)
       --json               Output in JSON format (default: markdown)
+      --calls              Include cross-file AST symbol call graph edges (default)
+      --no-calls           Disable AST symbol call graph edges (module imports only)
       --no-redact          Do not mask secrets
   -o, --output FILE        Write output to FILE instead of stdout
       --copy               Copy document to clipboard
@@ -61,6 +64,7 @@ async function main() {
   let useStdin = false;
   let budget = 24000;
   let format = 'markdown';
+  let callGraph = true;
   let redact = true;
   let outputFile = null;
   let copy = false;
@@ -78,6 +82,10 @@ async function main() {
         budget = parseBudget(arg.slice('--budget='.length));
       } else if (arg === '--json') {
         format = 'json';
+      } else if (arg === '--calls' || arg === '--call-graph') {
+        callGraph = true;
+      } else if (arg === '--no-calls' || arg === '--no-call-graph') {
+        callGraph = false;
       } else if (arg === '--no-redact') {
         redact = false;
       } else if (arg === '-o' || arg === '--output') {
@@ -130,6 +138,7 @@ async function main() {
     const result = await diagnoseFailure(root, traceText, {
       budget,
       format,
+      callGraph,
       redact,
       output: outputFile,
     });

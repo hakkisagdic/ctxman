@@ -2121,6 +2121,7 @@ export interface TaskContextOptions {
   budget?: number | string;
   format?: 'markdown' | 'json' | 'xml';
   searchMode?: 'hybrid' | 'bm25' | 'semantic';
+  callGraph?: boolean;
   redact?: boolean;
   output?: string;
   model?: string;
@@ -2135,6 +2136,7 @@ export interface TaskContextResult {
   text: string;
   seeds: Array<{ file: string; score: number; kind?: string; name?: string }>;
   files: Array<{ path: string; hop: number; compressed: boolean; tokens: number; lines: number }>;
+  callEdges?: RepoGraphCallEdge[];
   omitted: Array<{ path: string; reason: string }>;
   redactions: { total: number };
 }
@@ -2152,6 +2154,7 @@ export function buildTaskContext(
 export interface DiagnoseFailureOptions {
   budget?: number | string;
   format?: 'markdown' | 'json';
+  callGraph?: boolean;
   redact?: boolean;
   windowLines?: number;
   output?: string;
@@ -2165,6 +2168,7 @@ export interface DiagnoseFailureResult {
   text: string;
   history: Array<{ file: string; text: string; tokens: number }>;
   neighbors: string[];
+  callEdges?: RepoGraphCallEdge[];
   redactions: { total: number };
 }
 

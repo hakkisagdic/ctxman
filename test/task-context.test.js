@@ -130,6 +130,74 @@ describe('buildTaskContext & cm-task CLI & MCP task_context', () => {
       const content = fs.readFileSync(outPath, 'utf-8');
       expect(content).toContain('# Task Context: login authentication');
     });
+
+    it('expands 1-hop neighbors via graph.callEdges (including barrel re-exports) and exposes callEdges', async () => {
+      // Add a barrel module `src/audit/index.js` re-exporting `recordLoginAudit` from `src/audit/tracker.js`,
+      // and call `recordLoginAudit(username)` from `login.js` via a local helper `emitAudit(username)`.
+      fs.mkdirSync(path.join(tmpDir, 'src', 'audit'), { recursive: true });
+      fs.writeFileSync(
+        path.join(tmpDir, 'src', 'audit', 'index.js'),
+        "export { recordLoginAudit } from './tracker.js';\n"
+      );
+      fs.writeFileSync(
+        path.join(tmpDir, 'src', 'audit', 'tracker.js'),
+        'export function recordLoginAudit(actor) {\n  return `audit:${actor}`;\n}\n'
+      );
+      fs.writeFileSync(
+        path.join(tmpDir, 'src', 'auth', 'login.js'),
+        [
+          "import { queryUser } from '../db/user.js';",
+          "import { recordLoginAudit } from '../audit/index.js';",
+          'function emitAudit(username) {',
+          '  return recordLoginAudit(username);',
+          '}',
+          'export function login(username, password) {',
+          '  emitAudit(username);',
+          '  const user = queryUser(username);',
+          '  return user && user.password === password;',
+          '}',
+        ].join('\n')
+      );
+
+      const withCalls = await buildTaskContext(tmpDir, 'login password', {
+        limit: 1,
+        searchMode: 'bm25',
+        format: 'json',
+      });
+      const parsedWithCalls = JSON.parse(withCalls.text);
+      expect(withCalls.seeds[0].file).toBe('src/auth/login.js');
+
+      // Because `login` -> `emitAudit` -> `recordLoginAudit` is a direct cross-file callEdge,
+      // `src/audit/tracker.js` is promoted to hop 1 (full code, not hop 2 compressed!)
+      const trackerHopWithCalls = withCalls.files.find((f) => f.path === 'src/audit/tracker.js');
+      expect(trackerHopWithCalls).toBeDefined();
+      expect(trackerHopWithCalls.hop).toBe(1);
+      expect(trackerHopWithCalls.compressed).toBe(false);
+      expect(
+        withCalls.callEdges.some(
+          (e) =>
+            e.from === 'src/auth/login.js' &&
+            e.to === 'src/audit/tracker.js' &&
+            e.callee === 'recordLoginAudit'
+        )
+      ).toBe(true);
+      expect(Array.isArray(parsedWithCalls.callEdges)).toBe(true);
+
+      // When callGraph is disabled, `src/audit/tracker.js` is only reachable in 2 module-import hops (compressed)
+      const withoutCalls = await buildTaskContext(tmpDir, 'login password', {
+        limit: 1,
+        searchMode: 'bm25',
+        callGraph: false,
+        format: 'json',
+      });
+      const trackerHopWithoutCalls = withoutCalls.files.find(
+        (f) => f.path === 'src/audit/tracker.js'
+      );
+      expect(trackerHopWithoutCalls).toBeDefined();
+      expect(trackerHopWithoutCalls.hop).toBe(2);
+      expect(trackerHopWithoutCalls.compressed).toBe(true);
+      expect(withoutCalls.callEdges).toEqual([]);
+    });
   });
 
   describe('cm-task CLI', () => {
@@ -151,6 +219,7 @@ describe('buildTaskContext & cm-task CLI & MCP task_context', () => {
       const json = JSON.parse(res.stdout);
       expect(json.query).toBe('login authentication');
       expect(json.budget).toBe(32000);
+      expect(Array.isArray(json.callEdges)).toBe(true);
     });
 
     it('exits with code 2 when goal is missing', () => {
