@@ -9,6 +9,7 @@ import {
   LocalHashEmbeddingProvider,
   askCodebase,
 } from '../index.js';
+import MCPServer from '../lib/api/mcp/server.js';
 
 describe('Watch Mode Incremental SqliteVectorStore & Knowledge Graph Synchronization', () => {
   let tmpDir;
@@ -339,6 +340,81 @@ describe('Watch Mode Incremental SqliteVectorStore & Knowledge Graph Synchroniza
       expect(watcher.shouldIgnore('custom-cache/state.json')).toBe(true);
       expect(watcher.shouldIgnore('src/scratch.tmp')).toBe(true);
       expect(watcher.shouldIgnore('src/index.js')).toBe(false);
+    });
+  });
+
+  describe('MCP query_knowledge_graph tool', () => {
+    it('bootstraps via IncrementalAnalyzer when empty, then queries cached/persisted SQLite graph with file/query filters and policy enforcement', async () => {
+      const srcDir = path.join(tmpDir, 'src');
+      fs.mkdirSync(srcDir, { recursive: true });
+
+      fs.writeFileSync(
+        path.join(srcDir, 'db.js'),
+        'export function queryDatabase(sql) {\n  return [];\n}\n'
+      );
+      fs.writeFileSync(
+        path.join(srcDir, 'service.js'),
+        "import { queryDatabase } from './db.js';\nexport function fetchUsers() {\n  return queryDatabase('SELECT * FROM users');\n}\n"
+      );
+      fs.writeFileSync(
+        path.join(srcDir, 'secret.js'),
+        'export function internalKey() { return "secret"; }\n'
+      );
+
+      fs.mkdirSync(path.join(tmpDir, '.ctxman'), { recursive: true });
+      fs.writeFileSync(
+        path.join(tmpDir, '.ctxman', 'policy.json'),
+        JSON.stringify({ version: 1, deny: ['src/secret.js'] })
+      );
+
+      const mcp = new MCPServer({ root: tmpDir });
+      const callHandler = mcp.server._requestHandlers.get('tools/call');
+
+      // 1. First call auto-bootstraps the SQLite knowledge graph and excludes denied files
+      const firstCall = await callHandler({
+        method: 'tools/call',
+        params: {
+          name: 'query_knowledge_graph',
+          arguments: { path: tmpDir },
+        },
+      });
+      expect(firstCall.isError).toBeFalsy();
+      const firstPayload = JSON.parse(firstCall.content[0].text);
+      expect(firstPayload.bootstrapped).toBe(true);
+      expect(firstPayload.stats.totalNodes).toBe(2);
+      expect(firstPayload.stats.totalEdges).toBe(1);
+      expect(firstPayload.nodes.map((n) => n.path)).toEqual(['src/db.js', 'src/service.js']);
+      expect(firstPayload.edges).toEqual([{ from: 'src/service.js', to: 'src/db.js', weight: 1 }]);
+
+      // 2. Second call uses the cached IncrementalAnalyzer & persisted SQLite graph without re-bootstrapping
+      const secondCall = await callHandler({
+        method: 'tools/call',
+        params: {
+          name: 'query_knowledge_graph',
+          arguments: { path: tmpDir, query: 'fetchUsers' },
+        },
+      });
+      const secondPayload = JSON.parse(secondCall.content[0].text);
+      expect(secondPayload.bootstrapped).toBe(false);
+      expect(secondPayload.cached).toBe(true);
+      expect(secondPayload.nodes.map((n) => n.path)).toEqual(['src/service.js']);
+      expect(secondPayload.edges).toEqual([{ from: 'src/service.js', to: 'src/db.js', weight: 1 }]);
+
+      // 3. File neighborhood filter
+      const fileCall = await callHandler({
+        method: 'tools/call',
+        params: {
+          name: 'query_knowledge_graph',
+          arguments: { path: tmpDir, file: 'src/db.js', depth: 1 },
+        },
+      });
+      const filePayload = JSON.parse(fileCall.content[0].text);
+      expect(filePayload.bootstrapped).toBe(false);
+      expect(filePayload.nodes.map((n) => n.path)).toEqual(['src/db.js', 'src/service.js']);
+
+      for (const inc of mcp.incrementalAnalyzers.values()) {
+        inc.close();
+      }
     });
   });
 });

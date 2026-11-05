@@ -165,28 +165,29 @@ claude mcp add --scope user --transport stdio ctxman -- /usr/local/bin/node /usr
 $ ctxman mcp uninstall --client claude-desktop
 ```
 
-## Tools (18)
+## Tools (19)
 
-| Tool               | Arguments                                                                                                                  | Returns                                                                                                      |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `analyze_codebase` | `path`                                                                                                                     | Statistics and token counts                                                                                  |
-| `generate_context` | `path`, `template?`, `maxTokens?`                                                                                          | LLM context                                                                                                  |
-| `git_diff`         | `path`, `branch?`                                                                                                          | `git diff <branch>`                                                                                          |
-| `search_code`      | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`                                  | Matching lines or ranked/hybrid code chunks (below)                                                          |
-| `list_methods`     | `path` (directory or file), `file?`                                                                                        | Methods per file                                                                                             |
-| `get_symbol`       | `path`, `name`, `file?`, `redact?`                                                                                         | Source of a named method, function or class                                                                  |
-| `repo_map`         | `path`, `tokens?`, `focus?`, `repos?`                                                                                      | Ranked repository map within a token budget (`ctxman map`)                                                   |
-| `pr_context`       | `path`, `base?`, `head?`, `budget?`, `style?`                                                                              | Review context for a branch (`ctxman pr`)                                                                    |
-| `count_tokens`     | `path` or `text`, `model?`, `top?`                                                                                         | Token count for a model and the fit in its window (`ctxman count`)                                           |
-| `explain_history`  | `path`, `target`, `limit?`, `budget?`, `since?`, `patches?`, `discussions?`, `maxDiscussions?`, `analyzer?`, `analyzerDb?` | Why code looks as it does: git history, references, institutional citations, owners, tests, PR threads       |
-| `pack_context`     | `path`, `include?`, `exclude?`, `files?`, `style?`, `budget?`, `repos?`                                                    | File contents in one LLM-ready document (`ctxman pack`)                                                      |
-| `focus_context`    | `path`, `file`, `depth?`, `direction?`, `style?`, `compress?`, `budget?`                                                   | Import-neighborhood slice around a file or symbol (`ctxman focus`)                                           |
-| `check_policy`     | `path`                                                                                                                     | The effective export policy, or why its files are invalid (`ctxman policy check`)                            |
-| `audit_log`        | `path`, `since?`, `limit?`                                                                                                 | Exports recorded in the policy's audit log (`ctxman audit`)                                                  |
-| `ask_codebase`     | `path`, `query`, `limit?`                                                                                                  | Files closest in meaning to a question, from a local SQLite embedding index (`ctxman ask`)                   |
-| `task_context`     | `path`, `task`, `budget?`, `format?`, `model?`                                                                             | Task-driven auto context: hybrid search seeds, 1-hop code, 2-hop signatures, repo map (`ctxman task`)        |
-| `diagnose_failure` | `path`, `trace`, `budget?`, `format?`                                                                                      | Stack-trace & failure root-cause bundle: implicated frames, methods, 1-hop & git history (`ctxman diagnose`) |
-| `find_experts`     | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                                                      | Expert Finder ("Who knows about this?"): blame share, recency-decayed commits & CODEOWNERS (`ctxman who`)    |
+| Tool                    | Arguments                                                                                                                  | Returns                                                                                                      |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `analyze_codebase`      | `path`                                                                                                                     | Statistics and token counts                                                                                  |
+| `generate_context`      | `path`, `template?`, `maxTokens?`                                                                                          | LLM context                                                                                                  |
+| `git_diff`              | `path`, `branch?`                                                                                                          | `git diff <branch>`                                                                                          |
+| `search_code`           | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`                                  | Matching lines or ranked/hybrid code chunks (below)                                                          |
+| `list_methods`          | `path` (directory or file), `file?`                                                                                        | Methods per file                                                                                             |
+| `get_symbol`            | `path`, `name`, `file?`, `redact?`                                                                                         | Source of a named method, function or class                                                                  |
+| `repo_map`              | `path`, `tokens?`, `focus?`, `repos?`                                                                                      | Ranked repository map within a token budget (`ctxman map`)                                                   |
+| `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`                                                                              | Review context for a branch (`ctxman pr`)                                                                    |
+| `count_tokens`          | `path` or `text`, `model?`, `top?`                                                                                         | Token count for a model and the fit in its window (`ctxman count`)                                           |
+| `explain_history`       | `path`, `target`, `limit?`, `budget?`, `since?`, `patches?`, `discussions?`, `maxDiscussions?`, `analyzer?`, `analyzerDb?` | Why code looks as it does: git history, references, institutional citations, owners, tests, PR threads       |
+| `pack_context`          | `path`, `include?`, `exclude?`, `files?`, `style?`, `budget?`, `repos?`                                                    | File contents in one LLM-ready document (`ctxman pack`)                                                      |
+| `focus_context`         | `path`, `file`, `depth?`, `direction?`, `style?`, `compress?`, `budget?`                                                   | Import-neighborhood slice around a file or symbol (`ctxman focus`)                                           |
+| `check_policy`          | `path`                                                                                                                     | The effective export policy, or why its files are invalid (`ctxman policy check`)                            |
+| `audit_log`             | `path`, `since?`, `limit?`                                                                                                 | Exports recorded in the policy's audit log (`ctxman audit`)                                                  |
+| `ask_codebase`          | `path`, `query`, `limit?`                                                                                                  | Files closest in meaning to a question, from a local SQLite embedding index (`ctxman ask`)                   |
+| `task_context`          | `path`, `task`, `budget?`, `format?`, `model?`                                                                             | Task-driven auto context: hybrid search seeds, 1-hop code, 2-hop signatures, repo map (`ctxman task`)        |
+| `diagnose_failure`      | `path`, `trace`, `budget?`, `format?`                                                                                      | Stack-trace & failure root-cause bundle: implicated frames, methods, 1-hop & git history (`ctxman diagnose`) |
+| `find_experts`          | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                                                      | Expert Finder ("Who knows about this?"): blame share, recency-decayed commits & CODEOWNERS (`ctxman who`)    |
+| `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`                                                                  | File nodes, method declarations, and import/dependency edges from `.ctxman/self-knowledge/index.sqlite`      |
 
 `explain_history` takes `patches?` (each commit's diff), `discussions?` (GitHub/GitLab PR, MR and
 issue threads referenced in commit history), and `analyzer?` / `analyzerDb?` (institutional memory
@@ -208,6 +209,11 @@ history (`explainHistory`) within `budget` (default 24,000 tokens); see [`ctxman
 directory, or natural-language topic query by combining `git blame -w` line ownership (`0.45`),
 exponential recency-decayed commit history (`0.35`, default 90-day half-life), total commit share
 (`0.20`), and a `+0.15` `CODEOWNERS` stewardship bonus; see [`ctxman who`](who.md).
+
+`query_knowledge_graph` queries the persistent SQLite knowledge graph (`graph_nodes` and `graph_edges`
+in `.ctxman/self-knowledge/index.sqlite`) and the cached `IncrementalAnalyzer` state, automatically
+bootstrapping the graph when empty or when `refresh: true` is passed, and honouring `.ctxman/policy.json`
+deny rules.
 
 `repo_map`, `search_code` (`ranked`, `semantic`, `hybrid`), and `pack_context` accept an optional
 `repos` array of repository directories to run across a multi-repository workspace under a single
