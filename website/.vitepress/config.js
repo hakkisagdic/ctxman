@@ -59,6 +59,7 @@ export default defineConfig({
           { text: 'Features', link: '/features' },
           { text: 'Getting Started', link: '/getting-started' },
           { text: 'API', link: '/api-reference' },
+          { text: 'Architecture & ADRs', link: '/adr' },
           { text: 'Compare', link: '/compare' },
           { text: 'Changelog', link: '/changelog' },
         ],
@@ -81,6 +82,25 @@ export default defineConfig({
                 { text: 'CLI Reference', link: '/api-reference#cli-reference' },
                 { text: 'REST API', link: '/api-reference#rest-api' },
                 { text: 'Configuration', link: '/getting-started#configuration' },
+              ],
+            },
+            {
+              text: 'Architecture & ADRs',
+              items: [
+                { text: 'ADR Catalog (Evren + why)', link: '/adr' },
+                { text: 'Cross-Repo Knowledge Graph', link: '/knowledge-graph' },
+                {
+                  text: 'ADR-001 · Expert Finder & MCP',
+                  link: '/adr#adr-001-ctxman-uzman-bulucu-ctxman-who-findexperts-ve-18-araclik-mcp-sunucu-mimarisi',
+                },
+                {
+                  text: 'ADR-002 · Hybrid Graph & Evren RAG',
+                  link: '/adr#adr-002-plansmithai-analyzer-3-depo-birlesik-hibrit-bilgi-grafigi-ve-keysmith-evren-rag-sentezleyicisi',
+                },
+                {
+                  text: 'ADR-003 · 43+2 MCP & IPC Parity',
+                  link: '/adr#adr-003-plansmith-desktop-43-2-a2a-browser-mcp-orkestrasyonu-ve-traycer-1-5-1-birebir-electron-ipc-paritesi',
+                },
               ],
             },
             {
@@ -140,6 +160,7 @@ export default defineConfig({
           { text: 'Özellikler', link: '/tr/features' },
           { text: 'Başlangıç', link: '/tr/getting-started' },
           { text: 'API', link: '/tr/api-reference' },
+          { text: 'Mimari & ADR', link: '/tr/adr' },
           { text: 'Karşılaştırma', link: '/tr/compare' },
           { text: 'Değişiklikler', link: '/tr/changelog' },
         ],
@@ -162,6 +183,25 @@ export default defineConfig({
                 { text: 'CLI Referansı', link: '/tr/api-reference#cli-referansi' },
                 { text: 'REST API', link: '/tr/api-reference#rest-api' },
                 { text: 'Yapılandırma', link: '/tr/getting-started#yapilandirma' },
+              ],
+            },
+            {
+              text: 'Mimari & ADR',
+              items: [
+                { text: 'ADR Kataloğu (Evren + why)', link: '/tr/adr' },
+                { text: 'Çapraz-Depo Bilgi Grafiği', link: '/tr/knowledge-graph' },
+                {
+                  text: 'ADR-001 · Uzman Bulucu & MCP',
+                  link: '/tr/adr#adr-001-ctxman-uzman-bulucu-ctxman-who-findexperts-ve-18-araclik-mcp-sunucu-mimarisi',
+                },
+                {
+                  text: 'ADR-002 · Hibrit Graf & Evren RAG',
+                  link: '/tr/adr#adr-002-plansmithai-analyzer-3-depo-birlesik-hibrit-bilgi-grafigi-ve-keysmith-evren-rag-sentezleyicisi',
+                },
+                {
+                  text: 'ADR-003 · 43+2 MCP & IPC Paritesi',
+                  link: '/tr/adr#adr-003-plansmith-desktop-43-2-a2a-browser-mcp-orkestrasyonu-ve-traycer-1-5-1-birebir-electron-ipc-paritesi',
+                },
               ],
             },
             {
@@ -249,6 +289,7 @@ export default defineConfig({
       { text: 'Features', link: '/features' },
       { text: 'Getting Started', link: '/getting-started' },
       { text: 'API Reference', link: '/api-reference' },
+      { text: 'Architecture & ADRs', link: '/adr' },
       { text: 'Demo', link: '/demo' },
       { text: 'Changelog', link: '/changelog' },
     ],
@@ -262,6 +303,8 @@ export default defineConfig({
             { text: 'What is Ctxman?', link: '/' },
             { text: 'Quick Start', link: '/getting-started' },
             { text: 'Features', link: '/features' },
+            { text: 'Architecture & ADRs', link: '/adr' },
+            { text: 'Cross-Repo Knowledge Graph', link: '/knowledge-graph' },
           ],
         },
       ],
