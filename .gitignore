@@ -94,3 +94,13 @@ html/
 
 # plansmith analyzer index
 .plansmith/
+
+# polyctl: mail is transient; the ledger and reviews are not (polyctl: 8 lines below, d68cfe62428df686)
+agent-mail/*.md
+!agent-mail/README.md
+.polyctl/inbox/
+.polyctl/hold
+.polyctl/sessions.json
+.polyctl/lanes/
+.kiro/settings/mcp.json
+.mcp.json
