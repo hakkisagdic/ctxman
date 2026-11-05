@@ -14,6 +14,10 @@ import { ContextBuilder } from './lib/core/ContextBuilder.js';
 import { Reporter } from './lib/core/Reporter.js';
 import { CacheManager, resolveCacheManager } from './lib/cache/CacheManager.js';
 
+// Watch & incremental RAG/graph sync
+import { FileWatcher } from './lib/watch/FileWatcher.js';
+import { IncrementalAnalyzer } from './lib/watch/IncrementalAnalyzer.js';
+
 // Parsers
 import GitIgnoreParser from './lib/parsers/gitignore-parser.js';
 import MethodFilterParser from './lib/parsers/method-filter-parser.js';
@@ -92,6 +96,10 @@ export {
   Reporter,
   CacheManager,
   resolveCacheManager,
+
+  // Watch & incremental RAG/graph sync
+  FileWatcher,
+  IncrementalAnalyzer,
 
   // Parsers
   GitIgnoreParser,

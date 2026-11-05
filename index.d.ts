@@ -1971,10 +1971,32 @@ export class SqliteVectorStore {
   dbPath: string;
   constructor(embeddingProvider: any, storagePath?: string);
   init(): Promise<void>;
-  addDocument(text: string, metadata?: Record<string, any>): Promise<void>;
+  addDocument(
+    text: string,
+    metadata?: Record<string, any>
+  ): Promise<{ upserted: number; skipped: number }>;
   addDocuments(
     docs: Array<{ text: string; id?: string; metadata?: Record<string, any> }>
+  ): Promise<{ upserted: number; skipped: number }>;
+  removeDocument(idOrFilePath: string): Promise<number>;
+  upsertGraphNode(node: Record<string, any>): Promise<void>;
+  replaceGraphEdges(
+    fromPath: string,
+    edges?: Array<{ to: string; weight?: number }>
   ): Promise<void>;
+  removeGraphNode(
+    filePath: string
+  ): Promise<{ removedNode: number; removedEdges: number }>;
+  syncGraph(graph: {
+    nodes?: Array<Record<string, any>>;
+    edges?: Array<{ from: string; to: string; weight?: number }>;
+    replaceAll?: boolean;
+  }): Promise<void>;
+  getGraph(): Promise<{
+    nodes: Array<Record<string, any>>;
+    edges: Array<{ from: string; to: string; weight: number }>;
+  }>;
+  graphCounts(): { nodes: number; edges: number };
   search(
     queryText: string,
     limit?: number
@@ -1982,6 +2004,81 @@ export class SqliteVectorStore {
   deleteTable(): Promise<void>;
   count(): number;
   close(): void;
+}
+
+export interface FileWatcherOptions {
+  debounce?: number;
+  recursive?: boolean;
+  ignorePatterns?: Array<string | RegExp>;
+}
+
+export class FileWatcher {
+  rootPath: string;
+  options: FileWatcherOptions;
+  isWatching: boolean;
+  constructor(rootPath: string, options?: FileWatcherOptions);
+  start(): void;
+  stop(): void;
+  shouldIgnore(relativePath: string): boolean;
+  getStats(): {
+    totalChanges: number;
+    ignoredChanges: number;
+    errors: number;
+    isWatching: boolean;
+    activeWatchers: number;
+    pendingDebounce: number;
+  };
+  resetStats(): void;
+  on(event: string, listener: (...args: any[]) => void): this;
+}
+
+export interface IncrementalAnalyzerOptions extends AnalyzerOptions {
+  projectRoot?: string;
+  sync?: boolean;
+  syncRag?: boolean;
+  syncGraph?: boolean;
+  storePath?: string;
+  vectorStore?: SqliteVectorStore;
+  embeddingProvider?: any;
+  redactSecrets?: boolean;
+  maxFileBytes?: number;
+  hydrateGraphOnStart?: boolean;
+}
+
+export class IncrementalAnalyzer {
+  projectRoot: string | null;
+  vectorStore: SqliteVectorStore | null;
+  constructor(options?: IncrementalAnalyzerOptions);
+  ensureSyncReady(rootOverride?: string | null): Promise<boolean>;
+  bootstrapSync(root?: string): Promise<{
+    files: number;
+    ragUpserted: number;
+    ragSkipped: number;
+    graphNodes: number;
+    graphEdges: number;
+  }>;
+  syncFileChange(changeEvent: Record<string, any>): Promise<{
+    rag: Record<string, any> | null;
+    graph: Record<string, any> | null;
+  }>;
+  analyzeChange(changeEvent: Record<string, any>): Promise<void>;
+  handleFileDeleted(changeEvent: Record<string, any>): Promise<void>;
+  getGraph(): Promise<{
+    nodes: Array<Record<string, any>>;
+    edges: Array<{ from: string; to: string; weight: number }>;
+  }>;
+  getStats(): AnalyzerStats;
+  getCachedAnalysis(filePath: string): AnalyzedFile | null;
+  clearCache(): void;
+  close(): void;
+  getCacheStats(): {
+    cachedFiles: number;
+    cacheSize: number;
+    graphNodes: number;
+    graphEdges: number;
+    vectorDocuments: number;
+  };
+  on(event: string, listener: (...args: any[]) => void): this;
 }
 
 // ============================================

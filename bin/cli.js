@@ -746,8 +746,12 @@ function printHelp() {
   console.log('    --auth-token TOKEN     API authentication token');
   console.log('    --host HOST            Address to bind (default: localhost)');
   console.log('    --cors                 Send CORS headers (off by default)');
-  console.log('  watch [options]          Watch mode with auto-analysis');
+  console.log('  watch [options]          Watch mode with auto-analysis & live RAG/graph sync');
   console.log('    --debounce MS          Debounce delay (default: 1000ms)');
+  console.log('    --bootstrap            Seed full SQLite vector & graph store on startup');
+  console.log('    --no-sync              Disable incremental SQLite vector & graph sync');
+  console.log('    --no-sync-rag          Disable incremental SQLite vector embedding sync');
+  console.log('    --no-sync-graph        Disable incremental SQLite knowledge-graph sync');
   console.log();
   console.log('General Options:');
   console.log('  -h, --help               Show this help');
@@ -1007,8 +1011,24 @@ async function runWatchMode(args) {
     ? parseInt(args[args.indexOf('--debounce') + 1], 10) || 1000
     : 1000;
 
+  const noSync = args.includes('--no-sync');
+  const syncRag = !noSync && !args.includes('--no-sync-rag');
+  const syncGraph = !noSync && !args.includes('--no-sync-graph');
+
   const watcher = new FileWatcher(projectRoot, { debounce });
-  const analyzer = new IncrementalAnalyzer({ methodLevel: args.includes('-m') });
+  const analyzer = new IncrementalAnalyzer({
+    projectRoot,
+    methodLevel: args.includes('-m'),
+    syncRag,
+    syncGraph,
+  });
+
+  if (args.includes('--bootstrap')) {
+    const boot = await analyzer.bootstrapSync(projectRoot);
+    console.log(
+      `   🔄 Bootstrapped SQLite store: ${boot.ragUpserted} embedded (${boot.ragSkipped} unchanged), ${boot.graphNodes} graph nodes, ${boot.graphEdges} edges`
+    );
+  }
 
   // Handle file changes
   watcher.on('file:changed', async (event) => {
@@ -1020,6 +1040,17 @@ async function runWatchMode(args) {
   analyzer.on('analysis:complete', (event) => {
     console.log(`   ✅ Analysis complete: ${event.analysis.tokens} tokens (${event.elapsed}ms)`);
 
+    if (event.sync?.rag) {
+      console.log(
+        `   🧠 Vector store (${event.sync.rag.action}): ${event.sync.rag.totalDocuments} indexed files`
+      );
+    }
+    if (event.sync?.graph) {
+      console.log(
+        `   🕸️  Knowledge graph (${event.sync.graph.action}): ${event.sync.graph.totalNodes} nodes, ${event.sync.graph.totalEdges} edges`
+      );
+    }
+
     const stats = analyzer.getStats();
     console.log(
       `   📊 Total: ${stats.totalFiles} files, ${stats.totalTokens.toLocaleString()} tokens`
@@ -1029,6 +1060,11 @@ async function runWatchMode(args) {
   // Handle file deletion
   analyzer.on('file:deleted', (event) => {
     console.log(`   🗑️  File deleted: ${event.file} (-${event.oldTokens} tokens)`);
+    if (event.sync?.rag || event.sync?.graph) {
+      console.log(
+        `   🧹 Synced deletion: ${event.sync.rag?.totalDocuments ?? 0} indexed docs, ${event.sync.graph?.totalNodes ?? 0} graph nodes`
+      );
+    }
   });
 
   // Start watching
@@ -1041,6 +1077,7 @@ async function runWatchMode(args) {
   process.on('SIGINT', () => {
     console.log('\n\n🛑 Stopping watch mode...');
     watcher.stop();
+    analyzer.close();
     process.exit(0);
   });
 }
