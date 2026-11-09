@@ -417,4 +417,178 @@ describe('Watch Mode Incremental SqliteVectorStore & Knowledge Graph Synchroniza
       }
     });
   });
+
+  describe('Cross-Repo Multi-Root Live Watch & Knowledge Graph Synchronization', () => {
+    it('bootstraps and incrementally synchronizes <alias>/<path> nodes, cross-repo import edges, and per-repo policy across sibling repositories', async () => {
+      const apiRepo = path.join(tmpDir, 'api');
+      const sharedRepo = path.join(tmpDir, 'shared');
+      fs.mkdirSync(path.join(apiRepo, 'src'), { recursive: true });
+      fs.mkdirSync(path.join(sharedRepo, 'src'), { recursive: true });
+      fs.mkdirSync(path.join(sharedRepo, 'secrets'), { recursive: true });
+
+      const authPath = path.join(sharedRepo, 'src', 'auth.js');
+      const secretPath = path.join(sharedRepo, 'secrets', 'vault.js');
+      const serverPath = path.join(apiRepo, 'src', 'server.js');
+
+      fs.writeFileSync(
+        authPath,
+        'export function verifyJwtToken(token) {\n  return Boolean(token);\n}\n'
+      );
+      fs.writeFileSync(secretPath, 'export function masterVaultKey() { return "top-secret"; }\n');
+      fs.writeFileSync(
+        serverPath,
+        'import { verifyJwtToken } from "@shared/auth.js";\nexport function handleRequest(req) {\n  return verifyJwtToken(req.token);\n}\n'
+      );
+
+      // Configure deny policy in sibling sharedRepo
+      fs.mkdirSync(path.join(sharedRepo, '.ctxman'), { recursive: true });
+      fs.writeFileSync(
+        path.join(sharedRepo, '.ctxman', 'policy.json'),
+        JSON.stringify({ version: 1, deny: ['secrets/**'] })
+      );
+
+      const watcher = new FileWatcher(apiRepo, {
+        repos: [sharedRepo],
+        debounce: 10,
+      });
+      expect(watcher.isMultiRepo).toBe(true);
+      expect(watcher.repos.map((r) => r.alias)).toEqual(['api', 'shared']);
+
+      const analyzer = new IncrementalAnalyzer({
+        projectRoot: apiRepo,
+        repos: [sharedRepo],
+        sync: true,
+        embeddingProvider: new LocalHashEmbeddingProvider(),
+      });
+
+      // 1. Bootstrap multi-repo workspace
+      const boot = await analyzer.bootstrapSync(apiRepo, { repos: [sharedRepo] });
+      expect(boot.repos).toEqual(['api', 'shared']);
+      expect(boot.graphNodes).toBe(2);
+      expect(boot.graphEdges).toBe(1);
+
+      let graph = await analyzer.getGraph();
+      expect(graph.nodes.map((n) => n.path)).toEqual(['api/src/server.js', 'shared/src/auth.js']);
+      expect(graph.edges).toEqual([
+        { from: 'api/src/server.js', to: 'shared/src/auth.js', weight: 1 },
+      ]);
+      // Cross-repo symbol reference from api/src/server.js boosts shared/src/auth.js symbolRefs
+      const sharedAuthNode = graph.nodes.find((n) => n.path === 'shared/src/auth.js');
+      expect(sharedAuthNode.symbolRefs).toBeGreaterThan(0);
+
+      // 2. Live file creation in sibling repo (shared/src/logger.js) and relative cross-repo import from api/src/worker.js
+      const loggerPath = path.join(sharedRepo, 'src', 'logger.js');
+      fs.writeFileSync(loggerPath, 'export function logAuditEvent(msg) {\n  return msg;\n}\n');
+      const loggerStat = fs.statSync(loggerPath);
+      await analyzer.analyzeChange({
+        type: 'rename',
+        path: loggerPath,
+        relativePath: 'shared/src/logger.js',
+        repo: 'shared',
+        repoRoot: sharedRepo,
+        repoRelativePath: 'src/logger.js',
+        exists: true,
+        size: loggerStat.size,
+        modified: loggerStat.mtime,
+      });
+
+      const workerPath = path.join(apiRepo, 'src', 'worker.js');
+      fs.writeFileSync(
+        workerPath,
+        'import { logAuditEvent } from "../../shared/src/logger.js";\nexport function runJob() {\n  return logAuditEvent("started");\n}\n'
+      );
+      const workerStat = fs.statSync(workerPath);
+      await analyzer.analyzeChange({
+        type: 'rename',
+        path: workerPath,
+        relativePath: 'api/src/worker.js',
+        repo: 'api',
+        repoRoot: apiRepo,
+        repoRelativePath: 'src/worker.js',
+        exists: true,
+        size: workerStat.size,
+        modified: workerStat.mtime,
+      });
+
+      graph = await analyzer.getGraph();
+      expect(graph.nodes.map((n) => n.path)).toEqual([
+        'api/src/server.js',
+        'api/src/worker.js',
+        'shared/src/auth.js',
+        'shared/src/logger.js',
+      ]);
+      expect(graph.edges).toEqual([
+        { from: 'api/src/server.js', to: 'shared/src/auth.js', weight: 1 },
+        { from: 'api/src/worker.js', to: 'shared/src/logger.js', weight: 1 },
+      ]);
+
+      // 3. Denied file in sibling repo is rejected on live change
+      const secretStat = fs.statSync(secretPath);
+      const skipped = [];
+      analyzer.on('sync:skipped', (ev) => skipped.push(ev));
+      await analyzer.analyzeChange({
+        type: 'change',
+        path: secretPath,
+        relativePath: 'shared/secrets/vault.js',
+        exists: true,
+        size: secretStat.size,
+        modified: secretStat.mtime,
+      });
+      expect(skipped).toHaveLength(1);
+      expect(skipped[0]).toMatchObject({
+        file: 'shared/secrets/vault.js',
+        reason: 'denied',
+      });
+
+      // 4. Deleting shared/src/logger.js removes cross-repo edge from api/src/worker.js
+      fs.unlinkSync(loggerPath);
+      await analyzer.analyzeChange({
+        type: 'rename',
+        path: loggerPath,
+        relativePath: 'shared/src/logger.js',
+        exists: false,
+      });
+
+      graph = await analyzer.getGraph();
+      expect(graph.nodes.map((n) => n.path)).toEqual([
+        'api/src/server.js',
+        'api/src/worker.js',
+        'shared/src/auth.js',
+      ]);
+      expect(graph.edges).toEqual([
+        { from: 'api/src/server.js', to: 'shared/src/auth.js', weight: 1 },
+      ]);
+
+      analyzer.close();
+
+      // 5. MCP query_knowledge_graph with repos queries the multi-repo graph and enforces per-repo policy
+      const mcp = new MCPServer({ root: tmpDir });
+      const callHandler = mcp.server._requestHandlers.get('tools/call');
+      const mcpRes = await callHandler({
+        method: 'tools/call',
+        params: {
+          name: 'query_knowledge_graph',
+          arguments: {
+            path: apiRepo,
+            repos: [sharedRepo],
+            file: 'shared/src/auth.js',
+            depth: 1,
+          },
+        },
+      });
+      expect(mcpRes.isError).toBeFalsy();
+      const mcpPayload = JSON.parse(mcpRes.content[0].text);
+      expect(mcpPayload.nodes.map((n) => n.path)).toEqual([
+        'api/src/server.js',
+        'shared/src/auth.js',
+      ]);
+      expect(mcpPayload.edges).toEqual([
+        { from: 'api/src/server.js', to: 'shared/src/auth.js', weight: 1 },
+      ]);
+
+      for (const inc of mcp.incrementalAnalyzers.values()) {
+        inc.close();
+      }
+    });
+  });
 });

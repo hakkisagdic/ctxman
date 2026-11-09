@@ -2025,9 +2025,7 @@ export class SqliteVectorStore {
     fromPath: string,
     edges?: Array<{ to: string; weight?: number }>
   ): Promise<void>;
-  removeGraphNode(
-    filePath: string
-  ): Promise<{ removedNode: number; removedEdges: number }>;
+  removeGraphNode(filePath: string): Promise<{ removedNode: number; removedEdges: number }>;
   syncGraph(graph: {
     nodes?: Array<Record<string, any>>;
     edges?: Array<{ from: string; to: string; weight?: number }>;
@@ -2051,16 +2049,19 @@ export interface FileWatcherOptions {
   debounce?: number;
   recursive?: boolean;
   ignorePatterns?: Array<string | RegExp>;
+  repos?: string[];
 }
 
 export class FileWatcher {
   rootPath: string;
   options: FileWatcherOptions;
   isWatching: boolean;
+  isMultiRepo: boolean;
+  repos: Array<{ root: string; alias: string | null }>;
   constructor(rootPath: string, options?: FileWatcherOptions);
   start(): void;
   stop(): void;
-  shouldIgnore(relativePath: string): boolean;
+  shouldIgnore(relativePath: string, repoRoot?: string): boolean;
   getStats(): {
     totalChanges: number;
     ignoredChanges: number;
@@ -2075,6 +2076,7 @@ export class FileWatcher {
 
 export interface IncrementalAnalyzerOptions extends AnalyzerOptions {
   projectRoot?: string;
+  repos?: string[];
   sync?: boolean;
   syncRag?: boolean;
   syncGraph?: boolean;
@@ -2090,13 +2092,20 @@ export class IncrementalAnalyzer {
   projectRoot: string | null;
   vectorStore: SqliteVectorStore | null;
   constructor(options?: IncrementalAnalyzerOptions);
+  isMultiRepo: boolean;
+  repos: Array<{ root: string; alias: string | null }>;
+  isPathDenied(graphPath: string): boolean;
   ensureSyncReady(rootOverride?: string | null): Promise<boolean>;
-  bootstrapSync(root?: string): Promise<{
+  bootstrapSync(
+    root?: string,
+    options?: { repos?: string[] }
+  ): Promise<{
     files: number;
     ragUpserted: number;
     ragSkipped: number;
     graphNodes: number;
     graphEdges: number;
+    repos?: string[];
   }>;
   syncFileChange(changeEvent: Record<string, any>): Promise<{
     rag: Record<string, any> | null;
@@ -2229,7 +2238,7 @@ export interface FindExpertsOptions {
   commitWindow?: number;
   halfLifeDays?: number;
   since?: string;
-  style?: "markdown" | "xml" | "json";
+  style?: 'markdown' | 'xml' | 'json';
   nowMs?: number;
 }
 

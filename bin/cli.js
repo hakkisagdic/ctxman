@@ -747,6 +747,7 @@ function printHelp() {
   console.log('    --host HOST            Address to bind (default: localhost)');
   console.log('    --cors                 Send CORS headers (off by default)');
   console.log('  watch [options]          Watch mode with auto-analysis & live RAG/graph sync');
+  console.log('    --repo DIR             Additional repository root to watch (repeatable)');
   console.log('    --debounce MS          Debounce delay (default: 1000ms)');
   console.log('    --bootstrap            Seed full SQLite vector & graph store on startup');
   console.log('    --no-sync              Disable incremental SQLite vector & graph sync');
@@ -1011,20 +1012,35 @@ async function runWatchMode(args) {
     ? parseInt(args[args.indexOf('--debounce') + 1], 10) || 1000
     : 1000;
 
+  const repos = [];
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--repo' && args[i + 1] && !args[i + 1].startsWith('-')) {
+      repos.push(resolve(projectRoot, args[i + 1]));
+      i++;
+    }
+  }
+
   const noSync = args.includes('--no-sync');
   const syncRag = !noSync && !args.includes('--no-sync-rag');
   const syncGraph = !noSync && !args.includes('--no-sync-graph');
 
-  const watcher = new FileWatcher(projectRoot, { debounce });
+  const watcher = new FileWatcher(projectRoot, { debounce, repos });
   const analyzer = new IncrementalAnalyzer({
     projectRoot,
+    repos,
     methodLevel: args.includes('-m'),
     syncRag,
     syncGraph,
   });
 
+  if (repos.length > 0) {
+    console.log(
+      `   🔗 Multi-repo workspace: ${watcher.repos.map((r) => `${r.alias} (${r.root})`).join(', ')}`
+    );
+  }
+
   if (args.includes('--bootstrap')) {
-    const boot = await analyzer.bootstrapSync(projectRoot);
+    const boot = await analyzer.bootstrapSync(projectRoot, { repos });
     console.log(
       `   🔄 Bootstrapped SQLite store: ${boot.ragUpserted} embedded (${boot.ragSkipped} unchanged), ${boot.graphNodes} graph nodes, ${boot.graphEdges} edges`
     );
