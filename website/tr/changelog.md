@@ -7,6 +7,16 @@ ve bu proje [Semantic Versioning](https://semver.org/spec/v2.0.0.html) takip ede
 
 Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) dosyasına bakın.
 
+## [3.2.6] - 2026-11-09
+
+### Eklendi
+
+- **Çoklu Depo Kod Arkeolojisi, PR İnceleme, Politika Doğrulama ve Denetim Günlüğü (`why --repo`, `pr --repo`, `policy check --repo`, `audit --repo`)**:
+  - `ctxman why --repo <dir>` (`explainHistory` `options.repos` ve MCP `explain_history` `repos`): çalışma alanı depoları genelinde (git deposu olmayan üst dizinlerden çalıştırma dahil) `<alias>/<path>[:symbol|#Lstart-Lend]` hedeflerini çözümler; hedef dosyanın kendi deposunda git geçmişi, blame sahipliği ve birlikte değişen dosyaları analiz eder; tüm depolarda `<alias>/<path>` altında çapraz depo ADR, changelog, doküman, yorum ve testleri keşfeder ve depo bazlı `.ctxman/policy.json` kurallarını uygular
+  - `ctxman pr --repo <dir>` (`buildPrContext` `options.repos` ve MCP `pr_context` `repos`): commit'leri (`[<alias>]` / `repo` etiketiyle), `<alias>/<path>` ad alanlı değişen dosyaları, değişen/silinen fonksiyonları, diff'leri ve ilgili testleri paylaşılan tek bir token bütçesi altında birleştirir; ilgili dalı içermeyen kardeş depoları uyarıyla atlar ve depo bazlı politikaları uygular
+  - `ctxman policy check --repo <dir>` (`checkWorkspacePolicies` ve MCP `check_policy` `repos`): çalışma alanındaki tüm depolarda `.ctxman/policy.json` ve `CTXMAN_POLICY` kurallarını erken durmadan toplu doğrular, depo bazlı durum/hataları raporlar ve en sıkı çalışma alanı sınırlarını (`requireRedaction`, minimum `maxExportTokens`, kesişen `allowedTargetModels`) hesaplar
+  - `ctxman audit --repo <dir>` (`readWorkspaceAuditLogs` ve MCP `audit_log` `repos`): çalışma alanı depolarındaki denetim günlüklerini kronolojik sırayla birleştirip tekilleştirir, tabloya `REPO` sütunu ve JSON çıktısına `repo` alanı ekler (`--file` + `--repo` birlikte kullanımını çıkış kodu `2` ile reddeder) ve `index.d.ts` tip tanımlarıyla `ctxman` paketinden dışa aktarır
+
 ## [3.2.5] - 2026-11-09
 
 ### Eklendi
@@ -163,6 +173,7 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
 
 | Sürüm | Tarih      | Öne Çıkanlar                                                                                                                                 |
 | ----- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3.2.6 | 2026-11-09 | Çoklu depo `why`, `pr`, `policy check` ve `audit` (`--repo` / MCP `repos`, `checkWorkspacePolicies`, `readWorkspaceAuditLogs`)               |
 | 3.2.5 | 2026-11-09 | Çoklu depo `who`, `ask` ve `get_symbol` (`--repo` / MCP `repos`) desteği ve yük altında kararlılaştırılmış test paketi                       |
 | 3.2.4 | 2026-11-09 | Çapraz depo AST sembol çağrı ve import grafiği (`buildWorkspaceGraph`) ile çoklu depo `focus`, `task` ve `diagnose` (`--repo` / MCP `repos`) |
 | 3.2.3 | 2026-11-09 | Çapraz depo canlı izleme (`ctxman watch --repo`) ve çoklu kök SQLite bilgi grafiği / RAG senkronu (`query_knowledge_graph` `repos`)          |
@@ -178,7 +189,9 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
 
 ## Yol Haritası
 
-### v3.1 – v3.2.5 ile Tamamlananlar
+### v3.1 – v3.2.6 ile Tamamlananlar
+
+- **Çoklu Depo Kod Arkeolojisi, PR İnceleme, Politika ve Denetim Günlüğü**: `ctxman why --repo`, `ctxman pr --repo`, `ctxman policy check --repo` ve `ctxman audit --repo` (ve `checkWorkspacePolicies`, `readWorkspaceAuditLogs`, MCP `explain_history` / `pr_context` / `check_policy` / `audit_log` `repos` desteği)
 
 - **Çoklu Depo Uzman Bulucu, Semantik Soru-Cevap ve Sembol Arama**: `ctxman who --repo`, `ctxman ask --repo` ve MCP `find_experts` / `ask_codebase` / `get_symbol` `repos` desteği
 

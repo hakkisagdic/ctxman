@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) on GitHub.
 
+## [3.2.6] - 2026-11-09
+
+### Added
+
+- **Multi-Repo Code Archaeology, PR Review, Policy Validation & Audit Logs (`why --repo`, `pr --repo`, `policy check --repo`, `audit --repo`)**:
+  - `ctxman why --repo <dir>` (`explainHistory` `options.repos` & MCP `explain_history` `repos`): resolves `<alias>/<path>[:symbol|#Lstart-Lend]` targets across workspace repositories (including from a non-git parent directory), runs git history, blame ownership, and co-change coupling in the target file's owning repository, discovers cross-repository ADRs, changelogs, docs, code comments, and tests under `<alias>/<path>`, and enforces per-repo `.ctxman/policy.json` deny rules
+  - `ctxman pr --repo <dir>` (`buildPrContext` `options.repos` & MCP `pr_context` `repos`): merges commits (tagged with `[<alias>]` / `repo`), `<alias>/<path>`-namespaced changed files, changed/deleted methods, unified diffs, and related tests across repositories under one shared token budget, skipping sibling repositories missing a branch/ref with a warning while enforcing per-repo policies
+  - `ctxman policy check --repo <dir>` (`checkWorkspacePolicies` & MCP `check_policy` `repos`): validates `.ctxman/policy.json` and `CTXMAN_POLICY` across all workspace repositories without early abort, reporting per-repo status/errors and computing effective workspace-wide limits (`requireRedaction`, minimum `maxExportTokens`, intersected `allowedTargetModels`)
+  - `ctxman audit --repo <dir>` (`readWorkspaceAuditLogs` & MCP `audit_log` `repos`): merges and deduplicates export audit logs across workspace repositories in chronological order with a `REPO` table column and `repo` JSON field (rejecting `--file` + `--repo` with exit code `2`), exported from `ctxman` with TypeScript definitions in `index.d.ts`
+
 ## [3.2.5] - 2026-11-09
 
 ### Added
@@ -163,6 +173,7 @@ For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ct
 
 | Version | Date       | Highlights                                                                                                                                 |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 3.2.6   | 2026-11-09 | Multi-repo `why`, `pr`, `policy check`, and `audit` (`--repo` / MCP `repos`, `checkWorkspacePolicies`, `readWorkspaceAuditLogs`)           |
 | 3.2.5   | 2026-11-09 | Multi-repo `who`, `ask`, and `get_symbol` (`--repo` / MCP `repos`) plus load-hardened subprocess test suite                                |
 | 3.2.4   | 2026-11-09 | Multi-repo `focus`, `task`, and `diagnose` (`--repo` / MCP `repos`) with cross-repo AST symbol call & import graph (`buildWorkspaceGraph`) |
 | 3.2.3   | 2026-11-09 | Cross-repo live watch (`ctxman watch --repo`) and multi-root SQLite knowledge graph & RAG sync (`query_knowledge_graph` `repos`)           |
@@ -178,7 +189,9 @@ For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ct
 
 ## Roadmap
 
-### Delivered in v3.1 – v3.2.5
+### Delivered in v3.1 – v3.2.6
+
+- **Multi-Repo Code Archaeology, PR Review, Policy & Audit**: Cross-repository `ctxman why --repo`, `ctxman pr --repo`, `ctxman policy check --repo`, and `ctxman audit --repo` (plus `checkWorkspacePolicies`, `readWorkspaceAuditLogs`, and MCP `explain_history` / `pr_context` / `check_policy` / `audit_log` `repos` support)
 
 - **Multi-Repo Expert Finder, Semantic Ask & Symbol Lookup**: Cross-repository `ctxman who --repo`, `ctxman ask --repo`, and MCP `find_experts` / `ask_codebase` / `get_symbol` `repos` support
 
