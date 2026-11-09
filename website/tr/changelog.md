@@ -16,6 +16,10 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
   - `ctxman map`: `-c, --call-graph` ve `--focus <file:symbol>` desteği, fonksiyon satırlarında `-> path:callee` açıklamaları, `--graph --call-graph` altında `file:caller -> file:callee` çıktısı, `--style dot --call-graph` içinde kesikli çağrı kenarları ve doğrudan sembol çağrı komşularına (`0.85` ağırlık) PageRank kişiselleştirmesi eklendi
   - `ctxman focus`: `<file>:<symbol>`, `-s, --symbol`, `--calls-only`, `--callers-only` ve `--calls` / `--no-calls` (ve MCP `focus_context` `symbol` ve `callGraph` parametreleri) ile dosya içi yardımcı fonksiyon kapanışı ve dosyalar arası sembol çağrı gezintisi eklendi
   - `ctxman task` ve `ctxman diagnose`: `buildTaskContext` ve `diagnoseFailure` içinde 1-hop ve 2-hop dosyalar arası AST sembol çağrı kenarlarına öncelik verildi, `--calls` / `--no-calls` CLI bayrakları ve teşhis raporlarında `## Related 1-Hop Neighborhood` altında `caller -> callee` açıklamaları eklendi
+- **Çapraz Depo Canlı İzleme ve Bilgi Grafiği Senkronizasyonu (`ctxman watch --repo`, `FileWatcher`, `IncrementalAnalyzer`, MCP `query_knowledge_graph`)**:
+  - `FileWatcher` ve `IncrementalAnalyzer` modüllerine çoklu depo çalışma alanı desteği (`options.repos`) eklendi; izlenen dosyalar, SQLite RAG vektörleri ve bilgi grafiği düğümleri `<alias>/<path>` altında isimlendirildi
+  - `@<alias>/...`, `<alias>/...`, `@<scope>/<alias>/...` ve göreli kardeş dizin yolları üzerinden depolar arası import kenarları (`<aliasA>/<file> -> <aliasB>/<file>`) ve çapraz depo sembol referans puanlaması (`symbolRefs`) çözümlendi
+  - İzlenen tüm depolarda depo bazlı `.ctxman/policy.json` engelleme kuralları (`isPathDenied`) ve gitignore kuralları zorunlu kılındı; `ctxman watch` için tekrarlanabilir `--repo <dir>` ve MCP `query_knowledge_graph` için `repos` desteği eklendi
 
 ### Düzeltildi
 
