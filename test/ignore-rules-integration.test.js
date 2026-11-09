@@ -79,16 +79,26 @@ describe('ignore rules on a real project', () => {
   it('watch mode analyzes a changed file end to end', async () => {
     const watcher = new FileWatcher(root, { debounce: 50 });
     const analyzer = new IncrementalAnalyzer();
-    const completed = new Promise((resolve, reject) => {
-      analyzer.on('analysis:complete', resolve);
-      analyzer.on('analysis:error', (event) => reject(event.error));
-      setTimeout(() => reject(new Error('no analysis within 5 s')), 5000);
-    });
-    watcher.on('file:changed', (event) => analyzer.analyzeChange(event));
 
     watcher.start();
     try {
       await new Promise((resolve) => setTimeout(resolve, 100));
+      for (const timer of watcher.debounceTimers.values()) {
+        clearTimeout(timer);
+      }
+      watcher.debounceTimers.clear();
+
+      const completed = new Promise((resolve, reject) => {
+        analyzer.on('analysis:complete', (ev) => {
+          if (ev.file.split(path.sep).join('/') === 'src/app.js') {
+            resolve(ev);
+          }
+        });
+        analyzer.on('analysis:error', (event) => reject(event.error));
+        setTimeout(() => reject(new Error('no analysis within 5 s')), 5000);
+      });
+      watcher.on('file:changed', (event) => analyzer.analyzeChange(event));
+
       write('src/app.js', 'export const x = 2;\nexport const y = 3;\n');
 
       const event = await completed;
