@@ -2,6 +2,19 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
+## [3.2.5] - 2026-11-09
+
+### Added
+
+- **Multi-Repo Expert Finder, Semantic Ask & Symbol Lookup (`who --repo`, `ask --repo`, `get_symbol`)**:
+  - `ctxman who --repo <dir>` (`findExperts` `options.repos` & MCP `find_experts` `repos`): resolves `<alias>/<path>[:symbol|#Lstart-Lend]`, directory, and BM25 topic targets across multiple repositories, aggregates surviving `git blame -w` share, recency-decayed commits, and `CODEOWNERS` stewardship per author, and enforces per-repo `.ctxman/policy.json` deny rules.
+  - `ctxman ask --repo <dir>` (`askCodebase` `options.repos` & MCP `ask_codebase` `repos`): indexes and queries chunks across multiple workspace repositories in the local SQLite semantic vector store (`.ctxman/self-knowledge/index.sqlite`) under `<alias>/<path>` namespaces with per-repo policy enforcement and secret redaction.
+  - `getSymbol` `options.repos` & MCP `get_symbol` `repos`: resolves functions, methods, and classes across multiple repositories under `<alias>/<path>` (and optional `file: "<alias>/<path>"` filtering) with fuzzy cross-repo suggestions.
+
+### Fixed
+
+- Hardened subprocess and workspace tests under heavy CPU load (`MultiRepoManager.generateRepoId` monotonic ID generation, direct subcommand spawning in `test/workspace-multi-repo.test.js`, and 60s Vitest timeouts).
+
 ## [3.2.4] - 2026-11-09
 
 ### Added

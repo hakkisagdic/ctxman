@@ -7,6 +7,19 @@ ve bu proje [Semantic Versioning](https://semver.org/spec/v2.0.0.html) takip ede
 
 Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) dosyasına bakın.
 
+## [3.2.5] - 2026-11-09
+
+### Eklendi
+
+- **Çoklu Depo Uzman Bulucu, Semantik Soru-Cevap ve Sembol Arama (`who --repo`, `ask --repo`, `get_symbol`)**:
+  - `ctxman who --repo <dir>` (`findExperts` `options.repos` ve MCP `find_experts` `repos`): birden fazla depoda `<alias>/<path>[:symbol|#Lstart-Lend]`, dizin ve BM25 konu hedeflerini çözümler; yaşayan `git blame -w` payı, zaman aşınmalı commit geçmişi ve `CODEOWNERS` sahipliğini yazar bazında birleştirir ve depo bazlı `.ctxman/policy.json` kurallarını uygular
+  - `ctxman ask --repo <dir>` (`askCodebase` `options.repos` ve MCP `ask_codebase` `repos`): yerel SQLite semantik vektör deposunda (`.ctxman/self-knowledge/index.sqlite`) birden fazla çalışma alanı deposunu `<alias>/<path>` ad alanları altında indeksler ve sorgular
+  - `getSymbol` `options.repos` ve MCP `get_symbol` `repos`: birden fazla depoda fonksiyon, metot ve sınıfları `<alias>/<path>` altında (ve isteğe bağlı `file: "<alias>/<path>"` filtresiyle) çözümler ve çapraz depo bulanık öneriler sunar
+
+### Düzeltildi
+
+- Yoğun CPU yükü altında alt süreç (subprocess) ve çoklu depo testlerinin kararlılığı artırıldı (`MultiRepoManager.generateRepoId` monotonik ID üretimi, `test/workspace-multi-repo.test.js` içinde doğrudan alt komut çağrısı ve 60s Vitest zaman aşımları)
+
 ## [3.2.4] - 2026-11-09
 
 ### Eklendi
@@ -150,6 +163,7 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
 
 | Sürüm | Tarih      | Öne Çıkanlar                                                                                                                                 |
 | ----- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3.2.5 | 2026-11-09 | Çoklu depo `who`, `ask` ve `get_symbol` (`--repo` / MCP `repos`) desteği ve yük altında kararlılaştırılmış test paketi                       |
 | 3.2.4 | 2026-11-09 | Çapraz depo AST sembol çağrı ve import grafiği (`buildWorkspaceGraph`) ile çoklu depo `focus`, `task` ve `diagnose` (`--repo` / MCP `repos`) |
 | 3.2.3 | 2026-11-09 | Çapraz depo canlı izleme (`ctxman watch --repo`) ve çoklu kök SQLite bilgi grafiği / RAG senkronu (`query_knowledge_graph` `repos`)          |
 | 3.2.2 | 2026-11-05 | Dosyalar arası AST sembol çağrı grafiği (`buildCallGraph`, `map --call-graph`, `focus file:symbol`, `task` ve `diagnose`)                    |
@@ -164,7 +178,9 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
 
 ## Yol Haritası
 
-### v3.1 – v3.2.4 ile Tamamlananlar
+### v3.1 – v3.2.5 ile Tamamlananlar
+
+- **Çoklu Depo Uzman Bulucu, Semantik Soru-Cevap ve Sembol Arama**: `ctxman who --repo`, `ctxman ask --repo` ve MCP `find_experts` / `ask_codebase` / `get_symbol` `repos` desteği
 
 - **Çoklu Depo Focus, Task ve Diagnose Ajanları**: `ctxman focus --repo`, `ctxman task --repo` ve `ctxman diagnose --repo` (ve MCP `repos`) genelinde çapraz depo import ve AST sembol çağrı grafiği gezintisi (`buildWorkspaceGraph`)
 

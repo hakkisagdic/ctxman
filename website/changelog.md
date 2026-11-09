@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) on GitHub.
 
+## [3.2.5] - 2026-11-09
+
+### Added
+
+- **Multi-Repo Expert Finder, Semantic Ask & Symbol Lookup (`who --repo`, `ask --repo`, `get_symbol`)**:
+  - `ctxman who --repo <dir>` (`findExperts` `options.repos` & MCP `find_experts` `repos`): resolves `<alias>/<path>[:symbol|#Lstart-Lend]`, directory, and BM25 topic targets across multiple repositories, aggregates surviving `git blame -w` share, recency-decayed commits, and `CODEOWNERS` stewardship per author, and enforces per-repo `.ctxman/policy.json` deny rules
+  - `ctxman ask --repo <dir>` (`askCodebase` `options.repos` & MCP `ask_codebase` `repos`): indexes and queries chunks across multiple workspace repositories in the local SQLite semantic vector store (`.ctxman/self-knowledge/index.sqlite`) under `<alias>/<path>` namespaces with per-repo policy enforcement and secret redaction
+  - `getSymbol` `options.repos` & MCP `get_symbol` `repos`: resolves functions, methods, and classes across multiple repositories under `<alias>/<path>` (and optional `file: "<alias>/<path>"` filtering) with fuzzy cross-repo suggestions
+
+### Fixed
+
+- Hardened subprocess and workspace tests under heavy CPU load (`MultiRepoManager.generateRepoId` monotonic ID generation, direct subcommand spawning in `test/workspace-multi-repo.test.js`, and 60s Vitest timeouts)
+
 ## [3.2.4] - 2026-11-09
 
 ### Added
@@ -150,6 +163,7 @@ For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ct
 
 | Version | Date       | Highlights                                                                                                                                 |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 3.2.5   | 2026-11-09 | Multi-repo `who`, `ask`, and `get_symbol` (`--repo` / MCP `repos`) plus load-hardened subprocess test suite                                |
 | 3.2.4   | 2026-11-09 | Multi-repo `focus`, `task`, and `diagnose` (`--repo` / MCP `repos`) with cross-repo AST symbol call & import graph (`buildWorkspaceGraph`) |
 | 3.2.3   | 2026-11-09 | Cross-repo live watch (`ctxman watch --repo`) and multi-root SQLite knowledge graph & RAG sync (`query_knowledge_graph` `repos`)           |
 | 3.2.2   | 2026-11-05 | Cross-file AST symbol call graph (`buildCallGraph`, `map --call-graph`, `focus file:symbol`, `task` & `diagnose` call edges)               |
@@ -164,7 +178,9 @@ For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ct
 
 ## Roadmap
 
-### Delivered in v3.1 – v3.2.4
+### Delivered in v3.1 – v3.2.5
+
+- **Multi-Repo Expert Finder, Semantic Ask & Symbol Lookup**: Cross-repository `ctxman who --repo`, `ctxman ask --repo`, and MCP `find_experts` / `ask_codebase` / `get_symbol` `repos` support
 
 - **Multi-Repo Focus, Task & Diagnose Agents**: Cross-repository import and AST symbol call-graph traversal (`buildWorkspaceGraph`) across `ctxman focus --repo`, `ctxman task --repo`, and `ctxman diagnose --repo` (and MCP `repos`)
 
