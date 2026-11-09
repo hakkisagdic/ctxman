@@ -79,6 +79,7 @@ Yaşayan `git blame -w` payı (`0.45`), zaman aşınmalı commit geçmişi (`0.3
 ctxman who lib/why/index.js:explainHistory
 ctxman who lib/rag
 ctxman who "hybrid search RRF" --limit 5 --style json
+ctxman who "invoice payment" --repo ../billing-api --repo ../checkout-web
 ```
 
 ### `ctxman task "<goal>"`
@@ -111,10 +112,11 @@ ctxman search "sqlite vector cosine similarity" --hybrid
 
 ### `ctxman ask "<question>"`
 
-Yerel SQLite semantik indeksini (`.ctxman/self-knowledge/index.sqlite`) doğal dille sorgular:
+Yerel SQLite semantik indeksini (`.ctxman/self-knowledge/index.sqlite`) bir veya birden fazla `--repo` kökünde doğal dille sorgular:
 
 ```bash
 ctxman ask "how does export policy redaction work?"
+ctxman ask "how is invoice payment processed?" --repo ../billing-api --repo ../checkout-web
 ```
 
 ### `ctxman count [path|-]`
@@ -165,7 +167,7 @@ ctxman serve --port 3000
 | `git_diff`              | `path`, `branch?`                                                                                           | Doğrulanmış `git diff <branch>`                                               |
 | `search_code`           | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`                   | Satır araması veya BM25 / hibrit RRF kod parçası araması                      |
 | `list_methods`          | `path`, `file?`                                                                                             | Dosya başına çıkarılan fonksiyonlar                                           |
-| `get_symbol`            | `path`, `name`, `file?`, `redact?`                                                                          | İsimle fonksiyon, metot veya sınıfın tam kaynak kodu                          |
+| `get_symbol`            | `path`, `name`, `file?`, `redact?`, `repos?`                                                                | İsimle fonksiyon, metot veya sınıfın tam kaynak kodu                          |
 | `repo_map`              | `path`, `tokens?`, `focus?`, `repos?`                                                                       | PageRank depo haritası (`ctxman map`)                                         |
 | `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`                                                               | Pull-request inceleme paketi (`ctxman pr`)                                    |
 | `count_tokens`          | `path` veya `text`, `model?`, `top?`                                                                        | Modele duyarlı token sayımı ve pencere uyumu (`ctxman count`)                 |
@@ -174,10 +176,10 @@ ctxman serve --port 3000
 | `focus_context`         | `path`, `file`, `repos?`, `symbol?`, `depth?`, `direction?`, `callGraph?`, `style?`, `compress?`, `budget?` | Yönlü `N`-hop import ve AST sembol çağrı komşuluğu (`ctxman focus`)           |
 | `check_policy`          | `path`                                                                                                      | Etkin `.ctxman/policy.json` doğrulaması (`ctxman policy`)                     |
 | `audit_log`             | `path`, `since?`, `limit?`                                                                                  | SHA-256 dışa aktarım denetim günlüğü (`ctxman audit`)                         |
-| `ask_codebase`          | `path`, `query`, `limit?`                                                                                   | Çevrimdışı SQLite semantik arama (`ctxman ask`)                               |
+| `ask_codebase`          | `path`, `query`, `limit?`, `repos?`                                                                         | Çevrimdışı SQLite semantik arama (`ctxman ask`)                               |
 | `task_context`          | `path`, `task`, `repos?`, `budget?`, `format?`, `callGraph?`, `model?`                                      | AST sembol çağrı ve import komşuluklu otomatik görev bağlamı (`ctxman task`)  |
 | `diagnose_failure`      | `path`, `trace`, `repos?`, `budget?`, `format?`, `callGraph?`                                               | AST sembol çağrı komşuluklu stack-trace kök neden teşhisi (`ctxman diagnose`) |
-| `find_experts`          | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                                       | Blame + güncellik + CODEOWNERS uzman sıralaması (`ctxman who`)                |
+| `find_experts`          | `path`, `target`, `repos?`, `limit?`, `halfLifeDays?`, `style?`                                             | Blame + güncellik + CODEOWNERS uzman sıralaması (`ctxman who`)                |
 | `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`, `repos?`                                         | Kalıcı SQLite bilgi grafiği ve `IncrementalAnalyzer` önbellek sorgusu         |
 
 ### `query_knowledge_graph` Örnek Kullanımı
@@ -308,8 +310,11 @@ const why = await explainHistory('/path/to/repo', 'lib/why/index.js:explainHisto
 });
 console.log(why.text);
 
-// 3. Alan Uzmanlarını Bulma
-const who = await findExperts('/path/to/repo', 'hybrid search RRF', { limit: 5 });
+// 3. Alan Uzmanlarını Bulma (Tekli veya Çoklu Depo Çalışma Alanı)
+const who = await findExperts('/path/to/repo', 'hybrid search RRF', {
+  limit: 5,
+  repos: ['../billing-api', '../checkout-web'],
+});
 console.log(who.experts);
 
 // 4. Görev Bağlamı ve Hata Teşhisi

@@ -8,7 +8,7 @@ Ctxman, modern geliştirici ve yapay zeka ajanı iş akışları için tasarlanm
 
 - **PageRank Depo Haritası ve AST Çağrı Grafiği (`ctxman map`)**: 14+ dilde import grafiği üzerindeki PageRank değerini git değişim sıklığı, sembol referansları ve dosyalar arası AST sembol çağrı kenarlarıyla (`--call-graph`, `--focus file:symbol`) birleştirerek en önemli dosya ve fonksiyon imzalarını token bütçesine sığdırır
 - **Yönlü Import ve Sembol Çağrı Komşuluğu (`ctxman focus`)**: Hedef dosya veya sembolü (`<file>:<symbol>`) `N`-hop giden import/çağrılanlar ve gelen importer/çağıranlar (`--direction both|imports|importers`, `--calls-only`, `--callers-only`, dosya içi yardımcı fonksiyon kapanışı ve barrel re-export çözümlemesi dahil) ile ortak hub patlamasına yol açmadan paketler
-- **Çoklu Depo Çalışma Alanı (`--repo <dir>`)**: `map`, `search`, `pack`, `focus`, `task`, `diagnose` ve `watch` komutlarında birden fazla depoyu `<alias>/<path>` ad alanları altında, depolar arası import ve AST sembol çağrı grafiği (`buildWorkspaceGraph`) ile tek bir paylaşılan token bütçesinde birleştirir
+- **Çoklu Depo Çalışma Alanı (`--repo <dir>`)**: `map`, `search`, `pack`, `focus`, `task`, `diagnose`, `who`, `ask` ve `watch` komutlarında (ve MCP `get_symbol` `repos` parametresinde) birden fazla depoyu `<alias>/<path>` ad alanları altında, depolar arası import ve AST sembol çağrı grafiği (`buildWorkspaceGraph`) ile tek bir paylaşılan token bütçesinde birleştirir
 
 ```bash
 # Dosyalar arası AST sembol çağrılarıyla 2.000 token bütçeli sıralı depo haritası
@@ -21,14 +21,15 @@ ctxman focus lib/why/index.js:explainHistory --depth 1 --budget 16k
 ### Kod Arkeolojisi (`why`) ve Uzman Bulucu (`who`)
 
 - **Kod Neden Böyle? (`ctxman why`)**: Herhangi bir dosya, sembol (`file:symbol`) veya satır aralığını (`file#L10-L40`); git geçmişi, PR/issue referansları, GitHub/GitLab tartışmaları (`--discussions`), `@plansmithai/analyzer` SQLite kurumsal hafıza atıfları (`--analyzer-db`), blame sahipliği, birlikte değişen dosyalar, ADR'ler, TODO'lar ve testlerle açıklar
-- **Bunu Kim Biliyor? (`ctxman who`)**: Yaşayan `git blame -w` satır sahipliği (`0.45`), üstel zaman aşınmalı commit geçmişi (`0.35`, 90 gün yarı ömür), toplam commit payı (`0.20`) ve `CODEOWNERS` sahipliğini (`+0.15`) birleştirerek uzmanları sıralar; doğal dil konularını BM25 ile otomatik olarak dosyalara çözümler
+- **Bunu Kim Biliyor? (`ctxman who`)**: Bir veya birden fazla `--repo` kökünde yaşayan `git blame -w` satır sahipliği (`0.45`), üstel zaman aşınmalı commit geçmişi (`0.35`, 90 gün yarı ömür), toplam commit payı (`0.20`) ve `CODEOWNERS` sahipliğini (`+0.15`) birleştirerek uzmanları sıralar; doğal dil konularını BM25 ile otomatik olarak dosyalara çözümler
 
 ```bash
 # Kurumsal hafıza atıflarıyla bir fonksiyonu açıkla
 ctxman why lib/why/index.js:explainHistory --analyzer
 
-# Dosya, sembol, dizin veya konu için uzmanları bul
+# Dosya, sembol, dizin veya konu için uzmanları bul (tekli veya çoklu depo)
 ctxman who "hybrid search RRF"
+ctxman who "invoice payment" --repo ../billing-api --repo ../checkout-web
 ```
 
 ### Görev Bağlamı (`task`), Hata Teşhisi (`diagnose`) ve PR İnceleme (`pr`)
@@ -47,7 +48,7 @@ ctxman pr --base main --budget 24k
 
 ### Çevrimdışı SQLite RAG ve Hibrit Arama (`search` & `ask`)
 
-- **Sıfır Native Bağımlılıklı `SqliteVectorStore`**: Node.js 22/24 yerleşik `node:sqlite` (`DatabaseSync`) üzerinde `.ctxman/self-knowledge/index.sqlite` içinde SHA-256 artımlı indeksleme
+- **Sıfır Native Bağımlılıklı `SqliteVectorStore`**: Node.js 22/24 yerleşik `node:sqlite` (`DatabaseSync`) üzerinde `.ctxman/self-knowledge/index.sqlite` içinde tekli veya çoklu depo çalışma alanlarında (`ctxman ask --repo <dir>`, MCP `ask_codebase` `repos`) SHA-256 artımlı indeksleme
 - **Çevrimdışı `AutoEmbeddingProvider`**: `@xenova/transformers` kuruluysa kullanır, aksi halde deterministik 256 boyutlu `LocalHashEmbeddingProvider`'a otomatik geçer
 - **Reciprocal Rank Fusion (`ctxman search --hybrid`)**: BM25 kod parçası sıralamasını (`k1 = 1.5, b = 0.75`) semantik vektör benzerliği ile (`1 / (k + rank)`) birleştirir
 

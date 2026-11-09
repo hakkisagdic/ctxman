@@ -10,6 +10,7 @@ the MCP tool `search_code` with `type: "ranked"`, `"hybrid"`, or `"semantic"` (s
 ```bash
 ctxman search "parse config file"
 ctxman search "how authentication sessions expire" --hybrid
+ctxman search "invoice checkout" --repo ../billing-api --repo ../checkout-web
 ctxman search getUserName ./services/api --limit 5
 ```
 
@@ -21,6 +22,7 @@ ctxman search "<query>" [path] [options]
 
 | Option               | Default | Meaning                                                        |
 | -------------------- | ------- | -------------------------------------------------------------- |
+| `--repo <dir>`       |         | Add a repository to a multi-repo workspace (repeatable)        |
 | `-n`, `--limit <n>`  | 10      | Number of results                                              |
 | `--max-tokens <n>`   | 4000    | Token budget for the returned code (all results together)      |
 | `--hybrid`           | off     | Fuse BM25 lexical ranking with local vector embeddings via RRF |
@@ -63,5 +65,7 @@ const hybrid = await hybridSearch('/work/app', 'exponential retry policy', {
   limit: 5,
   maxTokens: 2000,
 });
-const { symbols } = getSymbol('/work/app', 'HttpClient.request');
+const { symbols } = getSymbol('/work/app', 'HttpClient.request', {
+  repos: ['../billing-api', '../checkout-web'], // optional multi-repo symbol lookup
+});
 ```

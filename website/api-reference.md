@@ -79,6 +79,7 @@ Rank code and domain experts using surviving `git blame -w` share (`0.45`), rece
 ctxman who lib/why/index.js:explainHistory
 ctxman who lib/rag
 ctxman who "hybrid search RRF" --limit 5 --style json
+ctxman who "invoice payment" --repo ../billing-api --repo ../checkout-web
 ```
 
 ### `ctxman task "<goal>"`
@@ -111,10 +112,11 @@ ctxman search "sqlite vector cosine similarity" --hybrid
 
 ### `ctxman ask "<question>"`
 
-Query the local SQLite semantic index (`.ctxman/self-knowledge/index.sqlite`):
+Query the local SQLite semantic index (`.ctxman/self-knowledge/index.sqlite`) across one or more `--repo` roots:
 
 ```bash
 ctxman ask "how does export policy redaction work?"
+ctxman ask "how is invoice payment processed?" --repo ../billing-api --repo ../checkout-web
 ```
 
 ### `ctxman count [path|-]`
@@ -165,7 +167,7 @@ ctxman serve --port 3000
 | `git_diff`              | `path`, `branch?`                                                                                           | Validated `git diff <branch>`                                                  |
 | `search_code`           | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`                   | Line search or BM25 / hybrid RRF code-chunk search                             |
 | `list_methods`          | `path`, `file?`                                                                                             | Extracted methods per file                                                     |
-| `get_symbol`            | `path`, `name`, `file?`, `redact?`                                                                          | Full source of a named function, method, or class                              |
+| `get_symbol`            | `path`, `name`, `file?`, `redact?`, `repos?`                                                                | Full source of a named function, method, or class                              |
 | `repo_map`              | `path`, `tokens?`, `focus?`, `repos?`                                                                       | PageRank repository map (`ctxman map`)                                         |
 | `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`                                                               | Pull-request review bundle (`ctxman pr`)                                       |
 | `count_tokens`          | `path` or `text`, `model?`, `top?`                                                                          | Model-aware token count and context window fit (`ctxman count`)                |
@@ -174,10 +176,10 @@ ctxman serve --port 3000
 | `focus_context`         | `path`, `file`, `repos?`, `symbol?`, `depth?`, `direction?`, `callGraph?`, `style?`, `compress?`, `budget?` | Directional `N`-hop import & AST symbol call neighborhood (`ctxman focus`)     |
 | `check_policy`          | `path`                                                                                                      | Effective `.ctxman/policy.json` validation (`ctxman policy`)                   |
 | `audit_log`             | `path`, `since?`, `limit?`                                                                                  | SHA-256 export audit trail (`ctxman audit`)                                    |
-| `ask_codebase`          | `path`, `query`, `limit?`                                                                                   | Offline SQLite semantic search (`ctxman ask`)                                  |
+| `ask_codebase`          | `path`, `query`, `limit?`, `repos?`                                                                         | Offline SQLite semantic search (`ctxman ask`)                                  |
 | `task_context`          | `path`, `task`, `repos?`, `budget?`, `format?`, `callGraph?`, `model?`                                      | Automatic task context bundle with AST call & import neighbors (`ctxman task`) |
 | `diagnose_failure`      | `path`, `trace`, `repos?`, `budget?`, `format?`, `callGraph?`                                               | Stack-trace root-cause diagnosis with AST call neighbors (`ctxman diagnose`)   |
-| `find_experts`          | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                                       | Blame + recency + CODEOWNERS expert ranking (`ctxman who`)                     |
+| `find_experts`          | `path`, `target`, `repos?`, `limit?`, `halfLifeDays?`, `style?`                                             | Blame + recency + CODEOWNERS expert ranking (`ctxman who`)                     |
 | `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`, `repos?`                                         | Query persistent SQLite knowledge graph and `IncrementalAnalyzer` cache        |
 
 ### `query_knowledge_graph` Example Usage
@@ -308,8 +310,11 @@ const why = await explainHistory('/path/to/repo', 'lib/why/index.js:explainHisto
 });
 console.log(why.text);
 
-// 3. Find Domain Experts
-const who = await findExperts('/path/to/repo', 'hybrid search RRF', { limit: 5 });
+// 3. Find Domain Experts (Single or Multi-Repo Workspace)
+const who = await findExperts('/path/to/repo', 'hybrid search RRF', {
+  limit: 5,
+  repos: ['../billing-api', '../checkout-web'],
+});
 console.log(who.experts);
 
 // 4. Task-Driven Context & Failure Diagnosis

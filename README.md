@@ -85,7 +85,7 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 - 🎯 **`ctxman focus`** - Pack a file or `file:symbol` together with its `N`-hop import and AST symbol call neighborhood within a token budget (`--repo` for multi-repo; `docs/commands/focus.md`)
 - 🧭 **`ctxman task`** - Task-driven auto context bundle: hybrid search seeds, 1-hop AST call & import code, 2-hop compressed signatures, and repo map (`--repo` for multi-repo; `docs/commands/task.md`)
 - 🩺 **`ctxman diagnose`** - Stack-trace & failure root-cause bundle: implicated frames, enclosing methods, 1-hop AST call & import neighbors, and git history (`--repo` for multi-repo; `docs/commands/diagnose.md`)
-- 👥 **`ctxman who`** - Rank domain experts via surviving `git blame -w` share, recency-decayed commits, and `CODEOWNERS` (`docs/commands/who.md`)
+- 👥 **`ctxman who`** - Rank domain experts via surviving `git blame -w` share, recency-decayed commits, and `CODEOWNERS` (`--repo` for multi-repo; `docs/commands/who.md`)
 - 🗺️ **`ctxman map`** - Ranked repository map (import graph + git history) within a token budget (`--repo` for multi-repo)
 - 🔍 **`ctxman pr`** - Review context for a branch: log, changed methods, diff, related tests
 - 🧭 **`ctxman why`** - Why code looks as it does: commits, linked issues and PRs, optional GitHub/GitLab discussions (`--discussions`), owners, co-changed files, ADRs and tests

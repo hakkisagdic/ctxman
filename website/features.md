@@ -8,7 +8,7 @@ Ctxman is a local-first AI Code Intelligence & Context Engineering Platform desi
 
 - **PageRank Repository Map & AST Call Graph (`ctxman map`)**: Ranks files across 14+ languages using PageRank over the import graph blended with git change frequency, symbol references, and cross-file AST symbol call edges (`--call-graph`, `--focus file:symbol`), fitting function signatures into any token budget
 - **Directional Import & Symbol Call Focus (`ctxman focus`)**: Packs a target file or symbol (`<file>:<symbol>`) together with its `N`-hop outgoing imports/callees and incoming importers/callers (`--direction both|imports|importers`, `--calls-only`, `--callers-only`, including intra-file helper closures and barrel re-exports) without shared-hub explosion
-- **Multi-Repo Workspaces (`--repo <dir>`)**: Merge multiple repositories under `<alias>/<path>` namespaces within a single shared token budget across `map`, `search`, `pack`, `focus`, `task`, `diagnose`, and `watch` with cross-repo import and AST symbol call-graph traversal (`buildWorkspaceGraph`)
+- **Multi-Repo Workspaces (`--repo <dir>`)**: Merge multiple repositories under `<alias>/<path>` namespaces within a single shared token budget across `map`, `search`, `pack`, `focus`, `task`, `diagnose`, `who`, `ask`, and `watch` (plus `repos` on MCP `get_symbol`) with cross-repo import and AST symbol call-graph traversal (`buildWorkspaceGraph`)
 
 ```bash
 # Ranked repository map with cross-file AST symbol call annotations
@@ -21,14 +21,15 @@ ctxman focus lib/why/index.js:explainHistory --depth 1 --budget 16k
 ### Code Archaeology (`why`) & Expert Finder (`who`)
 
 - **Why Is the Code Like This? (`ctxman why`)**: Explains any file, symbol (`file:symbol`), or line range (`file#L10-L40`) using git history, PR/issue references, remote GitHub/GitLab discussions (`--discussions`), `@plansmithai/analyzer` SQLite institutional citations (`--analyzer-db`), blame ownership, co-change coupling, ADRs, TODOs, and tests
-- **Who Knows About This? (`ctxman who`)**: Ranks domain experts by fusing surviving `git blame -w` line ownership (`0.45`), exponentially decayed commit history (`0.35`, 90-day half-life), total commit share (`0.20`), and `CODEOWNERS` stewardship (`+0.15`), with automatic BM25 topic-to-file resolution
+- **Who Knows About This? (`ctxman who`)**: Ranks domain experts across one or more `--repo` roots by fusing surviving `git blame -w` line ownership (`0.45`), exponentially decayed commit history (`0.35`, 90-day half-life), total commit share (`0.20`), and `CODEOWNERS` stewardship (`+0.15`), with automatic BM25 topic-to-file resolution
 
 ```bash
 # Explain a function with institutional memory citations
 ctxman why lib/why/index.js:explainHistory --analyzer
 
-# Find top experts for a file, symbol, directory, or topic
+# Find top experts for a file, symbol, directory, or topic (single or multi-repo)
 ctxman who "hybrid search RRF"
+ctxman who "invoice payment" --repo ../billing-api --repo ../checkout-web
 ```
 
 ### Task Context (`task`), Failure Diagnosis (`diagnose`) & PR Review (`pr`)
@@ -47,7 +48,7 @@ ctxman pr --base main --budget 24k
 
 ### Offline SQLite RAG & Hybrid Search (`search` & `ask`)
 
-- **Zero-Native-Binary `SqliteVectorStore`**: Built on Node.js 22/24 `node:sqlite` (`DatabaseSync`) with SHA-256 incremental indexing in `.ctxman/self-knowledge/index.sqlite`
+- **Zero-Native-Binary `SqliteVectorStore`**: Built on Node.js 22/24 `node:sqlite` (`DatabaseSync`) with SHA-256 incremental indexing in `.ctxman/self-knowledge/index.sqlite` across single or multi-repo workspaces (`ctxman ask --repo <dir>`, MCP `ask_codebase` `repos`)
 - **Offline `AutoEmbeddingProvider`**: Uses `@xenova/transformers` when installed and falls back automatically to deterministic 256-dim `LocalHashEmbeddingProvider`
 - **Reciprocal Rank Fusion (`ctxman search --hybrid`)**: Fuses BM25 code-chunk ranking (`k1 = 1.5, b = 0.75`) with semantic vector similarity (`1 / (k + rank)`)
 

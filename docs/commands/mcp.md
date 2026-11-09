@@ -174,7 +174,7 @@ $ ctxman mcp uninstall --client claude-desktop
 | `git_diff`              | `path`, `branch?`                                                                                                          | `git diff <branch>`                                                                                                     |
 | `search_code`           | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`                                  | Matching lines or ranked/hybrid code chunks (below)                                                                     |
 | `list_methods`          | `path` (directory or file), `file?`                                                                                        | Methods per file                                                                                                        |
-| `get_symbol`            | `path`, `name`, `file?`, `redact?`                                                                                         | Source of a named method, function or class                                                                             |
+| `get_symbol`            | `path`, `name`, `file?`, `redact?`, `repos?`                                                                               | Source of a named method, function or class                                                                             |
 | `repo_map`              | `path`, `tokens?`, `focus?`, `repos?`                                                                                      | Ranked repository map within a token budget (`ctxman map`)                                                              |
 | `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`                                                                              | Review context for a branch (`ctxman pr`)                                                                               |
 | `count_tokens`          | `path` or `text`, `model?`, `top?`                                                                                         | Token count for a model and the fit in its window (`ctxman count`)                                                      |
@@ -183,10 +183,10 @@ $ ctxman mcp uninstall --client claude-desktop
 | `focus_context`         | `path`, `file`, `repos?`, `symbol?`, `depth?`, `direction?`, `callGraph?`, `style?`, `compress?`, `budget?`                | Import & AST symbol call-graph neighborhood slice around a file or `file:symbol` (`ctxman focus`)                       |
 | `check_policy`          | `path`                                                                                                                     | The effective export policy, or why its files are invalid (`ctxman policy check`)                                       |
 | `audit_log`             | `path`, `since?`, `limit?`                                                                                                 | Exports recorded in the policy's audit log (`ctxman audit`)                                                             |
-| `ask_codebase`          | `path`, `query`, `limit?`                                                                                                  | Files closest in meaning to a question, from a local SQLite embedding index (`ctxman ask`)                              |
+| `ask_codebase`          | `path`, `query`, `limit?`, `repos?`                                                                                        | Files closest in meaning to a question, from a local SQLite embedding index (`ctxman ask`)                              |
 | `task_context`          | `path`, `task`, `repos?`, `budget?`, `format?`, `callGraph?`, `model?`                                                     | Task-driven auto context: hybrid search seeds, AST call & import 1-hop code, 2-hop signatures, repo map (`ctxman task`) |
 | `diagnose_failure`      | `path`, `trace`, `repos?`, `budget?`, `format?`, `callGraph?`                                                              | Stack-trace & failure root-cause bundle: implicated frames, methods, AST call & import 1-hop & git history              |
-| `find_experts`          | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                                                      | Expert Finder ("Who knows about this?"): blame share, recency-decayed commits & CODEOWNERS (`ctxman who`)               |
+| `find_experts`          | `path`, `target`, `repos?`, `limit?`, `halfLifeDays?`, `style?`                                                            | Expert Finder ("Who knows about this?"): blame share, recency-decayed commits & CODEOWNERS (`ctxman who`)               |
 | `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`, `repos?`                                                        | File nodes, method declarations, and import/dependency edges from `.ctxman/self-knowledge/index.sqlite`                 |
 
 `explain_history` takes `patches?` (each commit's diff), `discussions?` (GitHub/GitLab PR, MR and
@@ -218,7 +218,7 @@ bootstrapping the graph when empty or when `refresh: true` is passed, and honour
 `.ctxman/policy.json` deny rules. When `repos` is provided, nodes and cross-repo import edges across all
 repositories are indexed and returned under `<alias>/<path>`.
 
-`repo_map`, `search_code` (`ranked`, `semantic`, `hybrid`), `pack_context`, `focus_context`, `task_context`, `diagnose_failure`, and `query_knowledge_graph` accept an optional
+`repo_map`, `search_code` (`ranked`, `semantic`, `hybrid`), `get_symbol`, `pack_context`, `focus_context`, `ask_codebase`, `task_context`, `diagnose_failure`, `find_experts`, and `query_knowledge_graph` accept an optional
 `repos` array of repository directories to run across a multi-repository workspace under a single
 shared token budget, prefixing paths with `<alias>/<path>`. When `--root` is active, every entry in
 `repos` (and `analyzerDb` on `explain_history`) must also resolve inside the sandbox root.
@@ -329,7 +329,7 @@ narrows to the methods of a class (for Go, of the receiver type). Every match is
 
 A miss looks like `{ "match": "none", "total": 0, "symbols": [], "suggestions": [{ "name":
 "expireSession", "kind": "method", "parent": "SessionStore", "file": "src/session.js",
-"startLine": 6 }] }`. `file` restricts the lookup to one project-relative file.
+"startLine": 6 }] }`. `file` restricts the lookup to one project-relative file (or `<alias>/<path>` when `repos` is passed).
 
 Both tools use the Scanner, so `.gitignore`, `.contextignore` and `.contextinclude` apply, and
 both redact secrets in the code they return unless `redact: false` is passed.

@@ -20,8 +20,22 @@ ctxman who lib/why/index.js:explainHistory          # specific function/method
 ctxman who lib/why/index.js#L1-L80                  # specific line range
 ctxman who lib/rag                                  # directory / subsystem
 ctxman who "hybrid search RRF"                      # natural-language topic (BM25 resolution)
+ctxman who "invoice payment" --repo ../billing-api --repo ../checkout-web
+ctxman who billing-api/src/invoice.js:createInvoice --repo ../billing-api --repo ../checkout-web
 ctxman who lib/api/mcp/server.js --style json       # structured JSON output
 ```
+
+## Multi-Repository Workspaces (`--repo <dir>`)
+
+Pass `--repo <dir>` (repeatable) to rank domain experts across multiple repositories in a single
+workspace:
+
+- Targets can be `<alias>/<path>[:symbol|#Lstart-Lend]`, an alias directory (`<alias>` or
+  `<alias>/<subdir>`), a relative path unambiguous across the workspace, or a natural-language
+  topic query resolved across all repositories via `searchWorkspace`.
+- `git blame -w`, `git log`, and `CODEOWNERS` rules are evaluated inside each resolved file's
+  owning repository and aggregated across authors, while enforcing each repository's
+  `.ctxman/policy.json` deny rules.
 
 ## Scoring Formula
 
@@ -48,6 +62,7 @@ date.
 
 | Option              | Default    | Description                                                     |
 | ------------------- | ---------- | --------------------------------------------------------------- |
+| `--repo DIR`        | none       | Add a repository to a multi-repo workspace (repeatable)         |
 | `-n, --limit N`     | `5`        | Maximum number of ranked experts to return                      |
 | `--half-life DAYS`  | `90`       | Exponential recency decay half-life in days                     |
 | `--window N`        | `200`      | Maximum non-merge commits examined in `git log`                 |
@@ -65,10 +80,11 @@ const result = await findExperts('/path/to/repo', 'lib/why/index.js:explainHisto
   limit: 5,
   halfLifeDays: 90,
   style: 'markdown', // or 'xml', 'json'
+  repos: ['../billing-api', '../checkout-web'], // optional multi-repo workspace
 });
 
 console.log(result.text);
 console.log(result.experts);
 ```
 
-The MCP server exposes `find_experts` with `path`, `target`, `limit`, `halfLifeDays`, and `style`.
+The MCP server exposes `find_experts` with `path`, `target`, `repos`, `limit`, `halfLifeDays`, and `style`.
