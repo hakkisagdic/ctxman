@@ -23,9 +23,10 @@ hosted assistants (Copilot content exclusion, Sourcegraph context filters, ...).
 ## Quick start
 
 ```bash
-ctxman policy init      # writes .ctxman/policy.json (starter policy)
+ctxman policy init                        # writes .ctxman/policy.json (starter policy)
 $EDITOR .ctxman/policy.json
-ctxman policy check     # validates it and prints the effective policy
+ctxman policy check                       # validates it and prints the effective policy
+ctxman policy check --repo ../billing-api # validate policies across a multi-repo workspace
 git add .ctxman/policy.json
 echo .ctxman/audit.log >> .gitignore
 ```
@@ -54,6 +55,17 @@ Both apply at the same time, and the stricter value wins on every field:
 
 If `CTXMAN_POLICY` names a file that does not exist, or either file is invalid, commands
 that export stop with exit code 2 instead of running without the policy.
+
+### Multi-repository workspaces (`--repo <dir>`)
+
+Pass `--repo <dir>` (repeatable; `--repo=<dir>` works too) to `ctxman policy check` to validate
+`.ctxman/policy.json` (plus `CTXMAN_POLICY`) across every repository in a workspace in one pass:
+
+- Every repository is inspected without stopping at the first invalid file, printing per-repo
+  status, rule counts, and validation errors.
+- It computes the strictest effective workspace-wide constraints (`requireRedaction` if any repo
+  requires it, the lowest `maxExportTokens`, and the intersection of `allowedTargetModels`) and
+  exits with code `2` if any repository policy is invalid.
 
 ## Schema
 
@@ -134,7 +146,7 @@ tokens" figure ctxman prints), not the length of the serialized output.
 
 ## Audit log
 
-While `audit` is enabled, each export appends one JSON object per line (JSON Lines). The
+While `audit` is enabled, each export appends one JSON line (JSON Lines). The
 log is append-only, created with its directories on first use (mode 0600), and a write
 failure only prints a warning: it never fails the export.
 
@@ -176,6 +188,7 @@ failure only prints a warning: it never fails the export.
 ctxman audit                     # last 50 exports as a table
 ctxman audit --since 7d          # an age (30m, 12h, 7d, 2w) or a date (2026-10-01, ISO time)
 ctxman audit --limit 0           # everything
+ctxman audit --repo ../billing-api --repo ../checkout-web --since 7d
 ctxman audit --json | jq '.[] | select(.outcome == "refused")'
 ctxman audit --file /var/log/ctxman/audit.log
 ```
@@ -189,16 +202,20 @@ TIME (UTC)           RESULT   USER         COMMAND                    DESTINATIO
 2 events from /work/app/.ctxman/audit.log
 ```
 
-| Option         | Meaning                                                                  |
-| -------------- | ------------------------------------------------------------------------ |
-| `--since DATE` | Only events at or after a date/ISO time, or within an age (`7d`)         |
-| `--limit N`    | The last N events (default 50 for the table, all with `--json`; 0 = all) |
-| `--json`       | A JSON array of the events                                               |
-| `--file PATH`  | Read this log instead of the policy's log(s)                             |
+| Option         | Meaning                                                                     |
+| -------------- | --------------------------------------------------------------------------- |
+| `--repo DIR`   | Merge audit logs across a multi-repo workspace (incompatible with `--file`) |
+| `--since DATE` | Only events at or after a date/ISO time, or within an age (`7d`)            |
+| `--limit N`    | The last N events (default 50 for the table, all with `--json`; 0 = all)    |
+| `--json`       | A JSON array of the events                                                  |
+| `--file PATH`  | Read this log instead of the policy's log(s)                                |
 
 Without `--file`, the command reads every log the effective policy writes (events present in
 both the organisation and the project log are shown once), or `.ctxman/audit.log` when no
-policy enables auditing.
+policy enables auditing. With `--repo DIR` (repeatable), `ctxman audit` merges and deduplicates
+audit logs across every repository in the workspace in chronological order, adding a `REPO`
+column to the table output and a `repo` alias field to `--json` entries; passing both `--file`
+and `--repo` exits with code `2`.
 
 ## AI-tool ignore files
 
@@ -257,7 +274,8 @@ export time.
 ## Using the policy from code
 
 ```js
-import { loadPolicy, guardExport, enforceExport, recordExport } from './lib/policy/index.js';
+import { loadPolicy, checkWorkspacePolicies, readWorkspaceAuditLogs } from 'ctxman';
+import { guardExport, enforceExport, recordExport } from './lib/policy/index.js';
 
 const policy = loadPolicy(root); // { env } option to read another environment
 const scanner = new Scanner(root, { policy }); // drops denied files
@@ -273,10 +291,17 @@ guardExport(policy, {
   redactions, // count, or { type: count } from the secret redactor
   text, // only its SHA-256 is logged
 }); // throws PolicyViolationError (statusCode 403, exitCode 3)
+
+// Validate policies or merge audit logs across a multi-repo workspace:
+const summary = checkWorkspacePolicies(root, ['../billing-api', '../checkout-web']);
+const audit = readWorkspaceAuditLogs(root, ['../billing-api', '../checkout-web'], { limit: 50 });
 ```
 
 `guardExport()` is `enforceExport()` followed by `recordExport()`; call them separately when
 the check must happen before the export is built.
+
+The MCP server exposes `check_policy` (`path`, `repos?`) and `audit_log` (`path`, `since?`,
+`limit?`, `repos?`).
 
 ## Limits
 

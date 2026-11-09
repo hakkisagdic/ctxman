@@ -55,19 +55,21 @@ ctxman pack --include "lib/**/*.js" --max-tokens 50000
 
 ### `ctxman pr [dir]`
 
-Assemble pull-request review context (summary, commit log, changed methods, diff, and related tests):
+Assemble pull-request review context (summary, commit log, changed methods, diff, and related tests) across one or more `--repo` roots within a shared budget:
 
 ```bash
 ctxman pr --base main --head HEAD --budget 24k
+ctxman pr --base main --repo ../billing-api --repo ../checkout-web --budget 24k
 ```
 
 ### `ctxman why <target>`
 
-Explain why a file, symbol (`file:symbol`), or line range (`file#L10-L40`) looks the way it does:
+Explain why a file, symbol (`file:symbol`), or line range (`file#L10-L40`) looks the way it does across one or more `--repo` roots:
 
 ```bash
 ctxman why lib/why/index.js:explainHistory
 ctxman why lib/why/index.js:explainHistory --discussions --analyzer
+ctxman why billing-api/src/invoice.js:createInvoice --repo ../billing-api --repo ../checkout-web
 ctxman why lib/why/index.js#L1-L80 --patches --budget 12k
 ```
 
@@ -130,12 +132,14 @@ ctxman count . --model claude-opus-5-5 --api --json
 
 ### `ctxman policy` & `ctxman audit`
 
-Validate `.ctxman/policy.json` Data Shield rules and inspect the SHA-256 export audit trail:
+Validate `.ctxman/policy.json` Data Shield rules and inspect the SHA-256 export audit trail across single or multi-repo (`--repo`) workspaces:
 
 ```bash
 ctxman policy init
 ctxman policy check
+ctxman policy check --repo ../billing-api --repo ../checkout-web
 ctxman audit --since 7d --limit 20
+ctxman audit --repo ../billing-api --repo ../checkout-web --since 7d
 ```
 
 ### `ctxman mcp`
@@ -169,13 +173,13 @@ ctxman serve --port 3000
 | `list_methods`          | `path`, `file?`                                                                                             | Extracted methods per file                                                     |
 | `get_symbol`            | `path`, `name`, `file?`, `redact?`, `repos?`                                                                | Full source of a named function, method, or class                              |
 | `repo_map`              | `path`, `tokens?`, `focus?`, `repos?`                                                                       | PageRank repository map (`ctxman map`)                                         |
-| `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`                                                               | Pull-request review bundle (`ctxman pr`)                                       |
+| `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`, `repos?`                                                     | Pull-request review bundle (`ctxman pr`)                                       |
 | `count_tokens`          | `path` or `text`, `model?`, `top?`                                                                          | Model-aware token count and context window fit (`ctxman count`)                |
-| `explain_history`       | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?`               | Git archaeology & institutional citations (`ctxman why`)                       |
+| `explain_history`       | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?`, `repos?`     | Git archaeology & institutional citations (`ctxman why`)                       |
 | `pack_context`          | `path`, `include?`, `exclude?`, `files?`, `style?`, `compress?`, `budget?`, `repos?`                        | Packed codebase document (`ctxman pack`)                                       |
 | `focus_context`         | `path`, `file`, `repos?`, `symbol?`, `depth?`, `direction?`, `callGraph?`, `style?`, `compress?`, `budget?` | Directional `N`-hop import & AST symbol call neighborhood (`ctxman focus`)     |
-| `check_policy`          | `path`                                                                                                      | Effective `.ctxman/policy.json` validation (`ctxman policy`)                   |
-| `audit_log`             | `path`, `since?`, `limit?`                                                                                  | SHA-256 export audit trail (`ctxman audit`)                                    |
+| `check_policy`          | `path`, `repos?`                                                                                            | Effective `.ctxman/policy.json` validation (`ctxman policy`)                   |
+| `audit_log`             | `path`, `since?`, `limit?`, `repos?`                                                                        | SHA-256 export audit trail (`ctxman audit`)                                    |
 | `ask_codebase`          | `path`, `query`, `limit?`, `repos?`                                                                         | Offline SQLite semantic search (`ctxman ask`)                                  |
 | `task_context`          | `path`, `task`, `repos?`, `budget?`, `format?`, `callGraph?`, `model?`                                      | Automatic task context bundle with AST call & import neighbors (`ctxman task`) |
 | `diagnose_failure`      | `path`, `trace`, `repos?`, `budget?`, `format?`, `callGraph?`                                               | Stack-trace root-cause diagnosis with AST call neighbors (`ctxman diagnose`)   |
@@ -281,6 +285,8 @@ import {
   packWorkspace,
   loadPolicy,
   Policy,
+  checkWorkspacePolicies,
+  readWorkspaceAuditLogs,
 
   // Core v3 Pipeline
   Scanner,
@@ -303,10 +309,11 @@ const map = renderRepoMap('/path/to/repo', {
 });
 console.log(map.output);
 
-// 2. Explain History with Institutional Citations
-const why = await explainHistory('/path/to/repo', 'lib/why/index.js:explainHistory', {
+// 2. Explain History with Institutional Citations (Single or Multi-Repo Workspace)
+const why = await explainHistory('/path/to/repo', 'billing-api/src/invoice.js:createInvoice', {
   analyzer: true,
   budget: 12000,
+  repos: ['../billing-api', '../checkout-web'],
 });
 console.log(why.text);
 
@@ -317,8 +324,13 @@ const who = await findExperts('/path/to/repo', 'hybrid search RRF', {
 });
 console.log(who.experts);
 
-// 4. Task-Driven Context & Failure Diagnosis
+// 4. Task-Driven Context, PR Review & Failure Diagnosis
 const taskBundle = await buildTaskContext('/path/to/repo', 'add retry backoff', { budget: 32000 });
+const prBundle = await buildPrContext('/path/to/repo', {
+  base: 'main',
+  repos: ['../billing-api', '../checkout-web'],
+  budget: 24000,
+});
 const diagReport = await diagnoseFailure('/path/to/repo', errorStackText, { budget: 24000 });
 ```
 

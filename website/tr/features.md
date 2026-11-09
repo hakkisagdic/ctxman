@@ -8,7 +8,7 @@ Ctxman, modern geliştirici ve yapay zeka ajanı iş akışları için tasarlanm
 
 - **PageRank Depo Haritası ve AST Çağrı Grafiği (`ctxman map`)**: 14+ dilde import grafiği üzerindeki PageRank değerini git değişim sıklığı, sembol referansları ve dosyalar arası AST sembol çağrı kenarlarıyla (`--call-graph`, `--focus file:symbol`) birleştirerek en önemli dosya ve fonksiyon imzalarını token bütçesine sığdırır
 - **Yönlü Import ve Sembol Çağrı Komşuluğu (`ctxman focus`)**: Hedef dosya veya sembolü (`<file>:<symbol>`) `N`-hop giden import/çağrılanlar ve gelen importer/çağıranlar (`--direction both|imports|importers`, `--calls-only`, `--callers-only`, dosya içi yardımcı fonksiyon kapanışı ve barrel re-export çözümlemesi dahil) ile ortak hub patlamasına yol açmadan paketler
-- **Çoklu Depo Çalışma Alanı (`--repo <dir>`)**: `map`, `search`, `pack`, `focus`, `task`, `diagnose`, `who`, `ask` ve `watch` komutlarında (ve MCP `get_symbol` `repos` parametresinde) birden fazla depoyu `<alias>/<path>` ad alanları altında, depolar arası import ve AST sembol çağrı grafiği (`buildWorkspaceGraph`) ile tek bir paylaşılan token bütçesinde birleştirir
+- **Çoklu Depo Çalışma Alanı (`--repo <dir>`)**: `map`, `search`, `pack`, `focus`, `task`, `diagnose`, `who`, `why`, `pr`, `ask`, `policy check`, `audit` ve `watch` komutlarında (ve `get_symbol`, `explain_history`, `pr_context`, `check_policy`, `audit_log` dahil tüm MCP çalışma alanı araçlarındaki `repos` parametresinde) birden fazla depoyu `<alias>/<path>` ad alanları altında, depolar arası import ve AST sembol çağrı grafiği (`buildWorkspaceGraph`) ile tek bir paylaşılan token bütçesinde birleştirir
 
 ```bash
 # Dosyalar arası AST sembol çağrılarıyla 2.000 token bütçeli sıralı depo haritası
@@ -20,12 +20,13 @@ ctxman focus lib/why/index.js:explainHistory --depth 1 --budget 16k
 
 ### Kod Arkeolojisi (`why`) ve Uzman Bulucu (`who`)
 
-- **Kod Neden Böyle? (`ctxman why`)**: Herhangi bir dosya, sembol (`file:symbol`) veya satır aralığını (`file#L10-L40`); git geçmişi, PR/issue referansları, GitHub/GitLab tartışmaları (`--discussions`), `@plansmithai/analyzer` SQLite kurumsal hafıza atıfları (`--analyzer-db`), blame sahipliği, birlikte değişen dosyalar, ADR'ler, TODO'lar ve testlerle açıklar
+- **Kod Neden Böyle? (`ctxman why`)**: Bir veya birden fazla `--repo` kökündeki herhangi bir dosya, sembol (`file:symbol`) veya satır aralığını (`file#L10-L40`); git geçmişi, PR/issue referansları, GitHub/GitLab tartışmaları (`--discussions`), `@plansmithai/analyzer` SQLite kurumsal hafıza atıfları (`--analyzer-db`), blame sahipliği, birlikte değişen dosyalar ve çapraz depo ADR'ler, dokümanlar, TODO'lar ve testlerle açıklar
 - **Bunu Kim Biliyor? (`ctxman who`)**: Bir veya birden fazla `--repo` kökünde yaşayan `git blame -w` satır sahipliği (`0.45`), üstel zaman aşınmalı commit geçmişi (`0.35`, 90 gün yarı ömür), toplam commit payı (`0.20`) ve `CODEOWNERS` sahipliğini (`+0.15`) birleştirerek uzmanları sıralar; doğal dil konularını BM25 ile otomatik olarak dosyalara çözümler
 
 ```bash
-# Kurumsal hafıza atıflarıyla bir fonksiyonu açıkla
+# Kurumsal hafıza atıflarıyla bir fonksiyonu açıkla (tekli veya çoklu depo)
 ctxman why lib/why/index.js:explainHistory --analyzer
+ctxman why billing-api/src/invoice.js:createInvoice --repo ../billing-api --repo ../checkout-web
 
 # Dosya, sembol, dizin veya konu için uzmanları bul (tekli veya çoklu depo)
 ctxman who "hybrid search RRF"
@@ -36,7 +37,7 @@ ctxman who "invoice payment" --repo ../billing-api --repo ../checkout-web
 
 - **Görev Odaklı Otomatik Bağlam (`ctxman task`)**: Hibrit BM25 + vektör araması ile tohum dosya ve sembolleri bulur, 1-hop dosyalar arası AST sembol çağıran/çağrılanları (ve import komşularını) tam kod ve 2-hop sıkıştırılmış imzalar olarak mimari depo haritasıyla `--budget` (varsayılan `32000`) içinde birleştirir
 - **Stack-Trace Kök Neden Paketi (`ctxman diagnose`)**: Node/TS/JS, Python, Go, Rust, Java, C# ve Vitest yığın izlerini ayrıştırır; çevreleyen fonksiyonları, 1-hop AST sembol çağrı ve import komşularını (`caller -> callee`) ve yakın git commit'lerini (`explainHistory`) `--budget` (varsayılan `24000`) içinde sunar
-- **Pull Request Bağlamı (`ctxman pr`)**: Kod incelemesi için branch özeti, commit günlüğü, değişen fonksiyonların tam kodu, diff ve ilgili testleri toplar
+- **Pull Request Bağlamı (`ctxman pr`)**: Bir veya birden fazla `--repo` kökünde kod incelemesi için branch özeti, commit günlüğü, değişen fonksiyonların tam kodu, diff ve ilgili testleri tek bir paylaşılan token bütçesi altında toplar
 
 ```bash
 ctxman task "add OAuth token refresh retry logic" --budget 32k
@@ -44,6 +45,7 @@ ctxman task "fix invoice checkout webhook" --repo ../billing-api --repo ../check
 npm test 2>&1 | ctxman diagnose --budget 20k
 ctxman diagnose "Error at billing-api/src/invoice.js:3:10" --repo ../checkout-web
 ctxman pr --base main --budget 24k
+ctxman pr --base main --repo ../billing-api --repo ../checkout-web --budget 24k
 ```
 
 ### Çevrimdışı SQLite RAG ve Hibrit Arama (`search` & `ask`)
@@ -198,8 +200,8 @@ LLM planlaması için doğru token sayımı:
 
 - **Yol Engelleme Kuralları**: Hassas dosyaların dışa aktarımlara, RAG indekslerine veya MCP yanıtlarına girmesini engeller
 - **Otomatik Sır Maskeleme**: Bulut anahtarlarını, token'ları ve PEM özel anahtarlarını `[REDACTED:<type>]` olarak maskeler
-- **Token Sınırları ve Model İzin Listeleri**: Kurum genelinde dışa aktarım sınırları (`CTXMAN_POLICY`)
-- **Denetim Günlüğü (`ctxman audit`)**: Her dışa aktarımı zaman damgası, komut, dosya sayısı, token sayısı ve SHA-256 özetiyle kaydeder
+- **Token Sınırları ve Model İzin Listeleri**: Kurum ve çoklu depo çalışma alanı genelinde dışa aktarım sınırları (`CTXMAN_POLICY`, `ctxman policy check --repo <dir>`)
+- **Denetim Günlüğü (`ctxman audit`)**: Her dışa aktarımı zaman damgası, komut, dosya sayısı, token sayısı ve SHA-256 özetiyle kaydeder; `--repo <dir>` ile depolar arası birleştirilmiş kronolojik denetim görünümü sunar
 
 ## 📊 Çıktı Formatları
 

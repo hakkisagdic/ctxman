@@ -50,6 +50,46 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
     }
   });
 
+  it('verifies multi-repo (--repo / repos) documentation across command docs, README, and EN/TR website', () => {
+    for (const rel of [
+      'docs/commands/why.md',
+      'docs/commands/pr.md',
+      'docs/commands/policy.md',
+      'README.md',
+      'README-tr.md',
+    ]) {
+      const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+      expect(text, `${rel} missing --repo`).toContain('--repo');
+    }
+
+    const policyDoc = fs.readFileSync(path.join(ROOT, 'docs/commands/policy.md'), 'utf8');
+    expect(policyDoc).toContain('checkWorkspacePolicies');
+    expect(policyDoc).toContain('readWorkspaceAuditLogs');
+
+    const mcpDoc = fs.readFileSync(path.join(ROOT, 'docs/commands/mcp.md'), 'utf8');
+    expect(mcpDoc).toMatch(/`pr_context`\s*\|[^\n]*`repos\?`/);
+    expect(mcpDoc).toMatch(/`explain_history`\s*\|[^\n]*`repos\?`/);
+    expect(mcpDoc).toMatch(/`check_policy`\s*\|[^\n]*`repos\?`/);
+    expect(mcpDoc).toMatch(/`audit_log`\s*\|[^\n]*`repos\?`/);
+
+    for (const rel of ['website/api-reference.md', 'website/tr/api-reference.md']) {
+      const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+      expect(text, `${rel} missing checkWorkspacePolicies`).toContain('checkWorkspacePolicies');
+      expect(text, `${rel} missing readWorkspaceAuditLogs`).toContain('readWorkspaceAuditLogs');
+      expect(text).toMatch(/`pr_context`\s*\|[^\n]*`repos\?`/);
+      expect(text).toMatch(/`explain_history`\s*\|[^\n]*`repos\?`/);
+      expect(text).toMatch(/`check_policy`\s*\|[^\n]*`repos\?`/);
+      expect(text).toMatch(/`audit_log`\s*\|[^\n]*`repos\?`/);
+    }
+
+    for (const rel of ['website/features.md', 'website/tr/features.md']) {
+      const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+      expect(text).toContain('ctxman why billing-api/src/invoice.js:createInvoice --repo');
+      expect(text).toContain('ctxman pr --base main --repo');
+      expect(text).toContain('ctxman policy check --repo');
+    }
+  });
+
   it('verifies VitePress ADR & Knowledge Graph pages and @include targets in EN and TR', () => {
     const pages = [
       'website/adr.md',
@@ -144,6 +184,12 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
     const explainSchema = tools.find((t) => t.name === 'explain_history').inputSchema.properties;
     expect(explainSchema.analyzer).toBeDefined();
     expect(explainSchema.analyzerDb).toBeDefined();
+    expect(explainSchema.repos).toBeDefined();
+
+    for (const toolName of ['pr_context', 'check_policy', 'audit_log']) {
+      const props = tools.find((t) => t.name === toolName).inputSchema.properties;
+      expect(props.repos, `${toolName} missing repos schema`).toBeDefined();
+    }
 
     // Verify sandbox enforcement on analyzerDb when --root is active
     const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-mcp-why-root-'));

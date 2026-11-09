@@ -55,19 +55,21 @@ ctxman pack --include "lib/**/*.js" --max-tokens 50000
 
 ### `ctxman pr [dir]`
 
-Pull-request inceleme bağlamı (özet, commit günlüğü, değişen fonksiyonlar, diff ve ilgili testler) oluşturur:
+Bir veya birden fazla `--repo` kökünde paylaşılan tek bir bütçe altında pull-request inceleme bağlamı (özet, commit günlüğü, değişen fonksiyonlar, diff ve ilgili testler) oluşturur:
 
 ```bash
 ctxman pr --base main --head HEAD --budget 24k
+ctxman pr --base main --repo ../billing-api --repo ../checkout-web --budget 24k
 ```
 
 ### `ctxman why <target>`
 
-Bir dosya, sembol (`file:symbol`) veya satır aralığının (`file#L10-L40`) neden öyle göründüğünü açıklar:
+Bir veya birden fazla `--repo` kökünde bir dosya, sembol (`file:symbol`) veya satır aralığının (`file#L10-L40`) neden öyle göründüğünü açıklar:
 
 ```bash
 ctxman why lib/why/index.js:explainHistory
 ctxman why lib/why/index.js:explainHistory --discussions --analyzer
+ctxman why billing-api/src/invoice.js:createInvoice --repo ../billing-api --repo ../checkout-web
 ctxman why lib/why/index.js#L1-L80 --patches --budget 12k
 ```
 
@@ -130,12 +132,14 @@ ctxman count . --model claude-opus-5-5 --api --json
 
 ### `ctxman policy` ve `ctxman audit`
 
-`.ctxman/policy.json` Veri Kalkanı kurallarını doğrular ve SHA-256 dışa aktarım denetim günlüğünü inceler:
+Tekli veya çoklu depo (`--repo`) çalışma alanlarında `.ctxman/policy.json` Veri Kalkanı kurallarını doğrular ve SHA-256 dışa aktarım denetim günlüğünü inceler:
 
 ```bash
 ctxman policy init
 ctxman policy check
+ctxman policy check --repo ../billing-api --repo ../checkout-web
 ctxman audit --since 7d --limit 20
+ctxman audit --repo ../billing-api --repo ../checkout-web --since 7d
 ```
 
 ### `ctxman mcp`
@@ -169,13 +173,13 @@ ctxman serve --port 3000
 | `list_methods`          | `path`, `file?`                                                                                             | Dosya başına çıkarılan fonksiyonlar                                           |
 | `get_symbol`            | `path`, `name`, `file?`, `redact?`, `repos?`                                                                | İsimle fonksiyon, metot veya sınıfın tam kaynak kodu                          |
 | `repo_map`              | `path`, `tokens?`, `focus?`, `repos?`                                                                       | PageRank depo haritası (`ctxman map`)                                         |
-| `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`                                                               | Pull-request inceleme paketi (`ctxman pr`)                                    |
+| `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`, `repos?`                                                     | Pull-request inceleme paketi (`ctxman pr`)                                    |
 | `count_tokens`          | `path` veya `text`, `model?`, `top?`                                                                        | Modele duyarlı token sayımı ve pencere uyumu (`ctxman count`)                 |
-| `explain_history`       | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?`               | Git arkeolojisi ve kurumsal hafıza atıfları (`ctxman why`)                    |
+| `explain_history`       | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?`, `repos?`     | Git arkeolojisi ve kurumsal hafıza atıfları (`ctxman why`)                    |
 | `pack_context`          | `path`, `include?`, `exclude?`, `files?`, `style?`, `compress?`, `budget?`, `repos?`                        | Paketlenmiş kod tabanı belgesi (`ctxman pack`)                                |
 | `focus_context`         | `path`, `file`, `repos?`, `symbol?`, `depth?`, `direction?`, `callGraph?`, `style?`, `compress?`, `budget?` | Yönlü `N`-hop import ve AST sembol çağrı komşuluğu (`ctxman focus`)           |
-| `check_policy`          | `path`                                                                                                      | Etkin `.ctxman/policy.json` doğrulaması (`ctxman policy`)                     |
-| `audit_log`             | `path`, `since?`, `limit?`                                                                                  | SHA-256 dışa aktarım denetim günlüğü (`ctxman audit`)                         |
+| `check_policy`          | `path`, `repos?`                                                                                            | Etkin `.ctxman/policy.json` doğrulaması (`ctxman policy`)                     |
+| `audit_log`             | `path`, `since?`, `limit?`, `repos?`                                                                        | SHA-256 dışa aktarım denetim günlüğü (`ctxman audit`)                         |
 | `ask_codebase`          | `path`, `query`, `limit?`, `repos?`                                                                         | Çevrimdışı SQLite semantik arama (`ctxman ask`)                               |
 | `task_context`          | `path`, `task`, `repos?`, `budget?`, `format?`, `callGraph?`, `model?`                                      | AST sembol çağrı ve import komşuluklu otomatik görev bağlamı (`ctxman task`)  |
 | `diagnose_failure`      | `path`, `trace`, `repos?`, `budget?`, `format?`, `callGraph?`                                               | AST sembol çağrı komşuluklu stack-trace kök neden teşhisi (`ctxman diagnose`) |
@@ -281,6 +285,8 @@ import {
   packWorkspace,
   loadPolicy,
   Policy,
+  checkWorkspacePolicies,
+  readWorkspaceAuditLogs,
 
   // Çekirdek v3 Hattı
   Scanner,
@@ -303,10 +309,11 @@ const map = renderRepoMap('/path/to/repo', {
 });
 console.log(map.output);
 
-// 2. Kurumsal Hafıza Atıflarıyla Kod Geçmişi Açıklama
-const why = await explainHistory('/path/to/repo', 'lib/why/index.js:explainHistory', {
+// 2. Kurumsal Hafıza Atıflarıyla Kod Geçmişi Açıklama (Tekli veya Çoklu Depo)
+const why = await explainHistory('/path/to/repo', 'billing-api/src/invoice.js:createInvoice', {
   analyzer: true,
   budget: 12000,
+  repos: ['../billing-api', '../checkout-web'],
 });
 console.log(why.text);
 
@@ -317,8 +324,13 @@ const who = await findExperts('/path/to/repo', 'hybrid search RRF', {
 });
 console.log(who.experts);
 
-// 4. Görev Bağlamı ve Hata Teşhisi
+// 4. Görev Bağlamı, PR İncelemesi ve Hata Teşhisi
 const taskBundle = await buildTaskContext('/path/to/repo', 'add retry backoff', { budget: 32000 });
+const prBundle = await buildPrContext('/path/to/repo', {
+  base: 'main',
+  repos: ['../billing-api', '../checkout-web'],
+  budget: 24000,
+});
 const diagReport = await diagnoseFailure('/path/to/repo', errorStackText, { budget: 24000 });
 ```
 

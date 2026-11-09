@@ -17,20 +17,23 @@ ctxman why src/cart.js:total --discussions                         # enrich refe
 ctxman why src/cart.js:total --analyzer-db .plansmith/analyzer.sqlite # attach institutional memory citations
 ctxman why src/cart.js#L40-L72 --patches                           # a line range, with each commit's diff
 ctxman why lib/server.js --since "1 year ago"                      # a whole file, following renames
+ctxman why billing-api/src/invoice.js:createInvoice --repo ../billing-api --repo ../checkout-web
 ctxman why src/cart.js:Cart.total --ask "Why do we round here?" --copy
 ```
 
 ## Targets
 
-Paths are relative to the current directory and must lie inside the repository.
+Paths are relative to the current directory (or prefixed with `<alias>/` when `--repo` is passed)
+and must lie inside a repository in the workspace.
 
-| Target                   | Meaning                                                          |
-| ------------------------ | ---------------------------------------------------------------- |
-| `src/cart.js`            | The whole file; history follows renames (`git log --follow`)     |
-| `src/cart.js:total`      | A function, method or class, with its doc comment and decorators |
-| `src/cart.js:Cart.total` | A method of a class (`Cart::total` and `Cart#total` work too)    |
-| `src/cart.js#L40-L72`    | A line range (GitHub style); `#L40` is a single line             |
-| `src/cart.js:40-72`      | The same range, compiler style                                   |
+| Target                      | Meaning                                                               |
+| --------------------------- | --------------------------------------------------------------------- |
+| `src/cart.js`               | The whole file; history follows renames (`git log --follow`)          |
+| `src/cart.js:total`         | A function, method or class, with its doc comment and decorators      |
+| `src/cart.js:Cart.total`    | A method of a class (`Cart::total` and `Cart#total` work too)         |
+| `src/cart.js#L40-L72`       | A line range (GitHub style); `#L40` is a single line                  |
+| `src/cart.js:40-72`         | The same range, compiler style                                        |
+| `<alias>/src/cart.js:total` | Target inside a named repository of a multi-repo workspace (`--repo`) |
 
 Symbols are found with ctxman's method analyzers (the 14 languages of `ctxman -m`) plus a
 scan for classes, structs, interfaces, traits, `impl` blocks, modules and similar containers.
@@ -45,6 +48,20 @@ fails with up to five close matches:
 $ ctxman why src/cart.js:totl
 ctxman why: Symbol totl not found in src/cart.js. Did you mean: total?
 ```
+
+## Multi-Repository Workspaces (`--repo <dir>`)
+
+Pass `--repo <dir>` (repeatable; `--repo=<dir>` works too) to explain code across a multi-repo
+workspace:
+
+- Targets can be `<alias>/<path>[:symbol|#L10-L40]` or a relative path unambiguous across the
+  workspace. You can even run `ctxman why` from a non-git parent directory as long as the
+  resolved target belongs to one of the `--repo` git repositories.
+- `git log`, `git blame -w`, and co-change coupling run inside the target file's owning
+  repository, while **Related text** (ADRs, changelogs, docs, code comments) and **Tests** are
+  discovered across every repository in the workspace and reported under `<alias>/<path>`.
+- Every repository's `.ctxman/policy.json` is enforced: denied targets exit with code `3`, and
+  denied files in sibling repositories are omitted from cross-repo related text and tests.
 
 ## What the document contains
 
@@ -100,6 +117,7 @@ Sections appear in this order; empty ones are left out.
 
 | Option                 | Description                                                                |
 | ---------------------- | -------------------------------------------------------------------------- |
+| `--repo DIR`           | Add a repository to a multi-repo workspace (repeatable)                    |
 | `-n, --limit N`        | Commits to include (default 20)                                            |
 | `--since DATE`         | Only commits after DATE (`2024-01-01`, `"6 months ago"`)                   |
 | `--rev REF`            | Explain the code as of REF instead of the working tree                     |
@@ -143,12 +161,14 @@ commit.
 
 ## Styles
 
-- **Markdown** (default): the sections above, with fenced source and diffs (the fence grows
-  when the code contains backticks) and commit/discussion bodies as quotes.
-- **XML**: `<why_context>` with `<target>`, `<history>` / `<commit>`, `<references>`,
-  `<discussions>` (when populated), `<institutional_citations>` (when populated), `<ownership>`,
-  `<coupling>`, `<related>`, `<notes>`, `<tests>` and `<question>`; text is entity-escaped.
-- **JSON**: the collected data (`target`, `repository`, `history`, `references`,
+- **Markdown** (default): the sections above (plus `Workspace repositories` when `--repo` is
+  used), with fenced source and diffs (the fence grows when the code contains backticks) and
+  commit/discussion bodies as quotes.
+- **XML**: `<why_context>` with `<repositories>` (when multi-repo), `<target>`, `<history>` /
+  `<commit>`, `<references>`, `<discussions>` (when populated), `<institutional_citations>`
+  (when populated), `<ownership>`, `<coupling>`, `<related>`, `<notes>`, `<tests>` and
+  `<question>`; text is entity-escaped.
+- **JSON**: the collected data (`repos`, `target`, `repository`, `history`, `references`,
   `discussions`, `institutionalCitations`, `ownership`, `coupling`, `related`, `notes`, `tests`,
   `warnings`, `trimmed`, `question`).
 
@@ -165,6 +185,7 @@ const result = await explainHistory('/path/to/repo', 'src/cart.js:total', {
   maxDiscussions: 5,
   analyzer: true,
   analyzerDb: '/path/to/repo/.plansmith/analyzer.sqlite',
+  repos: ['../billing-api', '../checkout-web'], // optional multi-repo workspace
   style: 'markdown', // or 'xml', 'json'
   budget: 8000,
   ask: 'Why do we round here?',
@@ -174,4 +195,4 @@ console.log(result.data.institutionalCitations);
 ```
 
 The MCP server exposes `explain_history` with `path`, `target`, `limit`, `budget`, `since`,
-`patches`, `discussions`, `maxDiscussions`, `analyzer`, and `analyzerDb`.
+`patches`, `discussions`, `maxDiscussions`, `analyzer`, `analyzerDb`, and `repos`.

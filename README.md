@@ -87,12 +87,12 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 - 🩺 **`ctxman diagnose`** - Stack-trace & failure root-cause bundle: implicated frames, enclosing methods, 1-hop AST call & import neighbors, and git history (`--repo` for multi-repo; `docs/commands/diagnose.md`)
 - 👥 **`ctxman who`** - Rank domain experts via surviving `git blame -w` share, recency-decayed commits, and `CODEOWNERS` (`--repo` for multi-repo; `docs/commands/who.md`)
 - 🗺️ **`ctxman map`** - Ranked repository map (import graph + git history) within a token budget (`--repo` for multi-repo)
-- 🔍 **`ctxman pr`** - Review context for a branch: log, changed methods, diff, related tests
-- 🧭 **`ctxman why`** - Why code looks as it does: commits, linked issues and PRs, optional GitHub/GitLab discussions (`--discussions`), owners, co-changed files, ADRs and tests
+- 🔍 **`ctxman pr`** - Review context for a branch: log, changed methods, diff, related tests (`--repo` for multi-repo; `docs/commands/pr.md`)
+- 🧭 **`ctxman why`** - Why code looks as it does: commits, linked issues and PRs, optional GitHub/GitLab discussions (`--discussions`), owners, co-changed files, ADRs and tests (`--repo` for multi-repo; `docs/commands/why.md`)
 - 🔎 **`ctxman search`** - Ranked (BM25) and hybrid BM25 + semantic vector RRF (`--hybrid`) search over functions and code chunks across one or more `--repo` roots
 - 🔢 **`ctxman count`** - Token count for one model, exact for Claude through Anthropic's API
 - 🔌 **`ctxman mcp`** - MCP server with one-command setup for Claude Desktop, Claude Code, Cursor, VS Code and Windsurf
-- 🛡️ **`ctxman policy` / `ctxman audit`** - Export policy (deny rules, required redaction, token limits) and an audit log
+- 🛡️ **`ctxman policy` / `ctxman audit`** - Export policy (deny rules, required redaction, token limits) and an audit log (`--repo` for multi-repo workspace checks and merged audit trails)
 - 🤖 **GitHub Action and Docker image** - Token budgets and model fit as a CI check
 
 ### 🎨 User Interface
@@ -279,6 +279,7 @@ tests, with your question last.
 ctxman pr                                    # HEAD against origin/HEAD, main or master
 ctxman pr --base release/2.x --budget 30k    # drops the least important parts to fit
 ctxman pr --staged --ask "Is this safe to merge?" --copy
+ctxman pr --base main --repo ../billing-api --repo ../checkout-web --budget 24k
 ctxman pr --style xml -o review.xml
 ```
 
@@ -293,6 +294,7 @@ repository record about a file, a function or a line range.
 ctxman why src/cart.js:total                   # function / method / class (Class.method)
 ctxman why src/cart.js#L40-L72 --patches       # line range, with each commit's diff
 ctxman why lib/server.js --since "1 year ago"  # whole file, following renames
+ctxman why billing-api/src/invoice.js:createInvoice --repo ../billing-api --repo ../checkout-web
 ctxman why src/cart.js:total --ask "Why round here?" --budget 8k --copy
 ```
 
@@ -337,8 +339,8 @@ A policy in the repository (`.ctxman/policy.json`), or one an organisation point
 
 ```bash
 ctxman policy init       # starter policy: deny .env, keys and secrets/, require redaction
-ctxman policy check      # validate and show the effective policy
-ctxman audit             # what was exported, when, by whom, how many tokens
+ctxman policy check      # validate and show the effective policy (--repo DIR for multi-repo)
+ctxman audit             # what was exported, when, by whom, how many tokens (--repo DIR for multi-repo)
 ctxman --cli --respect-ignore-files .cursorignore,.aiexclude   # honour other AI tools' ignore files
 ```
 

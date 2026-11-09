@@ -57,12 +57,12 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 
 - 📦 **`ctxman pack`** - Dosya içeriklerini tek bir LLM belgesinde toplar (Claude XML, Markdown, JSON); yalnızca imza sıkıştırması ve kesin token bütçesiyle
 - 🗺️ **`ctxman map`** - Import grafiği ve git geçmişine göre sıralanmış, token bütçesine sığan repo haritası
-- 🔍 **`ctxman pr`** - Bir dal için inceleme bağlamı: commit geçmişi, değişen metotlar, diff, ilgili testler
-- 🧭 **`ctxman why`** - Kod neden böyle: yerel git geçmişinden commit'ler, bağlı issue ve PR'lar, sahipler, birlikte değişen dosyalar, ADR'ler ve testler
+- 🔍 **`ctxman pr`** - Bir dal için inceleme bağlamı: commit geçmişi, değişen metotlar, diff, ilgili testler (çoklu depo için `--repo`; `docs/commands/pr.md`)
+- 🧭 **`ctxman why`** - Kod neden böyle: yerel git geçmişinden commit'ler, bağlı issue ve PR'lar, sahipler, birlikte değişen dosyalar, ADR'ler ve testler (çoklu depo için `--repo`; `docs/commands/why.md`)
 - 🔎 **`ctxman search`** - Fonksiyonlar ve kod parçaları üzerinde sıralı (BM25) arama
 - 🔢 **`ctxman count`** - Bir model için token sayısı; Claude için Anthropic API'siyle birebir
 - 🔌 **`ctxman mcp`** - Claude Desktop, Claude Code, Cursor, VS Code ve Windsurf için tek komutla kurulan MCP sunucusu
-- 🛡️ **`ctxman policy` / `ctxman audit`** - Dışa aktarma politikası (engellenen yollar, zorunlu maskeleme, token sınırı) ve denetim kaydı
+- 🛡️ **`ctxman policy` / `ctxman audit`** - Dışa aktarma politikası (engellenen yollar, zorunlu maskeleme, token sınırı) ve denetim kaydı (çoklu depo doğrulama ve birleştirilmiş denetim için `--repo`)
 - 🤖 **GitHub Action ve Docker imajı** - Token bütçesi ve modele sığma kontrolü CI'da
 
 ### 🔢 Token Analizi
@@ -290,6 +290,7 @@ testler; sorunuz en sonda.
 ```bash
 ctxman pr                                    # HEAD ile origin/HEAD, main veya master
 ctxman pr --base release/2.x --budget 30k    # sığmak için en az önemli kısımları çıkarır
+ctxman pr --base main --repo ../billing-api --repo ../checkout-web --budget 24k
 ctxman pr --staged --ask "Birleştirmek güvenli mi?" --copy
 ```
 
@@ -304,6 +305,7 @@ fonksiyon veya satır aralığı hakkında kaydettiklerini toplar.
 ctxman why src/cart.js:total                   # fonksiyon / metot / sınıf (Sinif.metot)
 ctxman why src/cart.js#L40-L72 --patches       # satır aralığı, her commit'in diff'iyle
 ctxman why lib/server.js --since "1 year ago"  # yeniden adlandırmaları izleyerek tüm dosya
+ctxman why billing-api/src/invoice.js:createInvoice --repo ../billing-api --repo ../checkout-web
 ctxman why src/cart.js:total --ask "Burada neden yuvarlanıyor?" --budget 8k --copy
 ```
 
@@ -347,8 +349,8 @@ dosya; CLI, REST API ve MCP sunucusu için aynı şekilde uygulanır:
 
 ```bash
 ctxman policy init       # başlangıç politikası: .env, anahtarlar ve secrets/ engellenir, maskeleme zorunlu
-ctxman policy check      # doğrular ve geçerli politikayı gösterir
-ctxman audit             # ne, ne zaman, kim tarafından, kaç token dışa aktarıldı
+ctxman policy check      # doğrular ve geçerli politikayı gösterir (çoklu depo için --repo DIR)
+ctxman audit             # ne, ne zaman, kim tarafından, kaç token dışa aktarıldı (çoklu depo için --repo DIR)
 ctxman --cli --respect-ignore-files .cursorignore,.aiexclude   # diğer AI araçlarının ignore dosyaları
 ```
 

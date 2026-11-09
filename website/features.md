@@ -8,7 +8,7 @@ Ctxman is a local-first AI Code Intelligence & Context Engineering Platform desi
 
 - **PageRank Repository Map & AST Call Graph (`ctxman map`)**: Ranks files across 14+ languages using PageRank over the import graph blended with git change frequency, symbol references, and cross-file AST symbol call edges (`--call-graph`, `--focus file:symbol`), fitting function signatures into any token budget
 - **Directional Import & Symbol Call Focus (`ctxman focus`)**: Packs a target file or symbol (`<file>:<symbol>`) together with its `N`-hop outgoing imports/callees and incoming importers/callers (`--direction both|imports|importers`, `--calls-only`, `--callers-only`, including intra-file helper closures and barrel re-exports) without shared-hub explosion
-- **Multi-Repo Workspaces (`--repo <dir>`)**: Merge multiple repositories under `<alias>/<path>` namespaces within a single shared token budget across `map`, `search`, `pack`, `focus`, `task`, `diagnose`, `who`, `ask`, and `watch` (plus `repos` on MCP `get_symbol`) with cross-repo import and AST symbol call-graph traversal (`buildWorkspaceGraph`)
+- **Multi-Repo Workspaces (`--repo <dir>`)**: Merge multiple repositories under `<alias>/<path>` namespaces within a single shared token budget across `map`, `search`, `pack`, `focus`, `task`, `diagnose`, `who`, `why`, `pr`, `ask`, `policy check`, `audit`, and `watch` (plus `repos` across MCP workspace tools including `get_symbol`, `explain_history`, `pr_context`, `check_policy`, and `audit_log`) with cross-repo import and AST symbol call-graph traversal (`buildWorkspaceGraph`)
 
 ```bash
 # Ranked repository map with cross-file AST symbol call annotations
@@ -20,12 +20,13 @@ ctxman focus lib/why/index.js:explainHistory --depth 1 --budget 16k
 
 ### Code Archaeology (`why`) & Expert Finder (`who`)
 
-- **Why Is the Code Like This? (`ctxman why`)**: Explains any file, symbol (`file:symbol`), or line range (`file#L10-L40`) using git history, PR/issue references, remote GitHub/GitLab discussions (`--discussions`), `@plansmithai/analyzer` SQLite institutional citations (`--analyzer-db`), blame ownership, co-change coupling, ADRs, TODOs, and tests
+- **Why Is the Code Like This? (`ctxman why`)**: Explains any file, symbol (`file:symbol`), or line range (`file#L10-L40`) across one or more `--repo` roots using git history, PR/issue references, remote GitHub/GitLab discussions (`--discussions`), `@plansmithai/analyzer` SQLite institutional citations (`--analyzer-db`), blame ownership, co-change coupling, and cross-repo ADRs, docs, TODOs, and tests
 - **Who Knows About This? (`ctxman who`)**: Ranks domain experts across one or more `--repo` roots by fusing surviving `git blame -w` line ownership (`0.45`), exponentially decayed commit history (`0.35`, 90-day half-life), total commit share (`0.20`), and `CODEOWNERS` stewardship (`+0.15`), with automatic BM25 topic-to-file resolution
 
 ```bash
-# Explain a function with institutional memory citations
+# Explain a function with institutional memory citations (single or multi-repo)
 ctxman why lib/why/index.js:explainHistory --analyzer
+ctxman why billing-api/src/invoice.js:createInvoice --repo ../billing-api --repo ../checkout-web
 
 # Find top experts for a file, symbol, directory, or topic (single or multi-repo)
 ctxman who "hybrid search RRF"
@@ -36,7 +37,7 @@ ctxman who "invoice payment" --repo ../billing-api --repo ../checkout-web
 
 - **Task-Driven Auto Context (`ctxman task`)**: Discovers seed files and symbols via hybrid BM25 + vector search, prioritizes 1-hop cross-file AST symbol callers/callees (plus import neighbors) as full code and 2-hop compressed signatures, and prepends an architectural repo map within `--budget` (default `32000`)
 - **Stack-Trace Root-Cause Bundle (`ctxman diagnose`)**: Parses Node/TS/JS, Python, Go, Rust, Java, C#, and Vitest stack traces, extracting enclosing methods, 1-hop AST symbol call & import neighbors (`caller -> callee`), and recent git commits (`explainHistory`) within `--budget` (default `24000`)
-- **Pull Request Context (`ctxman pr`)**: Assembles branch summary, commit log, changed methods, unified diff, and related tests for code review
+- **Pull Request Context (`ctxman pr`)**: Assembles branch summary, commit log, changed methods, unified diff, and related tests across one or more `--repo` roots within a single shared token budget
 
 ```bash
 ctxman task "add OAuth token refresh retry logic" --budget 32k
@@ -44,6 +45,7 @@ ctxman task "fix invoice checkout webhook" --repo ../billing-api --repo ../check
 npm test 2>&1 | ctxman diagnose --budget 20k
 ctxman diagnose "Error at billing-api/src/invoice.js:3:10" --repo ../checkout-web
 ctxman pr --base main --budget 24k
+ctxman pr --base main --repo ../billing-api --repo ../checkout-web --budget 24k
 ```
 
 ### Offline SQLite RAG & Hybrid Search (`search` & `ask`)
@@ -198,8 +200,8 @@ Analyze code in 14+ programming languages:
 
 - **Path Deny Rules**: Prevent sensitive files from ever entering exports, RAG indexes, or MCP responses
 - **Automatic Secret Redaction**: Masks cloud keys, tokens, and PEM private keys as `[REDACTED:<type>]`
-- **Token Caps & Model Allowlists**: Enforce organization-wide export limits (`CTXMAN_POLICY`)
-- **Append-Only Audit Trail (`ctxman audit`)**: Records every export with timestamp, command, file count, token count, and SHA-256 digest
+- **Token Caps & Model Allowlists**: Enforce organization-wide and multi-repo workspace export limits (`CTXMAN_POLICY`, `ctxman policy check --repo <dir>`)
+- **Append-Only Audit Trail (`ctxman audit`)**: Records every export with timestamp, command, file count, token count, and SHA-256 digest, with merged chronological `--repo <dir>` audit views
 
 ## 📊 Output Formats
 

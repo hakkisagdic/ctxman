@@ -8,6 +8,7 @@ models answer best.
 ```bash
 ctxman pr                                  # current branch against the default branch
 ctxman pr --base main --head feature/login -o review.md
+ctxman pr --base main --repo ../billing-api --repo ../checkout-web --budget 24k
 ctxman pr --working --ask "Anything risky in these changes?"
 ctxman pr --budget 16k --style xml --with-tests --copy
 ```
@@ -28,6 +29,14 @@ ctxman pr --budget 16k --style xml --with-tests --copy
 - A path argument inside the repository limits the change to that directory:
   `ctxman pr packages/api`. The commit log then lists only commits that touch it, and related
   tests are searched in it.
+- `--repo DIR` (repeatable) builds a single multi-repository review bundle across the primary
+  project and every additional repository within one shared `--budget`. Changed files, changed
+  and deleted methods, unified diff headers, related tests, and full file contents are
+  namespaced under `<alias>/<path>`, and commits carry `[<alias>]` (`repo="<alias>"` in XML,
+  `repo` in JSON). Sibling repositories that do not contain the requested branch or ref are
+  skipped with a warning instead of failing the review, and `ctxman pr --repo ...` can be run
+  from a non-git parent directory as long as at least one `--repo` is a git repository. Every
+  participating repository's `.ctxman/policy.json` is enforced.
 
 Refs are checked before git runs: only letters, digits and `/ - _ . @ ^ ~` are accepted and a
 ref may not start with `-`, so `--base '--output=/tmp/x'` or `--base '$(touch x)'` is refused.
@@ -73,6 +82,7 @@ The output has these sections, in this order:
 
 | Option                | Description                                                                 |
 | --------------------- | --------------------------------------------------------------------------- |
+| `--repo DIR`          | Add a repository to a multi-repo workspace (repeatable)                     |
 | `--base REF`          | Base branch or commit                                                       |
 | `--head REF`          | Head branch or commit (default `HEAD`)                                      |
 | `--staged`            | Compare the index instead of a commit                                       |
@@ -135,8 +145,9 @@ ctxman pr: feature into main (merge base 7ab10f8)
 
 **XML**: simple tags per section (`<summary>`, `<commits>`, `<changed_files>`,
 `<changed_methods>`, `<diff>`, `<related_tests>`, `<changed_file_contents>`, `<instructions>`,
-`<question>`) inside `<pr_context>`. Method, test and file bodies use the document layout from
-Anthropic's long-context guidance, numbered across the whole output:
+`<question>`) inside `<pr_context>` (plus `<repositories>` when `repos` is passed). Method,
+test and file bodies use the document layout from Anthropic's long-context guidance, numbered
+across the whole output:
 
 ```xml
 <documents>
@@ -154,9 +165,9 @@ export function add(a, b) {
 Bodies are not entity-escaped, so the model reads the code as written; treat the result as
 prompt markup, not as input for an XML parser.
 
-**JSON**: one object with `summary`, `commits`, `files`, `methods` (`changed`, `deleted`),
-`diff` (per file), `relatedTests`, `fileContents` and `request`; sections that are empty or
-dropped are absent.
+**JSON**: one object with `repos` (when multi-repo), `summary`, `commits`, `files`, `methods`
+(`changed`, `deleted`), `diff` (per file), `relatedTests`, `fileContents` and `request`;
+sections that are empty or dropped are absent.
 
 ## Filters and redaction
 
@@ -176,6 +187,7 @@ import { buildPrContext } from 'ctxman';
 const result = await buildPrContext('/path/to/repo', {
   base: 'main',
   head: 'feature/login',
+  repos: ['../billing-api', '../checkout-web'], // optional multi-repo workspace
   style: 'xml',
   budget: 16000,
   withTests: true,
@@ -187,11 +199,12 @@ console.log(result.methods.changed, result.methods.deleted, result.relatedTests)
 ```
 
 Options mirror the command line (`base`, `head`, `staged`, `working`, `unified`, `diff`,
-`withTests`, `withFiles`, `ask`, `instructions` (text), `budget`, `style`, `redact`). The
-result also carries the parsed `commits`, `files`, `stats`, `redactions` and `warnings`.
+`withTests`, `withFiles`, `ask`, `instructions` (text), `budget`, `style`, `redact`, `repos`).
+The result also carries `repos` (when multi-repo) and the parsed `commits`, `files`, `stats`,
+`redactions` and `warnings`.
 
 The MCP server exposes the same as the `pr_context` tool with `path` (required), `base`, `head`,
-`budget` and `style`.
+`budget`, `style`, and `repos`.
 
 ## Limits
 
