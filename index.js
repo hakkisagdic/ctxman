@@ -60,6 +60,7 @@ import { focusContext, describeFocus, FocusError } from './lib/focus/index.js';
 // Multi-repository workspace (`--repo`)
 import {
   resolveWorkspaceRepos,
+  buildWorkspaceGraph,
   mapWorkspace,
   searchWorkspace,
   packWorkspace,
@@ -153,6 +154,7 @@ export {
 
   // Multi-repository workspace
   resolveWorkspaceRepos,
+  buildWorkspaceGraph,
   mapWorkspace,
   searchWorkspace,
   packWorkspace,

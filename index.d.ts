@@ -1862,6 +1862,8 @@ export interface FocusOptions extends Omit<PackOptions, 'files'> {
   history?: number;
   /** Explicit rank order override */
   rankOrder?: string[];
+  /** Additional repositories for multi-repo workspace focus */
+  repos?: WorkspaceRepoInput[];
 }
 
 export interface FocusNeighbor {
@@ -1880,10 +1882,12 @@ export interface FocusMetadata {
   inGraph: boolean;
   neighbors: FocusNeighbor[];
   callEdges?: RepoGraphCallEdge[];
+  repos?: Array<{ alias: string; root: string }>;
 }
 
 export interface FocusResult extends PackResult {
   focus: FocusMetadata;
+  repos?: Array<{ alias: string; root: string }>;
 }
 
 export class FocusError extends Error {
@@ -1956,6 +1960,15 @@ export interface ResolvedWorkspaceRepo {
 }
 
 export function resolveWorkspaceRepos(repos: WorkspaceRepoInput[]): ResolvedWorkspaceRepo[];
+
+export interface WorkspaceGraph extends RepoGraph {
+  repos: Array<{ alias: string; root: string }>;
+}
+
+export function buildWorkspaceGraph(
+  repos: WorkspaceRepoInput[],
+  options?: RepoGraphOptions & { callGraph?: boolean }
+): WorkspaceGraph;
 
 export interface WorkspaceMapResult extends RepoMapResult {
   repos: Array<{ alias: string; root: string }>;
@@ -2144,6 +2157,7 @@ export interface TaskContextOptions {
   output?: string;
   model?: string;
   limit?: number;
+  repos?: WorkspaceRepoInput[];
 }
 
 export interface TaskContextResult {
@@ -2157,6 +2171,7 @@ export interface TaskContextResult {
   callEdges?: RepoGraphCallEdge[];
   omitted: Array<{ path: string; reason: string }>;
   redactions: { total: number };
+  repos?: Array<{ alias: string; root: string }>;
 }
 
 export function buildTaskContext(
@@ -2171,11 +2186,12 @@ export function buildTaskContext(
 
 export interface DiagnoseFailureOptions {
   budget?: number | string;
-  format?: 'markdown' | 'json';
+  format?: 'markdown' | 'json' | 'xml';
   callGraph?: boolean;
   redact?: boolean;
   windowLines?: number;
   output?: string;
+  repos?: WorkspaceRepoInput[];
 }
 
 export interface DiagnoseFailureResult {
@@ -2188,6 +2204,7 @@ export interface DiagnoseFailureResult {
   neighbors: string[];
   callEdges?: RepoGraphCallEdge[];
   redactions: { total: number };
+  repos?: Array<{ alias: string; root: string }>;
 }
 
 export function diagnoseFailure(

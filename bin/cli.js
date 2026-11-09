@@ -730,12 +730,14 @@ function printHelp() {
   console.log();
   console.log('Task-Driven Context (v3.2.0):');
   console.log('  task "<goal>" [options]  Build task-driven context bundle around a goal');
+  console.log('    --repo DIR             Additional repository root for workspace (repeatable)');
   console.log('    --budget TOKENS        Token budget (default: 32000, supports 32k)');
   console.log('    --model MODEL          Optimize for specific target model');
   console.log('    --format FORMAT        markdown (default), json, xml');
   console.log();
   console.log('Failure Diagnosis (v3.2.0):');
   console.log('  diagnose [file|text]     Analyze stack traces and failure logs');
+  console.log('    --repo DIR             Additional repository root for workspace (repeatable)');
   console.log('    --stdin                Read failure log or stack trace from stdin');
   console.log('    --budget TOKENS        Token budget (default: 24000)');
   console.log('    --json                 Output in JSON format');

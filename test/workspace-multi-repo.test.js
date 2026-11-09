@@ -6,9 +6,13 @@ import os from 'os';
 import path from 'path';
 import {
   resolveWorkspaceRepos,
+  buildWorkspaceGraph,
   mapWorkspace,
   searchWorkspace,
   packWorkspace,
+  focusContext,
+  buildTaskContext,
+  diagnoseFailure,
   PolicyConfigError,
   PolicyViolationError,
 } from '../index.js';
@@ -19,7 +23,7 @@ import { CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 const CLI = fileURLToPath(new URL('../bin/cli.js', import.meta.url));
 const AWS_KEY = 'AKIAIOSFODNN7EXAMPLE';
 
-describe('Multi-Repository Workspace (N3: map, search, pack)', () => {
+describe('Multi-Repository Workspace (map, search, pack, focus, task, diagnose)', () => {
   let workspaceDir;
   let apiRepo;
   let webRepo;
@@ -58,7 +62,7 @@ describe('Multi-Repository Workspace (N3: map, search, pack)', () => {
       JSON.stringify({ version: 1, deny: ['secrets/**'], requireRedaction: true })
     );
 
-    // Repo 2: checkout-web
+    // Repo 2: checkout-web (imports createInvoice from billing-api across repos!)
     write(
       webRepo,
       'src/CartView.js',
@@ -67,7 +71,7 @@ describe('Multi-Repository Workspace (N3: map, search, pack)', () => {
     write(
       webRepo,
       'src/checkoutClient.js',
-      `export function submitCheckout(items) {\n  const token = '${AWS_KEY}';\n  return { count: items.length, token };\n}\n`
+      `import { createInvoice } from 'billing-api/src/invoice.js';\nexport function submitCheckout(items) {\n  const token = '${AWS_KEY}';\n  const invoice = createInvoice(items.length * 100);\n  return { count: items.length, invoice, token };\n}\n`
     );
 
     // Outside repo (for MCP sandbox test)
@@ -91,7 +95,27 @@ describe('Multi-Repository Workspace (N3: map, search, pack)', () => {
     expect(resolved.map((r) => r.alias)).toEqual(['team-a-app', 'team-b-app']);
   });
 
-  it('builds a unified workspace map across repos within a shared token budget', () => {
+  it('builds a unified workspace map across repos with cross-repo import and call edges', () => {
+    const graph = buildWorkspaceGraph([apiRepo, webRepo], { history: 0, callGraph: true });
+    expect(graph.edges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          from: 'checkout-web/src/checkoutClient.js',
+          to: 'billing-api/src/invoice.js',
+        }),
+      ])
+    );
+    expect(graph.callEdges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          from: 'checkout-web/src/checkoutClient.js',
+          caller: 'submitCheckout',
+          to: 'billing-api/src/invoice.js',
+          callee: 'createInvoice',
+        }),
+      ])
+    );
+
     const map = mapWorkspace([apiRepo, webRepo], {
       tokens: 512,
       history: 0,
@@ -156,6 +180,91 @@ describe('Multi-Repository Workspace (N3: map, search, pack)', () => {
     await expect(packWorkspace([apiRepo, webRepo])).rejects.toThrow(PolicyConfigError);
   });
 
+  it('focuses on a target across multiple repositories with cross-repo import and symbol call edges', async () => {
+    const focused = await focusContext(
+      apiRepo,
+      'checkout-web/src/checkoutClient.js:submitCheckout',
+      {
+        repos: [webRepo],
+        depth: 1,
+        style: 'markdown',
+      }
+    );
+
+    expect(focused.repos.map((r) => r.alias)).toEqual(['billing-api', 'checkout-web']);
+    expect(focused.focus.target).toBe('checkout-web/src/checkoutClient.js');
+    expect(focused.focus.symbol).toBe('submitCheckout');
+    const neighborPaths = focused.focus.neighbors.map((n) => n.path);
+    expect(neighborPaths).toContain('billing-api/src/invoice.js');
+    expect(neighborPaths).toContain('checkout-web/src/CartView.js');
+    expect(focused.files[0].path).toBe('checkout-web/src/checkoutClient.js');
+    expect(focused.text).not.toContain(AWS_KEY);
+    expect(focused.text).toContain('[REDACTED:aws-access-key-id]');
+
+    // Targeting a policy-denied file in billing-api is rejected
+    await expect(
+      focusContext(apiRepo, 'billing-api/secrets/keys.js', { repos: [webRepo] })
+    ).rejects.toThrow(PolicyViolationError);
+  });
+
+  it('builds task context across multiple repositories with cross-repo call expansion', async () => {
+    const taskRes = await buildTaskContext(
+      apiRepo,
+      'fix invoice creation during checkout submission',
+      {
+        repos: [webRepo],
+        budget: 4000,
+        format: 'markdown',
+        searchMode: 'bm25',
+      }
+    );
+
+    expect(taskRes.repos.map((r) => r.alias)).toEqual(['billing-api', 'checkout-web']);
+    const packedPaths = taskRes.files.map((f) => f.path);
+    expect(packedPaths).toContain('billing-api/src/invoice.js');
+    expect(packedPaths).toContain('checkout-web/src/checkoutClient.js');
+    expect(packedPaths).not.toContain('billing-api/secrets/keys.js');
+    expect(taskRes.text).toContain('# Workspace repository map');
+    expect(taskRes.text).not.toContain(AWS_KEY);
+    expect(taskRes.text).toContain('[REDACTED:aws-access-key-id]');
+
+    // Enforces requireRedaction across all workspace repos
+    await expect(
+      buildTaskContext(apiRepo, 'invoice', { repos: [webRepo], redact: false })
+    ).rejects.toThrow(PolicyViolationError);
+  });
+
+  it('diagnoses stack traces spanning multiple repositories and collects cross-repo neighbors', async () => {
+    const stackTrace = [
+      'Error: Invalid invoice amount',
+      '    at formatMoney (billing-api/src/currency.js:2:10)',
+      '    at createInvoice (billing-api/src/invoice.js:3:10)',
+      `    at submitCheckout (${path.join(webRepo, 'src/checkoutClient.js')}:4:19)`,
+    ].join('\n');
+
+    const diag = await diagnoseFailure(apiRepo, stackTrace, {
+      repos: [webRepo],
+      budget: 4000,
+      format: 'markdown',
+    });
+
+    expect(diag.repos.map((r) => r.alias)).toEqual(['billing-api', 'checkout-web']);
+    expect(diag.implicatedFiles).toEqual([
+      'billing-api/src/currency.js',
+      'billing-api/src/invoice.js',
+      'checkout-web/src/checkoutClient.js',
+    ]);
+    expect(diag.neighbors).toContain('checkout-web/src/CartView.js');
+    expect(diag.text).toContain('billing-api/src/invoice.js');
+    expect(diag.text).toContain('checkout-web/src/checkoutClient.js');
+    expect(diag.text).not.toContain(AWS_KEY);
+
+    // Enforces requireRedaction across all workspace repos
+    await expect(
+      diagnoseFailure(apiRepo, stackTrace, { repos: [webRepo], redact: false })
+    ).rejects.toThrow(PolicyViolationError);
+  });
+
   it('works via CLI `--repo` flags and confines MCP `repos` to the sandbox `--root`', async () => {
     const cliMap = spawnSync(
       process.execPath,
@@ -183,6 +292,61 @@ describe('Multi-Repository Workspace (N3: map, search, pack)', () => {
     expect(cliPack.stdout).toContain('billing-api/src/invoice.js');
     expect(cliPack.stdout).toContain('checkout-web/src/CartView.js');
 
+    const cliFocus = spawnSync(
+      process.execPath,
+      [
+        CLI,
+        'focus',
+        'checkout-web/src/checkoutClient.js',
+        '--root',
+        apiRepo,
+        '--repo',
+        webRepo,
+        '--style',
+        'json',
+        '-q',
+      ],
+      { cwd: workspaceDir, encoding: 'utf-8' }
+    );
+    expect(cliFocus.status).toBe(0);
+    const focusJson = JSON.parse(cliFocus.stdout);
+    expect(focusJson.files[0].path).toBe('checkout-web/src/checkoutClient.js');
+    expect(focusJson.files.map((f) => f.path)).toContain('billing-api/src/invoice.js');
+
+    const cliTask = spawnSync(
+      process.execPath,
+      [
+        CLI,
+        'task',
+        'invoice checkout submission',
+        '--root',
+        apiRepo,
+        '--repo',
+        webRepo,
+        '--search-mode',
+        'bm25',
+        '--format',
+        'json',
+        '-q',
+      ],
+      { cwd: workspaceDir, encoding: 'utf-8' }
+    );
+    expect(cliTask.status).toBe(0);
+    const taskJson = JSON.parse(cliTask.stdout);
+    expect(taskJson.repos.map((r) => r.alias)).toEqual(['billing-api', 'checkout-web']);
+    expect(taskJson.files.map((f) => f.path)).toContain('billing-api/src/invoice.js');
+
+    const traceText = 'Error: boom\n    at createInvoice (billing-api/src/invoice.js:2:3)\n';
+    const cliDiagnose = spawnSync(
+      process.execPath,
+      [CLI, 'diagnose', traceText, '--root', apiRepo, '--repo', webRepo, '--format', 'json', '-q'],
+      { cwd: workspaceDir, encoding: 'utf-8' }
+    );
+    expect(cliDiagnose.status).toBe(0);
+    const diagJson = JSON.parse(cliDiagnose.stdout);
+    expect(diagJson.implicatedFiles).toContain('billing-api/src/invoice.js');
+    expect(diagJson.neighbors).toContain('checkout-web/src/checkoutClient.js');
+
     // MCP tools with sandbox root = workspaceDir
     const mcp = new MCPServer({ root: workspaceDir });
     const handler = mcp.server._requestHandlers.get(CallToolRequestSchema.shape.method.value);
@@ -198,15 +362,80 @@ describe('Multi-Repository Workspace (N3: map, search, pack)', () => {
     expect(okPack.content[0].text).toContain('billing-api/src/invoice.js');
     expect(okPack.content[0].text).toContain('checkout-web/src/CartView.js');
 
-    // Attempting to include outsideRepo via `repos` is blocked by MCP sandbox!
-    const escaped = await handler({
+    const okFocus = await handler({
       method: 'tools/call',
       params: {
-        name: 'pack_context',
-        arguments: { path: apiRepo, repos: [outsideRepo] },
+        name: 'focus_context',
+        arguments: {
+          path: apiRepo,
+          repos: [webRepo],
+          target: 'checkout-web/src/checkoutClient.js:submitCheckout',
+          style: 'json',
+        },
       },
     });
-    expect(escaped.isError).toBe(true);
-    expect(escaped.content[0].text).toContain('outside the MCP root');
+    expect(okFocus.isError).toBeUndefined();
+    const mcpFocusObj = JSON.parse(okFocus.content[0].text);
+    expect(mcpFocusObj.files.map((f) => f.path)).toContain('billing-api/src/invoice.js');
+    expect(okFocus.content[1].text).toContain(
+      'Focused target checkout-web/src/checkoutClient.js:submitCheckout'
+    );
+
+    const okTask = await handler({
+      method: 'tools/call',
+      params: {
+        name: 'task_context',
+        arguments: {
+          path: apiRepo,
+          repos: [webRepo],
+          query: 'invoice checkout',
+          searchMode: 'bm25',
+          format: 'json',
+        },
+      },
+    });
+    expect(okTask.isError).toBeUndefined();
+    const mcpTaskObj = JSON.parse(okTask.content[0].text);
+    expect(mcpTaskObj.repos).toHaveLength(2);
+
+    const okDiagnose = await handler({
+      method: 'tools/call',
+      params: {
+        name: 'diagnose_failure',
+        arguments: {
+          path: apiRepo,
+          repos: [webRepo],
+          trace: traceText,
+          format: 'json',
+        },
+      },
+    });
+    expect(okDiagnose.isError).toBeUndefined();
+    const mcpDiagObj = JSON.parse(okDiagnose.content[0].text);
+    expect(mcpDiagObj.neighbors).toContain('checkout-web/src/checkoutClient.js');
+
+    // Attempting to include outsideRepo via `repos` is blocked by MCP sandbox for all tools!
+    for (const toolCall of [
+      { name: 'pack_context', arguments: { path: apiRepo, repos: [outsideRepo] } },
+      {
+        name: 'focus_context',
+        arguments: { path: apiRepo, repos: [outsideRepo], target: 'src/invoice.js' },
+      },
+      {
+        name: 'task_context',
+        arguments: { path: apiRepo, repos: [outsideRepo], query: 'invoice' },
+      },
+      {
+        name: 'diagnose_failure',
+        arguments: { path: apiRepo, repos: [outsideRepo], trace: traceText },
+      },
+    ]) {
+      const escaped = await handler({
+        method: 'tools/call',
+        params: toolCall,
+      });
+      expect(escaped.isError).toBe(true);
+      expect(escaped.content[0].text).toContain('outside the MCP root');
+    }
   });
 });

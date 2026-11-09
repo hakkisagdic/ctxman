@@ -7,6 +7,7 @@
  */
 
 import fs from 'fs';
+import path from 'path';
 import { getLogger } from '../lib/utils/logger.js';
 
 function printHelp() {
@@ -15,13 +16,16 @@ function printHelp() {
 Usage: ctxman diagnose [log-file-or-text] [options]
 
 Parses stack trace frames across Node, TS, Python, Go, Rust, Java, C#, Vitest,
-resolves implicated files safely inside the repository, extracts enclosing method
-code windows, 1-hop graph neighbors (across module imports and the AST symbol
-call graph), and recent git history packed within the budget.
+resolves implicated files safely inside the repository (or across multiple
+repositories with --repo), extracts enclosing method code windows, 1-hop graph
+neighbors (across module imports and the AST symbol call graph), and recent
+git history packed within the budget.
 
 Options:
+      --repo DIR           Additional repository root to resolve frames across (repeatable)
       --stdin              Read failure log or stack trace from stdin
       --budget TOKENS      Token budget (e.g. 24000, 24k; default: 24000)
+      --format FORMAT      Output format: markdown (default), json, xml
       --json               Output in JSON format (default: markdown)
       --calls              Include cross-file AST symbol call graph edges (default)
       --no-calls           Disable AST symbol call graph edges (module imports only)
@@ -35,6 +39,7 @@ Examples:
   ctxman diagnose error.log
   npm test 2>&1 | ctxman diagnose --stdin
   ctxman diagnose "Error: invalid token at src/auth.js:42:10" --budget 20k
+  ctxman diagnose "Error at billing-api/src/invoice.js:3:10" --repo ../checkout-web
   ctxman diagnose failure.txt --json -o diagnosis.json
 `);
 }
@@ -61,6 +66,8 @@ async function main() {
   const { parseBudget } = await import('../lib/task/index.js');
 
   let inputArg = null;
+  let root = process.cwd();
+  const repos = [];
   let useStdin = false;
   let budget = 24000;
   let format = 'markdown';
@@ -76,10 +83,26 @@ async function main() {
 
       if (arg === '--stdin') {
         useStdin = true;
+      } else if (arg === '--root' || arg === '-r') {
+        if (i + 1 >= argv.length) throw new Error('--root needs a directory path');
+        root = path.resolve(argv[++i]);
+      } else if (arg.startsWith('--root=')) {
+        root = path.resolve(arg.slice('--root='.length));
+      } else if (arg === '--repo') {
+        if (i + 1 >= argv.length) throw new Error('--repo needs a directory path');
+        repos.push(path.resolve(argv[++i]));
+      } else if (arg.startsWith('--repo=')) {
+        const val = arg.slice('--repo='.length);
+        if (!val) throw new Error('--repo needs a directory path');
+        repos.push(path.resolve(val));
       } else if (arg === '--budget') {
         budget = parseBudget(argv[++i]);
       } else if (arg.startsWith('--budget=')) {
         budget = parseBudget(arg.slice('--budget='.length));
+      } else if (arg === '--format') {
+        format = argv[++i];
+      } else if (arg.startsWith('--format=')) {
+        format = arg.slice('--format='.length);
       } else if (arg === '--json') {
         format = 'json';
       } else if (arg === '--calls' || arg === '--call-graph') {
@@ -134,8 +157,8 @@ async function main() {
   }
 
   try {
-    const root = process.cwd();
     const result = await diagnoseFailure(root, traceText, {
+      repos,
       budget,
       format,
       callGraph,
@@ -154,8 +177,9 @@ async function main() {
     }
 
     if (!quiet) {
+      const repoLabel = result.repos?.length > 1 ? ` across ${result.repos.length} repos` : '';
       process.stderr.write(
-        `Diagnosed: ${result.implicatedFiles.length} implicated file(s), ${result.totalTokens}/${result.budget} tokens.\n`
+        `Diagnosed: ${result.implicatedFiles.length} implicated file(s)${repoLabel}, ${result.totalTokens}/${result.budget} tokens.\n`
       );
       if (outputFile) {
         process.stderr.write(`Saved to: ${outputFile}\n`);
@@ -163,7 +187,7 @@ async function main() {
     }
   } catch (error) {
     process.stderr.write(`Error: ${error.message}\n`);
-    process.exitCode = 1;
+    process.exitCode = error.exitCode ?? 1;
   }
 }
 

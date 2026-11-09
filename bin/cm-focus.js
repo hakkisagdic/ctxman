@@ -18,12 +18,14 @@ function printHelp() {
 
 Usage: ctxman focus <file[:symbol]> [root] [options]
 
-Resolves <file> inside the project (default root: current directory), traverses the
-repository import graph and cross-file AST symbol call graph up to --depth hops (both
-outgoing imports/calls and incoming importers/callers by default), and packs the target
-file first followed by its closest neighbors.
+Resolves <file> inside the project (default root: current directory) or across a
+multi-repository workspace (--repo), traverses the repository import graph and
+cross-file AST symbol call graph up to --depth hops (both outgoing imports/calls
+and incoming importers/callers by default), and packs the target file first
+followed by its closest neighbors.
 
 Graph Neighborhood:
+      --repo DIR           Additional repository root for cross-repo neighborhood (repeatable)
   -d, --depth N            Hops in the import/call graph (default: 1; 0 = target file only)
   -s, --symbol NAME        Focus the cross-file call graph around a specific function/method
       --imports-only       Follow only outgoing imports/callees (dependencies of <file>)
@@ -57,6 +59,7 @@ Output:
 Examples:
   ctxman focus src/auth/login.ts
   ctxman focus src/auth/login.ts:authenticate --depth 2
+  ctxman focus billing-api/src/invoice.js --repo ../checkout-web --depth 2
   ctxman focus src/auth/login.ts --depth 2 --budget 25k --style markdown
   ctxman focus lib/pack/index.js --imports-only --compress --copy
   ctxman focus src/billing.js --no-tests -o focus-billing.xml
@@ -82,6 +85,9 @@ function parseDepth(text) {
 }
 
 const VALUE_OPTIONS = {
+  '--root': 'root',
+  '-r': 'root',
+  '--repo': 'repos',
   '--depth': 'depth',
   '-d': 'depth',
   '--symbol': 'symbol',
@@ -122,6 +128,7 @@ const FLAG_OPTIONS = {
 
 export function parseFocusArgs(argv) {
   const options = {
+    repos: [],
     depth: 1,
     imports: true,
     importers: true,
@@ -145,7 +152,12 @@ export function parseFocusArgs(argv) {
       if (eq > 0) value = arg.slice(eq + 1);
       else if (i + 1 < argv.length) value = argv[++i];
       else throw new Error(`${name} needs a value`);
-      options[VALUE_OPTIONS[name]] = value;
+      const key = VALUE_OPTIONS[name];
+      if (key === 'repos') {
+        options.repos.push(value);
+      } else {
+        options[key] = value;
+      }
     } else if (FLAG_OPTIONS[name] && eq < 0) {
       const [key, value] = FLAG_OPTIONS[name];
       options[key] = value;
@@ -195,8 +207,10 @@ function printSummary(result, extras) {
   const { focus } = result;
   const packedNeighbors = Math.max(0, result.files.length - 1);
   const targetLabel = focus.symbol ? `${focus.target}:${focus.symbol}` : focus.target;
+  const repoLabel =
+    result.repos?.length > 1 ? ` across ${formatNumber(result.repos.length)} repos` : '';
   const lines = [
-    `ctxman focus: ${targetLabel} + ${formatNumber(packedNeighbors)}/${formatNumber(focus.neighbors.length)} neighbor(s) ` +
+    `ctxman focus: ${targetLabel} + ${formatNumber(packedNeighbors)}/${formatNumber(focus.neighbors.length)} neighbor(s)${repoLabel} ` +
       `(depth ${focus.depth}, ${focus.direction}), ${formatNumber(result.totalTokens)} tokens (${result.style}, ${result.encoding})`,
   ];
   if (result.budget) {
@@ -239,10 +253,11 @@ async function main() {
   try {
     const { focusContext } = await import('../lib/focus/index.js');
     const [target, explicitRoot] = args.positional;
-    const root = path.resolve(explicitRoot ?? '.');
+    const root = path.resolve(args.root ?? explicitRoot ?? '.');
     const output = args.output ? path.resolve(args.output) : null;
 
     const options = {
+      repos: args.repos.map((r) => path.resolve(r)),
       depth: args.depth,
       symbol: args.symbol,
       direction: args.direction,
@@ -250,7 +265,7 @@ async function main() {
       importers: args.importers,
       callGraph: args.callGraph,
       includeTests: args.includeTests,
-      cwd: explicitRoot ? root : process.cwd(),
+      cwd: args.root || explicitRoot ? root : process.cwd(),
       style: args.style,
       tree: args.tree,
       header: args.header,

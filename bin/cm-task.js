@@ -7,6 +7,7 @@
  */
 
 import fs from 'fs';
+import path from 'path';
 import { getLogger } from '../lib/utils/logger.js';
 
 function printHelp() {
@@ -20,6 +21,7 @@ cross-file AST symbol call graph), prepends an architectural repo map,
 and packs everything strictly within the token budget.
 
 Options:
+      --repo DIR           Additional repository root to include in workspace (repeatable)
       --budget TOKENS      Token budget (e.g. 32000, 32k, 40k; default: 32000)
       --model MODEL        Target model profile (e.g. claude-sonnet-4-5)
       --format FORMAT      Output format: markdown (default), json, xml
@@ -36,6 +38,7 @@ Options:
 Examples:
   ctxman task "Add SQLite vector store"
   ctxman task "Fix OAuth token refresh" --budget 40k --format json
+  ctxman task "Add invoice checkout webhook" --repo ../billing-api --repo ../checkout-web
   ctxman task "Refactor tokenizer" -o task-context.md
 `);
 }
@@ -54,6 +57,7 @@ async function main() {
 
   let goal = null;
   let root = process.cwd();
+  const repos = [];
   let budget = 32000;
   let model = null;
   let format = 'markdown';
@@ -71,6 +75,18 @@ async function main() {
       if (arg === '--help' || arg === '-h') {
         printHelp();
         return;
+      } else if (arg === '--root' || arg === '-r') {
+        if (i + 1 >= argv.length) throw new Error('--root needs a directory path');
+        root = path.resolve(argv[++i]);
+      } else if (arg.startsWith('--root=')) {
+        root = path.resolve(arg.slice('--root='.length));
+      } else if (arg === '--repo') {
+        if (i + 1 >= argv.length) throw new Error('--repo needs a directory path');
+        repos.push(path.resolve(argv[++i]));
+      } else if (arg.startsWith('--repo=')) {
+        const val = arg.slice('--repo='.length);
+        if (!val) throw new Error('--repo needs a directory path');
+        repos.push(path.resolve(val));
       } else if (arg === '--budget') {
         budget = parseBudget(argv[++i]);
       } else if (arg.startsWith('--budget=')) {
@@ -133,6 +149,7 @@ async function main() {
 
   try {
     const result = await buildTaskContext(root, goal, {
+      repos,
       budget,
       model,
       format,
@@ -153,8 +170,9 @@ async function main() {
     }
 
     if (!quiet) {
+      const repoLabel = result.repos?.length > 1 ? ` across ${result.repos.length} repos` : '';
       process.stderr.write(
-        `Task Context: ${result.files.length} file(s), ${result.totalTokens}/${result.budget} tokens (${result.format}).\n`
+        `Task Context: ${result.files.length} file(s)${repoLabel}, ${result.totalTokens}/${result.budget} tokens (${result.format}).\n`
       );
       if (outputFile) {
         process.stderr.write(`Saved to: ${outputFile}\n`);
@@ -162,7 +180,7 @@ async function main() {
     }
   } catch (error) {
     process.stderr.write(`Error: ${error.message}\n`);
-    process.exitCode = 1;
+    process.exitCode = error.exitCode ?? 1;
   }
 }
 
