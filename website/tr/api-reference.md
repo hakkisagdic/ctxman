@@ -149,6 +149,7 @@ Canlı dosya izlemeyi veya yerel REST API sunucusunu başlatır:
 
 ```bash
 ctxman watch --debounce 1000
+ctxman watch --repo ../shared-lib --repo ../api-service --bootstrap
 ctxman serve --port 3000
 ```
 
@@ -174,7 +175,7 @@ ctxman serve --port 3000
 | `task_context`          | `path`, `task`, `budget?`, `format?`, `model?`                                                    | AST sembol çağrı ve import komşuluklu otomatik görev bağlamı (`ctxman task`)  |
 | `diagnose_failure`      | `path`, `trace`, `budget?`, `format?`                                                             | AST sembol çağrı komşuluklu stack-trace kök neden teşhisi (`ctxman diagnose`) |
 | `find_experts`          | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                             | Blame + güncellik + CODEOWNERS uzman sıralaması (`ctxman who`)                |
-| `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`                                         | Kalıcı SQLite bilgi grafiği ve `IncrementalAnalyzer` önbellek sorgusu         |
+| `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`, `repos?`                               | Kalıcı SQLite bilgi grafiği ve `IncrementalAnalyzer` önbellek sorgusu         |
 
 ### `query_knowledge_graph` Örnek Kullanımı
 

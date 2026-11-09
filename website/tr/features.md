@@ -110,6 +110,9 @@ ctxman watch
 
 # Belirli seçeneklerle izle
 ctxman watch --debounce 1000
+
+# Çoklu depo canlı izleme ve SQLite RAG / bilgi grafiği senkronizasyonu
+ctxman watch --repo ../shared-lib --repo ../api-service --bootstrap
 ```
 
 ### REST API

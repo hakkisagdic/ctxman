@@ -149,6 +149,7 @@ Start live file watching or the local REST API server:
 
 ```bash
 ctxman watch --debounce 1000
+ctxman watch --repo ../shared-lib --repo ../api-service --bootstrap
 ctxman serve --port 3000
 ```
 
@@ -174,7 +175,7 @@ ctxman serve --port 3000
 | `task_context`          | `path`, `task`, `budget?`, `format?`, `model?`                                                    | Automatic task context bundle with AST call & import neighbors (`ctxman task`) |
 | `diagnose_failure`      | `path`, `trace`, `budget?`, `format?`                                                             | Stack-trace root-cause diagnosis with AST call neighbors (`ctxman diagnose`)   |
 | `find_experts`          | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                             | Blame + recency + CODEOWNERS expert ranking (`ctxman who`)                     |
-| `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`                                         | Query persistent SQLite knowledge graph and `IncrementalAnalyzer` cache        |
+| `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`, `repos?`                               | Query persistent SQLite knowledge graph and `IncrementalAnalyzer` cache        |
 
 ### `query_knowledge_graph` Example Usage
 

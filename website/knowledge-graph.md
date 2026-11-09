@@ -9,12 +9,12 @@ description: Unified 3-repository hybrid knowledge graph (3,881 nodes, 3,566 sem
 
 ## `query_knowledge_graph` MCP Tool Architectural Flow
 
-The `query_knowledge_graph` tool in `MCPServer` (`lib/api/mcp/server.js`) provides direct, policy-enforced access to the persistent SQLite knowledge graph (`.ctxman/self-knowledge/index.sqlite`) and the per-project `IncrementalAnalyzer` cache (`lib/watch/IncrementalAnalyzer.js`).
+The `query_knowledge_graph` tool in `MCPServer` (`lib/api/mcp/server.js`) provides direct, policy-enforced access to the persistent SQLite knowledge graph (`.ctxman/self-knowledge/index.sqlite`) and the `IncrementalAnalyzer` cache (`lib/watch/IncrementalAnalyzer.js`), supporting both single-repository projects and multi-repository workspaces (`repos` / `ctxman watch --repo <dir>`) under `<alias>/<path>`.
 
 ```mermaid
 flowchart TD
   Client["MCP Client / Agent"] -->|"CallTool: query_knowledge_graph"| Sandbox["resolveSandboxPath & Scanner.getPolicy()"]
-  Sandbox --> Cache["MCPServer.getIncrementalAnalyzer(projectPath)"]
+  Sandbox --> Cache["MCPServer.getIncrementalAnalyzer(projectPath, repos)"]
   Cache --> Ready["IncrementalAnalyzer.ensureSyncReady()"]
   Ready --> Check{"refresh === true OR\ngraphCounts().nodes === 0?"}
   Check -->|"Yes (bootstrapped = true)"| Boot["IncrementalAnalyzer.bootstrapSync(projectPath)\nScan files -> redactSecrets -> syncGraph()"]

@@ -187,7 +187,7 @@ $ ctxman mcp uninstall --client claude-desktop
 | `task_context`          | `path`, `task`, `budget?`, `format?`, `model?`                                                                             | Task-driven auto context: hybrid search seeds, AST call & import 1-hop code, 2-hop signatures, repo map (`ctxman task`) |
 | `diagnose_failure`      | `path`, `trace`, `budget?`, `format?`                                                                                      | Stack-trace & failure root-cause bundle: implicated frames, methods, AST call & import 1-hop & git history              |
 | `find_experts`          | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                                                      | Expert Finder ("Who knows about this?"): blame share, recency-decayed commits & CODEOWNERS (`ctxman who`)               |
-| `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`                                                                  | File nodes, method declarations, and import/dependency edges from `.ctxman/self-knowledge/index.sqlite`                 |
+| `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`, `repos?`                                                        | File nodes, method declarations, and import/dependency edges from `.ctxman/self-knowledge/index.sqlite`                 |
 
 `explain_history` takes `patches?` (each commit's diff), `discussions?` (GitHub/GitLab PR, MR and
 issue threads referenced in commit history), and `analyzer?` / `analyzerDb?` (institutional memory
@@ -214,10 +214,11 @@ exponential recency-decayed commit history (`0.35`, default 90-day half-life), t
 
 `query_knowledge_graph` queries the persistent SQLite knowledge graph (`graph_nodes` and `graph_edges`
 in `.ctxman/self-knowledge/index.sqlite`) and the cached `IncrementalAnalyzer` state, automatically
-bootstrapping the graph when empty or when `refresh: true` is passed, and honouring `.ctxman/policy.json`
-deny rules.
+bootstrapping the graph when empty or when `refresh: true` is passed, and honouring per-repository
+`.ctxman/policy.json` deny rules. When `repos` is provided, nodes and cross-repo import edges across all
+repositories are indexed and returned under `<alias>/<path>`.
 
-`repo_map`, `search_code` (`ranked`, `semantic`, `hybrid`), and `pack_context` accept an optional
+`repo_map`, `search_code` (`ranked`, `semantic`, `hybrid`), `pack_context`, and `query_knowledge_graph` accept an optional
 `repos` array of repository directories to run across a multi-repository workspace under a single
 shared token budget, prefixing paths with `<alias>/<path>`. When `--root` is active, every entry in
 `repos` (and `analyzerDb` on `explain_history`) must also resolve inside the sandbox root.

@@ -110,6 +110,9 @@ ctxman watch
 
 # Watch with specific options
 ctxman watch --debounce 1000
+
+# Cross-repo live watch with SQLite RAG & knowledge graph sync
+ctxman watch --repo ../shared-lib --repo ../api-service --bootstrap
 ```
 
 ### REST API
