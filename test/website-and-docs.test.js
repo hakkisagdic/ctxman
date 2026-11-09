@@ -92,10 +92,12 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
     expect(trSidebar).toContain('"/tr/knowledge-graph"');
   });
 
-  it('verifies CHANGELOG.md, website changelog, features, and api-reference reflect v3.2.0 through v3.2.3 in EN and TR', () => {
+  it('verifies CHANGELOG.md, website changelog, features, and api-reference reflect v3.2.0 through v3.2.4 in EN and TR', () => {
     for (const rel of ['CHANGELOG.md', 'website/changelog.md', 'website/tr/changelog.md']) {
       const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+      expect(text).toContain('[3.2.4]');
       expect(text).toContain('[3.2.3]');
+      expect(text).toContain('buildWorkspaceGraph');
       expect(text).toContain('[3.2.2]');
       expect(text).toContain('[3.2.1]');
       expect(text).toContain('[3.2.0]');
