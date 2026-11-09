@@ -8,7 +8,7 @@ Ctxman, modern geliştirici ve yapay zeka ajanı iş akışları için tasarlanm
 
 - **PageRank Depo Haritası ve AST Çağrı Grafiği (`ctxman map`)**: 14+ dilde import grafiği üzerindeki PageRank değerini git değişim sıklığı, sembol referansları ve dosyalar arası AST sembol çağrı kenarlarıyla (`--call-graph`, `--focus file:symbol`) birleştirerek en önemli dosya ve fonksiyon imzalarını token bütçesine sığdırır
 - **Yönlü Import ve Sembol Çağrı Komşuluğu (`ctxman focus`)**: Hedef dosya veya sembolü (`<file>:<symbol>`) `N`-hop giden import/çağrılanlar ve gelen importer/çağıranlar (`--direction both|imports|importers`, `--calls-only`, `--callers-only`, dosya içi yardımcı fonksiyon kapanışı ve barrel re-export çözümlemesi dahil) ile ortak hub patlamasına yol açmadan paketler
-- **Çoklu Depo Çalışma Alanı (`--repo <dir>`)**: Birden fazla depoyu `<alias>/<path>` ad alanları altında tek bir paylaşılan token bütçesinde birleştirir
+- **Çoklu Depo Çalışma Alanı (`--repo <dir>`)**: `map`, `search`, `pack`, `focus`, `task`, `diagnose` ve `watch` komutlarında birden fazla depoyu `<alias>/<path>` ad alanları altında, depolar arası import ve AST sembol çağrı grafiği (`buildWorkspaceGraph`) ile tek bir paylaşılan token bütçesinde birleştirir
 
 ```bash
 # Dosyalar arası AST sembol çağrılarıyla 2.000 token bütçeli sıralı depo haritası
@@ -39,7 +39,9 @@ ctxman who "hybrid search RRF"
 
 ```bash
 ctxman task "add OAuth token refresh retry logic" --budget 32k
+ctxman task "fix invoice checkout webhook" --repo ../billing-api --repo ../checkout-web
 npm test 2>&1 | ctxman diagnose --budget 20k
+ctxman diagnose "Error at billing-api/src/invoice.js:3:10" --repo ../checkout-web
 ctxman pr --base main --budget 24k
 ```
 

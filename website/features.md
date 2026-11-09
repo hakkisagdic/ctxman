@@ -8,7 +8,7 @@ Ctxman is a local-first AI Code Intelligence & Context Engineering Platform desi
 
 - **PageRank Repository Map & AST Call Graph (`ctxman map`)**: Ranks files across 14+ languages using PageRank over the import graph blended with git change frequency, symbol references, and cross-file AST symbol call edges (`--call-graph`, `--focus file:symbol`), fitting function signatures into any token budget
 - **Directional Import & Symbol Call Focus (`ctxman focus`)**: Packs a target file or symbol (`<file>:<symbol>`) together with its `N`-hop outgoing imports/callees and incoming importers/callers (`--direction both|imports|importers`, `--calls-only`, `--callers-only`, including intra-file helper closures and barrel re-exports) without shared-hub explosion
-- **Multi-Repo Workspaces (`--repo <dir>`)**: Merge multiple repositories under `<alias>/<path>` namespaces within a single shared token budget
+- **Multi-Repo Workspaces (`--repo <dir>`)**: Merge multiple repositories under `<alias>/<path>` namespaces within a single shared token budget across `map`, `search`, `pack`, `focus`, `task`, `diagnose`, and `watch` with cross-repo import and AST symbol call-graph traversal (`buildWorkspaceGraph`)
 
 ```bash
 # Ranked repository map with cross-file AST symbol call annotations
@@ -39,7 +39,9 @@ ctxman who "hybrid search RRF"
 
 ```bash
 ctxman task "add OAuth token refresh retry logic" --budget 32k
+ctxman task "fix invoice checkout webhook" --repo ../billing-api --repo ../checkout-web
 npm test 2>&1 | ctxman diagnose --budget 20k
+ctxman diagnose "Error at billing-api/src/invoice.js:3:10" --repo ../checkout-web
 ctxman pr --base main --budget 24k
 ```
 

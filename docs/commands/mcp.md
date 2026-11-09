@@ -180,12 +180,12 @@ $ ctxman mcp uninstall --client claude-desktop
 | `count_tokens`          | `path` or `text`, `model?`, `top?`                                                                                         | Token count for a model and the fit in its window (`ctxman count`)                                                      |
 | `explain_history`       | `path`, `target`, `limit?`, `budget?`, `since?`, `patches?`, `discussions?`, `maxDiscussions?`, `analyzer?`, `analyzerDb?` | Why code looks as it does: git history, references, institutional citations, owners, tests, PR threads                  |
 | `pack_context`          | `path`, `include?`, `exclude?`, `files?`, `style?`, `budget?`, `repos?`                                                    | File contents in one LLM-ready document (`ctxman pack`)                                                                 |
-| `focus_context`         | `path`, `file`, `symbol?`, `depth?`, `direction?`, `callGraph?`, `style?`, `compress?`, `budget?`                          | Import & AST symbol call-graph neighborhood slice around a file or `file:symbol` (`ctxman focus`)                       |
+| `focus_context`         | `path`, `file`, `repos?`, `symbol?`, `depth?`, `direction?`, `callGraph?`, `style?`, `compress?`, `budget?`                | Import & AST symbol call-graph neighborhood slice around a file or `file:symbol` (`ctxman focus`)                       |
 | `check_policy`          | `path`                                                                                                                     | The effective export policy, or why its files are invalid (`ctxman policy check`)                                       |
 | `audit_log`             | `path`, `since?`, `limit?`                                                                                                 | Exports recorded in the policy's audit log (`ctxman audit`)                                                             |
 | `ask_codebase`          | `path`, `query`, `limit?`                                                                                                  | Files closest in meaning to a question, from a local SQLite embedding index (`ctxman ask`)                              |
-| `task_context`          | `path`, `task`, `budget?`, `format?`, `model?`                                                                             | Task-driven auto context: hybrid search seeds, AST call & import 1-hop code, 2-hop signatures, repo map (`ctxman task`) |
-| `diagnose_failure`      | `path`, `trace`, `budget?`, `format?`                                                                                      | Stack-trace & failure root-cause bundle: implicated frames, methods, AST call & import 1-hop & git history              |
+| `task_context`          | `path`, `task`, `repos?`, `budget?`, `format?`, `callGraph?`, `model?`                                                     | Task-driven auto context: hybrid search seeds, AST call & import 1-hop code, 2-hop signatures, repo map (`ctxman task`) |
+| `diagnose_failure`      | `path`, `trace`, `repos?`, `budget?`, `format?`, `callGraph?`                                                              | Stack-trace & failure root-cause bundle: implicated frames, methods, AST call & import 1-hop & git history              |
 | `find_experts`          | `path`, `target`, `limit?`, `halfLifeDays?`, `style?`                                                                      | Expert Finder ("Who knows about this?"): blame share, recency-decayed commits & CODEOWNERS (`ctxman who`)               |
 | `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`, `repos?`                                                        | File nodes, method declarations, and import/dependency edges from `.ctxman/self-knowledge/index.sqlite`                 |
 
@@ -218,7 +218,7 @@ bootstrapping the graph when empty or when `refresh: true` is passed, and honour
 `.ctxman/policy.json` deny rules. When `repos` is provided, nodes and cross-repo import edges across all
 repositories are indexed and returned under `<alias>/<path>`.
 
-`repo_map`, `search_code` (`ranked`, `semantic`, `hybrid`), `pack_context`, and `query_knowledge_graph` accept an optional
+`repo_map`, `search_code` (`ranked`, `semantic`, `hybrid`), `pack_context`, `focus_context`, `task_context`, `diagnose_failure`, and `query_knowledge_graph` accept an optional
 `repos` array of repository directories to run across a multi-repository workspace under a single
 shared token budget, prefixing paths with `<alias>/<path>`. When `--root` is active, every entry in
 `repos` (and `analyzerDb` on `explain_history`) must also resolve inside the sandbox root.
