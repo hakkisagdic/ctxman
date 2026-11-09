@@ -7,6 +7,19 @@ ve bu proje [Semantic Versioning](https://semver.org/spec/v2.0.0.html) takip ede
 
 Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) dosyasına bakın.
 
+## [3.2.3] - 2026-11-09
+
+### Eklendi
+
+- **Çapraz Depo Canlı İzleme ve Bilgi Grafiği Senkronizasyonu (`ctxman watch --repo`, `FileWatcher`, `IncrementalAnalyzer`, MCP `query_knowledge_graph`)**:
+  - `FileWatcher` ve `IncrementalAnalyzer` modüllerine çoklu depo çalışma alanı desteği (`options.repos`) eklendi; izlenen dosyalar, SQLite RAG vektörleri ve bilgi grafiği düğümleri `<alias>/<path>` altında isimlendirildi
+  - `@<alias>/...`, `<alias>/...`, `@<scope>/<alias>/...` ve göreli kardeş dizin yolları üzerinden depolar arası import kenarları (`<aliasA>/<file> -> <aliasB>/<file>`) ve çapraz depo sembol referans puanlaması (`symbolRefs`) çözümlendi
+  - İzlenen tüm depolarda depo bazlı `.ctxman/policy.json` engelleme kuralları (`isPathDenied`) ve gitignore kuralları zorunlu kılındı; `ctxman watch` için tekrarlanabilir `--repo <dir>` ve MCP `query_knowledge_graph` için `repos` desteği eklendi
+
+### Düzeltildi
+
+- İzleme entegrasyon testlerinde (`test/ignore-rules-integration.test.js`) macOS `FSEvents` gecikme (debounce) kararlılığı iyileştirildi
+
 ## [3.2.2] - 2026-11-05
 
 ### Eklendi
@@ -16,10 +29,6 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
   - `ctxman map`: `-c, --call-graph` ve `--focus <file:symbol>` desteği, fonksiyon satırlarında `-> path:callee` açıklamaları, `--graph --call-graph` altında `file:caller -> file:callee` çıktısı, `--style dot --call-graph` içinde kesikli çağrı kenarları ve doğrudan sembol çağrı komşularına (`0.85` ağırlık) PageRank kişiselleştirmesi eklendi
   - `ctxman focus`: `<file>:<symbol>`, `-s, --symbol`, `--calls-only`, `--callers-only` ve `--calls` / `--no-calls` (ve MCP `focus_context` `symbol` ve `callGraph` parametreleri) ile dosya içi yardımcı fonksiyon kapanışı ve dosyalar arası sembol çağrı gezintisi eklendi
   - `ctxman task` ve `ctxman diagnose`: `buildTaskContext` ve `diagnoseFailure` içinde 1-hop ve 2-hop dosyalar arası AST sembol çağrı kenarlarına öncelik verildi, `--calls` / `--no-calls` CLI bayrakları ve teşhis raporlarında `## Related 1-Hop Neighborhood` altında `caller -> callee` açıklamaları eklendi
-- **Çapraz Depo Canlı İzleme ve Bilgi Grafiği Senkronizasyonu (`ctxman watch --repo`, `FileWatcher`, `IncrementalAnalyzer`, MCP `query_knowledge_graph`)**:
-  - `FileWatcher` ve `IncrementalAnalyzer` modüllerine çoklu depo çalışma alanı desteği (`options.repos`) eklendi; izlenen dosyalar, SQLite RAG vektörleri ve bilgi grafiği düğümleri `<alias>/<path>` altında isimlendirildi
-  - `@<alias>/...`, `<alias>/...`, `@<scope>/<alias>/...` ve göreli kardeş dizin yolları üzerinden depolar arası import kenarları (`<aliasA>/<file> -> <aliasB>/<file>`) ve çapraz depo sembol referans puanlaması (`symbolRefs`) çözümlendi
-  - İzlenen tüm depolarda depo bazlı `.ctxman/policy.json` engelleme kuralları (`isPathDenied`) ve gitignore kuralları zorunlu kılındı; `ctxman watch` için tekrarlanabilir `--repo <dir>` ve MCP `query_knowledge_graph` için `repos` desteği eklendi
 
 ### Düzeltildi
 
@@ -129,21 +138,24 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
 
 ## Sürüm Geçmişi
 
-| Sürüm | Tarih      | Öne Çıkanlar                                                                                                                    |
-| ----- | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| 3.2.2 | 2026-11-05 | Dosyalar arası AST sembol çağrı grafiği (`buildCallGraph`, `map --call-graph`, `focus file:symbol`, `task` ve `diagnose`)       |
-| 3.2.1 | 2026-11-05 | `watch` artımlı RAG ve bilgi grafiği senkronu, 19 araçlı MCP (`query_knowledge_graph`), ADR Kataloğu ve Bilgi Grafiği sayfaları |
-| 3.2.0 | 2026-10-30 | `SqliteVectorStore`, `ctxman task`, `ctxman diagnose`, `ctxman who`, `ctxman focus`, 18 araçlı MCP                              |
-| 3.1.1 | 2026-10-15 | MCP `check_policy`, `audit_log`, `ask_codebase`, RAG politika doğrulaması                                                       |
-| 3.1.0 | 2026-10-14 | `map`, `pack`, `pr`, `why`, `search`, `count`, `policy`, `audit`, `mcp install`, 44+ LLM profili                                |
-| 3.0.0 | 2025-11-05 | Plugin mimarisi, Git entegrasyonu, REST API, İzleme modu                                                                        |
-| 2.3.7 | 2025-11-05 | LLM otomatik algılama, token bütçeleme                                                                                          |
-| 2.3.0 | 2025-11-02 | TOON formatı, akıllı GitIngest bölümleme, Ink arayüzü                                                                           |
-| 2.0.0 | 2025-10-13 | Modüler mimari, 14+ dil desteği                                                                                                 |
+| Sürüm | Tarih      | Öne Çıkanlar                                                                                                                        |
+| ----- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 3.2.3 | 2026-11-09 | Çapraz depo canlı izleme (`ctxman watch --repo`) ve çoklu kök SQLite bilgi grafiği / RAG senkronu (`query_knowledge_graph` `repos`) |
+| 3.2.2 | 2026-11-05 | Dosyalar arası AST sembol çağrı grafiği (`buildCallGraph`, `map --call-graph`, `focus file:symbol`, `task` ve `diagnose`)           |
+| 3.2.1 | 2026-11-05 | `watch` artımlı RAG ve bilgi grafiği senkronu, 19 araçlı MCP (`query_knowledge_graph`), ADR Kataloğu ve Bilgi Grafiği sayfaları     |
+| 3.2.0 | 2026-10-30 | `SqliteVectorStore`, `ctxman task`, `ctxman diagnose`, `ctxman who`, `ctxman focus`, 18 araçlı MCP                                  |
+| 3.1.1 | 2026-10-15 | MCP `check_policy`, `audit_log`, `ask_codebase`, RAG politika doğrulaması                                                           |
+| 3.1.0 | 2026-10-14 | `map`, `pack`, `pr`, `why`, `search`, `count`, `policy`, `audit`, `mcp install`, 44+ LLM profili                                    |
+| 3.0.0 | 2025-11-05 | Plugin mimarisi, Git entegrasyonu, REST API, İzleme modu                                                                            |
+| 2.3.7 | 2025-11-05 | LLM otomatik algılama, token bütçeleme                                                                                              |
+| 2.3.0 | 2025-11-02 | TOON formatı, akıllı GitIngest bölümleme, Ink arayüzü                                                                               |
+| 2.0.0 | 2025-10-13 | Modüler mimari, 14+ dil desteği                                                                                                     |
 
 ## Yol Haritası
 
-### v3.1 – v3.2.2 ile Tamamlananlar
+### v3.1 – v3.2.3 ile Tamamlananlar
+
+- **Çapraz Depo Canlı İzleme ve Bilgi Grafiği Senkronizasyonu**: Kardeş depolar arasında `<alias>/<path>` düğümlerini, çapraz depo import kenarlarını ve SQLite RAG vektörlerini eşzamanlı güncelleyen çoklu depo izleme modu (`ctxman watch --repo <dir>`)
 
 - **Dosyalar Arası AST Sembol Çağrı Grafiği**: `ctxman map --call-graph`, `ctxman focus <file>:<symbol>`, `ctxman task` ve `ctxman diagnose` genelinde fonksiyonlar arası çağrı kenarları ve barrel re-export çözümlemesi
 - **19 Araçlı MCP Sunucusu ve İstemci Kurucusu**: Claude Desktop, Claude Code, Cursor, VS Code ve Windsurf için yerleşik entegrasyon (`ctxman mcp`) ve `query_knowledge_graph` aracı
@@ -151,10 +163,6 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
 - **Kod Arkeolojisi ve Uzman Bulucu**: `ctxman why` (GitHub/GitLab tartışmaları ve `@plansmithai/analyzer` kurumsal hafıza atıflarıyla) ve `ctxman who`
 - **Görev ve Hata Ajanları**: `ctxman task` ve `ctxman diagnose`
 - **3 Sütunlu Ekosistem Entegrasyonu**: `plansmith` ve `plansmith-desktop` ile çapraz depo bilgi grafiği ([ADR Kataloğu](/tr/adr), [Bilgi Grafiği](/tr/knowledge-graph))
-
-### Sıradaki Geliştirmeler
-
-- **Çapraz Depo Canlı İzleme Servisi**: Kardeş depolar arasında `<alias>/<path>` grafik kenarlarını eşzamanlı güncelleyen çoklu depo izleme modu
 
 ### Katkıda Bulunma
 

@@ -2,6 +2,19 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
+## [3.2.3] - 2026-11-09
+
+### Added
+
+- **Cross-Repo Live Watch & Knowledge Graph Synchronization (`ctxman watch --repo`, `FileWatcher`, `IncrementalAnalyzer`, MCP `query_knowledge_graph`)**:
+  - Added multi-repository workspace support (`options.repos`) to `FileWatcher` and `IncrementalAnalyzer` (`resolveWorkspaceRepos`), namespacing watched files, SQLite RAG embeddings, and knowledge graph nodes under `<alias>/<path>`.
+  - Resolved cross-repository import edges (`<aliasA>/<file> -> <aliasB>/<file>`) across `@<alias>/...`, `<alias>/...`, `@<scope>/<alias>/...`, and relative sibling paths alongside cross-repo symbol reference scoring (`symbolRefs`).
+  - Enforced per-repository `.ctxman/policy.json` deny rules (`isPathDenied`) and gitignore rules across all watched repositories, and added repeatable `--repo <dir>` to `ctxman watch` and `repos` to MCP `query_knowledge_graph`.
+
+### Fixed
+
+- Stabilized macOS `FSEvents` debounce settle handling in watch integration tests (`test/ignore-rules-integration.test.js`).
+
 ## [3.2.2] - 2026-11-05
 
 ### Added
@@ -11,10 +24,6 @@ All notable changes to the Ctxman will be documented in this file.
   - `ctxman map`: added `-c, --call-graph` and `--focus <file:symbol>` support, annotating mapped methods with `-> path:callee`, rendering `file:caller -> file:callee` in `--graph --call-graph` and dashed call edges in `--style dot --call-graph`, and personalizing PageRank toward direct symbol call neighbors (weight `0.85`).
   - `ctxman focus`: added `<file>:<symbol>`, `-s, --symbol`, `--calls-only`, `--callers-only`, and `--calls` / `--no-calls` (plus MCP `focus_context` `symbol` and `callGraph` parameters), traversing intra-file helper closures and cross-file symbol call edges while prioritizing direct symbol call neighbors under token budgets.
   - `ctxman task` & `ctxman diagnose`: prioritized 1-hop and 2-hop cross-file AST symbol call edges (including intra-file helper closures and barrel re-exports) in `buildTaskContext` and `diagnoseFailure`, added `--calls` / `--no-calls` CLI flags, and annotated `## Related 1-Hop Neighborhood` in diagnosis reports with `caller -> callee` relationships.
-- **Cross-Repo Live Watch & Knowledge Graph Synchronization (`ctxman watch --repo`, `FileWatcher`, `IncrementalAnalyzer`, MCP `query_knowledge_graph`)**:
-  - Added multi-repository workspace support (`options.repos`) to `FileWatcher` and `IncrementalAnalyzer` (`resolveWorkspaceRepos`), namespacing watched files, SQLite RAG embeddings, and knowledge graph nodes under `<alias>/<path>`.
-  - Resolved cross-repository import edges (`<aliasA>/<file> -> <aliasB>/<file>`) across `@<alias>/...`, `<alias>/...`, `@<scope>/<alias>/...`, and relative sibling paths alongside cross-repo symbol reference scoring (`symbolRefs`).
-  - Enforced per-repository `.ctxman/policy.json` deny rules (`isPathDenied`) and gitignore rules across all watched repositories, and added repeatable `--repo <dir>` to `ctxman watch` and `repos` to MCP `query_knowledge_graph`.
 
 ### Fixed
 
