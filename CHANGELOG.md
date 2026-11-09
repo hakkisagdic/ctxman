@@ -2,6 +2,16 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
+## [3.2.4] - 2026-11-09
+
+### Added
+
+- **Multi-Repo Neighborhood Focus, Task Context & Failure Diagnosis (`buildWorkspaceGraph`, `focus --repo`, `task --repo`, `diagnose --repo`)**:
+  - Added and exported `buildWorkspaceGraph` in `lib/workspace/index.js`, uniting intra-repo imports, cross-repo package/alias/relative imports (`<alias>/...`, `@<alias>/...`, `@<scope>/<alias>/...`, `<pkgName>/...`, and sibling relative paths), and cross-repository AST symbol call graph edges (`<aliasA>/<path>:caller -> <aliasB>/<path>:callee` via `buildCallGraph`).
+  - `ctxman focus --repo <dir>` (`focusContext` `options.repos` & MCP `focus_context` `repos`): resolves `<alias>/<path>[:symbol]` targets across workspace repositories, traverses cross-repo import and symbol call-graph neighborhoods, and packs results via `packWorkspace` with per-repo `enforceWorkspacePolicies`.
+  - `ctxman task --repo <dir>` (`buildTaskContext` `options.repos` & MCP `task_context` `repos`): combines `searchWorkspace` seed discovery, `buildWorkspaceGraph` 1-hop and 2-hop cross-repo call/import expansion, and `mapWorkspace` architectural overview under a shared token budget.
+  - `ctxman diagnose --repo <dir>` (`diagnoseFailure` `options.repos` & MCP `diagnose_failure` `repos`): resolves stack trace frames across multiple repositories, collects 1-hop cross-repo call/import neighbors, and queries `explainHistory` git history in each implicated file's owning repository.
+
 ## [3.2.3] - 2026-11-09
 
 ### Added

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) on GitHub.
 
+## [3.2.4] - 2026-11-09
+
+### Added
+
+- **Multi-Repo Neighborhood Focus, Task Context & Failure Diagnosis (`buildWorkspaceGraph`, `focus --repo`, `task --repo`, `diagnose --repo`)**:
+  - Added and exported `buildWorkspaceGraph` in `lib/workspace/index.js`, uniting intra-repo imports, cross-repo package/alias/relative imports (`<alias>/...`, `@<alias>/...`, `@<scope>/<alias>/...`, `<pkgName>/...`, and sibling relative paths), and cross-repository AST symbol call graph edges (`<aliasA>/<path>:caller -> <aliasB>/<path>:callee` via `buildCallGraph`)
+  - `ctxman focus --repo <dir>` (`focusContext` `options.repos` & MCP `focus_context` `repos`): resolves `<alias>/<path>[:symbol]` targets across workspace repositories, traverses cross-repo import and symbol call-graph neighborhoods, and packs results via `packWorkspace` with per-repo `enforceWorkspacePolicies`
+  - `ctxman task --repo <dir>` (`buildTaskContext` `options.repos` & MCP `task_context` `repos`): combines `searchWorkspace` seed discovery, `buildWorkspaceGraph` 1-hop and 2-hop cross-repo call/import expansion, and `mapWorkspace` architectural overview under a shared token budget
+  - `ctxman diagnose --repo <dir>` (`diagnoseFailure` `options.repos` & MCP `diagnose_failure` `repos`): resolves stack trace frames across multiple repositories, collects 1-hop cross-repo call/import neighbors, and queries `explainHistory` git history in each implicated file's owning repository
+
 ## [3.2.3] - 2026-11-09
 
 ### Added
@@ -138,22 +148,25 @@ For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ct
 
 ## Version History
 
-| Version | Date       | Highlights                                                                                                                       |
-| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| 3.2.3   | 2026-11-09 | Cross-repo live watch (`ctxman watch --repo`) and multi-root SQLite knowledge graph & RAG sync (`query_knowledge_graph` `repos`) |
-| 3.2.2   | 2026-11-05 | Cross-file AST symbol call graph (`buildCallGraph`, `map --call-graph`, `focus file:symbol`, `task` & `diagnose` call edges)     |
-| 3.2.1   | 2026-11-05 | `watch` incremental RAG & knowledge graph sync, 19-tool MCP (`query_knowledge_graph`), ADR Catalog & Knowledge Graph pages       |
-| 3.2.0   | 2026-10-30 | `SqliteVectorStore`, `ctxman task`, `ctxman diagnose`, `ctxman who`, `ctxman focus`, 18-tool MCP                                 |
-| 3.1.1   | 2026-10-15 | MCP `check_policy`, `audit_log`, `ask_codebase`, RAG policy enforcement                                                          |
-| 3.1.0   | 2026-10-14 | `map`, `pack`, `pr`, `why`, `search`, `count`, `policy`, `audit`, `mcp install`, 44+ LLM profiles                                |
-| 3.0.0   | 2025-11-05 | Plugin architecture, Git integration, REST API, Watch mode                                                                       |
-| 2.3.7   | 2025-11-05 | LLM auto-detection, token budgeting                                                                                              |
-| 2.3.0   | 2025-11-02 | TOON format, smart GitIngest chunking, Ink UI                                                                                    |
-| 2.0.0   | 2025-10-13 | Modular architecture refactoring, 14+ language support                                                                           |
+| Version | Date       | Highlights                                                                                                                                 |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 3.2.4   | 2026-11-09 | Multi-repo `focus`, `task`, and `diagnose` (`--repo` / MCP `repos`) with cross-repo AST symbol call & import graph (`buildWorkspaceGraph`) |
+| 3.2.3   | 2026-11-09 | Cross-repo live watch (`ctxman watch --repo`) and multi-root SQLite knowledge graph & RAG sync (`query_knowledge_graph` `repos`)           |
+| 3.2.2   | 2026-11-05 | Cross-file AST symbol call graph (`buildCallGraph`, `map --call-graph`, `focus file:symbol`, `task` & `diagnose` call edges)               |
+| 3.2.1   | 2026-11-05 | `watch` incremental RAG & knowledge graph sync, 19-tool MCP (`query_knowledge_graph`), ADR Catalog & Knowledge Graph pages                 |
+| 3.2.0   | 2026-10-30 | `SqliteVectorStore`, `ctxman task`, `ctxman diagnose`, `ctxman who`, `ctxman focus`, 18-tool MCP                                           |
+| 3.1.1   | 2026-10-15 | MCP `check_policy`, `audit_log`, `ask_codebase`, RAG policy enforcement                                                                    |
+| 3.1.0   | 2026-10-14 | `map`, `pack`, `pr`, `why`, `search`, `count`, `policy`, `audit`, `mcp install`, 44+ LLM profiles                                          |
+| 3.0.0   | 2025-11-05 | Plugin architecture, Git integration, REST API, Watch mode                                                                                 |
+| 2.3.7   | 2025-11-05 | LLM auto-detection, token budgeting                                                                                                        |
+| 2.3.0   | 2025-11-02 | TOON format, smart GitIngest chunking, Ink UI                                                                                              |
+| 2.0.0   | 2025-10-13 | Modular architecture refactoring, 14+ language support                                                                                     |
 
 ## Roadmap
 
-### Delivered in v3.1 – v3.2.3
+### Delivered in v3.1 – v3.2.4
+
+- **Multi-Repo Focus, Task & Diagnose Agents**: Cross-repository import and AST symbol call-graph traversal (`buildWorkspaceGraph`) across `ctxman focus --repo`, `ctxman task --repo`, and `ctxman diagnose --repo` (and MCP `repos`)
 
 - **Cross-Repo Live Watch & Knowledge Graph Sync**: Multi-repository file watcher (`ctxman watch --repo <dir>`) and `IncrementalAnalyzer` synchronizing `<alias>/<path>` nodes, cross-repo import edges, and SQLite RAG embeddings
 
