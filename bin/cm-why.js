@@ -33,12 +33,13 @@ mention it, TODO-style notes inside it and the tests that reference it. Built
 from the local git history (offline by default; opt in to --discussions for
 GitHub/GitLab issue, PR and MR context).
 
-Targets (paths are relative to the current directory, inside the repository):
+Targets (paths are relative to the current directory, or <alias>/<file> with --repo):
   <file>                    The whole file (history follows renames)
   <file>:<symbol>           A function, method or class: total, Cart.total, Cart::total
   <file>#L10-L40            A line range (also <file>#L10 and <file>:10-40)
 
 Options:
+      --repo <dir>          Additional repository root for multi-repo workspaces (repeatable)
   -n, --limit <n>           Commits to include (default: 20)
       --since <date>        Only commits after this date ("2024-01-01", "6 months ago")
       --rev <ref>           Explain the code as of this revision (default: working tree)
@@ -63,6 +64,7 @@ Options:
 
 Examples:
   ctxman why src/cart.js:total
+  ctxman why backend/src/cart.js:total --repo ../docs-repo --repo ../e2e-tests
   ctxman why src/cart.js:total --discussions
   ctxman why src/cart.js#L40-L72 --patches --budget 8000
   ctxman why lib/server.js --since "1 year ago" --style xml -o why.xml
@@ -70,6 +72,7 @@ Examples:
 `;
 
 const OPTIONS = {
+  repo: { type: 'string', multiple: true },
   limit: { type: 'string', short: 'n' },
   since: { type: 'string' },
   rev: { type: 'string' },
@@ -165,11 +168,22 @@ async function main() {
   }
 
   const cwd = process.cwd();
+  const extraRepos = values.repo?.length ? values.repo.map((r) => path.resolve(cwd, r)) : undefined;
   let result;
   try {
-    const root = findRepositoryRoot(cwd);
+    let root = cwd;
+    if (extraRepos) {
+      try {
+        root = findRepositoryRoot(cwd);
+      } catch {
+        root = cwd;
+      }
+    } else {
+      root = findRepositoryRoot(cwd);
+    }
     result = await explainHistory(root, positionals[0], {
       cwd,
+      repos: extraRepos,
       limit: values.limit,
       since: values.since,
       rev: values.rev,

@@ -681,6 +681,7 @@ describe('ctxman why', () => {
         'maxDiscussions',
         'analyzer',
         'analyzerDb',
+        'repos',
       ]);
 
       const call = (args) =>

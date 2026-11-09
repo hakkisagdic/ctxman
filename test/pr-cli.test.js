@@ -173,6 +173,7 @@ describe('pr_context MCP tool', () => {
       'head',
       'budget',
       'style',
+      'repos',
     ]);
     expect(tool.inputSchema.required).toEqual(['path']);
   });

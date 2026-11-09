@@ -11,11 +11,33 @@ import {
   loadPolicy,
   createStarterPolicy,
   loadIgnoreFileRules,
+  checkWorkspacePolicies,
   POLICY_FILE,
   POLICY_ENV,
   POLICY_DOCS_URL,
   PolicyConfigError,
 } from '../lib/policy/index.js';
+
+function collectRepos(args) {
+  const repos = [];
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--repo') {
+      const next = args[++i];
+      if (!next || next.startsWith('-')) {
+        throw new Error('--repo needs a directory path');
+      }
+      repos.push(next);
+    } else if (arg.startsWith('--repo=')) {
+      const value = arg.slice('--repo='.length);
+      if (!value) {
+        throw new Error('--repo needs a directory path');
+      }
+      repos.push(value);
+    }
+  }
+  return repos;
+}
 
 function main() {
   const args = process.argv.slice(2);
@@ -25,13 +47,27 @@ function main() {
     return;
   }
 
+  let repos = [];
+  try {
+    repos = collectRepos(args);
+  } catch (error) {
+    console.error(`❌ ${error.message}`);
+    process.exitCode = 2;
+    return;
+  }
+
   const command = args[0] && !args[0].startsWith('-') ? args[0] : 'check';
 
   switch (command) {
     case 'check':
-      check(args.includes('--json'));
+      check(args.includes('--json'), repos);
       break;
     case 'init':
+      if (repos.length > 0) {
+        console.error("❌ --repo is only supported with 'ctxman policy check'");
+        process.exitCode = 2;
+        return;
+      }
       init(args.includes('--force') || args.includes('-f'));
       break;
     default:
@@ -41,8 +77,76 @@ function main() {
   }
 }
 
-function check(json) {
+function checkWorkspace(root, json, repos) {
+  let result;
+  try {
+    result = checkWorkspacePolicies(root, repos);
+  } catch (error) {
+    console.error(`❌ ${error.message}`);
+    process.exitCode = 2;
+    return;
+  }
+
+  if (!result.valid) {
+    process.exitCode = 2;
+  }
+
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  const label = (text) => `${text}:`.padEnd(24);
+  console.log('🛡️  ctxman workspace export policy');
+  console.log(`Repositories (${result.repos.length}):`);
+  for (const repo of result.repos) {
+    if (!repo.valid) {
+      console.log(`  ❌ [${repo.alias}] ${repo.root}`);
+      console.error(`❌ [${repo.alias}] ${repo.message}`);
+      continue;
+    }
+    const state = repo.active
+      ? `active (${repo.sources.map((s) => s.scope).join(', ')})`
+      : 'no policy (unrestricted)';
+    console.log(`  ✅ [${repo.alias}] ${repo.root} — ${state}`);
+  }
+  console.log();
+  console.log(
+    label('Require redaction') + (result.requireRedaction ? 'yes (--no-redact is refused)' : 'no')
+  );
+  console.log(
+    label('Max export tokens') +
+      (result.maxExportTokens === null
+        ? 'no limit'
+        : result.maxExportTokens.toLocaleString('en-US'))
+  );
+  console.log(
+    label('Allowed target models') +
+      (!result.allowedTargetModels
+        ? 'any'
+        : result.allowedTargetModels
+            .map((rule) => `${rule.patterns.join(', ')} [${rule.repo}:${rule.scope}]`)
+            .join(' AND '))
+  );
+  console.log(
+    label('AI-tool ignore files') +
+      (result.ignoreFiles.length === 0 ? 'none' : result.ignoreFiles.join(', '))
+  );
+  console.log();
+  if (result.valid) {
+    console.log('✅ All workspace policies are valid.');
+  } else {
+    console.error('❌ One or more workspace policy files are invalid.');
+  }
+}
+
+function check(json, repos = []) {
   const root = process.cwd();
+  if (repos.length > 0) {
+    checkWorkspace(root, json, repos);
+    return;
+  }
+
   let policy;
   try {
     policy = loadPolicy(root);
@@ -156,6 +260,7 @@ function printHelp() {
   console.log('                       (default)');
   console.log(`  init                 Write a starter ${POLICY_FILE}\n`);
   console.log('Options:');
+  console.log('  --repo DIR           check: include another repository (repeatable)');
   console.log('  --json               check: print the effective policy as JSON');
   console.log('  -f, --force          init: overwrite an existing policy file');
   console.log('  -h, --help           Show this help\n');

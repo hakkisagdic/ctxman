@@ -8,6 +8,7 @@ import path from 'path';
 import {
   auditLogFiles,
   readAuditLog,
+  readWorkspaceAuditLogs,
   filterAuditEvents,
   formatAuditTable,
   parseSince,
@@ -16,6 +17,27 @@ import {
 } from '../lib/policy/index.js';
 
 const DEFAULT_TABLE_LIMIT = 50;
+
+function collectRepos(args) {
+  const repos = [];
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--repo') {
+      const value = args[++i];
+      if (value === undefined || value.startsWith('--')) {
+        throw new Error('--repo needs a value');
+      }
+      repos.push(value);
+    } else if (arg.startsWith('--repo=')) {
+      const value = arg.slice('--repo='.length);
+      if (!value) {
+        throw new Error('--repo needs a value');
+      }
+      repos.push(value);
+    }
+  }
+  return repos;
+}
 
 function main() {
   const args = process.argv.slice(2);
@@ -29,6 +51,7 @@ function main() {
   let since = null;
   let limit = json ? 0 : DEFAULT_TABLE_LIMIT;
   let file = null;
+  let repos = [];
 
   try {
     const sinceValue = valueOf(args, '--since');
@@ -43,9 +66,18 @@ function main() {
     }
 
     file = valueOf(args, '--file') ?? null;
+    repos = collectRepos(args);
+    if (file && repos.length > 0) {
+      throw new Error('Cannot combine --file and --repo');
+    }
   } catch (error) {
     console.error(`❌ ${error.message}`);
     process.exitCode = 2;
+    return;
+  }
+
+  if (repos.length > 0) {
+    runWorkspaceAudit({ repos, since, limit, json });
     return;
   }
 
@@ -82,6 +114,48 @@ function main() {
   }
 }
 
+function runWorkspaceAudit({ repos, since, limit, json }) {
+  let result;
+  try {
+    result = readWorkspaceAuditLogs(process.cwd(), repos, { since, limit });
+  } catch (error) {
+    console.error(`❌ ${error.message}`);
+    process.exitCode = 2;
+    return;
+  }
+
+  for (const err of result.policyErrors) {
+    console.error(`⚠️  [${err.repo}] ${err.message}`);
+  }
+
+  if (json) {
+    console.log(JSON.stringify(result.events, null, 2));
+  } else if (result.files.length === 0) {
+    console.log(`No audit logs found across ${result.repos.length} repositories.`);
+    console.log(
+      `Exports are logged while ${POLICY_FILE} has "audit": {"enabled": true} (ctxman policy init).`
+    );
+  } else if (result.events.length === 0) {
+    console.log(
+      since ? `No exports recorded since ${since.toISOString()}.` : 'No exports recorded.'
+    );
+  } else {
+    console.log(formatAuditTable(result.events));
+    console.log();
+    const shown =
+      result.events.length < result.total
+        ? `Showing the last ${result.events.length} of ${result.total} events (--limit 0 shows all)`
+        : `${result.events.length} event${result.events.length === 1 ? '' : 's'}`;
+    console.log(`${shown} across ${result.repos.length} repositories (${result.files.join(', ')})`);
+  }
+
+  if (result.skippedLines > 0) {
+    console.error(
+      `⚠️  Skipped ${result.skippedLines} line${result.skippedLines === 1 ? '' : 's'} that are not JSON events`
+    );
+  }
+}
+
 // The policy's audit logs; the default location when no policy names one
 function auditFiles() {
   const { files, error } = auditLogFiles(process.cwd());
@@ -106,6 +180,8 @@ function printHelp() {
   console.log('ctxman audit - show the export audit log\n');
   console.log('Usage: ctxman audit [options]\n');
   console.log('Options:');
+  console.log('  --repo DIR           Include another repository in the merged audit log');
+  console.log('                       (repeatable)');
   console.log('  --since DATE         Only exports at or after DATE: a date (2026-10-01), an ISO');
   console.log('                       time, or an age such as 30m, 12h, 7d, 2w');
   console.log(`  --limit N            Show the last N exports (default: ${DEFAULT_TABLE_LIMIT};`);

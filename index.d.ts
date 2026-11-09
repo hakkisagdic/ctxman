@@ -1067,6 +1067,8 @@ export interface PrContextOptions {
   maxFileBytes?: number;
   /** Most related tests to list (default: 50) */
   maxRelatedTests?: number;
+  /** Additional repositories for multi-repo PR review context */
+  repos?: WorkspaceRepoInput[];
 }
 
 export interface PrRevision {
@@ -1104,6 +1106,7 @@ export interface PrChangedMethod extends PrMethod {
 }
 
 export interface PrCommit {
+  repo?: string;
   sha: string;
   short: string;
   author: string;
@@ -1120,6 +1123,8 @@ export interface PrRelatedTest {
 }
 
 export interface PrContextResult {
+  /** Participating repositories when `repos` was supplied */
+  repos?: Array<{ alias: string; root: string }>;
   /** The rendered context */
   output: string;
   /** Tokens of `output` */
@@ -1218,6 +1223,8 @@ export interface ExplainHistoryOptions {
   redact?: boolean;
   /** Directory relative target paths start from (default: root) */
   cwd?: string;
+  /** Additional repositories for multi-repo history & cross-repo ADR/doc/test lookup */
+  repos?: WorkspaceRepoInput[];
 }
 
 export interface WhyCommit {
@@ -1250,6 +1257,7 @@ export interface WhyIssueReference {
 }
 
 export interface ExplainHistoryData {
+  repos?: Array<{ alias: string; root: string }>;
   target: {
     path: string;
     symbol: string | null;
@@ -1348,6 +1356,8 @@ export interface ExplainHistoryData {
 }
 
 export interface ExplainHistoryResult {
+  /** Participating repositories when `repos` was supplied */
+  repos?: Array<{ alias: string; root: string }>;
   /** The rendered document */
   text: string;
   style: 'markdown' | 'xml' | 'json';
@@ -1838,6 +1848,44 @@ export class PolicyViolationError extends Error {
 }
 
 export function loadPolicy(rootPath: string, options?: { env?: NodeJS.ProcessEnv }): Policy;
+
+export interface WorkspacePolicySummary {
+  valid: boolean;
+  active: boolean;
+  requireRedaction: boolean;
+  maxExportTokens: number | null;
+  allowedTargetModels: Array<{
+    repo: string;
+    scope: string;
+    file: string;
+    patterns: string[];
+  }> | null;
+  ignoreFiles: string[];
+  repos: Array<Record<string, unknown>>;
+}
+
+export function checkWorkspacePolicies(
+  primaryRoot: string,
+  extraRepos?: WorkspaceRepoInput[],
+  options?: { env?: NodeJS.ProcessEnv }
+): WorkspacePolicySummary;
+
+export interface WorkspaceAuditResult {
+  repos: Array<{ alias: string; root: string }>;
+  files: string[];
+  allFiles: string[];
+  missing: string[];
+  total: number;
+  events: Array<Record<string, unknown>>;
+  skippedLines: number;
+  policyErrors: Array<{ repo: string; root: string; message: string }>;
+}
+
+export function readWorkspaceAuditLogs(
+  primaryRoot: string,
+  extraRepos?: WorkspaceRepoInput[],
+  options?: { since?: Date | null; limit?: number | null; env?: NodeJS.ProcessEnv }
+): WorkspaceAuditResult;
 
 // ============================================
 // Focused Neighborhood Context (`ctxman focus`)

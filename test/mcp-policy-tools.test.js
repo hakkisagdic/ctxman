@@ -34,8 +34,8 @@ describe('MCP policy, audit and ask tools', () => {
     );
     const args = (name) => Object.keys(tools.find((t) => t.name === name).inputSchema.properties);
 
-    expect(args('check_policy')).toEqual(['path']);
-    expect(args('audit_log')).toEqual(['path', 'since', 'limit']);
+    expect(args('check_policy')).toEqual(['path', 'repos']);
+    expect(args('audit_log')).toEqual(['path', 'since', 'limit', 'repos']);
     expect(args('ask_codebase')).toEqual(['path', 'query', 'limit', 'repos']);
   });
 

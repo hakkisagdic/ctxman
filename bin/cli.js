@@ -801,10 +801,12 @@ function printHelp() {
   console.log('                           (ctxman map --help for options)');
   console.log('  pr [--base REF] [--head REF] [path]');
   console.log('                           Review context for a branch: log, changed methods,');
-  console.log('                           diff, related tests (ctxman pr --help)');
+  console.log('                           diff, related tests (--repo DIR, ctxman pr --help)');
   console.log('  why FILE[:SYMBOL|#L10-L40] [options]');
   console.log('                           Why the code looks like this: commits, references,');
-  console.log('                           owners, co-changes, docs and tests (ctxman why --help)');
+  console.log(
+    '                           owners, co-changes, docs and tests (--repo DIR, ctxman why --help)'
+  );
   console.log('  who TARGET [options]     Find code & domain experts across git blame, history,');
   console.log('                           and CODEOWNERS (--repo DIR for multi-repo workspaces)');
   console.log('  search QUERY [path]      Ranked (BM25) search over methods and code chunks');
@@ -812,8 +814,10 @@ function printHelp() {
   console.log('                           Count tokens for a model (exact for Claude with --api)');
   console.log('  mcp [install|uninstall|config]');
   console.log('                           Start the MCP server or add it to an MCP client');
-  console.log('  policy [check|init]      Show or create the export policy (.ctxman/policy.json)');
-  console.log('  audit [--since DATE]     Show the export audit log written under a policy');
+  console.log(
+    '  policy [check|init]      Show or create the export policy (--repo DIR for workspaces)'
+  );
+  console.log('  audit [--since DATE]     Show the export audit log (--repo DIR for workspaces)');
   console.log(
     '  ask QUESTION [options]   Answer a question from the indexed codebase (--repo DIR)'
   );

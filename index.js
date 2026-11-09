@@ -83,7 +83,14 @@ import { hybridSearch } from './lib/search/hybrid.js';
 import { getSymbol } from './lib/search/symbols.js';
 import { countForModel } from './lib/count/index.js';
 import { askCodebase } from './lib/rag/ask.js';
-import { loadPolicy, Policy, PolicyConfigError, PolicyViolationError } from './lib/policy/index.js';
+import {
+  loadPolicy,
+  Policy,
+  PolicyConfigError,
+  PolicyViolationError,
+  checkWorkspacePolicies,
+  readWorkspaceAuditLogs,
+} from './lib/policy/index.js';
 
 export {
   // Analyzers
@@ -181,6 +188,8 @@ export {
   Policy,
   PolicyConfigError,
   PolicyViolationError,
+  checkWorkspacePolicies,
+  readWorkspaceAuditLogs,
 };
 
 // Alias for backward compatibility

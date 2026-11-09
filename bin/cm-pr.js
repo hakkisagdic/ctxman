@@ -53,7 +53,7 @@ const FLAG_OPTIONS = {
  * @returns {object}
  */
 function parseArgs(argv) {
-  const parsed = { paths: [] };
+  const parsed = { paths: [], repos: [] };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--') {
@@ -62,7 +62,13 @@ function parseArgs(argv) {
     }
     const eq = arg.startsWith('--') ? arg.indexOf('=') : -1;
     const name = eq > 0 ? arg.slice(0, eq) : arg;
-    if (VALUE_OPTIONS[name]) {
+    if (name === '--repo') {
+      let value;
+      if (eq > 0) value = arg.slice(eq + 1);
+      else if (i + 1 < argv.length) value = argv[++i];
+      else throw new Error('--repo needs a value');
+      parsed.repos.push(value);
+    } else if (VALUE_OPTIONS[name]) {
       let value;
       if (eq > 0) value = arg.slice(eq + 1);
       else if (i + 1 < argv.length) value = argv[++i];
@@ -109,6 +115,11 @@ function printSummary(result, extras) {
     const what = result.mode === 'staged' ? 'staged changes' : 'working tree';
     lines.push(`ctxman pr: ${what} against ${result.base.ref} (${result.mergeBase.short})`);
   }
+  if (Array.isArray(result.repos) && result.repos.length > 0) {
+    lines.push(
+      `  Repositories (${result.repos.length}): ${result.repos.map((r) => r.alias).join(', ')}`
+    );
+  }
   lines.push(
     `  ${stats.commits} commit(s), ${stats.files} file(s) (+${stats.additions} -${stats.deletions}), ` +
       `${stats.changedMethods} changed method(s), ${stats.deletedMethods} deleted, ` +
@@ -150,6 +161,7 @@ Arguments:
                            directory); a subdirectory limits the change to that directory
 
 What to compare:
+  --repo DIR               Additional repository root for multi-repo PR review (repeatable)
   --base REF               Base branch/commit (default: origin/HEAD, else main, else master)
   --head REF               Head branch/commit (default: HEAD)
   --staged                 Staged changes (index) against HEAD, or against --base
@@ -181,6 +193,7 @@ diff, methods and contents included; excluded files are still listed.
 Examples:
   ctxman pr                                  # current branch against the default branch
   ctxman pr --base main --head feature/login -o review.md
+  ctxman pr --repo ../api --repo ../web --base main --budget 16k
   ctxman pr --working --ask "Anything risky in these changes?"
   ctxman pr --budget 16k --style xml --with-tests --copy
 `);
@@ -201,6 +214,7 @@ async function main() {
   }
 
   try {
+    const cwd = process.cwd();
     const options = {
       base: args.base,
       head: args.head,
@@ -212,6 +226,7 @@ async function main() {
       redact: args.redact,
       style: args.style,
       ask: args.ask,
+      repos: args.repos.length > 0 ? args.repos.map((r) => path.resolve(cwd, r)) : undefined,
     };
     if (args.unified !== undefined) options.unified = parseCount(args.unified, '--unified');
     if (args.budget !== undefined) options.budget = parseTokenCount(args.budget);
@@ -220,7 +235,7 @@ async function main() {
     }
 
     const { buildPrContext } = await import('../lib/pr/pr-context.js');
-    const result = await buildPrContext(args.paths[0] || process.cwd(), options);
+    const result = await buildPrContext(args.paths[0] || cwd, options);
 
     const extras = [];
     let toStdout = !args.output && !args.copy;
