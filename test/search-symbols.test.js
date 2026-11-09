@@ -200,4 +200,44 @@ describe('getSymbol', () => {
       'File not found in project'
     );
   });
+
+  it('looks up symbols across multiple repositories and narrows by <alias>/<file>', () => {
+    const wsRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-symbols-ws-'));
+    const repoA = path.join(wsRoot, 'billing');
+    const repoB = path.join(wsRoot, 'gateway');
+    fs.mkdirSync(path.join(repoA, 'src'), { recursive: true });
+    fs.mkdirSync(path.join(repoB, 'src'), { recursive: true });
+
+    fs.writeFileSync(
+      path.join(repoA, 'src/invoice.js'),
+      'export function settlePayment(id) {\n  return { id, settled: true };\n}\n'
+    );
+    fs.writeFileSync(
+      path.join(repoB, 'src/router.js'),
+      'export function settlePayment(req) {\n  return req;\n}\n'
+    );
+
+    try {
+      const both = getSymbol(wsRoot, 'settlePayment', { repos: [repoA, repoB] });
+      expect(both.match).toBe('exact');
+      expect(both.total).toBe(2);
+      expect(both.repos.map((r) => r.alias)).toEqual(['billing', 'gateway']);
+      expect(both.symbols.map((s) => s.file)).toEqual([
+        path.join('billing', 'src', 'invoice.js'),
+        path.join('gateway', 'src', 'router.js'),
+      ]);
+      expect(both.symbols.map((s) => s.repo)).toEqual(['billing', 'gateway']);
+
+      // Narrow by <alias>/<file>
+      const narrowed = getSymbol(wsRoot, 'settlePayment', {
+        repos: [repoA, repoB],
+        file: 'gateway/src/router.js',
+      });
+      expect(narrowed.total).toBe(1);
+      expect(narrowed.symbols[0].repo).toBe('gateway');
+      expect(narrowed.symbols[0].file).toBe(path.join('gateway', 'src', 'router.js'));
+    } finally {
+      fs.rmSync(wsRoot, { recursive: true, force: true });
+    }
+  });
 });

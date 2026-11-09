@@ -36,7 +36,7 @@ describe('MCP policy, audit and ask tools', () => {
 
     expect(args('check_policy')).toEqual(['path']);
     expect(args('audit_log')).toEqual(['path', 'since', 'limit']);
-    expect(args('ask_codebase')).toEqual(['path', 'query', 'limit']);
+    expect(args('ask_codebase')).toEqual(['path', 'query', 'limit', 'repos']);
   });
 
   describe('check_policy', () => {

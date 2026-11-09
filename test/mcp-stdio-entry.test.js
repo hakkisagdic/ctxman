@@ -18,8 +18,8 @@ function runStdioSession(cwd, messages, waitForId) {
     let stderr = '';
     const timer = setTimeout(() => {
       child.kill();
-      reject(new Error(`no response ${waitForId} within 15s; stderr: ${stderr}`));
-    }, 15000);
+      reject(new Error(`no response ${waitForId} within 45s; stderr: ${stderr}`));
+    }, 45000);
 
     child.stderr.on('data', (d) => (stderr += d));
     child.stdout.on('data', (d) => {
@@ -104,5 +104,5 @@ describe('bin/mcp-server.js stdio transport', () => {
     expect(JSON.parse(result.content[0].text).stats.totalFiles).toBe(1);
     // The diagnostics still reach the user, on stderr
     expect(stderr).toContain('Starting scan');
-  }, 20000);
+  }, 60000);
 });

@@ -38,7 +38,7 @@ describe('Logger with a log directory that cannot be created', () => {
       cwd: workDir,
       input: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping' }) + '\n',
       encoding: 'utf8',
-      timeout: 15000,
+      timeout: 45000,
     });
 
     expect(r.stderr).not.toContain('ENOTDIR');

@@ -177,4 +177,98 @@ describe('Expert Finder (`ctxman who` & MCP `find_experts`)', () => {
     const payload = JSON.parse(called.content[0].text);
     expect(payload.experts[0].name).toBe('Alice Pay');
   });
+
+  it('aggregates git blame, commit recency, and CODEOWNERS across multi-repo workspaces', async () => {
+    const wsRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-who-ws-'));
+    const repoA = path.join(wsRoot, 'billing-svc');
+    const repoB = path.join(wsRoot, 'checkout-ui');
+    fs.mkdirSync(path.join(repoA, 'src'), { recursive: true });
+    fs.mkdirSync(path.join(repoB, '.github'), { recursive: true });
+    fs.mkdirSync(path.join(repoB, 'src'), { recursive: true });
+
+    try {
+      git(repoA, ['init']);
+      fs.writeFileSync(
+        path.join(repoA, 'src/invoice.js'),
+        'export function chargeCard(amount) {\n  return { amount, ok: true };\n}\n'
+      );
+      git(repoA, ['add', '.']);
+      git(repoA, ['commit', '-m', 'feat: add chargeCard'], {
+        GIT_AUTHOR_NAME: 'Alice Pay',
+        GIT_AUTHOR_EMAIL: 'alice-pay@example.com',
+        GIT_COMMITTER_NAME: 'Alice Pay',
+        GIT_COMMITTER_EMAIL: 'alice-pay@example.com',
+        GIT_AUTHOR_DATE: '2026-10-25T12:00:00Z',
+        GIT_COMMITTER_DATE: '2026-10-25T12:00:00Z',
+      });
+
+      git(repoB, ['init']);
+      fs.writeFileSync(path.join(repoB, '.github/CODEOWNERS'), '/src/ @carol-ui\n');
+      fs.writeFileSync(
+        path.join(repoB, 'src/payButton.js'),
+        [
+          'export function renderPayButton(amount) {',
+          '  const label = `Pay $${amount}`;',
+          '  return { label, action: "chargeCard" };',
+          '}',
+          '',
+        ].join('\n')
+      );
+      git(repoB, ['add', '.']);
+      git(repoB, ['commit', '-m', 'feat: add renderPayButton'], {
+        GIT_AUTHOR_NAME: 'Carol UI',
+        GIT_AUTHOR_EMAIL: 'carol-ui@example.com',
+        GIT_COMMITTER_NAME: 'Carol UI',
+        GIT_COMMITTER_EMAIL: 'carol-ui@example.com',
+        GIT_AUTHOR_DATE: '2026-10-28T12:00:00Z',
+        GIT_COMMITTER_DATE: '2026-10-28T12:00:00Z',
+      });
+
+      // Topic search across both repos
+      const topicRes = await findExperts(wsRoot, 'chargeCard amount', {
+        repos: [repoA, repoB],
+        nowMs,
+        style: 'json',
+      });
+      expect(topicRes.data.target.mode).toBe('topic');
+      expect(topicRes.data.target.files).toEqual(
+        expect.arrayContaining(['billing-svc/src/invoice.js', 'checkout-ui/src/payButton.js'])
+      );
+      const names = topicRes.experts.map((e) => e.name);
+      expect(names).toContain('Alice Pay');
+      expect(names).toContain('Carol UI');
+      const carol = topicRes.experts.find((e) => e.name === 'Carol UI');
+      expect(carol.isCodeOwner).toBe(true);
+      expect(topicRes.data.codeOwners.owners).toContain('@carol-ui');
+
+      // Alias-prefixed file + symbol lookup (`checkout-ui/src/payButton.js:renderPayButton`)
+      const symRes = await findExperts(wsRoot, 'checkout-ui/src/payButton.js:renderPayButton', {
+        repos: [repoA, repoB],
+        nowMs,
+        style: 'json',
+      });
+      expect(symRes.data.target.mode).toBe('symbol');
+      expect(symRes.data.target.files).toEqual(['checkout-ui/src/payButton.js']);
+      expect(symRes.experts[0].name).toBe('Carol UI');
+
+      // CLI `--repo` support
+      const cliOut = execFileSync(
+        process.execPath,
+        [
+          path.resolve('bin/cm-who.js'),
+          'billing-svc/src/invoice.js',
+          '--repo',
+          repoA,
+          '--repo',
+          repoB,
+          '--json',
+        ],
+        { cwd: wsRoot, encoding: 'utf8' }
+      );
+      const cliData = JSON.parse(cliOut);
+      expect(cliData.experts[0].name).toBe('Alice Pay');
+    } finally {
+      fs.rmSync(wsRoot, { recursive: true, force: true });
+    }
+  });
 });

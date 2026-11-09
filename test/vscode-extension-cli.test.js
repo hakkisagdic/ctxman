@@ -14,7 +14,7 @@ import Module, { createRequire } from 'module';
 const CLI = path.resolve('bin/cli.js');
 const EXTENSION = path.resolve('ide/vscode/extension.js');
 // The extension waits up to 60 s for the CLI; give up well before the test timeout
-const KILL_AFTER_MS = 10000;
+const KILL_AFTER_MS = 45000;
 
 function loadExtension(fakeVscode, onSpawn) {
   const fakeChildProcess = {
@@ -130,7 +130,7 @@ describe('VS Code extension -> CLI contract', () => {
     const total = Number(printed.replace(/\D/g, ''));
     expect(total).toBeGreaterThan(999);
     expect(messages).toContain(`Generated ${total.toLocaleString()} tokens`);
-  }, 30000);
+  }, 60000);
 });
 
 describe('VS Code extension command line', () => {

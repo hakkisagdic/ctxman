@@ -293,12 +293,9 @@ describe('MultiRepoManager', () => {
   });
 
   describe('generateRepoId', () => {
-    it('should generate unique IDs', async () => {
+    it('should generate unique IDs', () => {
       const id1 = manager.generateRepoId('../test-repo');
-      // Add a small delay to ensure different timestamp
-      await new Promise((resolve) => setTimeout(resolve, 10));
       const id2 = manager.generateRepoId('../test-repo');
-      // IDs should be different due to timestamp
       expect(id1).not.toBe(id2);
     });
 

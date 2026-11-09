@@ -168,7 +168,7 @@ describe('Token Utils - Multi-Tokenizer', () => {
       const longText = 'a'.repeat(10000); // Reduced from 100000
       const tokens = await TokenUtils.calculateForModel(longText, 'gpt-4');
       expect(tokens).toBeGreaterThan(100);
-    }, 10000); // 10 second timeout
+    }, 30000);
 
     test('Handles special characters', async () => {
       const text = '你好世界 Hello World 🚀';

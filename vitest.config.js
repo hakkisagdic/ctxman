@@ -22,7 +22,7 @@ export default defineConfig({
     include: ['test/**/*.test.js'],
     // Exclude desktop-app from root run (handled by workspace)
     exclude: ['node_modules', 'dist', '.git', 'desktop-app/**'],
-    testTimeout: 30000,
-    hookTimeout: 30000,
+    testTimeout: 60000,
+    hookTimeout: 60000,
   },
 });

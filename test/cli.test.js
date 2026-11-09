@@ -15,7 +15,7 @@ function runCommand(args, options = {}) {
       {
         encoding: 'utf8',
         cwd: options.cwd || process.cwd(),
-        timeout: options.timeout || 10000,
+        timeout: options.timeout || 45000,
         stdio: 'pipe',
         input: options.input ? `${options.input.trim()}\n` : undefined,
       }

@@ -1719,12 +1719,14 @@ export interface GetSymbolOptions {
   limit?: number;
   maxTokens?: number;
   redact?: boolean;
+  repos?: WorkspaceRepoInput[];
 }
 
 export interface SymbolMatch {
   name: string;
   kind: string;
   parent?: string;
+  repo?: string;
   file: string;
   startLine: number;
   endLine: number;
@@ -1737,6 +1739,7 @@ export interface GetSymbolResult {
   query: string;
   match: 'exact' | 'case-insensitive' | 'none';
   total: number;
+  repos?: Array<{ alias: string; root: string }>;
   symbols: SymbolMatch[];
   suggestions?: Array<{
     name: string;
@@ -1784,14 +1787,17 @@ export interface AskCodebaseOptions {
   limit?: number;
   redact?: boolean;
   maxChars?: number;
+  repos?: WorkspaceRepoInput[];
   onProgress?: (event: 'indexing' | 'indexed') => void;
-  createStore?: (storePath: string) => unknown;
+  createStore?: (storePath: string, repo?: ResolvedWorkspaceRepo) => unknown;
 }
 
 export interface AskCodebaseResult {
   query: string;
   indexed: boolean;
+  repos?: Array<{ alias: string; root: string }>;
   results: Array<{
+    repo?: string;
     file: string;
     score: number | null;
     text: string;
@@ -2257,6 +2263,7 @@ export interface FindExpertsOptions {
   since?: string;
   style?: 'markdown' | 'xml' | 'json';
   nowMs?: number;
+  repos?: WorkspaceRepoInput[];
 }
 
 export interface ExpertEntry {
@@ -2278,7 +2285,9 @@ export interface ExpertEntry {
 }
 
 export interface FindExpertsResult {
+  repos?: Array<{ alias: string; root: string }>;
   data: {
+    repos?: Array<{ alias: string; root: string }>;
     target: { query: string; mode: string; label: string; files: string[] };
     codeOwners: { file: string | null; owners: string[] };
     totalAuthors: number;

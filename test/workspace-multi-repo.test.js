@@ -20,7 +20,7 @@ import { clearSearchCache } from '../lib/search/bm25.js';
 import MCPServer from '../lib/api/mcp/server.js';
 import { CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 
-const CLI = fileURLToPath(new URL('../bin/cli.js', import.meta.url));
+const BIN_DIR = fileURLToPath(new URL('../bin', import.meta.url));
 const AWS_KEY = 'AKIAIOSFODNN7EXAMPLE';
 
 describe('Multi-Repository Workspace (map, search, pack, focus, task, diagnose)', () => {
@@ -265,89 +265,86 @@ describe('Multi-Repository Workspace (map, search, pack, focus, task, diagnose)'
     ).rejects.toThrow(PolicyViolationError);
   });
 
-  it('works via CLI `--repo` flags and confines MCP `repos` to the sandbox `--root`', async () => {
-    const cliMap = spawnSync(
-      process.execPath,
-      [CLI, 'map', apiRepo, '--repo', webRepo, '--history', '0', '--quiet'],
-      { cwd: workspaceDir, encoding: 'utf-8' }
-    );
+  it('works via CLI `--repo` flags across workspace commands', () => {
+    const runSub = (script, args) =>
+      spawnSync(process.execPath, [path.join(BIN_DIR, script), ...args], {
+        cwd: workspaceDir,
+        encoding: 'utf-8',
+        timeout: 45000,
+      });
+
+    const cliMap = runSub('cm-map.js', [apiRepo, '--repo', webRepo, '--history', '0', '--quiet']);
     expect(cliMap.status).toBe(0);
     expect(cliMap.stdout).toContain('billing-api/src/invoice.js');
     expect(cliMap.stdout).toContain('checkout-web/src/CartView.js');
 
-    const cliSearch = spawnSync(
-      process.execPath,
-      [CLI, 'search', 'formatMoney', '--repo', apiRepo, '--repo', webRepo, '--json'],
-      { cwd: workspaceDir, encoding: 'utf-8' }
-    );
+    const cliSearch = runSub('cm-search.js', [
+      'formatMoney',
+      '--repo',
+      apiRepo,
+      '--repo',
+      webRepo,
+      '--json',
+    ]);
     expect(cliSearch.status).toBe(0);
     expect(JSON.parse(cliSearch.stdout).results[0].file).toBe('billing-api/src/currency.js');
 
-    const cliPack = spawnSync(
-      process.execPath,
-      [CLI, 'pack', apiRepo, '--repo', webRepo, '--style', 'plain', '-q'],
-      { cwd: workspaceDir, encoding: 'utf-8' }
-    );
+    const cliPack = runSub('cm-pack.js', [apiRepo, '--repo', webRepo, '--style', 'plain', '-q']);
     expect(cliPack.status).toBe(0);
     expect(cliPack.stdout).toContain('billing-api/src/invoice.js');
     expect(cliPack.stdout).toContain('checkout-web/src/CartView.js');
 
-    const cliFocus = spawnSync(
-      process.execPath,
-      [
-        CLI,
-        'focus',
-        'checkout-web/src/checkoutClient.js',
-        '--root',
-        apiRepo,
-        '--repo',
-        webRepo,
-        '--style',
-        'json',
-        '-q',
-      ],
-      { cwd: workspaceDir, encoding: 'utf-8' }
-    );
+    const cliFocus = runSub('cm-focus.js', [
+      'checkout-web/src/checkoutClient.js',
+      '--root',
+      apiRepo,
+      '--repo',
+      webRepo,
+      '--style',
+      'json',
+      '-q',
+    ]);
     expect(cliFocus.status).toBe(0);
     const focusJson = JSON.parse(cliFocus.stdout);
     expect(focusJson.files[0].path).toBe('checkout-web/src/checkoutClient.js');
     expect(focusJson.files.map((f) => f.path)).toContain('billing-api/src/invoice.js');
 
-    const cliTask = spawnSync(
-      process.execPath,
-      [
-        CLI,
-        'task',
-        'invoice checkout submission',
-        '--root',
-        apiRepo,
-        '--repo',
-        webRepo,
-        '--search-mode',
-        'bm25',
-        '--format',
-        'json',
-        '-q',
-      ],
-      { cwd: workspaceDir, encoding: 'utf-8' }
-    );
+    const cliTask = runSub('cm-task.js', [
+      'invoice checkout submission',
+      '--root',
+      apiRepo,
+      '--repo',
+      webRepo,
+      '--search-mode',
+      'bm25',
+      '--format',
+      'json',
+      '-q',
+    ]);
     expect(cliTask.status).toBe(0);
     const taskJson = JSON.parse(cliTask.stdout);
     expect(taskJson.repos.map((r) => r.alias)).toEqual(['billing-api', 'checkout-web']);
     expect(taskJson.files.map((f) => f.path)).toContain('billing-api/src/invoice.js');
 
     const traceText = 'Error: boom\n    at createInvoice (billing-api/src/invoice.js:2:3)\n';
-    const cliDiagnose = spawnSync(
-      process.execPath,
-      [CLI, 'diagnose', traceText, '--root', apiRepo, '--repo', webRepo, '--format', 'json', '-q'],
-      { cwd: workspaceDir, encoding: 'utf-8' }
-    );
+    const cliDiagnose = runSub('cm-diagnose.js', [
+      traceText,
+      '--root',
+      apiRepo,
+      '--repo',
+      webRepo,
+      '--format',
+      'json',
+      '-q',
+    ]);
     expect(cliDiagnose.status).toBe(0);
     const diagJson = JSON.parse(cliDiagnose.stdout);
     expect(diagJson.implicatedFiles).toContain('billing-api/src/invoice.js');
     expect(diagJson.neighbors).toContain('checkout-web/src/checkoutClient.js');
+  });
 
-    // MCP tools with sandbox root = workspaceDir
+  it('confines MCP `repos` to the sandbox `--root` across workspace tools', async () => {
+    const traceText = 'Error: boom\n    at createInvoice (billing-api/src/invoice.js:2:3)\n';
     const mcp = new MCPServer({ root: workspaceDir });
     const handler = mcp.server._requestHandlers.get(CallToolRequestSchema.shape.method.value);
 
@@ -414,6 +411,23 @@ describe('Multi-Repository Workspace (map, search, pack, focus, task, diagnose)'
     const mcpDiagObj = JSON.parse(okDiagnose.content[0].text);
     expect(mcpDiagObj.neighbors).toContain('checkout-web/src/checkoutClient.js');
 
+    const okSymbol = await handler({
+      method: 'tools/call',
+      params: {
+        name: 'get_symbol',
+        arguments: {
+          path: apiRepo,
+          repos: [webRepo],
+          name: 'submitCheckout',
+        },
+      },
+    });
+    expect(okSymbol.isError).toBeUndefined();
+    const mcpSymObj = JSON.parse(okSymbol.content[0].text);
+    expect(mcpSymObj.match).toBe('exact');
+    expect(mcpSymObj.symbols[0].file).toBe('checkout-web/src/checkoutClient.js');
+    expect(mcpSymObj.symbols[0].source).not.toContain(AWS_KEY);
+
     // Attempting to include outsideRepo via `repos` is blocked by MCP sandbox for all tools!
     for (const toolCall of [
       { name: 'pack_context', arguments: { path: apiRepo, repos: [outsideRepo] } },
@@ -428,6 +442,18 @@ describe('Multi-Repository Workspace (map, search, pack, focus, task, diagnose)'
       {
         name: 'diagnose_failure',
         arguments: { path: apiRepo, repos: [outsideRepo], trace: traceText },
+      },
+      {
+        name: 'get_symbol',
+        arguments: { path: apiRepo, repos: [outsideRepo], name: 'createInvoice' },
+      },
+      {
+        name: 'ask_codebase',
+        arguments: { path: apiRepo, repos: [outsideRepo], query: 'invoice' },
+      },
+      {
+        name: 'find_experts',
+        arguments: { path: apiRepo, repos: [outsideRepo], target: 'src/invoice.js' },
       },
     ]) {
       const escaped = await handler({

@@ -17,7 +17,7 @@ class MemoryStore {
   }
 
   async search(_query, limit) {
-    return this.rows.slice(0, limit).map((doc) => ({ ...doc, score: 0.5 }));
+    return this.rows.slice(0, limit).map((doc, idx) => ({ ...doc, score: 0.9 - idx * 0.1 }));
   }
 }
 
@@ -97,5 +97,53 @@ describe('askCodebase', () => {
 
   it('needs a question', async () => {
     await expect(askCodebase(root, '   ')).rejects.toThrow('A question is required');
+  });
+
+  it('searches across multiple repositories with <alias>/<path> prefixes and enforces per-repo policies', async () => {
+    const wsRoot = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-ask-ws-')));
+    const repoA = path.join(wsRoot, 'auth-svc');
+    const repoB = path.join(wsRoot, 'web-app');
+
+    fs.mkdirSync(path.join(repoA, 'src'), { recursive: true });
+    fs.mkdirSync(path.join(repoB, 'src'), { recursive: true });
+    fs.mkdirSync(path.join(repoB, 'private'), { recursive: true });
+    fs.mkdirSync(path.join(repoB, '.ctxman'), { recursive: true });
+
+    fs.writeFileSync(path.join(repoA, 'src/token.js'), `export const secret = '${FAKE_KEY}';\n`);
+    fs.writeFileSync(
+      path.join(repoB, 'src/login.js'),
+      'export function login() { return true; }\n'
+    );
+    fs.writeFileSync(path.join(repoB, 'private/keys.js'), 'export const p = "denied";\n');
+    fs.writeFileSync(
+      path.join(repoB, '.ctxman/policy.json'),
+      JSON.stringify({ version: 1, deny: ['private/'] })
+    );
+
+    try {
+      const stores = new Map();
+      const result = await askCodebase(wsRoot, 'where is authentication handled', {
+        repos: [repoA, repoB],
+        createStore: (storePath) => {
+          const s = new MemoryStore();
+          stores.set(storePath, s);
+          return s;
+        },
+      });
+
+      expect(result.indexed).toBe(true);
+      expect(result.repos.map((r) => r.alias)).toEqual(['auth-svc', 'web-app']);
+      expect(result.results.map((r) => r.file).sort()).toEqual([
+        'auth-svc/src/token.js',
+        'web-app/src/login.js',
+      ]);
+      expect(result.results.find((r) => r.file === 'auth-svc/src/token.js').repo).toBe('auth-svc');
+      expect(result.results.find((r) => r.file === 'auth-svc/src/token.js').text).not.toContain(
+        FAKE_KEY
+      );
+      expect(result.redactions).toBeGreaterThan(0);
+    } finally {
+      fs.rmSync(wsRoot, { recursive: true, force: true });
+    }
   });
 });

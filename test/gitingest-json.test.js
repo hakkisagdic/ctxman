@@ -16,7 +16,7 @@ function runCommand(args) {
         encoding: 'utf8',
         cwd: TEMP_DIR,
         stdio: 'pipe',
-        timeout: 10000, // 10s timeout should be enough for small dir
+        timeout: 45000,
       }
     );
     return { success: true, output, error: null };

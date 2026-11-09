@@ -6,6 +6,7 @@
 
 import { parseArgs } from 'node:util';
 import fs from 'node:fs';
+import path from 'node:path';
 import { getLogger } from '../lib/utils/logger.js';
 
 getLogger({ level: 'error', logToFile: false });
@@ -19,16 +20,18 @@ const HELP = `Usage: ctxman who <target-or-topic> [options]
 
 Find the code and domain experts for a file, symbol, line range, directory, or
 natural-language topic by fusing surviving git blame ownership, recency-decayed
-commit/churn depth, and CODEOWNERS stewardship.
+commit/churn depth, and CODEOWNERS stewardship (single-repo or multi-repo workspace).
 
 Targets:
-  <file>                    A single file (e.g. lib/why/index.js)
+  <file>                    A single file (e.g. lib/why/index.js or <alias>/src/index.js)
   <file>:<symbol>           A function, method, or class (e.g. lib/why/index.js:explainHistory)
   <file>#L10-L40            A line range
-  <directory>               A directory / subsystem (e.g. lib/rag)
+  <directory>               A directory / subsystem (e.g. lib/rag or <alias>/src)
   "<topic query>"           A natural-language concept resolved via BM25 code search
 
 Options:
+      --root <dir>          Primary repository root (default: cwd)
+      --repo <dir>          Additional repository root for multi-repo workspace (repeatable)
   -n, --limit <n>           Maximum experts to return (default: ${DEFAULT_WHO_LIMIT})
       --commits <n>         Commit window to examine (default: ${DEFAULT_COMMIT_WINDOW})
       --half-life <days>    Recency decay half-life in days (default: ${DEFAULT_HALF_LIFE_DAYS})
@@ -40,6 +43,8 @@ Options:
 `;
 
 const OPTIONS = {
+  root: { type: 'string' },
+  repo: { type: 'string', multiple: true },
   limit: { type: 'string', short: 'n' },
   commits: { type: 'string' },
   'half-life': { type: 'string' },
@@ -82,8 +87,14 @@ async function run() {
     return;
   }
 
+  const rootDir = values.root ? path.resolve(process.cwd(), values.root) : process.cwd();
+  const extraRepos = Array.isArray(values.repo)
+    ? values.repo.map((r) => path.resolve(process.cwd(), r))
+    : undefined;
+
   try {
-    const result = await findExperts(process.cwd(), target, {
+    const result = await findExperts(rootDir, target, {
+      repos: extraRepos,
       limit: values.limit ? Number(values.limit) : undefined,
       commitWindow: values.commits ? Number(values.commits) : undefined,
       halfLifeDays: values['half-life'] ? Number(values['half-life']) : undefined,

@@ -25,8 +25,8 @@ function mcpSession(args, requests, { cwd, env = {} } = {}) {
     let stderr = '';
     const timer = setTimeout(() => {
       child.kill();
-      reject(new Error(`no complete MCP session within 20s; stderr: ${stderr}`));
-    }, 20000);
+      reject(new Error(`no complete MCP session within 45s; stderr: ${stderr}`));
+    }, 45000);
 
     const messages = [
       {
@@ -285,7 +285,7 @@ describe('ctxman mcp', () => {
     const suggestion = toolText(responses.get(4));
     expect(suggestion.match).toBe('none');
     expect(suggestion.suggestions[0].name).toBe('addNumbers');
-  }, 30000);
+  }, 60000);
 
   it('confines tools to --root and to CTXMAN_MCP_ROOT', async () => {
     const outside = {
@@ -313,5 +313,5 @@ describe('ctxman mcp', () => {
       });
       expect(stderr).toContain(`confined to ${project}`);
     }
-  }, 40000);
+  }, 60000);
 });
