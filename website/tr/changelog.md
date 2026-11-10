@@ -7,6 +7,13 @@ ve bu proje [Semantic Versioning](https://semver.org/spec/v2.0.0.html) takip ede
 
 Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) dosyasına bakın.
 
+## [3.2.7] - 2026-11-10
+
+### Düzeltildi
+
+- **Tembel (Lazy) `node:sqlite` Yükleme ve Temiz CLI `stderr` Çıktısı**: `SqliteVectorStore` ve `lib/why/analyzer-bridge.js` artık `node:sqlite` (`DatabaseSync`) modülünü yalnızca ihtiyaç duyulduğunda yükler ve Node'un `ExperimentalWarning: SQLite is an experimental feature` uyarısını bastırır; böylece CLI komutları (`ctxman map`, `ctxman pr`, `ctxman pack` vb.) `stderr` çıktısına deneysel uyarı yazmaz
+- **Kök CI Ortamlarında Sunucusuz Website Yapılandırma İçe Aktarımı**: `website/.vitepress/config.js` çalışma zamanı `vitepress` paketi bağımlılığından (`defineConfig`) ayrıştırıldı; böylece `test/website-and-docs.test.js` ayrı bir `website/node_modules` kurulumuna gerek kalmadan kök CI ortamlarında sorunsuz çalışır
+
 ## [3.2.6] - 2026-11-09
 
 ### Eklendi
@@ -173,6 +180,7 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
 
 | Sürüm | Tarih      | Öne Çıkanlar                                                                                                                                 |
 | ----- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3.2.7 | 2026-11-10 | Tembel (lazy) `node:sqlite` yükleme (`ExperimentalWarning` bastırma) ve kök CI ortamları için sunucusuz `website/.vitepress/config.js`       |
 | 3.2.6 | 2026-11-09 | Çoklu depo `why`, `pr`, `policy check` ve `audit` (`--repo` / MCP `repos`, `checkWorkspacePolicies`, `readWorkspaceAuditLogs`)               |
 | 3.2.5 | 2026-11-09 | Çoklu depo `who`, `ask` ve `get_symbol` (`--repo` / MCP `repos`) desteği ve yük altında kararlılaştırılmış test paketi                       |
 | 3.2.4 | 2026-11-09 | Çapraz depo AST sembol çağrı ve import grafiği (`buildWorkspaceGraph`) ile çoklu depo `focus`, `task` ve `diagnose` (`--repo` / MCP `repos`) |
@@ -189,7 +197,7 @@ Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/h
 
 ## Yol Haritası
 
-### v3.1 – v3.2.6 ile Tamamlananlar
+### v3.1 – v3.2.7 ile Tamamlananlar
 
 - **Çoklu Depo Kod Arkeolojisi, PR İnceleme, Politika ve Denetim Günlüğü**: `ctxman why --repo`, `ctxman pr --repo`, `ctxman policy check --repo` ve `ctxman audit --repo` (ve `checkWorkspacePolicies`, `readWorkspaceAuditLogs`, MCP `explain_history` / `pr_context` / `check_policy` / `audit_log` `repos` desteği)
 

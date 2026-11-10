@@ -2,6 +2,13 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
+## [3.2.7] - 2026-11-10
+
+### Fixed
+
+- **Lazy `node:sqlite` Loading & Clean CLI `stderr`**: `SqliteVectorStore` and `lib/why/analyzer-bridge.js` now lazy-load `node:sqlite` (`DatabaseSync`) on demand and suppress Node's `ExperimentalWarning: SQLite is an experimental feature` on load so CLI commands (`ctxman map`, `ctxman pr`, `ctxman pack`, etc.) never emit experimental warnings to `stderr`.
+- **Serverless Website Config Import in Root CI**: Decoupled `website/.vitepress/config.js` from runtime `vitepress` package resolution (`defineConfig`) so `test/website-and-docs.test.js` runs cleanly in root CI environments without requiring a separate `website/node_modules` install.
+
 ## [3.2.6] - 2026-11-09
 
 ### Added

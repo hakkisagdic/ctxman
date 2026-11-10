@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) on GitHub.
 
+## [3.2.7] - 2026-11-10
+
+### Fixed
+
+- **Lazy `node:sqlite` Loading & Clean CLI `stderr`**: `SqliteVectorStore` and `lib/why/analyzer-bridge.js` now lazy-load `node:sqlite` (`DatabaseSync`) on demand and suppress Node's `ExperimentalWarning: SQLite is an experimental feature` on load so CLI commands (`ctxman map`, `ctxman pr`, `ctxman pack`, etc.) never emit experimental warnings to `stderr`
+- **Serverless Website Config Import in Root CI**: Decoupled `website/.vitepress/config.js` from runtime `vitepress` package resolution (`defineConfig`) so `test/website-and-docs.test.js` runs cleanly in root CI environments without requiring a separate `website/node_modules` install
+
 ## [3.2.6] - 2026-11-09
 
 ### Added
@@ -173,6 +180,7 @@ For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ct
 
 | Version | Date       | Highlights                                                                                                                                 |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 3.2.7   | 2026-11-10 | Lazy `node:sqlite` loading (`ExperimentalWarning` suppression) and serverless `website/.vitepress/config.js` CI compatibility              |
 | 3.2.6   | 2026-11-09 | Multi-repo `why`, `pr`, `policy check`, and `audit` (`--repo` / MCP `repos`, `checkWorkspacePolicies`, `readWorkspaceAuditLogs`)           |
 | 3.2.5   | 2026-11-09 | Multi-repo `who`, `ask`, and `get_symbol` (`--repo` / MCP `repos`) plus load-hardened subprocess test suite                                |
 | 3.2.4   | 2026-11-09 | Multi-repo `focus`, `task`, and `diagnose` (`--repo` / MCP `repos`) with cross-repo AST symbol call & import graph (`buildWorkspaceGraph`) |
@@ -189,7 +197,7 @@ For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ct
 
 ## Roadmap
 
-### Delivered in v3.1 – v3.2.6
+### Delivered in v3.1 – v3.2.7
 
 - **Multi-Repo Code Archaeology, PR Review, Policy & Audit**: Cross-repository `ctxman why --repo`, `ctxman pr --repo`, `ctxman policy check --repo`, and `ctxman audit --repo` (plus `checkWorkspacePolicies`, `readWorkspaceAuditLogs`, and MCP `explain_history` / `pr_context` / `check_policy` / `audit_log` `repos` support)
 

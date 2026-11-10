@@ -1,6 +1,4 @@
-import { defineConfig } from 'vitepress';
-
-export default defineConfig({
+export default {
   title: 'Ctxman',
   description:
     'Code context that fits: exact token counts, method maps in 14 languages and compact exports for LLMs',
@@ -330,4 +328,4 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1000,
   },
-});
+};
