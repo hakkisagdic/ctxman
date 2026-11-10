@@ -26,15 +26,23 @@ function fakeClient() {
 }
 
 let root;
+let siblingRoot;
 
 beforeEach(() => {
   root = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-count-'));
   fs.writeFileSync(path.join(root, 'a.js'), 'export const add = (a, b) => a + b;\n'.repeat(40));
   fs.writeFileSync(path.join(root, 'config.js'), `export const key = '${FAKE_KEY}';\n`);
+
+  siblingRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-count-sibling-'));
+  fs.writeFileSync(
+    path.join(siblingRoot, 'shared.js'),
+    'export const multiply = (a, b) => a * b;\n'.repeat(25)
+  );
 });
 
 afterEach(() => {
   fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(siblingRoot, { recursive: true, force: true });
 });
 
 describe('countForModel', () => {
@@ -93,6 +101,34 @@ describe('countForModel', () => {
       countForModel(root, { model: 'gpt-6.1-sol', api: true, client: fakeClient() })
     ).rejects.toThrow(/needs a Claude model/);
   });
+
+  test('counts across a multi-repository workspace and returns per-repo breakdown', async () => {
+    // Add a policy deny rule in siblingRoot to ensure per-repo policy enforcement
+    const policyDir = path.join(siblingRoot, '.ctxman');
+    fs.mkdirSync(policyDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(policyDir, 'policy.json'),
+      JSON.stringify({ version: 1, deny: ['denied.js', '.ctxman/**'] })
+    );
+    fs.writeFileSync(path.join(siblingRoot, 'denied.js'), 'export const secret = 42;\n');
+
+    const result = await countForModel(root, {
+      model: 'gpt-5.5',
+      repos: [siblingRoot],
+    });
+
+    expect(result.files).toBe(3); // a.js + config.js + shared.js (denied.js & .ctxman/** excluded)
+    expect(result.repos).toHaveLength(2);
+    const rootAlias = path.basename(root);
+    const siblingAlias = path.basename(siblingRoot);
+    expect(result.repos.map((r) => r.alias)).toEqual([rootAlias, siblingAlias]);
+    expect(result.repos[0].files).toBe(2);
+    expect(result.repos[1].files).toBe(1);
+    expect(result.repos[0].tokens + result.repos[1].tokens).toBe(result.tokens);
+    expect(result.largestFiles.some((f) => f.path === `${rootAlias}/a.js`)).toBe(true);
+    expect(result.largestFiles.some((f) => f.path === `${siblingAlias}/shared.js`)).toBe(true);
+    expect(result.largestFiles.some((f) => f.path.endsWith('denied.js'))).toBe(false);
+  });
 });
 
 describe('ClaudeTokenCounter', () => {
@@ -134,6 +170,7 @@ describe('ctxman count CLI', () => {
     const result = run(['--help']);
     expect(result.status).toBe(0);
     expect(result.stdout).toContain('Usage: ctxman count');
+    expect(result.stdout).toContain('--repo DIR');
   });
 
   test('--json keeps stdout parseable', () => {
@@ -144,9 +181,28 @@ describe('ctxman count CLI', () => {
     expect(json.largestFiles).toHaveLength(1);
   });
 
+  test('supports repeatable --repo <dir> in human and JSON output', () => {
+    const jsonRun = run(['--repo', siblingRoot, '--model', 'gpt-5.5', '--json']);
+    expect(jsonRun.status).toBe(0);
+    const parsed = JSON.parse(jsonRun.stdout);
+    expect(parsed.files).toBe(3);
+    expect(parsed.repos).toHaveLength(2);
+
+    const textRun = run(['--repo', siblingRoot, '--model', 'gpt-5.5']);
+    expect(textRun.status).toBe(0);
+    expect(textRun.stdout).toContain('Repositories:');
+    expect(textRun.stdout).toContain(path.basename(siblingRoot));
+  });
+
   test('reads stdin with -', () => {
     const result = run(['-', '--model', 'gpt-5.5', '--json'], 'one two three');
     expect(JSON.parse(result.stdout).largestFiles[0].path).toBe('<stdin>');
+  });
+
+  test('rejects --repo together with stdin -', () => {
+    const result = run(['-', '--repo', siblingRoot], 'one two three');
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('Cannot combine --repo with stdin');
   });
 
   test('points Claude users at the exact count', () => {
@@ -159,5 +215,6 @@ describe('ctxman count CLI', () => {
   test('rejects unknown options and bad paths', () => {
     expect(run(['--bogus']).status).toBe(1);
     expect(run(['missing-dir']).status).toBe(1);
+    expect(run(['--repo', 'missing-dir']).status).toBe(1);
   });
 });

@@ -20,11 +20,12 @@ getLogger().level = 'warn';
 
 const HELP = `Usage: ctxman count [path | -] [options]
 
-Count the tokens of a project (or of text piped to stdin with "-") for a target model,
-and check them against the model's context window.
+Count the tokens of a project, multi-repository workspace, or text piped to stdin with "-"
+for a target model, and check them against the model's context window.
 
 Options:
   --model, -m ID     Target model (default: ${LLMDetector.getDefaultModelId()}; see ctxman --list-llms)
+  --repo DIR         Additional repository root to count in a workspace (repeatable)
   --api              Claude models: count exactly with Anthropic's count_tokens API.
                      Sends the (secret-redacted) text to Anthropic; needs ANTHROPIC_API_KEY
                      and the @anthropic-ai/sdk package. Counting is free and generates nothing.
@@ -39,25 +40,45 @@ their counts are approximate.
 Examples:
   ctxman count --model gpt-6.1-sol
   ctxman count --model claude-opus-5-5 --api
+  ctxman count ./api --repo ../shared --repo ../web --model claude-sonnet-5-5
   ctxman pack | ctxman count - --model claude-sonnet-5-5 --api`;
 
 function parseArgs(argv) {
-  const options = { top: 5 };
+  const options = { top: 5, repos: [] };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--model' || arg === '-m') options.model = argv[++i];
-    else if (arg === '--api') options.api = true;
+    else if (arg.startsWith('--model=')) options.model = arg.slice('--model='.length);
+    else if (arg === '--repo') {
+      const repoDir = argv[++i];
+      if (!repoDir || repoDir.startsWith('-')) {
+        throw new Error('--repo needs a directory path');
+      }
+      options.repos.push(repoDir);
+    } else if (arg.startsWith('--repo=')) {
+      const repoDir = arg.slice('--repo='.length);
+      if (!repoDir) throw new Error('--repo needs a directory path');
+      options.repos.push(repoDir);
+    } else if (arg === '--api') options.api = true;
     else if (arg === '--json') options.json = true;
     else if (arg === '--top') options.top = Number.parseInt(argv[++i], 10);
+    else if (arg.startsWith('--top='))
+      options.top = Number.parseInt(arg.slice('--top='.length), 10);
     else if (arg === '--help' || arg === '-h') options.help = true;
     else if (arg === '-' || !arg.startsWith('-')) options.target = arg;
     else throw new Error(`Unknown option: ${arg}`);
   }
-  if (options.model === undefined && argv.includes('--model')) {
+  if (
+    (options.model === undefined || options.model === '') &&
+    argv.some((a) => a === '--model' || a === '-m' || a === '--model=')
+  ) {
     throw new Error('--model needs a model id');
   }
   if (!Number.isInteger(options.top) || options.top < 0) {
     throw new Error('--top needs a number of files');
+  }
+  if (options.target === '-' && options.repos.length > 0) {
+    throw new Error('Cannot combine --repo with stdin ("-")');
   }
   return options;
 }
@@ -89,8 +110,17 @@ function printResult(result, top) {
     print(`         For an exact count: ctxman count --model ${result.model} --api`);
   }
 
+  if (result.repos?.length > 1) {
+    print('\nRepositories:');
+    for (const repo of result.repos) {
+      print(
+        `  ${n(repo.tokens).padStart(9)}  ${repo.alias} (${n(repo.files)} file${repo.files === 1 ? '' : 's'}, ${repo.percentOfWindow.toFixed(1)}%)`
+      );
+    }
+  }
+
   const largest = result.largestFiles.slice(0, top);
-  if (largest.length > 1) {
+  if (largest.length > 1 || (result.repos?.length > 1 && largest.length > 0)) {
     const scale = result.method === 'anthropic-api' && result.ratio ? result.ratio : 1;
     print(`\nLargest files${scale !== 1 ? ' (≈, scaled to the API count)' : ''}:`);
     for (const file of largest) {
@@ -119,6 +149,14 @@ async function main() {
     process.exit(1);
   }
 
+  const repos = options.repos.map((r) => path.resolve(r));
+  for (const repoPath of repos) {
+    if (!fs.statSync(repoPath, { throwIfNoEntry: false })?.isDirectory()) {
+      console.error(`❌ Not a directory: ${repoPath}`);
+      process.exit(1);
+    }
+  }
+
   const model = options.model || LLMDetector.getDefaultModelId();
   if (options.api && LLMDetector.getProfile(model).vendor === 'Anthropic') {
     console.error('Sending the redacted text to the Anthropic API to count tokens...');
@@ -129,6 +167,7 @@ async function main() {
       model,
       api: options.api,
       text,
+      repos,
       onProgress: (done, total) => {
         if (total > 1) process.stderr.write(`\r  request ${done}/${total}`);
         if (total > 1 && done === total) process.stderr.write('\n');

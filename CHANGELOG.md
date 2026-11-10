@@ -2,6 +2,14 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
+## [3.2.8] - 2026-11-10
+
+### Added
+
+- **19/19 MCP & CLI Multi-Repository Workspace Parity (`ctxman count --repo`, `countForModel`, and all 19 MCP tools)**:
+  - `ctxman count --repo <dir>` (`countForModel` `options.repos` & MCP `count_tokens` `repos`): counts tokens across multi-repository workspaces under `<alias>/<path>`, enforces per-repository `.gitignore`, `.contextignore`, and `.ctxman/policy.json` deny rules, redacts secrets before `--api` calls, and reports a per-repository token/file breakdown (`repos: [{ alias, root, files, localTokens, tokens, percentOfWindow }]`).
+  - Added `repos` (`string[]`) support to `analyze_codebase`, `generate_context`, `git_diff`, `list_methods`, `count_tokens`, and line-level `search_code` (`regex`/`substring`), completing 100% multi-repository workspace support across all 19 MCP tools with `--root` sandbox and per-repo export policy enforcement.
+
 ## [3.2.7] - 2026-11-10
 
 ### Fixed

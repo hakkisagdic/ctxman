@@ -169,15 +169,15 @@ $ ctxman mcp uninstall --client claude-desktop
 
 | Tool                    | Arguments                                                                                                                            | Returns                                                                                                                 |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `analyze_codebase`      | `path`                                                                                                                               | Statistics and token counts                                                                                             |
-| `generate_context`      | `path`, `template?`, `maxTokens?`                                                                                                    | LLM context                                                                                                             |
-| `git_diff`              | `path`, `branch?`                                                                                                                    | `git diff <branch>`                                                                                                     |
+| `analyze_codebase`      | `path`, `repos?`                                                                                                                     | Statistics and token counts across one or more repositories                                                             |
+| `generate_context`      | `path`, `template?`, `maxTokens?`, `repos?`                                                                                          | LLM context across one or more repositories                                                                             |
+| `git_diff`              | `path`, `branch?`, `repos?`                                                                                                          | `git diff <branch>` across one or more repositories                                                                     |
 | `search_code`           | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`                                            | Matching lines or ranked/hybrid code chunks (below)                                                                     |
-| `list_methods`          | `path` (directory or file), `file?`                                                                                                  | Methods per file                                                                                                        |
+| `list_methods`          | `path` (directory or file), `file?`, `repos?`                                                                                        | Methods per file across one or more repositories                                                                        |
 | `get_symbol`            | `path`, `name`, `file?`, `redact?`, `repos?`                                                                                         | Source of a named method, function or class                                                                             |
 | `repo_map`              | `path`, `tokens?`, `focus?`, `repos?`                                                                                                | Ranked repository map within a token budget (`ctxman map`)                                                              |
 | `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`, `repos?`                                                                              | Review context for a branch across one or more repositories (`ctxman pr`)                                               |
-| `count_tokens`          | `path` or `text`, `model?`, `top?`                                                                                                   | Token count for a model and the fit in its window (`ctxman count`)                                                      |
+| `count_tokens`          | `path` or `text`, `model?`, `top?`, `repos?`                                                                                         | Token count for a model, per-repo breakdown, and the fit in its window (`ctxman count`)                                 |
 | `explain_history`       | `path`, `target`, `limit?`, `budget?`, `since?`, `patches?`, `discussions?`, `maxDiscussions?`, `analyzer?`, `analyzerDb?`, `repos?` | Why code looks as it does: git history, references, institutional citations, owners, tests, PR threads                  |
 | `pack_context`          | `path`, `include?`, `exclude?`, `files?`, `style?`, `budget?`, `repos?`                                                              | File contents in one LLM-ready document (`ctxman pack`)                                                                 |
 | `focus_context`         | `path`, `file`, `repos?`, `symbol?`, `depth?`, `direction?`, `callGraph?`, `style?`, `compress?`, `budget?`                          | Import & AST symbol call-graph neighborhood slice around a file or `file:symbol` (`ctxman focus`)                       |
@@ -219,9 +219,8 @@ bootstrapping the graph when empty or when `refresh: true` is passed, and honour
 `.ctxman/policy.json` deny rules. When `repos` is provided, nodes and cross-repo import edges across all
 repositories are indexed and returned under `<alias>/<path>`.
 
-`repo_map`, `search_code` (`ranked`, `semantic`, `hybrid`), `get_symbol`, `pr_context`, `explain_history`, `pack_context`, `focus_context`, `check_policy`, `audit_log`, `ask_codebase`, `task_context`, `diagnose_failure`, `find_experts`, and `query_knowledge_graph` accept an optional
-`repos` array of repository directories to run across a multi-repository workspace under a single
-shared token budget, prefixing paths with `<alias>/<path>`. When `--root` is active, every entry in
+All 19 MCP tools (`analyze_codebase`, `generate_context`, `git_diff`, `search_code`, `list_methods`, `get_symbol`, `repo_map`, `pr_context`, `count_tokens`, `explain_history`, `pack_context`, `focus_context`, `check_policy`, `audit_log`, `ask_codebase`, `task_context`, `diagnose_failure`, `find_experts`, and `query_knowledge_graph`) accept an optional
+`repos` array of repository directories to run across a multi-repository workspace, prefixing paths with `<alias>/<path>` and enforcing each repository's `.ctxman/policy.json` independently. When `--root` is active, every entry in
 `repos` (and `analyzerDb` on `explain_history`) must also resolve inside the sandbox root.
 
 `audit_log` reads only the logs the policy names (or `.ctxman/audit.log`), merging and deduplicating
@@ -358,18 +357,3 @@ ctxman mcp install --client claude-desktop --root ~/code/my-project
 
 Without `--root` the server behaves as before: any existing directory the server process can
 read is allowed.
-
-## Limits
-
-- Configuration files with comments (JSONC) are not rewritten; use `config` and edit by hand.
-- Claude Code user scope, VS Code user level and Windsurf (without `--file`) are print-only.
-- The entry holds the absolute path of the Node.js binary; re-run `install --force` after
-  changing Node.js versions, or use `--npx`.
-- `--root` checks the paths given to ctxman's tools and prompts. A tool that runs git can still
-  show history of the repository that contains the root; only `git_diff` is narrowed to it.
-- Ranked search and `get_symbol` use the regex method analyzers: languages they do not cover
-  are searched by line windows only, and an unusual construct (for example a regex literal that
-  contains braces) can make a method's range too long or too short.
-- The per-project index lives in the server's memory (file contents of up to 1 MiB per file,
-  for the 8 most recently searched projects); the first query on a large project reads every
-  file (about 1 s for 400 files).

@@ -7,6 +7,14 @@ ve bu proje [Semantic Versioning](https://semver.org/spec/v2.0.0.html) takip ede
 
 Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) dosyasına bakın.
 
+## [3.2.8] - 2026-11-10
+
+### Eklendi
+
+- **19/19 MCP ve CLI Çoklu Depo Çalışma Alanı Tam Paritesi (`ctxman count --repo`, `countForModel` ve tüm 19 MCP aracı)**:
+  - `ctxman count --repo <dir>` (`countForModel` `options.repos` ve MCP `count_tokens` `repos`): çoklu depo çalışma alanlarında `<alias>/<path>` altında token sayımı yapar, depo bazlı `.gitignore`, `.contextignore` ve `.ctxman/policy.json` kurallarını uygular, `--api` çağrılarından önce sırları maskeler ve depo bazlı token/dosya dökümü (`repos: [{ alias, root, files, localTokens, tokens, percentOfWindow }]`) döndürür.
+  - `analyze_codebase`, `generate_context`, `git_diff`, `list_methods`, `count_tokens` ve satır düzeyinde `search_code` (`regex`/`substring`) araçlarına `repos` (`string[]`) desteği eklenerek tüm 19 MCP aracında `--root` sandbox ve depo bazlı politika denetimiyle %100 çoklu depo paritesi tamamlandı.
+
 ## [3.2.7] - 2026-11-10
 
 ### Düzeltildi

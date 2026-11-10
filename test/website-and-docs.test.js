@@ -67,19 +67,37 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
     expect(policyDoc).toContain('readWorkspaceAuditLogs');
 
     const mcpDoc = fs.readFileSync(path.join(ROOT, 'docs/commands/mcp.md'), 'utf8');
-    expect(mcpDoc).toMatch(/`pr_context`\s*\|[^\n]*`repos\?`/);
-    expect(mcpDoc).toMatch(/`explain_history`\s*\|[^\n]*`repos\?`/);
-    expect(mcpDoc).toMatch(/`check_policy`\s*\|[^\n]*`repos\?`/);
-    expect(mcpDoc).toMatch(/`audit_log`\s*\|[^\n]*`repos\?`/);
+    for (const toolName of [
+      'analyze_codebase',
+      'generate_context',
+      'git_diff',
+      'list_methods',
+      'count_tokens',
+      'pr_context',
+      'explain_history',
+      'check_policy',
+      'audit_log',
+    ]) {
+      expect(mcpDoc).toMatch(new RegExp(`\`${toolName}\`\\s*\\|[^\\n]*\`repos\\?\``));
+    }
 
     for (const rel of ['website/api-reference.md', 'website/tr/api-reference.md']) {
       const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
       expect(text, `${rel} missing checkWorkspacePolicies`).toContain('checkWorkspacePolicies');
       expect(text, `${rel} missing readWorkspaceAuditLogs`).toContain('readWorkspaceAuditLogs');
-      expect(text).toMatch(/`pr_context`\s*\|[^\n]*`repos\?`/);
-      expect(text).toMatch(/`explain_history`\s*\|[^\n]*`repos\?`/);
-      expect(text).toMatch(/`check_policy`\s*\|[^\n]*`repos\?`/);
-      expect(text).toMatch(/`audit_log`\s*\|[^\n]*`repos\?`/);
+      for (const toolName of [
+        'analyze_codebase',
+        'generate_context',
+        'git_diff',
+        'list_methods',
+        'count_tokens',
+        'pr_context',
+        'explain_history',
+        'check_policy',
+        'audit_log',
+      ]) {
+        expect(text).toMatch(new RegExp(`\`${toolName}\`\\s*\\|[^\\n]*\`repos\\?\``));
+      }
     }
 
     for (const rel of ['website/features.md', 'website/tr/features.md']) {
@@ -132,9 +150,10 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
     expect(trSidebar).toContain('"/tr/knowledge-graph"');
   });
 
-  it('verifies CHANGELOG.md, website changelog, features, and api-reference reflect v3.2.0 through v3.2.7 in EN and TR', () => {
+  it('verifies CHANGELOG.md, website changelog, features, and api-reference reflect v3.2.0 through v3.2.8 in EN and TR', () => {
     for (const rel of ['CHANGELOG.md', 'website/changelog.md', 'website/tr/changelog.md']) {
       const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+      expect(text).toContain('[3.2.8]');
       expect(text).toContain('[3.2.7]');
       expect(text).toContain('[3.2.6]');
       expect(text).toContain('checkWorkspacePolicies');
@@ -164,7 +183,7 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
     }
   });
 
-  it('verifies MCPServer exposes all 19 tools and docs/commands/mcp.md documents every tool', async () => {
+  it('verifies MCPServer exposes all 19 tools with repos support and docs/commands/mcp.md documents every tool', async () => {
     const handlers = new Map();
     const mcp = new MCPServer();
     const fakeServer = {
@@ -183,17 +202,13 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
     const mcpDoc = fs.readFileSync(path.join(ROOT, 'docs/commands/mcp.md'), 'utf8');
     for (const tool of tools) {
       expect(mcpDoc, `docs/commands/mcp.md missing ${tool.name}`).toContain(`\`${tool.name}\``);
+      expect(tool.inputSchema.properties.repos, `${tool.name} missing repos schema`).toBeDefined();
     }
 
     const explainSchema = tools.find((t) => t.name === 'explain_history').inputSchema.properties;
     expect(explainSchema.analyzer).toBeDefined();
     expect(explainSchema.analyzerDb).toBeDefined();
     expect(explainSchema.repos).toBeDefined();
-
-    for (const toolName of ['pr_context', 'check_policy', 'audit_log']) {
-      const props = tools.find((t) => t.name === toolName).inputSchema.properties;
-      expect(props.repos, `${toolName} missing repos schema`).toBeDefined();
-    }
 
     // Verify sandbox enforcement on analyzerDb when --root is active
     const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-mcp-why-root-'));

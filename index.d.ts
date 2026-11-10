@@ -1765,6 +1765,7 @@ export function getSymbol(root: string, query: string, options?: GetSymbolOption
 export interface CountForModelOptions {
   model?: string;
   text?: string;
+  repos?: WorkspaceRepoInput[];
   api?: boolean;
   client?: unknown;
   onProgress?: (done: number, total: number) => void;
@@ -1785,6 +1786,14 @@ export interface CountForModelResult {
   percentOfWindow: number;
   requests?: number;
   ratio?: number | null;
+  repos?: Array<{
+    alias: string;
+    root: string;
+    files: number;
+    localTokens: number;
+    tokens: number;
+    percentOfWindow: number;
+  }>;
   largestFiles: Array<{ path: string; tokens: number }>;
 }
 

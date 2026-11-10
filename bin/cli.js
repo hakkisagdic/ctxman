@@ -810,8 +810,8 @@ function printHelp() {
   console.log('  who TARGET [options]     Find code & domain experts across git blame, history,');
   console.log('                           and CODEOWNERS (--repo DIR for multi-repo workspaces)');
   console.log('  search QUERY [path]      Ranked (BM25) search over methods and code chunks');
-  console.log('  count [path|-] [--model ID] [--api]');
-  console.log('                           Count tokens for a model (exact for Claude with --api)');
+  console.log('  count [path|-] [--model ID] [--repo DIR] [--api]');
+  console.log('                           Count tokens for a model or multi-repo workspace');
   console.log('  mcp [install|uninstall|config]');
   console.log('                           Start the MCP server or add it to an MCP client');
   console.log(
