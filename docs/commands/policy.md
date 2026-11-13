@@ -4,7 +4,10 @@
 organisation) a say in what ctxman may export to an LLM:
 
 - **Deny rules**: files that are never exported, whatever the flags.
-- **Limits**: required secret redaction, a maximum export size, allowed target models.
+- **Limits**: required secret redaction, PII redaction (`redactPII`), compliance presets
+  (`kvkk-bddk`, `soc2`), a maximum export size, allowed target models.
+- **SARIF v2.1.0 reporting**: `ctxman policy check --format sarif` emits OASIS SARIF v2.1.0
+  reports for GitHub Code Scanning and GitLab Security Dashboard.
 - **Audit log**: one JSON line per export: who, when, where to, which files, and a SHA-256
   of the exported text.
 - **Ignore-file interop**: honour `.cursorignore`, `.aiexclude` and the other AI tools'
@@ -23,17 +26,20 @@ hosted assistants (Copilot content exclusion, Sourcegraph context filters, ...).
 ## Quick start
 
 ```bash
-ctxman policy init                        # writes .ctxman/policy.json (starter policy)
+ctxman policy init                                  # writes .ctxman/policy.json (starter policy)
+ctxman policy init --preset kvkk-bddk --force       # Turkish KVKK / BDDK regulated preset
+ctxman policy init --preset soc2 --force            # SOC2 enterprise compliance preset
 $EDITOR .ctxman/policy.json
-ctxman policy check                       # validates it and prints the effective policy
-ctxman policy check --repo ../billing-api # validate policies across a multi-repo workspace
+ctxman policy check                                 # validates it and prints the effective policy
+ctxman policy check --format sarif > ctxman.sarif   # emit OASIS SARIF v2.1.0 report for CI/CD
+ctxman policy check --repo ../billing-api           # validate policies across a multi-repo workspace
 git add .ctxman/policy.json
 echo .ctxman/audit.log >> .gitignore
 ```
 
 From then on every export (`--context-export`, `--context-clipboard`, `--save-report`,
-`--gitingest`, `ctxman github`, the REST `POST /api/v1/context` endpoint and the MCP
-`generate_context` tool) is checked against the policy and logged.
+`--gitingest`, `ctxman github`, `ctxman pack`, `ctxman pr`, the REST `POST /api/v1/context`
+endpoint and the MCP `generate_context` tool) is checked against the policy and logged.
 
 ## Policy files
 
@@ -48,6 +54,8 @@ Both apply at the same time, and the stricter value wins on every field:
 | --------------------- | --------------------------------------------------------------------------------------------------------- |
 | `deny`                | union: a path denied by either file is denied (a project `!pattern` cannot re-allow an organisation deny) |
 | `requireRedaction`    | true when either file sets it                                                                             |
+| `redactPII`           | true when either file sets it                                                                             |
+| `compliancePreset`    | organisation preset wins if set, else project preset (`kvkk-bddk` or `soc2`)                              |
 | `maxExportTokens`     | the lower limit                                                                                           |
 | `allowedTargetModels` | a model must be allowed by every file that has the field                                                  |
 | `ignoreFiles`         | union                                                                                                     |
@@ -64,8 +72,50 @@ Pass `--repo <dir>` (repeatable; `--repo=<dir>` works too) to `ctxman policy che
 - Every repository is inspected without stopping at the first invalid file, printing per-repo
   status, rule counts, and validation errors.
 - It computes the strictest effective workspace-wide constraints (`requireRedaction` if any repo
-  requires it, the lowest `maxExportTokens`, and the intersection of `allowedTargetModels`) and
-  exits with code `2` if any repository policy is invalid.
+  requires it, `redactPII` if any repo requires it, the lowest `maxExportTokens`, and the
+  intersection of `allowedTargetModels`) and exits with code `2` if any repository policy is
+  invalid.
+
+## Compliance presets (`--preset kvkk-bddk | soc2`) and PII redaction
+
+`ctxman policy init --preset <name>` writes a pre-configured `.ctxman/policy.json` tailored for
+regulated engineering environments:
+
+| Preset      | `requireRedaction` | `redactPII` | `maxExportTokens` | Default `allowedTargetModels`       | Extra `deny` patterns                                                       |
+| ----------- | ------------------ | ----------- | ----------------- | ----------------------------------- | --------------------------------------------------------------------------- |
+| `kvkk-bddk` | `true`             | `true`      | `100000`          | `["claude-*", "gpt-5*", "gpt-4o*"]` | `**/pii/**`, `**/kvkk/**`, `**/customer-data/**`, `**/*.dump`, `**/*.sql`   |
+| `soc2`      | `true`             | `true`      | `150000`          | `["claude-*", "gpt-5*", "gpt-4o*"]` | `**/secrets/**`, `**/credentials/**`, `**/*.pem`, `**/*.key`, `**/audit/**` |
+
+When `redactPII: true` (or `compliancePreset: "kvkk-bddk"` / `"soc2"`) is active in the effective
+policy, `lib/utils/secret-redactor.js` masks regulated Personal Identifiable Information (PII) in
+addition to API keys and private keys:
+
+- **`[REDACTED:tc-kimlik]`** — 11-digit Turkish National ID numbers validated with the official
+  checksum algorithm (`d10` and `d11` modulo checks).
+- **`[REDACTED:tr-iban]`** — Turkish IBAN account numbers (`TR\d{2}` + 22 alphanumeric characters,
+  spaced or contiguous).
+- **`[REDACTED:tr-phone]`** — Turkish mobile numbers (`+90 5xx xxx xx xx` / `05xx xxx xx xx`).
+- **`[REDACTED:credit-card]`** — 13–19 digit payment card numbers passing Luhn checksum validation.
+- **`[REDACTED:email]`** — Email addresses (`user@domain.tld`).
+
+## SARIF v2.1.0 output (`--format sarif`)
+
+Pass `--format sarif` (or `--format=sarif`) to `ctxman policy check` to output an OASIS SARIF
+v2.1.0 JSON document (`version: "2.1.0"`, `runs[0].tool.driver.name: "ctxman"`):
+
+```bash
+ctxman policy check --format sarif > ctxman.sarif
+ctxman policy check --repo ../billing-api --format sarif > workspace-policy.sarif
+```
+
+- **Rule IDs**:
+  - `CTXMAN001` (`PolicySchemaInvalid`, level `error`): `.ctxman/policy.json` failed schema validation.
+  - `CTXMAN002` (`RedactionDisabledWarning`, level `warning`): `requireRedaction` is `false`.
+  - `CTXMAN003` (`PiiRedactionDisabledWarning`, level `warning`): `compliancePreset` is set without `redactPII`.
+  - `CTXMAN004` (`UnboundedExportTokensNote`, level `note`): `maxExportTokens` is `null`.
+- All `artifactLocation.uri` values are normalized relative POSIX paths (`/`), ready for
+  `github/codeql-action/upload-sarif@v3` or GitLab CI `artifacts.reports.sast`. See
+  [`docs/commands/ci.md`](ci.md) for copy-pasteable GitHub Actions and GitLab CI pipeline templates.
 
 ## Schema
 
@@ -73,9 +123,11 @@ Pass `--repo <dir>` (repeatable; `--repo=<dir>` works too) to `ctxman policy che
 {
   "$comment": "free-form notes: keys starting with $ are ignored",
   "version": 1,
+  "compliancePreset": "kvkk-bddk",
   "deny": ["secrets/", "**/*.pem", "customer-data/**", ".env.*", "!.env.example"],
   "requireRedaction": true,
-  "maxExportTokens": 200000,
+  "redactPII": true,
+  "maxExportTokens": 100000,
   "allowedTargetModels": ["claude-*", "gpt-5*"],
   "ignoreFiles": [".cursorignore", ".aiexclude"],
   "audit": { "enabled": true, "path": ".ctxman/audit.log" }
@@ -85,8 +137,10 @@ Pass `--repo <dir>` (repeatable; `--repo=<dir>` works too) to `ctxman policy che
 | Field                 | Type                                | Default             | Meaning                                                                                                                                       |
 | --------------------- | ----------------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `version`             | `1`                                 | required            | Schema version.                                                                                                                               |
+| `compliancePreset`    | `"kvkk-bddk"`, `"soc2"` or `null`   | `null`              | Optional compliance preset identifier (`kvkk-bddk` or `soc2`).                                                                                |
 | `deny`                | array of patterns                   | `[]`                | Files that are never analysed or exported, even with `--no-redact`, `.contextinclude`, a template or a profile that would include them.       |
 | `requireRedaction`    | boolean                             | `false`             | Secret redaction must stay on: `--no-redact` is refused. Method source in `--save-report -m` reports is redacted too.                         |
+| `redactPII`           | boolean                             | `false`             | Mask regulated PII (`tc-kimlik`, `tr-iban`, `tr-phone`, `credit-card`, `email`) alongside secrets.                                            |
 | `maxExportTokens`     | positive integer or `null`          | `null` (no limit)   | Exports whose files add up to more tokens fail.                                                                                               |
 | `allowedTargetModels` | non-empty array of globs, or `null` | `null` (any model)  | `--target-model` (or a template's/profile's model) must match one glob; `*` = any characters, `?` = one, case-insensitive.                    |
 | `ignoreFiles`         | array of file names, or `["all"]`   | `[]`                | Other tools' ignore files to honour, see [below](#ai-tool-ignore-files).                                                                      |
@@ -169,7 +223,7 @@ failure only prints a warning: it never fails the export.
   "removedByPolicy": 3,
   "files": ["src/index.js", "src/server.js"],
   "sha256": "33f4183bbe1064be0f4f8bda6fe46af80927f627c2335190d518a253b7b49faa",
-  "ctxmanVersion": "3.0.0"
+  "ctxmanVersion": "3.3.0"
 }
 ```
 
@@ -274,7 +328,12 @@ export time.
 ## Using the policy from code
 
 ```js
-import { loadPolicy, checkWorkspacePolicies, readWorkspaceAuditLogs } from 'ctxman';
+import {
+  loadPolicy,
+  checkWorkspacePolicies,
+  readWorkspaceAuditLogs,
+  buildSarifReport,
+} from 'ctxman';
 import { guardExport, enforceExport, recordExport } from './lib/policy/index.js';
 
 const policy = loadPolicy(root); // { env } option to read another environment
@@ -292,16 +351,17 @@ guardExport(policy, {
   text, // only its SHA-256 is logged
 }); // throws PolicyViolationError (statusCode 403, exitCode 3)
 
-// Validate policies or merge audit logs across a multi-repo workspace:
+// Validate policies, emit SARIF v2.1.0, or merge audit logs across a multi-repo workspace:
 const summary = checkWorkspacePolicies(root, ['../billing-api', '../checkout-web']);
+const sarif = buildSarifReport(summary);
 const audit = readWorkspaceAuditLogs(root, ['../billing-api', '../checkout-web'], { limit: 50 });
 ```
 
 `guardExport()` is `enforceExport()` followed by `recordExport()`; call them separately when
 the check must happen before the export is built.
 
-The MCP server exposes `check_policy` (`path`, `repos?`) and `audit_log` (`path`, `since?`,
-`limit?`, `repos?`).
+The MCP server exposes `check_policy` (`path`, `repos?`, `format?`) and `audit_log` (`path`,
+`since?`, `limit?`, `repos?`).
 
 ## Limits
 

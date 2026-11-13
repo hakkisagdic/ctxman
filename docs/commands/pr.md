@@ -1,9 +1,10 @@
 # `ctxman pr` — pull-request review context
 
 `ctxman pr` turns a branch (or your uncommitted changes) into one document an LLM can review:
-what changed, why, the full source of every method the change touches, the diff, and the tests
-that cover it. Your question goes last, after the long material, which is where long-context
-models answer best.
+what changed, why, a deterministic risk & confidence score, scoped `.ctxman/rules.json` rule
+checks, an automatic Mermaid `flowchart LR` change-impact diagram, the full source of every
+method the change touches, the diff, and the tests that cover it. Your question goes last,
+after the long material, which is where long-context models answer best.
 
 ```bash
 ctxman pr                                  # current branch against the default branch
@@ -48,7 +49,9 @@ The output has these sections, in this order:
 
 1. **Summary** — base, head and merge base (short SHAs), commit count, files changed by status,
    added/removed lines, changed/deleted method counts, related tests, a heuristic impact level,
-   tokens per section and, with `--budget`, what was dropped.
+   deterministic **`riskScore` (`0–100`)**, **`confidenceScore` (`1–5`)**, **`riskFactors`**,
+   **`.ctxman/rules.json` `ruleViolations`**, an automatic **Mermaid `flowchart LR` change-impact
+   diagram** (`mermaidDiagram`), tokens per section and, with `--budget`, what was dropped.
 2. **Commits** — oldest first: short SHA, subject, author, date and the message body.
 3. **Changed files** — status (added, modified, deleted, renamed with similarity, copied),
    path (old → new for renames) and added/removed lines.
@@ -77,6 +80,54 @@ The output has these sections, in this order:
 7. **Changed file contents** — with `--with-files`, the full head version of every changed file
    that is not deleted, binary or larger than 1 MiB.
 8. **Instructions / Question** — `--instructions FILE` and `--ask "QUESTION"`, last.
+
+## Deterministic risk score, `.ctxman/rules.json` checks, and Mermaid diagram (`v3.3.0+`)
+
+Every `ctxman pr` run computes three structured review signals automatically (surviving even
+tight `--budget` limits because they live inside the Summary):
+
+1. **Risk Score (`0–100`) & Confidence Score (`1–5`)**:
+   - Evaluates changed line volume, deleted methods, missing related tests when source files
+     change, sensitive paths (`auth`, `crypto`, `security`, `policy`, `migration`, `payment`,
+     `billing`, `secret`, `token`, `.env`, `Dockerfile`, `.github/workflows`), and custom rule
+     violations.
+   - `confidenceScore` starts at `5/5` and decreases as risk points accumulate or when code
+     changes have no matching test coverage.
+2. **Scoped PR Rules (`.ctxman/rules.json`)**:
+   If `.ctxman/rules.json` exists in the repository root, `ctxman pr` evaluates every changed
+   file against its rules and reports any violations in `ruleViolations` (Markdown `### Rule
+Violations`, XML `<rule_violations>`, JSON `ruleViolations`):
+
+   ```json
+   {
+     "rules": [
+       {
+         "id": "no-console-in-core",
+         "description": "Core modules must not introduce console.log statements",
+         "pathPattern": "lib/core/**",
+         "forbidPattern": "console\\.log\\(",
+         "requireTest": true,
+         "maxFileAdditions": 250,
+         "severity": "error"
+       }
+     ]
+   }
+   ```
+
+   | Field              | Meaning                                                                                  |
+   | ------------------ | ---------------------------------------------------------------------------------------- |
+   | `id`               | Unique rule identifier reported in violations                                            |
+   | `pathPattern`      | Glob pattern (`lib/core/**`, `src/auth/**`) scoping which changed files the rule checks  |
+   | `forbidPattern`    | Regex checked against added lines (`+`) in the file's unified diff                       |
+   | `requireTest`      | When `true`, flags the change if no test file in the PR or related tests covers the file |
+   | `maxFileAdditions` | Maximum added lines allowed in a single matching file                                    |
+   | `severity`         | `"error"` or `"warning"` (default `"warning"`)                                           |
+   | `message`          | Optional custom violation message (alias: `description`)                                 |
+
+3. **Mermaid Change Impact Diagram (`flowchart LR`)**:
+   Automatically renders a `flowchart LR` diagram connecting changed files (`Changed Files`
+   subgraph) to changed/deleted methods (`Changed Methods` subgraph) and covering test files
+   (`Related Tests` subgraph), capped for readability on large PRs.
 
 ## Options
 
@@ -165,9 +216,10 @@ export function add(a, b) {
 Bodies are not entity-escaped, so the model reads the code as written; treat the result as
 prompt markup, not as input for an XML parser.
 
-**JSON**: one object with `repos` (when multi-repo), `summary`, `commits`, `files`, `methods`
-(`changed`, `deleted`), `diff` (per file), `relatedTests`, `fileContents` and `request`;
-sections that are empty or dropped are absent.
+**JSON**: one object with `repos` (when multi-repo), `summary` (including `riskScore`,
+`confidenceScore`, `riskFactors`, and `mermaidDiagram`), `ruleViolations`, `commits`, `files`,
+`methods` (`changed`, `deleted`), `diff` (per file), `relatedTests`, `fileContents` and
+`request`; sections that are empty or dropped are absent.
 
 ## Filters and redaction
 
@@ -195,12 +247,15 @@ const result = await buildPrContext('/path/to/repo', {
 });
 console.log(result.output); // the rendered context
 console.log(result.tokens, result.sections, result.budget?.dropped);
+console.log(result.riskScore, result.confidenceScore, result.riskFactors);
+console.log(result.ruleViolations, result.mermaidDiagram);
 console.log(result.methods.changed, result.methods.deleted, result.relatedTests);
 ```
 
 Options mirror the command line (`base`, `head`, `staged`, `working`, `unified`, `diff`,
 `withTests`, `withFiles`, `ask`, `instructions` (text), `budget`, `style`, `redact`, `repos`).
 The result also carries `repos` (when multi-repo) and the parsed `commits`, `files`, `stats`,
+`riskScore`, `confidenceScore`, `riskFactors`, `ruleViolations`, `mermaidDiagram`,
 `redactions` and `warnings`.
 
 The MCP server exposes the same as the `pr_context` tool with `path` (required), `base`, `head`,

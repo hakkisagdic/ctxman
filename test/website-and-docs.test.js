@@ -55,6 +55,24 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
     expect(
       fs.existsSync(path.join(ROOT, 'examples/gitlab-ci/ctxman-sarif-gate.gitlab-ci.yml'))
     ).toBe(true);
+
+    const policyText = fs.readFileSync(path.join(ROOT, 'docs/commands/policy.md'), 'utf8');
+    expect(policyText).toContain('--preset kvkk-bddk');
+    expect(policyText).toContain('--format sarif');
+    expect(policyText).toContain('redactPII');
+    expect(policyText).toContain('buildSarifReport');
+
+    const prText = fs.readFileSync(path.join(ROOT, 'docs/commands/pr.md'), 'utf8');
+    expect(prText).toContain('.ctxman/rules.json');
+    expect(prText).toContain('riskScore');
+    expect(prText).toContain('confidenceScore');
+    expect(prText).toContain('mermaidDiagram');
+
+    const packText = fs.readFileSync(path.join(ROOT, 'docs/commands/pack.md'), 'utf8');
+    expect(packText).toContain('--include-rules');
+    expect(packText).toContain('--remote');
+    expect(packText).toContain('discoverProjectRules');
+    expect(packText).toContain('withRemoteRepo');
   });
 
   it('verifies multi-repo (--repo / repos) documentation across command docs, README, and EN/TR website', () => {

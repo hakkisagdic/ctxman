@@ -1,16 +1,19 @@
 # `ctxman pack` — file contents in one LLM-ready document
 
 `ctxman pack` puts the contents of a project's files into a single document you can paste
-into a chat, attach to a prompt or send through an API: a directory tree, then every file,
-then your instructions. The same ignore rules as the rest of ctxman decide which files go
-in, secrets are masked, and the result can be compressed to signatures, trimmed to a token
-budget or cut into parts.
+into a chat, attach to a prompt or send through an API: a directory tree, optional AI agent
+instruction rules (`--include-rules`), then every file, then your instructions. You can pack a
+local directory, a multi-repo workspace (`--repo`), or a remote GitHub/GitLab repository
+without cloning it yourself (`--remote`). The same ignore rules as the rest of ctxman decide
+which files go in, secrets are masked, and the result can be compressed to signatures, trimmed
+to a token budget or cut into parts.
 
 ```bash
 ctxman pack                                   # current directory, XML, to stdout
 ctxman pack -o context.xml                    # to a file
 ctxman pack src --style markdown --copy       # Markdown, to the clipboard
-ctxman pack --compress --budget 100k --instructions task.md -o context.xml
+ctxman pack --include-rules --compress --budget 100k --instructions task.md -o context.xml
+ctxman pack --remote owner/repo --branch main --budget 60k -o remote-context.xml
 ctxman pack --repo ../api --repo ../web --budget 80k -o workspace.xml   # multi-repo shared budget
 ```
 
@@ -65,10 +68,10 @@ so a file cannot end its own document early. Paths and the tree are escaped.
 
 | Style      | Layout                                                                                                                            |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `xml`      | As above; `<omitted_files>` and `<instructions>` at the end when present                                                          |
-| `markdown` | `## Directory structure`, `## Files` with a `### path` heading and a fenced block per file, `## Omitted files`, `## Instructions` |
-| `plain`    | `Directory structure:`, then `=== path ===` before each file                                                                      |
-| `json`     | `{header?, tree?, files: [{path, tokens, content}], omitted?, instructions?}`; `--json` is the same                               |
+| `xml`      | As above; `<project_rules>` after `<directory_structure>`, `<omitted_files>` and `<instructions>` at the end when present         |
+| `markdown` | `## Directory structure`, `## Project rules`, `## Files` with a `### path` heading and a fenced block per file, `## Instructions` |
+| `plain`    | `Directory structure:`, `Project rules:`, then `=== path ===` before each file                                                    |
+| `json`     | `{header?, tree?, projectRules?, files: [{path, tokens, content}], omitted?, instructions?}`; `--json` is the same                |
 
 In Markdown, each fence is one backtick longer than the longest run of backticks in the
 file (at least three), so no content can close it, and its language comes from the file
@@ -86,32 +89,68 @@ comes after the files, just before the instructions.
 
 ## Options
 
-| Option                 | Default | Description                                                                           |
-| ---------------------- | ------- | ------------------------------------------------------------------------------------- |
-| `[path]`               | `.`     | Project root                                                                          |
-| `--repo DIR`           |         | Include repository `DIR` in a multi-repository workspace pack (`<alias>/<path>`)      |
-| `--include GLOB`       |         | Only files matching GLOB; repeatable or comma-separated                               |
-| `--exclude GLOB`       |         | Leave out files matching GLOB; repeatable or comma-separated                          |
-| `--stdin`              | off     | Read the file list from stdin (one path per line) instead of scanning                 |
-| `-0, --null`           | off     | With `--stdin`: paths are separated by NUL bytes (`find -print0`, `git ls-files -z`)  |
-| `--max-file-size SIZE` | `1m`    | Skip larger files; bytes or with a `k`/`m` suffix (KiB/MiB)                           |
-| `--style STYLE`        | `xml`   | `xml`, `markdown`, `plain` or `json`                                                  |
-| `--json`               |         | Same as `--style json`                                                                |
-| `--no-tree`            |         | Leave out the directory tree                                                          |
-| `--header TEXT`        |         | Text at the top                                                                       |
-| `--instructions FILE`  |         | The text of FILE at the end, after the files                                          |
-| `--line-numbers`       | off     | Number every line (`12 \| code`); with `--compress` the numbers are the original ones |
-| `--compress`           | off     | Keep signatures, replace function bodies with a one-line placeholder                  |
-| `--no-redact`          |         | Do not mask secrets                                                                   |
-| `--budget TOKENS`      |         | Keep the document within TOKENS (`50000`, `50k`), the highest-ranked files first      |
-| `--max-tokens TOKENS`  |         | Exit with code 2, writing nothing, when the document is larger                        |
-| `--split TOKENS`       |         | With `-o`: write numbered parts of at most TOKENS each                                |
-| `--target-model ID`    |         | Count with this model's tokenizer encoding and report the fit (`ctxman --list-llms`)  |
-| `-o, --output FILE`    |         | Write to FILE instead of stdout (the file itself is never packed)                     |
-| `--copy`               |         | Copy to the clipboard instead of stdout (stdout if no clipboard tool works)           |
-| `-q, --quiet`          |         | No summary on stderr                                                                  |
+| Option                 | Default | Description                                                                            |
+| ---------------------- | ------- | -------------------------------------------------------------------------------------- |
+| `[path]`               | `.`     | Project root                                                                           |
+| `--repo DIR`           |         | Include repository `DIR` in a multi-repository workspace pack (`<alias>/<path>`)       |
+| `--remote SPEC`        |         | Shallow-clone and pack a remote repository (`owner/repo` or `https://...` / `git@...`) |
+| `--branch REF`         |         | Branch or tag to clone when `--remote` is used                                         |
+| `--include-rules`      | off     | Discover and prepend AI rule files (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, etc.)    |
+| `--include GLOB`       |         | Only files matching GLOB; repeatable or comma-separated                                |
+| `--exclude GLOB`       |         | Leave out files matching GLOB; repeatable or comma-separated                           |
+| `--stdin`              | off     | Read the file list from stdin (one path per line) instead of scanning                  |
+| `-0, --null`           | off     | With `--stdin`: paths are separated by NUL bytes (`find -print0`, `git ls-files -z`)   |
+| `--max-file-size SIZE` | `1m`    | Skip larger files; bytes or with a `k`/`m` suffix (KiB/MiB)                            |
+| `--style STYLE`        | `xml`   | `xml`, `markdown`, `plain` or `json`                                                   |
+| `--json`               |         | Same as `--style json`                                                                 |
+| `--no-tree`            |         | Leave out the directory tree                                                           |
+| `--header TEXT`        |         | Text at the top                                                                        |
+| `--instructions FILE`  |         | The text of FILE at the end, after the files                                           |
+| `--line-numbers`       | off     | Number every line (`12 \| code`); with `--compress` the numbers are the original ones  |
+| `--compress`           | off     | Keep signatures, replace function bodies with a one-line placeholder                   |
+| `--no-redact`          |         | Do not mask secrets                                                                    |
+| `--budget TOKENS`      |         | Keep the document within TOKENS (`50000`, `50k`), the highest-ranked files first       |
+| `--max-tokens TOKENS`  |         | Exit with code 2, writing nothing, when the document is larger                         |
+| `--split TOKENS`       |         | With `-o`: write numbered parts of at most TOKENS each                                 |
+| `--target-model ID`    |         | Count with this model's tokenizer encoding and report the fit (`ctxman --list-llms`)   |
+| `-o, --output FILE`    |         | Write to FILE instead of stdout (the file itself is never packed)                      |
+| `--copy`               |         | Copy to the clipboard instead of stdout (stdout if no clipboard tool works)            |
+| `-q, --quiet`          |         | No summary on stderr                                                                   |
 
 Token counts accept `k` and `m` suffixes (`8k` = 8,000).
+
+## Project rules auto-discovery (`--include-rules`)
+
+Pass `--include-rules` (or `includeRules: true` in `packContext`) to automatically discover AI
+coding instruction files in the repository and prepend them in a dedicated `<project_rules>`
+section (or `## Project rules` in Markdown, `projectRules` in JSON) right after the directory
+tree:
+
+- `AGENTS.md`
+- `CLAUDE.md`
+- `.cursorrules`
+- `.cursor/rules/*.mdc` (sorted alphabetically)
+- `.github/copilot-instructions.md`
+- `.windsurfrules`
+
+Secrets and regulated PII (when policy `redactPII` is enabled) inside project rule files are
+redacted before rendering.
+
+## Zero-clone remote repository packing (`--remote`)
+
+Pass `--remote <spec>` (with optional `--branch <ref>`) to pack a remote Git repository without
+manually cloning it:
+
+```bash
+ctxman pack --remote facebook/react --branch main --budget 60k -o react.xml
+ctxman pack --remote https://github.com/org/service.git --include-rules --compress
+```
+
+- `owner/repo` shorthand expands to `https://github.com/owner/repo.git`; full `https://`,
+  `http://`, `git@`, `ssh://`, and `file://` URLs are also accepted.
+- Runs `git clone --depth 1` (with `GIT_TERMINAL_PROMPT=0` and a 60s timeout) into a temporary
+  directory, packs the repository with all standard `ctxman pack` options (`--budget`,
+  `--compress`, `--include-rules`, etc.), and removes the temporary clone on exit.
 
 ## Selecting files
 
@@ -274,11 +313,12 @@ ctxman pack --compress --target-model gpt-4o --max-tokens 120k -q -o context.xml
 ## Library and MCP
 
 ```js
-import { packContext, packWorkspace } from 'ctxman';
+import { packContext, packWorkspace, discoverProjectRules, withRemoteRepo } from 'ctxman';
 
 const result = await packContext('/path/to/project', {
   style: 'markdown',
   include: ['src/**'],
+  includeRules: true,
   compress: true,
   budget: 50000,
   targetModel: 'gpt-4o',
@@ -286,10 +326,14 @@ const result = await packContext('/path/to/project', {
 });
 result.text; // the document
 result.totalTokens; // its tokens
+result.projectRules; // [{path, content}] when includeRules is true
 result.omitted; // [{path, tokens}] left out by the budget
 result.parts; // with `split`: [{index, text, tokens, files}]
 
 const ws = await packWorkspace(['../api', '../web'], { budget: 80000, compress: true });
+const remote = await withRemoteRepo('owner/repo', { branch: 'main' }, (dir) =>
+  packContext(dir, { includeRules: true, budget: 40000 })
+);
 ```
 
 Errors are `PackError`s with a `code` (`ROOT_NOT_FOUND`, `PATH_OUTSIDE_ROOT`,
@@ -297,12 +341,13 @@ Errors are `PackError`s with a `code` (`ROOT_NOT_FOUND`, `PATH_OUTSIDE_ROOT`,
 `index.d.ts` for every field.
 
 The MCP server (`ctxman mcp`) offers the same as the `pack_context` tool, with `path`,
-`repos` (optional array of repository roots for multi-repo packing), `include`, `exclude`,
+`repos` (optional array of repository roots for multi-repo packing), `remote` (optional remote
+repository URL or `owner/repo`), `branch`, `includeRules`, `include`, `exclude`,
 `files` (project-relative), `style`, `compress`, `lineNumbers`, `tree`, `instructions`
 (text), `budget` and `targetModel`. Its budget defaults to 20,000 tokens so a whole
 project does not flood the client's context; secrets are always redacted, and with
-`ctxman mcp --root` `path`, `repos` and `files` must stay inside the root. It returns the
-document and a one-line summary.
+`ctxman mcp --root` `path`, `repos` and `files` must stay inside the root (`remote` is
+refused in `--root` sandbox mode). It returns the document and a one-line summary.
 
 ## Limits
 
