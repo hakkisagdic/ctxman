@@ -1122,6 +1122,13 @@ export interface PrRelatedTest {
   excluded: string | null;
 }
 
+export interface PrRuleViolation {
+  ruleId: string;
+  severity: 'error' | 'warning';
+  file: string;
+  message: string;
+}
+
 export interface PrContextResult {
   /** Participating repositories when `repos` was supplied */
   repos?: Array<{ alias: string; root: string }>;
@@ -1148,6 +1155,16 @@ export interface PrContextResult {
     deletedMethods: number;
     relatedTests: number;
   };
+  /** Deterministic PR risk score (0-100) */
+  riskScore: number;
+  /** Deterministic PR confidence score (1-5) */
+  confidenceScore: number;
+  /** Reasons contributing to riskScore */
+  riskFactors: string[];
+  /** Violations evaluated against `.ctxman/rules.json` */
+  ruleViolations: PrRuleViolation[];
+  /** Automatic Mermaid `flowchart LR` change-impact diagram */
+  mermaidDiagram: string;
   /** Tokens per rendered section */
   sections: Record<string, number>;
   budget: { limit: number; dropped: string[]; over: boolean } | null;
@@ -1383,10 +1400,18 @@ export function explainHistory(
   target: string | ExplainHistoryTarget,
   options?: ExplainHistoryOptions
 ): Promise<ExplainHistoryResult>;
+
+// ============================================
 // Packed file contents (`ctxman pack`)
 // ============================================
 
 export type PackStyle = 'xml' | 'markdown' | 'plain' | 'json';
+
+export interface ProjectRuleFile {
+  path: string;
+  content: string;
+  bytes?: number;
+}
 
 export interface PackOptions {
   /** Output style (default: xml, Anthropic's `<documents>` long-context format) */
@@ -1408,6 +1433,8 @@ export interface PackOptions {
   maxFileSize?: number;
   /** Directory tree at the top (default: true) */
   tree?: boolean;
+  /** Discover and prepend AI instruction rule files (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, etc.) */
+  includeRules?: boolean;
   /** Text at the top */
   header?: string;
   /** Text at the end, after the files (long documents first, the query last) */
@@ -1471,6 +1498,8 @@ export interface PackResult {
   /** Tokens of `text` */
   totalTokens: number;
   files: PackedFile[];
+  /** Discovered AI project rule files when `includeRules` is true */
+  projectRules?: ProjectRuleFile[];
   /** Files left out by the budget, most important first */
   omitted: Array<{ path: string; tokens: number }>;
   /** Files not packed: binary, too-large, unreadable, missing, not-a-file, ignored */
@@ -1835,6 +1864,8 @@ export function askCodebase(
 export class Policy {
   active: boolean;
   requireRedaction: boolean;
+  redactPII: boolean;
+  compliancePreset: 'kvkk-bddk' | 'soc2' | null;
   maxExportTokens: number | null;
   allowedModels: string[] | null;
   ignoreFiles: string[];
@@ -1862,6 +1893,7 @@ export interface WorkspacePolicySummary {
   valid: boolean;
   active: boolean;
   requireRedaction: boolean;
+  redactPII?: boolean;
   maxExportTokens: number | null;
   allowedTargetModels: Array<{
     repo: string;
@@ -2364,48 +2396,140 @@ export function findExperts(
 // Billing, KVKK/BDDK PII, Rules, PR Intelligence, Remote Repo & SARIF (v3.3.0)
 // ============================================
 
-export function redactPII(text: string, options?: Record<string, any>): { text: string; findings: string[]; counts: Record<string, number> };
+export function redactPII(
+  text: string,
+  options?: Record<string, unknown>
+): { text: string; findings: string[]; counts: Record<string, number> };
 export function isValidTCKN(digits: string): boolean;
 export function isValidLuhn(digits: string): boolean;
 export function formatRedactionSummary(counts: Record<string, number>): string;
 
-export function discoverProjectRules(root: string, options?: Record<string, any>): any;
-export function formatProjectRulesSection(rules: any[], style?: string): string;
+export interface ProjectRulesDiscoveryResult {
+  rules: ProjectRuleFile[];
+  redactions: Record<string, number>;
+}
 
-export function analyzePrIntelligence(rootPath: string, params?: Record<string, any>): any;
-export function evaluatePrRules(rootPath: string, params?: Record<string, any>): any[];
-export function calculatePrRiskAndConfidence(params?: Record<string, any>): { riskScore: number; confidenceScore: number; riskFactors: string[] };
-export function buildPrMermaidDiagram(params?: Record<string, any>): string;
+export function discoverProjectRules(
+  root: string,
+  options?: { redact?: boolean; redactPII?: boolean }
+): ProjectRulesDiscoveryResult;
+export function formatProjectRulesSection(rules: ProjectRuleFile[], style?: PackStyle): string;
+
+export interface PrIntelligenceResult {
+  riskScore: number;
+  confidenceScore: number;
+  riskFactors: string[];
+  ruleViolations: PrRuleViolation[];
+  mermaidDiagram: string;
+}
+
+export function analyzePrIntelligence(
+  rootPath: string,
+  params?: Record<string, unknown>
+): PrIntelligenceResult;
+export function evaluatePrRules(
+  rootPath: string,
+  params?: Record<string, unknown>
+): PrRuleViolation[];
+export function calculatePrRiskAndConfidence(params?: Record<string, unknown>): {
+  riskScore: number;
+  confidenceScore: number;
+  riskFactors: string[];
+};
+export function buildPrMermaidDiagram(params?: Record<string, unknown>): string;
+
+export interface RemoteRepoOptions {
+  branch?: string | null;
+  depth?: number;
+  timeoutMs?: number;
+}
+
+export interface RemoteRepoCloneResult {
+  dir: string;
+  url: string;
+  branch: string | null;
+  cleanup: () => void;
+}
 
 export function resolveRemoteGitUrl(remoteSpec: string): string;
-export function cloneRemoteRepo(remoteSpec: string, options?: Record<string, any>): { dir: string; url: string; branch: string | null; cleanup: () => void };
-export function withRemoteRepo<T = any>(remoteSpec: string, optionsOrFn: any, maybeFn?: (dir: string, meta: any) => Promise<T> | T): Promise<T>;
+export function cloneRemoteRepo(
+  remoteSpec: string,
+  options?: RemoteRepoOptions
+): RemoteRepoCloneResult;
+export function withRemoteRepo<T = unknown>(
+  remoteSpec: string,
+  optionsOrFn:
+    | RemoteRepoOptions
+    | ((dir: string, meta: RemoteRepoCloneResult) => Promise<T> | T),
+  maybeFn?: (dir: string, meta: RemoteRepoCloneResult) => Promise<T> | T
+): Promise<T>;
 
-export const COMPLIANCE_PRESETS: Record<string, any>;
-export function createPolicyTemplate(preset?: string | null): Record<string, any>;
+export const COMPLIANCE_PRESETS: Record<string, Record<string, unknown>>;
+export function createPolicyTemplate(preset?: string | null): Record<string, unknown>;
 export const SARIF_SCHEMA: string;
 export const SARIF_VERSION: string;
-export function buildSarifReport(input?: Record<string, any>): Record<string, any>;
 
-export const PLANS: Record<string, any>;
-export const TOPUP_PACKS: Record<string, any>;
-export function getPlan(planId: string): any;
-export function listPlans(): any[];
+export interface SarifReport {
+  $schema: string;
+  version: '2.1.0';
+  runs: Array<{
+    tool: {
+      driver: {
+        name: string;
+        informationUri: string;
+        version: string;
+        rules: Array<{
+          id: string;
+          name: string;
+          shortDescription: { text: string };
+          defaultConfiguration: { level: 'error' | 'warning' | 'note' };
+        }>;
+      };
+    };
+    results: Array<{
+      ruleId: string;
+      level: 'error' | 'warning' | 'note';
+      message: { text: string };
+      locations: Array<{
+        physicalLocation: {
+          artifactLocation: { uri: string; uriBaseId?: string };
+          region?: { startLine: number };
+        };
+      }>;
+    }>;
+  }>;
+}
+
+export function buildSarifReport(
+  input?: WorkspacePolicySummary | Policy | Record<string, unknown>,
+  options?: { version?: string }
+): SarifReport;
+
+export const PLANS: Record<string, Record<string, unknown>>;
+export const TOPUP_PACKS: Record<string, Record<string, unknown>>;
+export function getPlan(planId: string): Record<string, unknown>;
+export function listPlans(): Array<Record<string, unknown>>;
 export class BillingStore {
-  constructor(dbPathOrOptions?: string | Record<string, any>);
+  constructor(dbPathOrOptions?: string | Record<string, unknown>);
 }
 export class QuotaExceededError extends Error {
-  constructor(message: string, details?: Record<string, any>);
+  constructor(message: string, details?: Record<string, unknown>);
 }
 export class PaymentProvider {
-  constructor(options?: Record<string, any>);
+  constructor(options?: Record<string, unknown>);
 }
 export class IyzicoProvider extends PaymentProvider {
-  constructor(options?: Record<string, any>);
+  constructor(options?: Record<string, unknown>);
 }
 export class MockPaymentProvider extends PaymentProvider {
-  constructor(options?: Record<string, any>);
+  constructor(options?: Record<string, unknown>);
 }
-export function createPaymentProvider(providerName?: string, options?: Record<string, any>): PaymentProvider;
-export function redactSecrets(text: string, options?: Record<string, any>): { text: string; findings: string[]; counts: Record<string, number> };
-export function createStarterPolicy(preset?: string | null): Record<string, any>;
+export function createPaymentProvider(
+  providerName?: string,
+  options?: Record<string, unknown>
+): PaymentProvider;
+export function redactSecrets(
+  text: string,
+  options?: Record<string, unknown>
+): { text: string; findings: string[]; counts: Record<string, number> };
+export function createStarterPolicy(preset?: string | null): Record<string, unknown>;

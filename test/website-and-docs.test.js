@@ -4,11 +4,29 @@ import path from 'node:path';
 import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 import MCPServer from '../lib/api/mcp/server.js';
+import * as publicApi from '../index.js';
 import websiteConfig from '../website/.vitepress/config.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 
 describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
+  it('verifies index.d.ts declares every runtime export in index.js and v3.3.0 interfaces', () => {
+    const dts = fs.readFileSync(path.join(ROOT, 'index.d.ts'), 'utf8');
+    for (const exportName of Object.keys(publicApi)) {
+      expect(dts, `index.d.ts missing export ${exportName}`).toContain(exportName);
+    }
+    expect(dts).toContain('export interface PrRuleViolation');
+    expect(dts).toContain('export interface PrIntelligenceResult');
+    expect(dts).toContain('export interface ProjectRuleFile');
+    expect(dts).toContain('export interface SarifReport');
+    expect(dts).toContain('riskScore: number;');
+    expect(dts).toContain('confidenceScore: number;');
+    expect(dts).toContain('ruleViolations: PrRuleViolation[];');
+    expect(dts).toContain('mermaidDiagram: string;');
+    expect(dts).toContain('includeRules?: boolean;');
+    expect(dts).toContain('projectRules?: ProjectRuleFile[];');
+  });
+
   it('verifies all permanent ADR & Knowledge Graph files exist and are non-empty', () => {
     const adrFiles = [
       'docs/adr/README.md',
