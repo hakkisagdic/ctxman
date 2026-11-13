@@ -2,7 +2,7 @@
 /**
  * Policy Command
  * Validate and show the export policy (`ctxman policy check`), or write a starter policy
- * (`ctxman policy init`)
+ * (`ctxman policy init [--preset kvkk-bddk|soc2]`)
  */
 
 import fs from 'fs';
@@ -39,6 +39,27 @@ function collectRepos(args) {
   return repos;
 }
 
+function getPreset(args) {
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--preset') {
+      const next = args[++i];
+      if (!next || next.startsWith('-')) {
+        throw new Error('--preset needs a preset name (e.g. kvkk-bddk, soc2)');
+      }
+      return next;
+    }
+    if (arg.startsWith('--preset=')) {
+      const val = arg.slice('--preset='.length);
+      if (!val) {
+        throw new Error('--preset needs a preset name (e.g. kvkk-bddk, soc2)');
+      }
+      return val;
+    }
+  }
+  return null;
+}
+
 function main() {
   const args = process.argv.slice(2);
 
@@ -48,8 +69,10 @@ function main() {
   }
 
   let repos = [];
+  let preset = null;
   try {
     repos = collectRepos(args);
+    preset = getPreset(args);
   } catch (error) {
     console.error(`❌ ${error.message}`);
     process.exitCode = 2;
@@ -68,7 +91,7 @@ function main() {
         process.exitCode = 2;
         return;
       }
-      init(args.includes('--force') || args.includes('-f'));
+      init(args.includes('--force') || args.includes('-f'), preset);
       break;
     default:
       console.error(`❌ Unknown policy command: ${command}`);
@@ -179,6 +202,9 @@ function check(json, repos = []) {
 
   console.log('🛡️  ctxman export policy');
   console.log(`Project root: ${root}`);
+  if (policy.compliancePreset) {
+    console.log(label('Compliance preset') + policy.compliancePreset);
+  }
   console.log();
   console.log('Policy files:');
   for (const { scope, file } of policy.sources) {
@@ -193,6 +219,10 @@ function check(json, repos = []) {
   }
   console.log(
     label('Require redaction') + (policy.requireRedaction ? 'yes (--no-redact is refused)' : 'no')
+  );
+  console.log(
+    label('Redact PII (KVKK/BDDK)') +
+      (policy.redactPII ? 'yes (TCKN, TR_IBAN, CREDIT_CARD, EMAIL, TR_PHONE)' : 'no')
   );
   console.log(
     label('Max export tokens') +
@@ -224,13 +254,22 @@ function check(json, repos = []) {
   console.log('✅ Policy is valid.');
 }
 
-function init(force) {
+function init(force, preset = null) {
   const file = path.join(process.cwd(), POLICY_FILE);
+
+  let starter;
+  try {
+    starter = createStarterPolicy(preset);
+  } catch (error) {
+    console.error(`❌ ${error.message}`);
+    process.exitCode = 2;
+    return;
+  }
 
   fs.mkdirSync(path.dirname(file), { recursive: true });
   try {
     // 'wx' fails when the file exists, without a separate check that could go stale
-    fs.writeFileSync(file, `${JSON.stringify(createStarterPolicy(), null, 2)}\n`, {
+    fs.writeFileSync(file, `${JSON.stringify(starter, null, 2)}\n`, {
       flag: force ? 'w' : 'wx',
     });
   } catch (error) {
@@ -240,7 +279,7 @@ function init(force) {
     return;
   }
 
-  console.log(`✅ Wrote ${POLICY_FILE}`);
+  console.log(`✅ Wrote ${POLICY_FILE}${preset ? ` (preset: ${preset})` : ''}`);
   console.log();
   console.log('JSON has no comments, so the "$comment" field points to the reference:');
   console.log(`   ${POLICY_DOCS_URL}`);
@@ -262,6 +301,7 @@ function printHelp() {
   console.log('Options:');
   console.log('  --repo DIR           check: include another repository (repeatable)');
   console.log('  --json               check: print the effective policy as JSON');
+  console.log('  --preset NAME        init: compliance preset (kvkk-bddk, soc2)');
   console.log('  -f, --force          init: overwrite an existing policy file');
   console.log('  -h, --help           Show this help\n');
   console.log('Policy files:');

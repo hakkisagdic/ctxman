@@ -37,6 +37,13 @@ import ErrorHandler from './lib/utils/error-handler.js';
 import { Logger, getLogger, createLogger } from './lib/utils/logger.js'; // v2.3.6+
 import Updater from './lib/utils/updater.js'; // v2.3.6+
 import GitUtils from './lib/utils/git-utils.js'; // v2.3.6+
+import {
+  redactSecrets,
+  redactPII,
+  isValidTCKN,
+  isValidLuhn,
+  formatRedactionSummary,
+} from './lib/utils/secret-redactor.js';
 
 // Pull-request review context
 import { buildPrContext } from './lib/pr/pr-context.js';
@@ -88,6 +95,9 @@ import {
   Policy,
   PolicyConfigError,
   PolicyViolationError,
+  createStarterPolicy,
+  createPolicyTemplate,
+  COMPLIANCE_PRESETS,
   checkWorkspacePolicies,
   readWorkspaceAuditLogs,
 } from './lib/policy/index.js';
@@ -139,6 +149,11 @@ export {
   ConfigUtils,
   FormatConverter,
   ErrorHandler,
+  redactSecrets,
+  redactPII,
+  isValidTCKN,
+  isValidLuhn,
+  formatRedactionSummary,
 
   // v2.3.6+ Utils
   Logger,
@@ -202,6 +217,9 @@ export {
   Policy,
   PolicyConfigError,
   PolicyViolationError,
+  createStarterPolicy,
+  createPolicyTemplate,
+  COMPLIANCE_PRESETS,
   checkWorkspacePolicies,
   readWorkspaceAuditLogs,
 
