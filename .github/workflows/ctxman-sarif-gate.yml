@@ -1,0 +1,62 @@
+name: ctxman SARIF Policy & PR Gate
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  policy-and-pr-gate:
+    name: Policy SARIF & PR Intelligence Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run ctxman policy check and emit OASIS SARIF v2.1.0
+        run: node bin/cli.js policy check --format sarif > ctxman-policy.sarif
+
+      - name: Upload SARIF report to GitHub Code Scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        continue-on-error: true
+        with:
+          sarif_file: ctxman-policy.sarif
+          category: ctxman-policy
+
+      - name: Generate PR review context, risk/confidence score & Mermaid walkthrough
+        if: github.event_name == 'pull_request'
+        run: |
+          node bin/cli.js pr \
+            --base "${{ github.event.pull_request.base.sha }}" \
+            --head "${{ github.event.pull_request.head.sha }}" \
+            --budget 16k \
+            -o pr-review-context.md
+          head -n 45 pr-review-context.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload PR context & SARIF artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctxman-ci-gate-reports
+          path: |
+            ctxman-policy.sarif
+            pr-review-context.md
+          if-no-files-found: ignore

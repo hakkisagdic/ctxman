@@ -48,6 +48,13 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
       expect(fs.existsSync(full), `Missing ${rel}`).toBe(true);
       expect(fs.readFileSync(full, 'utf8').trim().length).toBeGreaterThan(200);
     }
+    const ciText = fs.readFileSync(path.join(ROOT, 'docs/commands/ci.md'), 'utf8');
+    expect(ciText).toContain('ctxman policy check --format sarif');
+    expect(ciText).toContain('ctxman-sarif-gate.yml');
+    expect(fs.existsSync(path.join(ROOT, '.github/workflows/ctxman-sarif-gate.yml'))).toBe(true);
+    expect(
+      fs.existsSync(path.join(ROOT, 'examples/gitlab-ci/ctxman-sarif-gate.gitlab-ci.yml'))
+    ).toBe(true);
   });
 
   it('verifies multi-repo (--repo / repos) documentation across command docs, README, and EN/TR website', () => {

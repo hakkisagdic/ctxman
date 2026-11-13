@@ -229,3 +229,84 @@ Add `--init` to `docker run` for long-running commands (`serve`, `watch`) so Ctr
 - The action is tested on `ubuntu-latest`. Its steps use `bash`, which GitHub's macOS and Windows runners also provide, but they have not been tested there.
 - ctxman creates a `.ctxman/logs/` directory in the analyzed project (empty unless warnings are logged); add it to `.gitignore` if a later step commits files.
 - `version` installs from npm. The published 3.0.0 always writes `llm-context.json`, whatever the `export` format; the action then reports that file as `context-path`.
+
+## SARIF v2.1.0 Policy & PR Review Gates (GitHub Actions & GitLab CI)
+
+Starting in **v3.3.0**, `ctxman` provides native **OASIS SARIF v2.1.0** export (`ctxman policy check --format sarif` and `GET /api/v1/policy?format=sarif`) alongside deterministic PR risk/confidence scoring, `.ctxman/rules.json` scoped rules enforcement, and Mermaid `flowchart LR` diagrams (`ctxman pr`).
+
+### GitHub Actions: SARIF Code Scanning & PR Intelligence Gate
+
+See [`.github/workflows/ctxman-sarif-gate.yml`](../../.github/workflows/ctxman-sarif-gate.yml) for a complete workflow that:
+
+1. Validates `.ctxman/policy.json` (including `--preset kvkk-bddk` or `soc2`) and outputs `ctxman-policy.sarif`.
+2. Uploads the SARIF v2.1.0 report to **GitHub Security / Code Scanning** (`github/codeql-action/upload-sarif@v3`).
+3. Runs `ctxman pr --base <base> --head <head> --budget 16k` on pull requests and publishes the risk/confidence summary and Mermaid impact diagram directly to `$GITHUB_STEP_SUMMARY`.
+
+```yaml
+# .github/workflows/ctxman-sarif-gate.yml
+name: ctxman SARIF Policy & PR Gate
+on:
+  pull_request:
+    branches: [main, master]
+permissions:
+  contents: read
+  security-events: write
+jobs:
+  policy-and-pr-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install -g ctxman
+      - name: Validate export policy and generate SARIF v2.1.0
+        run: ctxman policy check --format sarif > ctxman-policy.sarif
+      - name: Upload SARIF to GitHub Code Scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ctxman-policy.sarif
+          category: ctxman-policy
+      - name: Build PR review context with risk score & Mermaid walkthrough
+        if: github.event_name == 'pull_request'
+        run: |
+          ctxman pr \
+            --base "${{ github.event.pull_request.base.sha }}" \
+            --head "${{ github.event.pull_request.head.sha }}" \
+            --budget 16k \
+            -o pr-review-context.md
+          head -n 45 pr-review-context.md >> "$GITHUB_STEP_SUMMARY"
+```
+
+### GitLab CI: SAST SARIF Report & Merge Request Review Gate
+
+See [`examples/gitlab-ci/ctxman-sarif-gate.gitlab-ci.yml`](../../examples/gitlab-ci/ctxman-sarif-gate.gitlab-ci.yml) for a ready-to-include GitLab CI template that registers `ctxman-policy.sarif` under `artifacts.reports.sast` and generates `pr-review-context.md` / `pr-review-context.json` on merge requests:
+
+```yaml
+# .gitlab-ci.yml
+ctxman_policy_sarif_gate:
+  stage: test
+  image: node:22-alpine
+  variables:
+    GIT_DEPTH: '0'
+  before_script:
+    - apk add --no-cache git
+    - npm install -g ctxman
+  script:
+    - ctxman policy check --format sarif > ctxman-policy.sarif
+    - |
+      if [ -n "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" ]; then
+        git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+        ctxman pr --base "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --budget 16k -o pr-review-context.md
+      fi
+  artifacts:
+    when: always
+    paths:
+      - ctxman-policy.sarif
+      - pr-review-context.md
+    reports:
+      sast: ctxman-policy.sarif
+```

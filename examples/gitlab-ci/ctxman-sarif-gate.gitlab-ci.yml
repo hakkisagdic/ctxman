@@ -1,0 +1,28 @@
+# Ready-to-use GitLab CI template for ctxman SARIF Policy & PR Review Gate (v3.3.0+)
+stages:
+  - quality-gate
+
+ctxman_policy_sarif_gate:
+  stage: quality-gate
+  image: node:22-alpine
+  variables:
+    GIT_DEPTH: '0'
+  before_script:
+    - apk add --no-cache git
+    - npm install -g ctxman
+  script:
+    - ctxman policy check --format sarif > ctxman-policy.sarif
+    - |
+      if [ -n "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" ]; then
+        git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+        ctxman pr --base "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --budget 16k -o pr-review-context.md
+        ctxman pr --base "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --json -o pr-review-context.json
+      fi
+  artifacts:
+    when: always
+    paths:
+      - ctxman-policy.sarif
+      - pr-review-context.md
+      - pr-review-context.json
+    reports:
+      sast: ctxman-policy.sarif
