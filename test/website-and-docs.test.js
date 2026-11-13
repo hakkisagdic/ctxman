@@ -153,6 +153,7 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
   it('verifies CHANGELOG.md, website changelog, features, and api-reference reflect v3.2.0 through v3.2.8 in EN and TR', () => {
     for (const rel of ['CHANGELOG.md', 'website/changelog.md', 'website/tr/changelog.md']) {
       const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+      expect(text).toContain('[3.3.0]');
       expect(text).toContain('[3.2.8]');
       expect(text).toContain('[3.2.7]');
       expect(text).toContain('[3.2.6]');

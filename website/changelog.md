@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For the complete changelog, see [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) on GitHub.
 
+## [3.3.0] - 2026-11-13
+
+### Added
+
+- **Usage Metering, Plan Quotas, Invoices & `iyzico` Payment Provider (`lib/billing`, REST `/api/v1/billing/*`)**:
+  - Added `PLANS` (`free`, `pro`, `team`, `enterprise`), `TOPUP_PACKS`, `BillingStore` (SQLite-backed subscriptions, usage metering, quota checks, overage calculation, invoice generation, and webhook idempotency), `QuotaExceededError` (HTTP `402`), and `IyzicoProvider` / `MockPaymentProvider`.
+  - Added REST endpoints `GET /api/v1/billing/plans`, `GET /api/v1/billing/subscription`, `POST /api/v1/billing/checkout`, `POST /api/v1/billing/webhook`, `GET /api/v1/billing/usage`, and `GET /api/v1/billing/invoices`, plus quota enforcement in `POST /api/v1/context` and `POST /api/v1/pack`.
+- **KVKK & BDDK PII Redaction & Compliance Policy Presets (`redactPII`, `ctxman policy init --preset kvkk-bddk|soc2`)**:
+  - Added deterministic Turkish National ID (`TCKN` 10th/11th digit checksum via `isValidTCKN`), Turkish `TR` IBAN (`kvkk-tr-iban`), Luhn-validated credit/debit card (`isValidLuhn`, `bddk-credit-card`), email (`kvkk-email`), and Turkish mobile phone (`kvkk-tr-phone`) redaction in `lib/utils/secret-redactor.js`.
+  - Added `redactPII` and `compliancePreset` policy support and `ctxman policy init --preset kvkk-bddk` / `--preset soc2`.
+- **Project Rules & Agent Instructions Auto-Discovery (`--include-rules`, `GET /api/v1/rules`)**:
+  - Added `discoverProjectRules` and `formatProjectRulesSection` in `lib/pack/rules-discovery.js` to automatically discover and redact `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.cursor/rules/*.mdc`, `.github/copilot-instructions.md`, and `.windsurfrules`.
+  - Wired `--include-rules` into `ctxman pack`, `ctxman task`, `packWorkspace`, `POST /api/v1/pack`, `POST /api/v1/task`, and `GET /api/v1/rules`.
+- **REST API v1 Knowledge Graph Endpoint (`GET /api/v1/graph`)**:
+  - Added `GET /api/v1/graph` (`path`, `repos`, `file`, `query`, `depth`, `limit`, `refresh`) in `lib/api/rest/server.js` for full parity with MCP `query_knowledge_graph`.
+- **PR Review Risk/Confidence Score, Scoped Rules & Mermaid Flowchart (`ctxman pr`, `lib/pr/pr-intelligence.js`)**:
+  - Added deterministic `riskScore` (0–100), `confidenceScore` (1–5), `riskFactors`, `.ctxman/rules.json` scoped rules evaluation (`pathPattern`, `forbidPattern`, `requireTest`, `maxFileAdditions` -> `ruleViolations`), and automatic `flowchart LR` `mermaidDiagram` generation across Markdown, XML, and JSON outputs.
+- **Remote Git Repository Direct Analysis & Packing (`--remote <spec>`, `--branch <ref>`)**:
+  - Added `withRemoteRepo`, `cloneRemoteRepo`, and `resolveRemoteGitUrl` in `lib/utils/remote-repo.js` supporting `owner/repo`, `github:owner/repo`, `gitlab:owner/repo`, `https://...`, and `file://` with shallow clone (`--depth 1`) and automatic cleanup in `ctxman pack`, `ctxman map`, `GET /api/v1/map`, and `POST /api/v1/pack`.
+- **OASIS SARIF v2.1.0 Report Output (`ctxman policy check --format sarif`, `GET /api/v1/policy?format=sarif`)**:
+  - Added `buildSarifReport` in `lib/policy/sarif.js` converting policy validation errors, export violations, secret/PII findings, and PR rule violations into standard SARIF v2.1.0 JSON for GitHub Security, GitLab SAST, and Kondukto CI gates.
+
 ## [3.2.8] - 2026-11-10
 
 ### Added

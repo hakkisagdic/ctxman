@@ -9,7 +9,7 @@
 
 **AI Development Platform** with plugin architecture, Git integration, REST API, and watch mode. Supporting 14+ programming languages with method-level filtering, automatic LLM optimization, and real-time analysis. Perfect for AI-assisted development workflows.
 
-**v3.0.0** - Platform Foundation Release 🚀
+**v3.3.0** - Enterprise Compliance, Billing, PR Intelligence & Remote Repo Release 🚀
 
 **Languages**: [English](README.md) | [Türkçe](README-tr.md)
 
@@ -75,24 +75,24 @@ If you find this tool helpful, consider buying me a coffee! Your support helps m
 - 🔌 **Plugin Architecture** - Modular, extensible system for languages and exporters
 - 🔀 **Git Integration** - Analyze only changed files, diff analysis, author tracking
 - 👁️ **Watch Mode** - Real-time file monitoring and auto-analysis
-- 🌐 **REST API** - HTTP server for programmatic access (6 endpoints)
+- 🌐 **REST API** - HTTP server for programmatic access (20+ endpoints including `GET /api/v1/graph`, `GET /api/v1/rules`, `GET /api/v1/policy?format=sarif`, and `/api/v1/billing/*` metering & `iyzico` checkout)
 - ⚡ **Performance** - Scans ~2,000 files in under 100 ms and counts 2.6M tokens in about 6 s with tiktoken; watch mode re-analyzes only changed files
 - 🏗️ **Modular Core** - Scanner, Analyzer, ContextBuilder, Reporter
 
 ### 🧰 Context Commands
 
-- 📦 **`ctxman pack`** - File contents in one LLM-ready document (Claude XML, Markdown, JSON) with signatures-only compression, a hard token budget, and multi-repo `--repo` packing
+- 📦 **`ctxman pack`** - File contents in one LLM-ready document (Claude XML, Markdown, JSON) with signatures-only compression, a hard token budget, `--include-rules` agent instruction auto-discovery, `--remote <url|owner/repo> --branch <ref>` remote packing, and multi-repo `--repo` packing
 - 🎯 **`ctxman focus`** - Pack a file or `file:symbol` together with its `N`-hop import and AST symbol call neighborhood within a token budget (`--repo` for multi-repo; `docs/commands/focus.md`)
 - 🧭 **`ctxman task`** - Task-driven auto context bundle: hybrid search seeds, 1-hop AST call & import code, 2-hop compressed signatures, and repo map (`--repo` for multi-repo; `docs/commands/task.md`)
 - 🩺 **`ctxman diagnose`** - Stack-trace & failure root-cause bundle: implicated frames, enclosing methods, 1-hop AST call & import neighbors, and git history (`--repo` for multi-repo; `docs/commands/diagnose.md`)
 - 👥 **`ctxman who`** - Rank domain experts via surviving `git blame -w` share, recency-decayed commits, and `CODEOWNERS` (`--repo` for multi-repo; `docs/commands/who.md`)
-- 🗺️ **`ctxman map`** - Ranked repository map (import graph + git history) within a token budget (`--repo` for multi-repo)
-- 🔍 **`ctxman pr`** - Review context for a branch: log, changed methods, diff, related tests (`--repo` for multi-repo; `docs/commands/pr.md`)
+- 🗺️ **`ctxman map`** - Ranked repository map (import graph + git history) within a token budget (`--repo` for multi-repo, `--remote <url|owner/repo> --branch <ref>` for remote repos)
+- 🔍 **`ctxman pr`** - Review context for a branch: deterministic `riskScore` (0–100) & `confidenceScore` (1–5), `.ctxman/rules.json` scoped rule checks, Mermaid `flowchart LR` walkthrough diagram, log, changed methods, diff, related tests (`--repo` for multi-repo; `docs/commands/pr.md`)
 - 🧭 **`ctxman why`** - Why code looks as it does: commits, linked issues and PRs, optional GitHub/GitLab discussions (`--discussions`), owners, co-changed files, ADRs and tests (`--repo` for multi-repo; `docs/commands/why.md`)
 - 🔎 **`ctxman search`** - Ranked (BM25) and hybrid BM25 + semantic vector RRF (`--hybrid`) search over functions and code chunks across one or more `--repo` roots
 - 🔢 **`ctxman count`** - Token count for one model, exact for Claude through Anthropic's API
 - 🔌 **`ctxman mcp`** - MCP server with one-command setup for Claude Desktop, Claude Code, Cursor, VS Code and Windsurf
-- 🛡️ **`ctxman policy` / `ctxman audit`** - Export policy (deny rules, required redaction, token limits) and an audit log (`--repo` for multi-repo workspace checks and merged audit trails)
+- 🛡️ **`ctxman policy` / `ctxman audit`** - Export policy (deny rules, KVKK/BDDK PII redaction via `--preset kvkk-bddk` or `soc2`, required redaction, token limits), OASIS SARIF v2.1.0 output (`ctxman policy check --format sarif`), and an audit log (`--repo` for multi-repo workspace checks)
 - 🤖 **GitHub Action and Docker image** - Token budgets and model fit as a CI check
 
 ### 🎨 User Interface

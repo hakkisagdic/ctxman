@@ -7,6 +7,25 @@ ve bu proje [Semantic Versioning](https://semver.org/spec/v2.0.0.html) takip ede
 
 Tam değişiklik günlüğü için GitHub'da [CHANGELOG.md](https://github.com/hakkisagdic/ctxman/blob/main/CHANGELOG.md) dosyasına bakın.
 
+## [3.3.0] - 2026-11-13
+
+### Eklendi
+
+- **Kullanım Ölçümü, Plan Kotaları, Faturalama ve `iyzico` Ödeme Sağlayıcısı (`lib/billing`, REST `/api/v1/billing/*`)**:
+  - `PLANS` (`free`, `pro`, `team`, `enterprise`), `TOPUP_PACKS`, SQLite tabanlı `BillingStore`, `QuotaExceededError` (HTTP `402`), `IyzicoProvider` / `MockPaymentProvider` ve `/api/v1/billing/*` uç noktaları eklendi.
+- **KVKK ve BDDK PII Maskeleme ve Uyumluluk Şablonları (`redactPII`, `ctxman policy init --preset kvkk-bddk|soc2`)**:
+  - T.C. Kimlik No (`isValidTCKN` algoritma doğrulamalı), `TR` IBAN, Luhn doğrulamalı kredi kartı (`isValidLuhn`), e-posta ve TR GSM maskelemesi ile `kvkk-bddk` ve `soc2` politika şablonları eklendi.
+- **Proje Kuralları ve Ajan Yönergeleri Otomatik Keşfi (`--include-rules`, `GET /api/v1/rules`)**:
+  - `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.cursor/rules/*.mdc`, `.github/copilot-instructions.md` ve `.windsurfrules` dosyalarını otomatik keşfedip paketleyen `discoverProjectRules` ve `--include-rules` seçeneği eklendi.
+- **REST API v1 Bilgi Grafiği Uç Noktası (`GET /api/v1/graph`)**:
+  - MCP `query_knowledge_graph` aracıyla tam paritede çalışan tekli ve çoklu depo destekli `GET /api/v1/graph` uç noktası eklendi.
+- **PR İnceleme Güven/Risk Skoru, Kural Denetimi ve Otomatik Mermaid Diyagramı (`ctxman pr`)**:
+  - Deterministik `riskScore` (0–100), `confidenceScore` (1–5), `riskFactors`, `.ctxman/rules.json` kapsamlı kural denetimi (`ruleViolations`) ve otomatik `flowchart LR` `mermaidDiagram` üretimi eklendi.
+- **Uzak Git Deposu Doğrudan Analiz ve Paketleme (`--remote <spec>`, `--branch <ref>`)**:
+  - `ctxman pack`, `ctxman map` ve REST API için uzak depoları sığ klon (`--depth 1`) ile geçici dizinde analiz edip temizleyen `withRemoteRepo` desteği eklendi.
+- **OASIS SARIF v2.1.0 Rapor Çıktısı (`ctxman policy check --format sarif`, `GET /api/v1/policy?format=sarif`)**:
+  - Politika hatalarını, dışa aktarım ihlallerini, sır/PII bulgularını ve PR kural ihlallerini standart SARIF v2.1.0 şemasına dönüştüren `buildSarifReport` eklendi.
+
 ## [3.2.8] - 2026-11-10
 
 ### Eklendi

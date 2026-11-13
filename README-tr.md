@@ -2,7 +2,7 @@
 
 **AI Geliştirme Platformu** - Plugin mimarisi, Git entegrasyonu, REST API ve watch modu ile 14+ programlama dilini destekleyen, method seviyesi filtreleme, otomatik LLM optimizasyonu ve gerçek zamanlı analiz sunan platform. AI destekli geliştirme iş akışları için mükemmel.
 
-**v3.0.0** - Platform Foundation Sürümü 🚀
+**v3.3.0** - Kurumsal Uyumluluk (KVKK/BDDK), Faturalama (iyzico), PR Zekası ve Uzak Depo Sürümü 🚀
 
 ## ☕ Bu Projeyi Destekleyin
 
@@ -49,20 +49,20 @@ Bu aracı yararlı buluyorsanız, bana bir kahve ısmarlayabilirsiniz! Desteğin
 - 🔌 **Plugin Mimarisi** - Modüler, genişletilebilir dil ve exporter sistemi
 - 🔀 **Git Entegrasyonu** - Sadece değişen dosyaları analiz et, diff analizi, yazar takibi
 - 👁️ **Watch Modu** - Gerçek zamanlı dosya izleme ve otomatik analiz
-- 🌐 **REST API** - Programatik erişim için HTTP serveri (6 endpoint)
+- 🌐 **REST API** - Programatik erişim için HTTP sunucusu (`GET /api/v1/graph`, `GET /api/v1/rules`, `GET /api/v1/policy?format=sarif` ve `/api/v1/billing/*` `iyzico` faturalama dahil 20+ uç nokta)
 - ⚡ **Performans** - ~2.000 dosyayı 100 ms'nin altında tarar, tiktoken ile 2,6M token'ı yaklaşık 6 sn'de sayar; watch modu yalnızca değişen dosyaları yeniden analiz eder
 - 🏗️ **Modüler Çekirdek** - Scanner, Analyzer, ContextBuilder, Reporter
 
 ### 🧰 Bağlam Komutları
 
-- 📦 **`ctxman pack`** - Dosya içeriklerini tek bir LLM belgesinde toplar (Claude XML, Markdown, JSON); yalnızca imza sıkıştırması ve kesin token bütçesiyle
-- 🗺️ **`ctxman map`** - Import grafiği ve git geçmişine göre sıralanmış, token bütçesine sığan repo haritası
-- 🔍 **`ctxman pr`** - Bir dal için inceleme bağlamı: commit geçmişi, değişen metotlar, diff, ilgili testler (çoklu depo için `--repo`; `docs/commands/pr.md`)
+- 📦 **`ctxman pack`** - Dosya içeriklerini tek bir LLM belgesinde toplar (Claude XML, Markdown, JSON); `--include-rules` ajan kuralları keşfi, `--remote <url|owner/repo> --branch <ref>` uzak depo paketleme ve `--repo` çoklu depo desteğiyle
+- 🗺️ **`ctxman map`** - Import grafiği ve git geçmişine göre sıralanmış, token bütçesine sığan repo haritası (`--repo` çoklu depo ve `--remote` uzak depo destekli)
+- 🔍 **`ctxman pr`** - Bir dal için inceleme bağlamı: deterministik `riskScore` (0–100) ve `confidenceScore` (1–5), `.ctxman/rules.json` kural denetimi, otomatik Mermaid `flowchart LR` etki diyagramı, değişen metotlar, diff ve testler (`--repo`; `docs/commands/pr.md`)
 - 🧭 **`ctxman why`** - Kod neden böyle: yerel git geçmişinden commit'ler, bağlı issue ve PR'lar, sahipler, birlikte değişen dosyalar, ADR'ler ve testler (çoklu depo için `--repo`; `docs/commands/why.md`)
 - 🔎 **`ctxman search`** - Fonksiyonlar ve kod parçaları üzerinde sıralı (BM25) arama
 - 🔢 **`ctxman count`** - Bir model için token sayısı; Claude için Anthropic API'siyle birebir
 - 🔌 **`ctxman mcp`** - Claude Desktop, Claude Code, Cursor, VS Code ve Windsurf için tek komutla kurulan MCP sunucusu
-- 🛡️ **`ctxman policy` / `ctxman audit`** - Dışa aktarma politikası (engellenen yollar, zorunlu maskeleme, token sınırı) ve denetim kaydı (çoklu depo doğrulama ve birleştirilmiş denetim için `--repo`)
+- 🛡️ **`ctxman policy` / `ctxman audit`** - Dışa aktarma politikası (`--preset kvkk-bddk` ve `soc2` şablonları, TCKN/IBAN/Kart PII maskeleme, token sınırı), OASIS SARIF v2.1.0 rapor çıktısı (`--format sarif`) ve denetim kaydı (`--repo`)
 - 🤖 **GitHub Action ve Docker imajı** - Token bütçesi ve modele sığma kontrolü CI'da
 
 ### 🔢 Token Analizi
