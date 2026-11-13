@@ -390,6 +390,9 @@ describe('pack_context MCP tool', () => {
       'lineNumbers',
       'tree',
       'instructions',
+      'includeRules',
+      'remote',
+      'branch',
       'budget',
       'targetModel',
       'repos',
@@ -446,17 +449,34 @@ describe('pack_context MCP tool', () => {
     expect(result.content[1].text).toMatch(/% of gpt-4o's window, fits\.$/);
   });
 
-  it('keeps files and paths inside the sandbox root', async () => {
+  it('includes discovered project rules when includeRules is true', async () => {
+    fs.writeFileSync(path.join(root, 'AGENTS.md'), '# Agents\nAlways use strict mode.\n');
+    const result = await callTool(new MCPServer(), {
+      path: root,
+      includeRules: true,
+    });
+
+    expect(result.isError).toBeUndefined();
+    expect(result.content[0].text).toContain('<project_rules>');
+    expect(result.content[0].text).toContain('Always use strict mode.');
+  });
+
+  it('keeps files and paths inside the sandbox root and refuses remote when root is set', async () => {
     const server = new MCPServer({ root });
     const escape = await callTool(server, { path: root, files: ['../outside.js'] });
     const outsideRoot = await callTool(server, { path: os.tmpdir() });
     const relative = await callTool(server, { path: 'src', tree: false });
+    const remoteAttempt = await callTool(server, { remote: 'owner/repo' });
 
     expect(escape.isError).toBe(true);
     expect(escape.content[0].text).toContain('outside the project root');
     expect(outsideRoot.isError).toBe(true);
     expect(relative.isError).toBeUndefined();
     expect(relative.content[0].text).toContain('<source>math.js</source>');
+    expect(remoteAttempt.isError).toBe(true);
+    expect(remoteAttempt.content[0].text).toContain(
+      'remote is not allowed when MCP server is running with --root'
+    );
   });
 
   it('reports invalid arguments as tool errors', async () => {

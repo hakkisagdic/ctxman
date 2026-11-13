@@ -34,7 +34,7 @@ describe('MCP policy, audit and ask tools', () => {
     );
     const args = (name) => Object.keys(tools.find((t) => t.name === name).inputSchema.properties);
 
-    expect(args('check_policy')).toEqual(['path', 'repos']);
+    expect(args('check_policy')).toEqual(['path', 'format', 'repos']);
     expect(args('audit_log')).toEqual(['path', 'since', 'limit', 'repos']);
     expect(args('ask_codebase')).toEqual(['path', 'query', 'limit', 'repos']);
   });
@@ -65,6 +65,16 @@ describe('MCP policy, audit and ask tools', () => {
       expect(result.isError).toBeUndefined();
       expect(json(result)).toMatchObject({ valid: false, errors: expect.any(Array) });
       expect(json(result).errors.length).toBeGreaterThan(0);
+    });
+
+    it('returns a SARIF v2.1.0 report when format is sarif', async () => {
+      writePolicy({ version: 1, deny: 'secrets/' });
+
+      const sarif = json(await callTool('check_policy', { path: root, format: 'sarif' }));
+
+      expect(sarif.version).toBe('2.1.0');
+      expect(sarif.runs[0].results.length).toBeGreaterThan(0);
+      expect(sarif.runs[0].results[0].ruleId).toBe('ctxman/policy-config-invalid');
     });
   });
 

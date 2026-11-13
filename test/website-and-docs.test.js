@@ -262,6 +262,18 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
     expect(explainSchema.analyzerDb).toBeDefined();
     expect(explainSchema.repos).toBeDefined();
 
+    const packSchema = tools.find((t) => t.name === 'pack_context').inputSchema.properties;
+    expect(packSchema.includeRules).toBeDefined();
+    expect(packSchema.remote).toBeDefined();
+    expect(packSchema.branch).toBeDefined();
+    expect(mcpDoc).toContain('includeRules?');
+    expect(mcpDoc).toContain('remote?');
+
+    const policySchema = tools.find((t) => t.name === 'check_policy').inputSchema.properties;
+    expect(policySchema.format).toBeDefined();
+    expect(policySchema.format.enum).toEqual(['json', 'sarif']);
+    expect(mcpDoc).toMatch(/`check_policy`\s*\|[^\n]*`format\?`/);
+
     // Verify sandbox enforcement on analyzerDb when --root is active
     const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-mcp-why-root-'));
     try {
