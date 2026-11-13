@@ -65,7 +65,7 @@
 
 ---
 
-### [ ] P1-1: REST API v1 Bilgi Grafiği Uç Noktası (`GET /api/v1/graph`)
+### [x] P1-1: REST API v1 Bilgi Grafiği Uç Noktası (`GET /api/v1/graph`)
 
 - **Rakip Matrisi Karşılığı:** #15 (Sourcegraph & Greptile Code Graph REST API paritesi — bizde **Kısmi**).
 - **Tahmini Efor:** 1.5 birim.

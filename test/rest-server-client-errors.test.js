@@ -276,10 +276,30 @@ describe('REST API multi-repository workspace support (repos)', () => {
     const siblingAlias = path.basename(siblingDir);
     const wsQuery = `path=${encodeURIComponent(primaryDir)}&repo=${encodeURIComponent(siblingDir)}`;
 
-    // 1. GET /api/v1/docs lists all 19 endpoints
+    // 1. GET /api/v1/docs lists all endpoints including /api/v1/graph
     const docs = await request(port, 'GET', '/api/v1/docs');
     expect(docs.status).toBe(200);
-    expect(docs.json.endpoints.length).toBeGreaterThanOrEqual(19);
+    expect(docs.json.endpoints.length).toBeGreaterThanOrEqual(20);
+    expect(docs.json.endpoints.some((e) => e.path === '/api/v1/graph')).toBe(true);
+
+    // 1b. GET /api/v1/graph (single-repo & multi-repo with query/file filters)
+    const singleGraph = await request(
+      port,
+      'GET',
+      `/api/v1/graph?path=${encodeURIComponent(primaryDir)}`
+    );
+    expect(singleGraph.status).toBe(200);
+    expect(singleGraph.json.nodes.some((n) => n.path === 'src/app.js')).toBe(true);
+    expect(singleGraph.json.stats.totalNodes).toBeGreaterThanOrEqual(1);
+
+    const wsGraph = await request(
+      port,
+      'GET',
+      `/api/v1/graph?${wsQuery}&query=chargeCard&limit=10`
+    );
+    expect(wsGraph.status).toBe(200);
+    expect(wsGraph.json.nodes.some((n) => n.path === `${siblingAlias}/src/billing.js`)).toBe(true);
+    expect(wsGraph.json.nodes.some((n) => n.path.endsWith('secret.js'))).toBe(false);
 
     // 2. GET /api/v1/map
     const mapRes = await request(port, 'GET', `/api/v1/map?${wsQuery}&tokens=2048&callGraph=true`);
