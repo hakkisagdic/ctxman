@@ -154,12 +154,13 @@ ctxman mcp --root /path/to/project
 
 ### `ctxman watch` & `ctxman serve`
 
-Start live file watching or the local REST API server:
+Start live file watching or the local REST API server across single or multi-repo (`--repo`) workspaces:
 
 ```bash
 ctxman watch --debounce 1000
 ctxman watch --repo ../shared-lib --repo ../api-service --bootstrap
 ctxman serve --port 3000
+ctxman serve --repo ../shared-lib --repo ../api-service --port 3000
 ```
 
 ## MCP Server Tools (19 Tools)
@@ -342,14 +343,30 @@ const diagReport = await diagnoseFailure('/path/to/repo', errorStackText, { budg
 http://127.0.0.1:3000/api/v1
 ```
 
-### Endpoints
+### Endpoints (Single-Repo & Multi-Repository `repos` Support)
+
+Every REST API v1 endpoint accepts optional `repo` / `repos` parameters (via repeatable `?repo=<dir>`, comma-separated `?repos=a,b`, JSON body `repos: string[]`, or server defaults configured via `ctxman serve --repo <dir>`):
 
 - `GET /api/v1/docs` — OpenAPI endpoint listing
-- `POST /api/v1/analyze` — Analyze repository files and token counts
-- `GET /api/v1/methods?file=<path>` — Extract methods for a file or project
-- `GET /api/v1/stats` — Cached repository statistics
+- `GET /api/v1/analyze` — Analyze repository or workspace files and token counts
+- `GET /api/v1/methods?file=<path>` — Extract methods for a file or `<alias>/<path>`
+- `GET /api/v1/stats` — Repository or multi-repository workspace token statistics
 - `GET /api/v1/diff?since=<ref>` — Git diff analysis (`isValidGitRef` validated)
-- `POST /api/v1/context` — Build policy-checked LLM context
+- `POST /api/v1/context` — Build policy-checked LLM context (`403` on policy violation)
+- `GET /api/v1/map` — Ranked repository or workspace map (`tokens`, `focus`, `callGraph`, `style`)
+- `GET /api/v1/search?query=<q>` — BM25, semantic, or hybrid RRF code search
+- `GET /api/v1/symbol?name=<sym>` — Full source of a named function, method, or class
+- `GET /api/v1/count` — Model-aware token count and context window fit
+- `GET /api/v1/pr` — Pull-request review bundle across one or more git repositories
+- `GET /api/v1/why?target=<spec>` — Git archaeology, ownership, coupling, and ADR/test lookup
+- `GET /api/v1/who?target=<spec>` — Blame + recency + CODEOWNERS expert ranking
+- `GET /api/v1/policy` — Validate and summarize `.ctxman/policy.json` across repositories
+- `GET /api/v1/audit` — Read SHA-256 export audit trail events across repositories
+- `POST /api/v1/pack` — Pack repository or workspace files into one LLM-ready document
+- `POST /api/v1/focus` — Pack a target file or symbol with its `N`-hop import & AST call neighborhood
+- `POST /api/v1/task` — Build a task-driven context bundle (hybrid search + AST/import graph + repo map)
+- `POST /api/v1/diagnose` — Parse stack traces and failure logs into a root-cause bundle
+- `POST /api/v1/ask` — Semantic search over the local SQLite embedding index
 
 ## Exit Codes
 

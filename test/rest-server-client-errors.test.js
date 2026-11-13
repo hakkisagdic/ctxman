@@ -260,5 +260,156 @@ describe('REST API multi-repository workspace support (repos)', () => {
     );
     expect(refused.status).toBe(403);
     expect(refused.json.violations).toBeDefined();
+
+    // Restore sibling policy without maxExportTokens cap for subsequent tests
+    fs.writeFileSync(
+      path.join(siblingDir, '.ctxman', 'policy.json'),
+      JSON.stringify({
+        version: 1,
+        deny: ['src/secret.js', '.ctxman/**'],
+      })
+    );
+  });
+
+  it('serves code intelligence endpoints across single and multi-repo workspaces', async () => {
+    const primaryAlias = path.basename(primaryDir);
+    const siblingAlias = path.basename(siblingDir);
+    const wsQuery = `path=${encodeURIComponent(primaryDir)}&repo=${encodeURIComponent(siblingDir)}`;
+
+    // 1. GET /api/v1/docs lists all 19 endpoints
+    const docs = await request(port, 'GET', '/api/v1/docs');
+    expect(docs.status).toBe(200);
+    expect(docs.json.endpoints.length).toBeGreaterThanOrEqual(19);
+
+    // 2. GET /api/v1/map
+    const mapRes = await request(port, 'GET', `/api/v1/map?${wsQuery}&tokens=2048&callGraph=true`);
+    expect(mapRes.status).toBe(200);
+    expect(mapRes.json.output).toContain(`${siblingAlias}/src/billing.js`);
+
+    // 3. GET /api/v1/search
+    const searchRes = await request(port, 'GET', `/api/v1/search?${wsQuery}&q=chargeCard&limit=5`);
+    expect(searchRes.status).toBe(200);
+    expect(searchRes.json.results.some((r) => r.file.includes('billing.js'))).toBe(true);
+
+    // 4. GET /api/v1/symbol
+    const symRes = await request(port, 'GET', `/api/v1/symbol?${wsQuery}&name=chargeCard`);
+    expect(symRes.status).toBe(200);
+    expect(symRes.json.symbols.length).toBeGreaterThanOrEqual(1);
+    expect(symRes.json.symbols[0].file).toBe(`${siblingAlias}/src/billing.js`);
+
+    // 5. GET /api/v1/count
+    const countRes = await request(
+      port,
+      'GET',
+      `/api/v1/count?${wsQuery}&model=claude-sonnet-5-5&top=5`
+    );
+    expect(countRes.status).toBe(200);
+    expect(countRes.json.tokens).toBeGreaterThan(0);
+
+    // 6. GET /api/v1/pr
+    const prRes = await request(port, 'GET', `/api/v1/pr?${wsQuery}&base=HEAD`);
+    expect(prRes.status).toBe(200);
+    expect(prRes.json.repos).toHaveLength(2);
+
+    // 7. GET /api/v1/why
+    const whyRes = await request(
+      port,
+      'GET',
+      `/api/v1/why?${wsQuery}&target=${encodeURIComponent(`${siblingAlias}/src/billing.js:chargeCard`)}`
+    );
+    expect(whyRes.status).toBe(200);
+    expect(whyRes.json.data.history.commits.length).toBeGreaterThanOrEqual(1);
+
+    // 8. GET /api/v1/who
+    const whoRes = await request(
+      port,
+      'GET',
+      `/api/v1/who?${wsQuery}&target=${encodeURIComponent(`${siblingAlias}/src/billing.js`)}`
+    );
+    expect(whoRes.status).toBe(200);
+    expect(whoRes.json.experts.length).toBeGreaterThanOrEqual(1);
+
+    // 9. GET /api/v1/policy & GET /api/v1/audit
+    const policyRes = await request(port, 'GET', `/api/v1/policy?${wsQuery}`);
+    expect(policyRes.status).toBe(200);
+    expect(policyRes.json.repos).toHaveLength(2);
+
+    const auditRes = await request(port, 'GET', `/api/v1/audit?${wsQuery}&limit=10`);
+    expect(auditRes.status).toBe(200);
+    expect(Array.isArray(auditRes.json.events)).toBe(true);
+
+    // 10. POST /api/v1/pack
+    const packRes = await request(
+      port,
+      'POST',
+      '/api/v1/pack',
+      JSON.stringify({
+        path: primaryDir,
+        repos: [siblingDir],
+        style: 'markdown',
+        budget: 8000,
+      })
+    );
+    expect(packRes.status).toBe(200);
+    expect(packRes.json.text).toContain(`${primaryAlias}/src/app.js`);
+
+    // 11. POST /api/v1/focus
+    const focusRes = await request(
+      port,
+      'POST',
+      '/api/v1/focus',
+      JSON.stringify({
+        path: primaryDir,
+        repos: [siblingDir],
+        file: `${siblingAlias}/src/billing.js:chargeCard`,
+        depth: 1,
+      })
+    );
+    expect(focusRes.status).toBe(200);
+    expect(focusRes.json.focus.target).toBe(`${siblingAlias}/src/billing.js`);
+
+    // 12. POST /api/v1/task
+    const taskRes = await request(
+      port,
+      'POST',
+      '/api/v1/task',
+      JSON.stringify({
+        path: primaryDir,
+        repos: [siblingDir],
+        task: 'update chargeCard amount calculation',
+        budget: 8000,
+      })
+    );
+    expect(taskRes.status).toBe(200);
+    expect(taskRes.json.repos).toHaveLength(2);
+
+    // 13. POST /api/v1/diagnose
+    const diagRes = await request(
+      port,
+      'POST',
+      '/api/v1/diagnose',
+      JSON.stringify({
+        path: primaryDir,
+        repos: [siblingDir],
+        trace: `Error: card declined\n    at chargeCard (${siblingAlias}/src/billing.js:2:10)`,
+      })
+    );
+    expect(diagRes.status).toBe(200);
+    expect(diagRes.json.implicatedFiles.some((f) => f.includes('billing.js'))).toBe(true);
+
+    // 14. POST /api/v1/ask
+    const askRes = await request(
+      port,
+      'POST',
+      '/api/v1/ask',
+      JSON.stringify({
+        path: primaryDir,
+        repos: [siblingDir],
+        query: 'chargeCard',
+        limit: 3,
+      })
+    );
+    expect(askRes.status).toBe(200);
+    expect(askRes.json.results.length).toBeGreaterThanOrEqual(1);
   });
 });

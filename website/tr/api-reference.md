@@ -154,12 +154,13 @@ ctxman mcp --root /path/to/project
 
 ### `ctxman watch` ve `ctxman serve`
 
-Canlı dosya izlemeyi veya yerel REST API sunucusunu başlatır:
+Tekli veya çoklu depo (`--repo`) çalışma alanlarında canlı dosya izlemeyi veya yerel REST API sunucusunu başlatır:
 
 ```bash
 ctxman watch --debounce 1000
 ctxman watch --repo ../shared-lib --repo ../api-service --bootstrap
 ctxman serve --port 3000
+ctxman serve --repo ../shared-lib --repo ../api-service --port 3000
 ```
 
 ## MCP Sunucu Araçları (19 Araç)
@@ -342,14 +343,30 @@ const diagReport = await diagnoseFailure('/path/to/repo', errorStackText, { budg
 http://127.0.0.1:3000/api/v1
 ```
 
-### Uç Noktalar
+### Uç Noktalar (Tekli ve Çoklu Depo `repos` Desteği)
+
+Tüm REST API v1 uç noktaları isteğe bağlı `repo` / `repos` parametrelerini (`?repo=<dir>`, virgülle ayrılmış `?repos=a,b`, JSON gövdesinde `repos: string[]` veya `ctxman serve --repo <dir>` varsayılanlarını) destekler:
 
 - `GET /api/v1/docs` — OpenAPI uç nokta listesi
-- `POST /api/v1/analyze` — Depo dosyalarını ve token sayılarını analiz et
-- `GET /api/v1/methods?file=<path>` — Bir dosya veya proje için fonksiyonları çıkar
-- `GET /api/v1/stats` — Önbelleğe alınmış depo istatistikleri
+- `GET /api/v1/analyze` — Depo veya çoklu depo dosyalarını ve token sayılarını analiz et
+- `GET /api/v1/methods?file=<path>` — Bir dosya veya `<alias>/<path>` için fonksiyonları çıkar
+- `GET /api/v1/stats` — Depo veya çoklu depo çalışma alanı istatistikleri
 - `GET /api/v1/diff?since=<ref>` — Git diff analizi (`isValidGitRef` korumalı)
-- `POST /api/v1/context` — Politika denetimli LLM bağlamı oluştur
+- `POST /api/v1/context` — Politika denetimli LLM bağlamı oluştur (politika ihlalinde `403`)
+- `GET /api/v1/map` — PageRank sıralamalı depo/çalışma alanı haritası (`tokens`, `focus`, `callGraph`, `style`)
+- `GET /api/v1/search?query=<q>` — BM25, semantik veya hibrit RRF kod araması
+- `GET /api/v1/symbol?name=<sym>` — İsimle fonksiyon, metot veya sınıfın tam kaynak kodu
+- `GET /api/v1/count` — Modele duyarlı token sayımı ve bağlam penceresi uyumu
+- `GET /api/v1/pr` — Bir veya birden fazla git deposunda pull-request inceleme paketi
+- `GET /api/v1/why?target=<spec>` — Git arkeolojisi, sahiplik, eş-değişim ve ADR/test sorgusu
+- `GET /api/v1/who?target=<spec>` — Blame + güncellik + CODEOWNERS uzman sıralaması
+- `GET /api/v1/policy` — `.ctxman/policy.json` kurallarını doğrula ve özetle
+- `GET /api/v1/audit` — SHA-256 dışa aktarım denetim günlüğü olaylarını oku
+- `POST /api/v1/pack` — Depo veya çalışma alanı dosyalarını tek bir LLM belgesinde paketle
+- `POST /api/v1/focus` — Hedef dosya veya sembolü `N`-hop import ve AST çağrı komşuluğuyla paketle
+- `POST /api/v1/task` — Görev odaklı bağlam paketi (hibrit arama + AST/import grafiği + depo haritası)
+- `POST /api/v1/diagnose` — Stack trace ve hata günlüklerinden kök neden paketi oluştur
+- `POST /api/v1/ask` — Yerel SQLite gömme indeksinde doğal dil semantik arama
 
 ## Çıkış Kodları
 
