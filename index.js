@@ -37,6 +37,7 @@ import ErrorHandler from './lib/utils/error-handler.js';
 import { Logger, getLogger, createLogger } from './lib/utils/logger.js'; // v2.3.6+
 import Updater from './lib/utils/updater.js'; // v2.3.6+
 import GitUtils from './lib/utils/git-utils.js'; // v2.3.6+
+import { resolveRemoteGitUrl, cloneRemoteRepo, withRemoteRepo } from './lib/utils/remote-repo.js';
 import {
   redactSecrets,
   redactPII,
@@ -167,6 +168,9 @@ export {
   createLogger,
   Updater,
   GitUtils,
+  resolveRemoteGitUrl,
+  cloneRemoteRepo,
+  withRemoteRepo,
 
   // Functions
   generateDigestFromReport,

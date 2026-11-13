@@ -25,6 +25,8 @@ are listed with one line per function (line, signature, tokens) until the budget
 
 Options:
   -t, --tokens N           Token budget for the map (default: 2048)
+      --remote SPEC        Clone and map a remote Git repo (URL, github:owner/repo, owner/repo)
+      --branch REF         Branch or tag ref to checkout with --remote
       --repo DIR           Additional repository root for a multi-repo workspace map
                            under one shared token budget (repeatable)
   -f, --focus PATH         Bias the ranking toward a file, file:symbol, or folder and its
@@ -67,6 +69,8 @@ Examples:
 function parseArgs(argv) {
   const options = {
     root: null,
+    remote: null,
+    branch: null,
     repos: [],
     tokens: undefined,
     focus: [],
@@ -110,6 +114,12 @@ function parseArgs(argv) {
       case '-t':
       case '--tokens':
         options.tokens = integer(arg, value(), 1);
+        break;
+      case '--remote':
+        options.remote = value();
+        break;
+      case '--branch':
+        options.branch = value();
         break;
       case '--repo':
         options.repos.push(value());
@@ -220,7 +230,22 @@ async function main() {
   const { default: ClipboardUtils } = await import('../lib/utils/clipboard-utils.js');
 
   let result;
-  if (options.repos.length > 0) {
+  if (options.remote) {
+    const { withRemoteRepo } = await import('../lib/utils/remote-repo.js');
+    result = await withRemoteRepo(options.remote, { branch: options.branch }, (remoteDir) =>
+      renderRepoMap(remoteDir, {
+        tokens: options.tokens,
+        focus: options.focus.map((entry) => focusPath(remoteDir, entry)),
+        history: options.history,
+        order: options.order,
+        importantLast: options.importantLast,
+        style: options.style,
+        graph: options.graph,
+        callGraph: options.callGraph,
+        redact: options.redact,
+      })
+    );
+  } else if (options.repos.length > 0) {
     const repoList = [
       ...(options.root !== null ? [path.resolve(options.root)] : []),
       ...options.repos.map((r) => path.resolve(r)),

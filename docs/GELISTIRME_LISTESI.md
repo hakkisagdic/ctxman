@@ -89,7 +89,7 @@
 
 ---
 
-### [ ] P1-3: Uzak Git Deposu Doğrudan Analiz ve Paketleme (`--remote <url|owner/repo> --branch <ref>`)
+### [x] P1-3: Uzak Git Deposu Doğrudan Analiz ve Paketleme (`--remote <url|owner/repo> --branch <ref>`)
 
 - **Rakip Matrisi Karşılığı:** #11 (Repomix `--remote` ve GitIngest URL/branch paritesi — bizde **Kısmi**).
 - **Tahmini Efor:** 2.5 birim.

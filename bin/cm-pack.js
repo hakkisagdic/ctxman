@@ -25,6 +25,8 @@ and .contextinclude decide which files are included; binary files and files over
 are skipped. Secrets (API keys, tokens, private keys) are masked.
 
 Selection:
+      --remote SPEC        Clone and pack a remote Git repo (URL, github:owner/repo, owner/repo)
+      --branch REF         Branch or tag ref to checkout with --remote
       --repo DIR           Pack multiple repository roots into one document under a
                            shared token budget, prefixed by repo name (repeatable)
       --include GLOB       Only files matching GLOB (repeatable or comma-separated)
@@ -97,6 +99,8 @@ function parseSize(text, flag) {
 }
 
 const VALUE_OPTIONS = {
+  '--remote': 'remote',
+  '--branch': 'branch',
   '--repo': 'repos',
   '--include': 'include',
   '--exclude': 'exclude',
@@ -361,7 +365,12 @@ async function main() {
 
     let result;
     try {
-      if (args.repos.length > 0) {
+      if (args.remote) {
+        const { withRemoteRepo } = await import('../lib/utils/remote-repo.js');
+        result = await withRemoteRepo(args.remote, { branch: args.branch }, (remoteDir) =>
+          packContext(remoteDir, options)
+        );
+      } else if (args.repos.length > 0) {
         const repoList = [
           ...(args.paths.length > 0 ? [path.resolve(args.paths[0])] : []),
           ...args.repos.map((r) => path.resolve(r)),
