@@ -41,6 +41,7 @@ Document:
       --no-tree            Leave out the directory tree
       --header TEXT        Text at the top
       --instructions FILE  Append the text of FILE at the end, after the files
+      --include-rules      Auto-discover and include AGENTS.md, CLAUDE.md, .cursorrules, Copilot rules
       --line-numbers       Number every line (original numbers, also with --compress)
       --compress           Keep signatures, replace function bodies with a one-line
                            placeholder (languages of the method analyzers)
@@ -118,6 +119,7 @@ const FLAG_OPTIONS = {
   '--json': ['style', 'json'],
   '--tree': ['tree', true],
   '--no-tree': ['tree', false],
+  '--include-rules': ['includeRules', true],
   '--line-numbers': ['lineNumbers', true],
   '--compress': ['compress', true],
   '--redact': ['redact', true],
@@ -335,6 +337,7 @@ async function main() {
       maxFileSize: args.maxFileSize,
       tree: args.tree,
       header: args.header,
+      includeRules: Boolean(args.includeRules),
       lineNumbers: args.lineNumbers,
       compress: args.compress,
       redact: args.redact,

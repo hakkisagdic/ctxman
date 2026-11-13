@@ -59,7 +59,7 @@ import { explainHistory } from './lib/why/index.js';
 import { findExperts, WhoError } from './lib/who/index.js';
 
 // File contents in one document (`ctxman pack`)
-import { packContext } from './lib/pack/index.js';
+import { packContext, discoverProjectRules, formatProjectRulesSection } from './lib/pack/index.js';
 
 // Import/importer neighborhood context (`ctxman focus`)
 import { focusContext, describeFocus, FocusError } from './lib/focus/index.js';
@@ -180,8 +180,10 @@ export {
   findExperts,
   WhoError,
 
-  // Packed file contents
+  // Packed file contents & rules discovery
   packContext,
+  discoverProjectRules,
+  formatProjectRulesSection,
 
   // Focused neighborhood context (`ctxman focus`)
   focusContext,

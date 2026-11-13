@@ -26,6 +26,7 @@ Options:
       --model MODEL        Target model profile (e.g. claude-sonnet-4-5)
       --format FORMAT      Output format: markdown (default), json, xml
       --json               Shorthand for --format json
+      --include-rules      Auto-discover and include AGENTS.md, CLAUDE.md, .cursorrules, Copilot rules
       --search-mode MODE   Search mode: hybrid (default), bm25, semantic
       --calls              Include cross-file AST symbol call graph edges (default)
       --no-calls           Disable AST symbol call graph edges (module imports only)
@@ -61,6 +62,7 @@ async function main() {
   let budget = 32000;
   let model = null;
   let format = 'markdown';
+  let includeRules = false;
   let searchMode = 'hybrid';
   let callGraph = true;
   let redact = true;
@@ -101,6 +103,8 @@ async function main() {
         format = arg.slice('--format='.length);
       } else if (arg === '--json') {
         format = 'json';
+      } else if (arg === '--include-rules') {
+        includeRules = true;
       } else if (arg === '--search-mode') {
         searchMode = argv[++i];
       } else if (arg.startsWith('--search-mode=')) {
@@ -153,6 +157,7 @@ async function main() {
       budget,
       model,
       format,
+      includeRules,
       searchMode,
       callGraph,
       redact,
