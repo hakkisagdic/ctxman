@@ -744,6 +744,7 @@ function printHelp() {
   console.log();
   console.log('Platform Features (v3.0.0):');
   console.log('  serve [options]          Start REST API server');
+  console.log('    --repo DIR             Additional repository root for workspace (repeatable)');
   console.log('    --port PORT            Server port (default: 3000)');
   console.log('    --auth-token TOKEN     API authentication token');
   console.log('    --host HOST            Address to bind (default: localhost)');
@@ -962,6 +963,14 @@ async function runAPIServer(args) {
   const hostIndex = args.findIndex((arg) => arg === '--host');
   const host = hostIndex !== -1 && args[hostIndex + 1] ? args[hostIndex + 1] : 'localhost';
   const cors = args.includes('--cors');
+  const repos = [];
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--repo' && args[i + 1]) {
+      repos.push(args[++i]);
+    } else if (args[i].startsWith('--repo=')) {
+      repos.push(args[i].slice('--repo='.length));
+    }
+  }
 
   if (!authToken && cors) {
     console.warn('⚠️  --cors without --auth-token: any web page you open can read the responses.');
@@ -972,7 +981,7 @@ async function runAPIServer(args) {
     );
   }
 
-  const server = new APIServer({ port, host, authToken, cors });
+  const server = new APIServer({ port, host, authToken, cors, repos });
 
   // Handle shutdown
   process.on('SIGINT', () => {
