@@ -2359,3 +2359,53 @@ export function findExperts(
   target: string,
   options?: FindExpertsOptions
 ): Promise<FindExpertsResult>;
+
+// ============================================
+// Billing, KVKK/BDDK PII, Rules, PR Intelligence, Remote Repo & SARIF (v3.3.0)
+// ============================================
+
+export function redactPII(text: string, options?: Record<string, any>): { text: string; findings: string[]; counts: Record<string, number> };
+export function isValidTCKN(digits: string): boolean;
+export function isValidLuhn(digits: string): boolean;
+export function formatRedactionSummary(counts: Record<string, number>): string;
+
+export function discoverProjectRules(root: string, options?: Record<string, any>): any;
+export function formatProjectRulesSection(rules: any[], style?: string): string;
+
+export function analyzePrIntelligence(rootPath: string, params?: Record<string, any>): any;
+export function evaluatePrRules(rootPath: string, params?: Record<string, any>): any[];
+export function calculatePrRiskAndConfidence(params?: Record<string, any>): { riskScore: number; confidenceScore: number; riskFactors: string[] };
+export function buildPrMermaidDiagram(params?: Record<string, any>): string;
+
+export function resolveRemoteGitUrl(remoteSpec: string): string;
+export function cloneRemoteRepo(remoteSpec: string, options?: Record<string, any>): { dir: string; url: string; branch: string | null; cleanup: () => void };
+export function withRemoteRepo<T = any>(remoteSpec: string, optionsOrFn: any, maybeFn?: (dir: string, meta: any) => Promise<T> | T): Promise<T>;
+
+export const COMPLIANCE_PRESETS: Record<string, any>;
+export function createPolicyTemplate(preset?: string | null): Record<string, any>;
+export const SARIF_SCHEMA: string;
+export const SARIF_VERSION: string;
+export function buildSarifReport(input?: Record<string, any>): Record<string, any>;
+
+export const PLANS: Record<string, any>;
+export const TOPUP_PACKS: Record<string, any>;
+export function getPlan(planId: string): any;
+export function listPlans(): any[];
+export class BillingStore {
+  constructor(dbPathOrOptions?: string | Record<string, any>);
+}
+export class QuotaExceededError extends Error {
+  constructor(message: string, details?: Record<string, any>);
+}
+export class PaymentProvider {
+  constructor(options?: Record<string, any>);
+}
+export class IyzicoProvider extends PaymentProvider {
+  constructor(options?: Record<string, any>);
+}
+export class MockPaymentProvider extends PaymentProvider {
+  constructor(options?: Record<string, any>);
+}
+export function createPaymentProvider(providerName?: string, options?: Record<string, any>): PaymentProvider;
+export function redactSecrets(text: string, options?: Record<string, any>): { text: string; findings: string[]; counts: Record<string, number> };
+export function createStarterPolicy(preset?: string | null): Record<string, any>;

@@ -107,6 +107,9 @@ import {
   COMPLIANCE_PRESETS,
   checkWorkspacePolicies,
   readWorkspaceAuditLogs,
+  buildSarifReport,
+  SARIF_SCHEMA,
+  SARIF_VERSION,
 } from './lib/policy/index.js';
 
 // Billing, usage metering, quotas, invoices & payment providers
@@ -238,6 +241,9 @@ export {
   COMPLIANCE_PRESETS,
   checkWorkspacePolicies,
   readWorkspaceAuditLogs,
+  buildSarifReport,
+  SARIF_SCHEMA,
+  SARIF_VERSION,
 
   // Billing, usage metering, quotas, invoices & payment providers
   PLANS,

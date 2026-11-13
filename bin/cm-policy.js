@@ -16,6 +16,7 @@ import {
   POLICY_ENV,
   POLICY_DOCS_URL,
   PolicyConfigError,
+  buildSarifReport,
 } from '../lib/policy/index.js';
 
 function collectRepos(args) {
@@ -37,6 +38,26 @@ function collectRepos(args) {
     }
   }
   return repos;
+}
+
+function getFormat(args) {
+  if (args.includes('--sarif')) return 'sarif';
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--format') {
+      const next = args[++i];
+      if (!next || next.startsWith('-')) {
+        throw new Error('--format needs a value (text, json, sarif)');
+      }
+      return next.toLowerCase();
+    }
+    if (arg.startsWith('--format=')) {
+      const val = arg.slice('--format='.length).trim();
+      if (!val) throw new Error('--format needs a value (text, json, sarif)');
+      return val.toLowerCase();
+    }
+  }
+  return args.includes('--json') ? 'json' : 'text';
 }
 
 function getPreset(args) {
@@ -70,9 +91,11 @@ function main() {
 
   let repos = [];
   let preset = null;
+  let format = 'text';
   try {
     repos = collectRepos(args);
     preset = getPreset(args);
+    format = getFormat(args);
   } catch (error) {
     console.error(`❌ ${error.message}`);
     process.exitCode = 2;
@@ -83,7 +106,7 @@ function main() {
 
   switch (command) {
     case 'check':
-      check(args.includes('--json'), repos);
+      check(format === 'json', repos, format);
       break;
     case 'init':
       if (repos.length > 0) {
@@ -100,7 +123,7 @@ function main() {
   }
 }
 
-function checkWorkspace(root, json, repos) {
+function checkWorkspace(root, json, repos, format = 'text') {
   let result;
   try {
     result = checkWorkspacePolicies(root, repos);
@@ -114,6 +137,12 @@ function checkWorkspace(root, json, repos) {
     process.exitCode = 2;
   }
 
+  if (format === 'sarif') {
+    console.log(
+      JSON.stringify(buildSarifReport({ rootPath: root, policyResult: result }), null, 2)
+    );
+    return;
+  }
   if (json) {
     console.log(JSON.stringify(result, null, 2));
     return;
@@ -163,10 +192,10 @@ function checkWorkspace(root, json, repos) {
   }
 }
 
-function check(json, repos = []) {
+function check(json, repos = [], format = 'text') {
   const root = process.cwd();
   if (repos.length > 0) {
-    checkWorkspace(root, json, repos);
+    checkWorkspace(root, json, repos, format);
     return;
   }
 
@@ -175,7 +204,18 @@ function check(json, repos = []) {
     policy = loadPolicy(root);
   } catch (error) {
     if (!(error instanceof PolicyConfigError)) throw error;
-    if (json) {
+    if (format === 'sarif') {
+      console.log(
+        JSON.stringify(
+          buildSarifReport({
+            rootPath: root,
+            policyResult: { valid: false, file: error.file, errors: error.errors },
+          }),
+          null,
+          2
+        )
+      );
+    } else if (json) {
       console.log(
         JSON.stringify({ valid: false, file: error.file, errors: error.errors }, null, 2)
       );
@@ -186,6 +226,16 @@ function check(json, repos = []) {
     return;
   }
 
+  if (format === 'sarif') {
+    console.log(
+      JSON.stringify(
+        buildSarifReport({ rootPath: root, policyResult: { valid: true, ...policy.toJSON() } }),
+        null,
+        2
+      )
+    );
+    return;
+  }
   if (json) {
     console.log(JSON.stringify({ valid: true, ...policy.toJSON() }, null, 2));
     return;
@@ -301,6 +351,7 @@ function printHelp() {
   console.log('Options:');
   console.log('  --repo DIR           check: include another repository (repeatable)');
   console.log('  --json               check: print the effective policy as JSON');
+  console.log('  --format sarif       check: print policy validation as OASIS SARIF v2.1.0');
   console.log('  --preset NAME        init: compliance preset (kvkk-bddk, soc2)');
   console.log('  -f, --force          init: overwrite an existing policy file');
   console.log('  -h, --help           Show this help\n');

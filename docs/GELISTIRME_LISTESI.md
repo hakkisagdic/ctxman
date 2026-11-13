@@ -101,7 +101,7 @@
 
 ---
 
-### [ ] P2-1: CI/CD Kalite ve Politika Kapısı için Standart SARIF v2.1.0 Rapor Çıktısı
+### [x] P2-1: CI/CD Kalite ve Politika Kapısı için Standart SARIF v2.1.0 Rapor Çıktısı
 
 - **Rakip Matrisi Karşılığı:** #17 (Kondukto & CodeRabbit GitHub Security / CI Gate paritesi — bizde **Kısmi**).
 - **Tahmini Efor:** 2 birim.
