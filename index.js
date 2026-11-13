@@ -47,6 +47,12 @@ import {
 
 // Pull-request review context
 import { buildPrContext } from './lib/pr/pr-context.js';
+import {
+  analyzePrIntelligence,
+  evaluatePrRules,
+  calculatePrRiskAndConfidence,
+  buildPrMermaidDiagram,
+} from './lib/pr/pr-intelligence.js';
 
 // Orchestrator functions
 import { generateDigestFromReport, generateDigestFromContext } from './ctxman.js';
@@ -174,6 +180,10 @@ export {
 
   // Pull-request context
   buildPrContext,
+  analyzePrIntelligence,
+  evaluatePrRules,
+  calculatePrRiskAndConfidence,
+  buildPrMermaidDiagram,
 
   // Code history explanation (`ctxman why`)
   explainHistory,

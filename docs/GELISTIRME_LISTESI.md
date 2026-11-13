@@ -76,7 +76,7 @@
 
 ---
 
-### [ ] P1-2: PR İnceleme Güven/Risk Skoru, Kural Denetimi ve Otomatik Mermaid Diyagramı (`ctxman pr`)
+### [x] P1-2: PR İnceleme Güven/Risk Skoru, Kural Denetimi ve Otomatik Mermaid Diyagramı (`ctxman pr`)
 
 - **Rakip Matrisi Karşılığı:** #14 (Greptile Confidence Score + Scoped Rules & CodeRabbit Mermaid Walkthrough paritesi — bizde **Kısmi**).
 - **Tahmini Efor:** 2.5 birim.
