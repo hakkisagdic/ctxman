@@ -92,6 +92,20 @@ import {
   readWorkspaceAuditLogs,
 } from './lib/policy/index.js';
 
+// Billing, usage metering, quotas, invoices & payment providers
+import {
+  PLANS,
+  TOPUP_PACKS,
+  getPlan,
+  listPlans,
+  BillingStore,
+  QuotaExceededError,
+  PaymentProvider,
+  IyzicoProvider,
+  MockPaymentProvider,
+  createPaymentProvider,
+} from './lib/billing/index.js';
+
 export {
   // Analyzers
   TokenCalculator,
@@ -190,6 +204,18 @@ export {
   PolicyViolationError,
   checkWorkspacePolicies,
   readWorkspaceAuditLogs,
+
+  // Billing, usage metering, quotas, invoices & payment providers
+  PLANS,
+  TOPUP_PACKS,
+  getPlan,
+  listPlans,
+  BillingStore,
+  QuotaExceededError,
+  PaymentProvider,
+  IyzicoProvider,
+  MockPaymentProvider,
+  createPaymentProvider,
 };
 
 // Alias for backward compatibility
