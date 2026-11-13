@@ -2,13 +2,13 @@
 
 Ctxman is a local-first AI Code Intelligence & Context Engineering Platform designed for modern developer and agent workflows.
 
-## 🧠 Code Intelligence & Archaeology (v3.2)
+## 🧠 Code Intelligence & Archaeology (v3.3)
 
 ### Repository Map & Neighborhood Focus (`map` & `focus`)
 
 - **PageRank Repository Map & AST Call Graph (`ctxman map`)**: Ranks files across 14+ languages using PageRank over the import graph blended with git change frequency, symbol references, and cross-file AST symbol call edges (`--call-graph`, `--focus file:symbol`), fitting function signatures into any token budget
 - **Directional Import & Symbol Call Focus (`ctxman focus`)**: Packs a target file or symbol (`<file>:<symbol>`) together with its `N`-hop outgoing imports/callees and incoming importers/callers (`--direction both|imports|importers`, `--calls-only`, `--callers-only`, including intra-file helper closures and barrel re-exports) without shared-hub explosion
-- **Multi-Repo Workspaces (`--repo <dir>`)**: Merge multiple repositories under `<alias>/<path>` namespaces within a single shared token budget across `map`, `search`, `pack`, `focus`, `task`, `diagnose`, `who`, `why`, `pr`, `ask`, `policy check`, `audit`, and `watch` (plus `repos` across MCP workspace tools including `get_symbol`, `explain_history`, `pr_context`, `check_policy`, and `audit_log`) with cross-repo import and AST symbol call-graph traversal (`buildWorkspaceGraph`)
+- **Multi-Repo Workspaces (`--repo <dir>`) & Remote Packing (`--remote <spec>`)**: Merge multiple repositories under `<alias>/<path>` namespaces within a single shared token budget across `map`, `search`, `pack`, `focus`, `task`, `diagnose`, `who`, `why`, `pr`, `ask`, `policy check`, `audit`, and `watch` (plus `repos` across MCP workspace tools including `get_symbol`, `explain_history`, `pr_context`, `check_policy`, and `audit_log`) with cross-repo import and AST symbol call-graph traversal (`buildWorkspaceGraph`), or shallow-clone and pack remote GitHub/GitLab repositories on the fly (`ctxman pack --remote owner/repo --branch main --include-rules`)
 
 ```bash
 # Ranked repository map with cross-file AST symbol call annotations
@@ -37,7 +37,7 @@ ctxman who "invoice payment" --repo ../billing-api --repo ../checkout-web
 
 - **Task-Driven Auto Context (`ctxman task`)**: Discovers seed files and symbols via hybrid BM25 + vector search, prioritizes 1-hop cross-file AST symbol callers/callees (plus import neighbors) as full code and 2-hop compressed signatures, and prepends an architectural repo map within `--budget` (default `32000`)
 - **Stack-Trace Root-Cause Bundle (`ctxman diagnose`)**: Parses Node/TS/JS, Python, Go, Rust, Java, C#, and Vitest stack traces, extracting enclosing methods, 1-hop AST symbol call & import neighbors (`caller -> callee`), and recent git commits (`explainHistory`) within `--budget` (default `24000`)
-- **Pull Request Context (`ctxman pr`)**: Assembles branch summary, commit log, changed methods, unified diff, and related tests across one or more `--repo` roots within a single shared token budget
+- **Pull Request Context & Risk Scoring (`ctxman pr`)**: Assembles branch summary, deterministic `riskScore` (`0–100`) & `confidenceScore` (`1–5`), `.ctxman/rules.json` scoped rule checks (`ruleViolations`), automatic Mermaid `flowchart LR` change-impact diagram (`mermaidDiagram`), commit log, changed methods, unified diff, and related tests across one or more `--repo` roots within a single shared token budget
 
 ```bash
 ctxman task "add OAuth token refresh retry logic" --budget 32k
@@ -124,7 +124,7 @@ ctxman watch --repo ../shared-lib --repo ../api-service --bootstrap
 
 HTTP server for programmatic access:
 
-- **6 Endpoints**: Full API coverage
+- **20 Endpoints**: Full API coverage across `/api/v1/*`
 - **JSON Responses**: Standard REST format
 - **DNS Rebinding Protection**: Loopback Host validation by default (`--cors` when needed)
 - **Health Check**: Monitor server status
@@ -199,16 +199,22 @@ Analyze code in 14+ programming languages:
 ### Export Policy & Data Shield (`.ctxman/policy.json`)
 
 - **Path Deny Rules**: Prevent sensitive files from ever entering exports, RAG indexes, or MCP responses
-- **Automatic Secret Redaction**: Masks cloud keys, tokens, and PEM private keys as `[REDACTED:<type>]`
+- **Automatic Secret & PII Redaction**: Masks cloud keys, tokens, PEM private keys, and regulated PII (`tc-kimlik`, `tr-iban`, `tr-phone`, `credit-card`, `email`) as `[REDACTED:<type>]` when `redactPII: true` or compliance presets (`ctxman policy init --preset kvkk-bddk|soc2`) are enabled
+- **OASIS SARIF v2.1.0 Reporting**: Emit static analysis security reports (`ctxman policy check --format sarif`, `buildSarifReport`) for GitHub Code Scanning and GitLab Security Dashboard
 - **Token Caps & Model Allowlists**: Enforce organization-wide and multi-repo workspace export limits (`CTXMAN_POLICY`, `ctxman policy check --repo <dir>`)
 - **Append-Only Audit Trail (`ctxman audit`)**: Records every export with timestamp, command, file count, token count, and SHA-256 digest, with merged chronological `--repo <dir>` audit views
 
+```bash
+ctxman policy init --preset kvkk-bddk --force
+ctxman policy check --repo ../billing-api --format sarif > ctxman.sarif
+```
+
 ## 📊 Output Formats
 
-- **Anthropic `<documents>` XML (`ctxman pack`)**: Structured LLM-ready context with `--compress` signature extraction
+- **Anthropic `<documents>` XML (`ctxman pack`)**: Structured LLM-ready context with `--compress` signature extraction, `--include-rules` (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.cursor/rules/*.mdc`, `.github/copilot-instructions.md`, `.windsurfrules`), and `--remote <owner/repo>` zero-clone packing
 - **TOON Format**: 40-50% token reduction with official `@toon-format/toon` encoding
 - **GitIngest Format**: Single-file or smart-chunked Markdown digest
-- **JSON, Markdown, YAML, CSV, XML**: Ready for automation and CI pipelines
+- **JSON, Markdown, YAML, CSV, XML, SARIF v2.1.0**: Ready for automation and CI pipelines
 
 ---
 

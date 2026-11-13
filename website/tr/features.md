@@ -2,13 +2,13 @@
 
 Ctxman, modern geliştirici ve yapay zeka ajanı iş akışları için tasarlanmış yerel öncelikli (local-first) bir AI Kod Zekası ve Bağlam Mühendisliği Platformudur.
 
-## 🧠 Kod Zekası ve Arkeolojisi (v3.2)
+## 🧠 Kod Zekası ve Arkeolojisi (v3.3)
 
 ### Depo Haritası ve Odaklı Komşuluk (`map` & `focus`)
 
 - **PageRank Depo Haritası ve AST Çağrı Grafiği (`ctxman map`)**: 14+ dilde import grafiği üzerindeki PageRank değerini git değişim sıklığı, sembol referansları ve dosyalar arası AST sembol çağrı kenarlarıyla (`--call-graph`, `--focus file:symbol`) birleştirerek en önemli dosya ve fonksiyon imzalarını token bütçesine sığdırır
 - **Yönlü Import ve Sembol Çağrı Komşuluğu (`ctxman focus`)**: Hedef dosya veya sembolü (`<file>:<symbol>`) `N`-hop giden import/çağrılanlar ve gelen importer/çağıranlar (`--direction both|imports|importers`, `--calls-only`, `--callers-only`, dosya içi yardımcı fonksiyon kapanışı ve barrel re-export çözümlemesi dahil) ile ortak hub patlamasına yol açmadan paketler
-- **Çoklu Depo Çalışma Alanı (`--repo <dir>`)**: `map`, `search`, `pack`, `focus`, `task`, `diagnose`, `who`, `why`, `pr`, `ask`, `policy check`, `audit` ve `watch` komutlarında (ve `get_symbol`, `explain_history`, `pr_context`, `check_policy`, `audit_log` dahil tüm MCP çalışma alanı araçlarındaki `repos` parametresinde) birden fazla depoyu `<alias>/<path>` ad alanları altında, depolar arası import ve AST sembol çağrı grafiği (`buildWorkspaceGraph`) ile tek bir paylaşılan token bütçesinde birleştirir
+- **Çoklu Depo Çalışma Alanı (`--repo <dir>`) ve Uzak Depo Paketleme (`--remote <spec>`)**: `map`, `search`, `pack`, `focus`, `task`, `diagnose`, `who`, `why`, `pr`, `ask`, `policy check`, `audit` ve `watch` komutlarında (ve `get_symbol`, `explain_history`, `pr_context`, `check_policy`, `audit_log` dahil tüm MCP çalışma alanı araçlarındaki `repos` parametresinde) birden fazla depoyu `<alias>/<path>` ad alanları altında, depolar arası import ve AST sembol çağrı grafiği (`buildWorkspaceGraph`) ile tek bir paylaşılan token bütçesinde birleştirir; veya uzak GitHub/GitLab depolarını (`ctxman pack --remote owner/repo --branch main --include-rules`) anında shallow-clone ile paketler
 
 ```bash
 # Dosyalar arası AST sembol çağrılarıyla 2.000 token bütçeli sıralı depo haritası
@@ -37,7 +37,7 @@ ctxman who "invoice payment" --repo ../billing-api --repo ../checkout-web
 
 - **Görev Odaklı Otomatik Bağlam (`ctxman task`)**: Hibrit BM25 + vektör araması ile tohum dosya ve sembolleri bulur, 1-hop dosyalar arası AST sembol çağıran/çağrılanları (ve import komşularını) tam kod ve 2-hop sıkıştırılmış imzalar olarak mimari depo haritasıyla `--budget` (varsayılan `32000`) içinde birleştirir
 - **Stack-Trace Kök Neden Paketi (`ctxman diagnose`)**: Node/TS/JS, Python, Go, Rust, Java, C# ve Vitest yığın izlerini ayrıştırır; çevreleyen fonksiyonları, 1-hop AST sembol çağrı ve import komşularını (`caller -> callee`) ve yakın git commit'lerini (`explainHistory`) `--budget` (varsayılan `24000`) içinde sunar
-- **Pull Request Bağlamı (`ctxman pr`)**: Bir veya birden fazla `--repo` kökünde kod incelemesi için branch özeti, commit günlüğü, değişen fonksiyonların tam kodu, diff ve ilgili testleri tek bir paylaşılan token bütçesi altında toplar
+- **Pull Request Bağlamı ve Risk Puanlama (`ctxman pr`)**: Bir veya birden fazla `--repo` kökünde kod incelemesi için branch özeti, deterministik `riskScore` (`0–100`) ve `confidenceScore` (`1–5`), `.ctxman/rules.json` kural ihlali denetimi (`ruleViolations`), otomatik Mermaid `flowchart LR` değişim etki diyagramı (`mermaidDiagram`), commit günlüğü, değişen fonksiyonların tam kodu, diff ve ilgili testleri tek bir paylaşılan token bütçesi altında toplar
 
 ```bash
 ctxman task "add OAuth token refresh retry logic" --budget 32k
@@ -124,7 +124,7 @@ ctxman watch --repo ../shared-lib --repo ../api-service --bootstrap
 
 Programatik erişim için HTTP sunucusu:
 
-- **6 Uç Nokta**: Tam API kapsamı
+- **20 Uç Nokta**: `/api/v1/*` altında tam API kapsamı
 - **JSON Yanıtlar**: Standart REST formatı
 - **DNS Rebinding Koruması**: Varsayılan olarak loopback Host doğrulaması (gerektiğinde `--cors`)
 - **Sağlık Kontrolü**: Sunucu durumunu izleyin
@@ -199,16 +199,22 @@ LLM planlaması için doğru token sayımı:
 ### Dışa Aktarım Politikası ve Veri Kalkanı (`.ctxman/policy.json`)
 
 - **Yol Engelleme Kuralları**: Hassas dosyaların dışa aktarımlara, RAG indekslerine veya MCP yanıtlarına girmesini engeller
-- **Otomatik Sır Maskeleme**: Bulut anahtarlarını, token'ları ve PEM özel anahtarlarını `[REDACTED:<type>]` olarak maskeler
+- **Otomatik Sır ve PII Maskeleme**: `redactPII: true` veya uyumluluk şablonları (`ctxman policy init --preset kvkk-bddk|soc2`) etkinleştirildiğinde bulut anahtarlarını, token'ları, PEM özel anahtarlarını ve kişisel verileri (`tc-kimlik`, `tr-iban`, `tr-phone`, `credit-card`, `email`) `[REDACTED:<type>]` olarak maskeler
+- **OASIS SARIF v2.1.0 Raporlama**: GitHub Code Scanning ve GitLab Security Dashboard için statik analiz güvenlik raporları (`ctxman policy check --format sarif`, `buildSarifReport`) üretir
 - **Token Sınırları ve Model İzin Listeleri**: Kurum ve çoklu depo çalışma alanı genelinde dışa aktarım sınırları (`CTXMAN_POLICY`, `ctxman policy check --repo <dir>`)
 - **Denetim Günlüğü (`ctxman audit`)**: Her dışa aktarımı zaman damgası, komut, dosya sayısı, token sayısı ve SHA-256 özetiyle kaydeder; `--repo <dir>` ile depolar arası birleştirilmiş kronolojik denetim görünümü sunar
 
+```bash
+ctxman policy init --preset kvkk-bddk --force
+ctxman policy check --repo ../billing-api --format sarif > ctxman.sarif
+```
+
 ## 📊 Çıktı Formatları
 
-- **Anthropic `<documents>` XML (`ctxman pack`)**: `--compress` imza sıkıştırmalı LLM bağlam paketi
+- **Anthropic `<documents>` XML (`ctxman pack`)**: `--compress` imza sıkıştırması, `--include-rules` (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.cursor/rules/*.mdc`, `.github/copilot-instructions.md`, `.windsurfrules`) ve `--remote <owner/repo>` klonsuz uzak depo paketleme destekli LLM bağlam paketi
 - **TOON Formatı**: Resmi `@toon-format/toon` kodlayıcısı ile %40-50 token azaltma
 - **GitIngest Formatı**: Tek dosya veya akıllı bölümlenmiş Markdown özeti
-- **JSON, Markdown, YAML, CSV, XML**: Otomasyon ve CI hatları için hazır
+- **JSON, Markdown, YAML, CSV, XML, SARIF v2.1.0**: Otomasyon ve CI hatları için hazır
 
 ---
 

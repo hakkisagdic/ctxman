@@ -1,6 +1,6 @@
 # API Referansı
 
-Ctxman v3.2 CLI komutları, 19 araçlı MCP sunucusu, REST API ve programatik kütüphane dışa aktarımları için tam referans.
+Ctxman v3.3 CLI komutları, 19 araçlı MCP sunucusu, REST API ve programatik kütüphane dışa aktarımları için tam referans.
 
 ## CLI Referansı
 
@@ -22,7 +22,7 @@ Ctxman v3.2 CLI komutları, 19 araçlı MCP sunucusu, REST API ve programatik k�
 | `--cache` / `--no-cache` |      | SHA-256 disk/bellek önbelleğini etkinleştir veya devre dışı bırak | `true`              |
 | `--no-redact`            |      | Otomatik sır maskelemeyi devre dışı bırak                         | `false`             |
 
-## CLI Alt Komutları (v3.2)
+## CLI Alt Komutları (v3.3)
 
 ### `ctxman map [dir]`
 
@@ -46,16 +46,17 @@ ctxman focus checkout-web/src/checkoutClient.js:submitCheckout --repo ../billing
 
 ### `ctxman pack [dir]`
 
-Depo dosyalarını tek bir LLM belgesinde (`xml`, `markdown`, `plain`, `json`) paketler:
+Yerel, çoklu depo (`--repo`) veya uzak (`--remote <owner/repo|url>`) depo dosyalarını, isteğe bağlı AI ajan kuralları keşfiyle (`--include-rules`) tek bir LLM belgesinde (`xml`, `markdown`, `plain`, `json`) paketler:
 
 ```bash
-ctxman pack --budget 32k --compress --style xml
+ctxman pack --budget 32k --compress --include-rules --style xml
+ctxman pack --remote owner/repo --branch main --budget 60k -o remote-context.xml
 ctxman pack --include "lib/**/*.js" --max-tokens 50000
 ```
 
 ### `ctxman pr [dir]`
 
-Bir veya birden fazla `--repo` kökünde paylaşılan tek bir bütçe altında pull-request inceleme bağlamı (özet, commit günlüğü, değişen fonksiyonlar, diff ve ilgili testler) oluşturur:
+Bir veya birden fazla `--repo` kökünde paylaşılan tek bir bütçe altında pull-request inceleme bağlamı (özet, deterministik `riskScore` `0–100` ve `confidenceScore` `1–5`, `.ctxman/rules.json` `ruleViolations`, otomatik Mermaid `flowchart LR` `mermaidDiagram`, commit günlüğü, değişen fonksiyonlar, diff ve ilgili testler) oluşturur:
 
 ```bash
 ctxman pr --base main --head HEAD --budget 24k
@@ -132,11 +133,12 @@ ctxman count . --model claude-opus-5-5 --api --json
 
 ### `ctxman policy` ve `ctxman audit`
 
-Tekli veya çoklu depo (`--repo`) çalışma alanlarında `.ctxman/policy.json` Veri Kalkanı kurallarını doğrular ve SHA-256 dışa aktarım denetim günlüğünü inceler:
+Tekli veya çoklu depo (`--repo`) çalışma alanlarında uyumluluk şablonlarını (`--preset kvkk-bddk|soc2`) başlatır, `.ctxman/policy.json` Veri Kalkanı kurallarını doğrular, OASIS SARIF v2.1.0 güvenlik raporları (`--format sarif`) üretir ve SHA-256 dışa aktarım denetim günlüğünü inceler:
 
 ```bash
-ctxman policy init
+ctxman policy init --preset kvkk-bddk --force
 ctxman policy check
+ctxman policy check --format sarif > ctxman.sarif
 ctxman policy check --repo ../billing-api --repo ../checkout-web
 ctxman audit --since 7d --limit 20
 ctxman audit --repo ../billing-api --repo ../checkout-web --since 7d
@@ -165,27 +167,27 @@ ctxman serve --repo ../shared-lib --repo ../api-service --port 3000
 
 ## MCP Sunucu Araçları (19 Araç)
 
-| Araç                    | Temel Argümanlar                                                                                            | Açıklama                                                                      |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `analyze_codebase`      | `path`, `repos?`                                                                                            | Depo token istatistikleri ve dosya dökümü                                     |
-| `generate_context`      | `path`, `template?`, `maxTokens?`, `repos?`                                                                 | Şablon tabanlı LLM bağlamı                                                    |
-| `git_diff`              | `path`, `branch?`, `repos?`                                                                                 | Doğrulanmış `git diff <branch>`                                               |
-| `search_code`           | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`                   | Satır araması veya BM25 / hibrit RRF kod parçası araması                      |
-| `list_methods`          | `path`, `file?`, `repos?`                                                                                   | Dosya başına çıkarılan fonksiyonlar                                           |
-| `get_symbol`            | `path`, `name`, `file?`, `redact?`, `repos?`                                                                | İsimle fonksiyon, metot veya sınıfın tam kaynak kodu                          |
-| `repo_map`              | `path`, `tokens?`, `focus?`, `repos?`                                                                       | PageRank depo haritası (`ctxman map`)                                         |
-| `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`, `repos?`                                                     | Pull-request inceleme paketi (`ctxman pr`)                                    |
-| `count_tokens`          | `path` veya `text`, `model?`, `top?`, `repos?`                                                              | Modele duyarlı token sayımı ve pencere uyumu (`ctxman count`)                 |
-| `explain_history`       | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?`, `repos?`     | Git arkeolojisi ve kurumsal hafıza atıfları (`ctxman why`)                    |
-| `pack_context`          | `path`, `include?`, `exclude?`, `files?`, `style?`, `compress?`, `budget?`, `repos?`                        | Paketlenmiş kod tabanı belgesi (`ctxman pack`)                                |
-| `focus_context`         | `path`, `file`, `repos?`, `symbol?`, `depth?`, `direction?`, `callGraph?`, `style?`, `compress?`, `budget?` | Yönlü `N`-hop import ve AST sembol çağrı komşuluğu (`ctxman focus`)           |
-| `check_policy`          | `path`, `repos?`                                                                                            | Etkin `.ctxman/policy.json` doğrulaması (`ctxman policy`)                     |
-| `audit_log`             | `path`, `since?`, `limit?`, `repos?`                                                                        | SHA-256 dışa aktarım denetim günlüğü (`ctxman audit`)                         |
-| `ask_codebase`          | `path`, `query`, `limit?`, `repos?`                                                                         | Çevrimdışı SQLite semantik arama (`ctxman ask`)                               |
-| `task_context`          | `path`, `task`, `repos?`, `budget?`, `format?`, `callGraph?`, `model?`                                      | AST sembol çağrı ve import komşuluklu otomatik görev bağlamı (`ctxman task`)  |
-| `diagnose_failure`      | `path`, `trace`, `repos?`, `budget?`, `format?`, `callGraph?`                                               | AST sembol çağrı komşuluklu stack-trace kök neden teşhisi (`ctxman diagnose`) |
-| `find_experts`          | `path`, `target`, `repos?`, `limit?`, `halfLifeDays?`, `style?`                                             | Blame + güncellik + CODEOWNERS uzman sıralaması (`ctxman who`)                |
-| `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`, `repos?`                                         | Kalıcı SQLite bilgi grafiği ve `IncrementalAnalyzer` önbellek sorgusu         |
+| Araç                    | Temel Argümanlar                                                                                                            | Açıklama                                                                      |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `analyze_codebase`      | `path`, `repos?`                                                                                                            | Depo token istatistikleri ve dosya dökümü                                     |
+| `generate_context`      | `path`, `template?`, `maxTokens?`, `repos?`                                                                                 | Şablon tabanlı LLM bağlamı                                                    |
+| `git_diff`              | `path`, `branch?`, `repos?`                                                                                                 | Doğrulanmış `git diff <branch>`                                               |
+| `search_code`           | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`                                   | Satır araması veya BM25 / hibrit RRF kod parçası araması                      |
+| `list_methods`          | `path`, `file?`, `repos?`                                                                                                   | Dosya başına çıkarılan fonksiyonlar                                           |
+| `get_symbol`            | `path`, `name`, `file?`, `redact?`, `repos?`                                                                                | İsimle fonksiyon, metot veya sınıfın tam kaynak kodu                          |
+| `repo_map`              | `path`, `tokens?`, `focus?`, `repos?`                                                                                       | PageRank depo haritası (`ctxman map`)                                         |
+| `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`, `repos?`                                                                     | Pull-request inceleme paketi (`ctxman pr`)                                    |
+| `count_tokens`          | `path` veya `text`, `model?`, `top?`, `repos?`                                                                              | Modele duyarlı token sayımı ve pencere uyumu (`ctxman count`)                 |
+| `explain_history`       | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?`, `repos?`                     | Git arkeolojisi ve kurumsal hafıza atıfları (`ctxman why`)                    |
+| `pack_context`          | `path`, `include?`, `exclude?`, `files?`, `includeRules?`, `remote?`, `branch?`, `style?`, `compress?`, `budget?`, `repos?` | Paketlenmiş kod tabanı belgesi (`ctxman pack`)                                |
+| `focus_context`         | `path`, `file`, `repos?`, `symbol?`, `depth?`, `direction?`, `callGraph?`, `style?`, `compress?`, `budget?`                 | Yönlü `N`-hop import ve AST sembol çağrı komşuluğu (`ctxman focus`)           |
+| `check_policy`          | `path`, `repos?`, `format?`                                                                                                 | Etkin `.ctxman/policy.json` doğrulaması ve SARIF v2.1.0 (`ctxman policy`)     |
+| `audit_log`             | `path`, `since?`, `limit?`, `repos?`                                                                                        | SHA-256 dışa aktarım denetim günlüğü (`ctxman audit`)                         |
+| `ask_codebase`          | `path`, `query`, `limit?`, `repos?`                                                                                         | Çevrimdışı SQLite semantik arama (`ctxman ask`)                               |
+| `task_context`          | `path`, `task`, `repos?`, `budget?`, `format?`, `callGraph?`, `model?`                                                      | AST sembol çağrı ve import komşuluklu otomatik görev bağlamı (`ctxman task`)  |
+| `diagnose_failure`      | `path`, `trace`, `repos?`, `budget?`, `format?`, `callGraph?`                                                               | AST sembol çağrı komşuluklu stack-trace kök neden teşhisi (`ctxman diagnose`) |
+| `find_experts`          | `path`, `target`, `repos?`, `limit?`, `halfLifeDays?`, `style?`                                                             | Blame + güncellik + CODEOWNERS uzman sıralaması (`ctxman who`)                |
+| `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`, `repos?`                                                         | Kalıcı SQLite bilgi grafiği ve `IncrementalAnalyzer` önbellek sorgusu         |
 
 ### `query_knowledge_graph` Örnek Kullanımı
 
@@ -261,6 +263,8 @@ import {
   renderRepoMap,
   focusContext,
   packContext,
+  discoverProjectRules,
+  withRemoteRepo,
   buildPrContext,
   explainHistory,
   queryAnalyzerCitations,
@@ -287,6 +291,7 @@ import {
   loadPolicy,
   Policy,
   checkWorkspacePolicies,
+  buildSarifReport,
   readWorkspaceAuditLogs,
 
   // Çekirdek v3 Hattı
@@ -325,14 +330,19 @@ const who = await findExperts('/path/to/repo', 'hybrid search RRF', {
 });
 console.log(who.experts);
 
-// 4. Görev Bağlamı, PR İncelemesi ve Hata Teşhisi
+// 4. Görev Bağlamı, PR İncelemesi (Risk/Mermaid/Kurallar) ve Hata Teşhisi
 const taskBundle = await buildTaskContext('/path/to/repo', 'add retry backoff', { budget: 32000 });
 const prBundle = await buildPrContext('/path/to/repo', {
   base: 'main',
   repos: ['../billing-api', '../checkout-web'],
   budget: 24000,
 });
+console.log(prBundle.riskScore, prBundle.confidenceScore, prBundle.ruleViolations);
 const diagReport = await diagnoseFailure('/path/to/repo', errorStackText, { budget: 24000 });
+
+// 5. Politika Doğrulama ve OASIS SARIF v2.1.0 Raporlama
+const policySummary = checkWorkspacePolicies('/path/to/repo', ['../billing-api']);
+const sarifReport = buildSarifReport(policySummary);
 ```
 
 ## REST API (`ctxman serve`)
@@ -360,9 +370,9 @@ Tüm REST API v1 uç noktaları isteğe bağlı `repo` / `repos` parametrelerini
 - `GET /api/v1/pr` — Bir veya birden fazla git deposunda pull-request inceleme paketi
 - `GET /api/v1/why?target=<spec>` — Git arkeolojisi, sahiplik, eş-değişim ve ADR/test sorgusu
 - `GET /api/v1/who?target=<spec>` — Blame + güncellik + CODEOWNERS uzman sıralaması
-- `GET /api/v1/policy` — `.ctxman/policy.json` kurallarını doğrula ve özetle
+- `GET /api/v1/policy` — `.ctxman/policy.json` kurallarını doğrula ve özetle (`?format=sarif` ile OASIS SARIF v2.1.0)
 - `GET /api/v1/audit` — SHA-256 dışa aktarım denetim günlüğü olaylarını oku
-- `POST /api/v1/pack` — Depo veya çalışma alanı dosyalarını tek bir LLM belgesinde paketle
+- `POST /api/v1/pack` — Depo veya çalışma alanı dosyalarını tek bir LLM belgesinde paketle (`includeRules`, `compress`, `budget`)
 - `POST /api/v1/focus` — Hedef dosya veya sembolü `N`-hop import ve AST çağrı komşuluğuyla paketle
 - `POST /api/v1/task` — Görev odaklı bağlam paketi (hibrit arama + AST/import grafiği + depo haritası)
 - `POST /api/v1/diagnose` — Stack trace ve hata günlüklerinden kök neden paketi oluştur

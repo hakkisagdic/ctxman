@@ -1,6 +1,6 @@
 # API Reference
 
-Complete reference for Ctxman v3.2 CLI commands, 19-tool MCP server, REST API, and programmatic library exports.
+Complete reference for Ctxman v3.3 CLI commands, 19-tool MCP server, REST API, and programmatic library exports.
 
 ## CLI Reference
 
@@ -22,7 +22,7 @@ Complete reference for Ctxman v3.2 CLI commands, 19-tool MCP server, REST API, a
 | `--cache` / `--no-cache` |       | Enable or bypass SHA-256 disk/memory analysis cache     | `true`              |
 | `--no-redact`            |       | Disable automatic secret redaction                      | `false`             |
 
-## CLI Subcommands (v3.2)
+## CLI Subcommands (v3.3)
 
 ### `ctxman map [dir]`
 
@@ -46,16 +46,17 @@ ctxman focus checkout-web/src/checkoutClient.js:submitCheckout --repo ../billing
 
 ### `ctxman pack [dir]`
 
-Pack repository files into one LLM-ready document (`xml`, `markdown`, `plain`, `json`):
+Pack local, multi-repo (`--repo`), or remote (`--remote <owner/repo|url>`) repository files into one LLM-ready document (`xml`, `markdown`, `plain`, `json`), with optional AI instruction rule discovery (`--include-rules`):
 
 ```bash
-ctxman pack --budget 32k --compress --style xml
+ctxman pack --budget 32k --compress --include-rules --style xml
+ctxman pack --remote owner/repo --branch main --budget 60k -o remote-context.xml
 ctxman pack --include "lib/**/*.js" --max-tokens 50000
 ```
 
 ### `ctxman pr [dir]`
 
-Assemble pull-request review context (summary, commit log, changed methods, diff, and related tests) across one or more `--repo` roots within a shared budget:
+Assemble pull-request review context (summary, deterministic `riskScore` `0–100` & `confidenceScore` `1–5`, `.ctxman/rules.json` `ruleViolations`, automatic Mermaid `flowchart LR` `mermaidDiagram`, commit log, changed methods, diff, and related tests) across one or more `--repo` roots within a shared budget:
 
 ```bash
 ctxman pr --base main --head HEAD --budget 24k
@@ -132,11 +133,12 @@ ctxman count . --model claude-opus-5-5 --api --json
 
 ### `ctxman policy` & `ctxman audit`
 
-Validate `.ctxman/policy.json` Data Shield rules and inspect the SHA-256 export audit trail across single or multi-repo (`--repo`) workspaces:
+Initialize compliance presets (`--preset kvkk-bddk|soc2`), validate `.ctxman/policy.json` Data Shield rules, emit OASIS SARIF v2.1.0 security reports (`--format sarif`), and inspect the SHA-256 export audit trail across single or multi-repo (`--repo`) workspaces:
 
 ```bash
-ctxman policy init
+ctxman policy init --preset kvkk-bddk --force
 ctxman policy check
+ctxman policy check --format sarif > ctxman.sarif
 ctxman policy check --repo ../billing-api --repo ../checkout-web
 ctxman audit --since 7d --limit 20
 ctxman audit --repo ../billing-api --repo ../checkout-web --since 7d
@@ -165,27 +167,27 @@ ctxman serve --repo ../shared-lib --repo ../api-service --port 3000
 
 ## MCP Server Tools (19 Tools)
 
-| Tool                    | Key Arguments                                                                                               | Description                                                                    |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `analyze_codebase`      | `path`, `repos?`                                                                                            | Repository token statistics and file breakdown                                 |
-| `generate_context`      | `path`, `template?`, `maxTokens?`, `repos?`                                                                 | Template-driven LLM context                                                    |
-| `git_diff`              | `path`, `branch?`, `repos?`                                                                                 | Validated `git diff <branch>`                                                  |
-| `search_code`           | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`                   | Line search or BM25 / hybrid RRF code-chunk search                             |
-| `list_methods`          | `path`, `file?`, `repos?`                                                                                   | Extracted methods per file                                                     |
-| `get_symbol`            | `path`, `name`, `file?`, `redact?`, `repos?`                                                                | Full source of a named function, method, or class                              |
-| `repo_map`              | `path`, `tokens?`, `focus?`, `repos?`                                                                       | PageRank repository map (`ctxman map`)                                         |
-| `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`, `repos?`                                                     | Pull-request review bundle (`ctxman pr`)                                       |
-| `count_tokens`          | `path` or `text`, `model?`, `top?`, `repos?`                                                                | Model-aware token count and context window fit (`ctxman count`)                |
-| `explain_history`       | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?`, `repos?`     | Git archaeology & institutional citations (`ctxman why`)                       |
-| `pack_context`          | `path`, `include?`, `exclude?`, `files?`, `style?`, `compress?`, `budget?`, `repos?`                        | Packed codebase document (`ctxman pack`)                                       |
-| `focus_context`         | `path`, `file`, `repos?`, `symbol?`, `depth?`, `direction?`, `callGraph?`, `style?`, `compress?`, `budget?` | Directional `N`-hop import & AST symbol call neighborhood (`ctxman focus`)     |
-| `check_policy`          | `path`, `repos?`                                                                                            | Effective `.ctxman/policy.json` validation (`ctxman policy`)                   |
-| `audit_log`             | `path`, `since?`, `limit?`, `repos?`                                                                        | SHA-256 export audit trail (`ctxman audit`)                                    |
-| `ask_codebase`          | `path`, `query`, `limit?`, `repos?`                                                                         | Offline SQLite semantic search (`ctxman ask`)                                  |
-| `task_context`          | `path`, `task`, `repos?`, `budget?`, `format?`, `callGraph?`, `model?`                                      | Automatic task context bundle with AST call & import neighbors (`ctxman task`) |
-| `diagnose_failure`      | `path`, `trace`, `repos?`, `budget?`, `format?`, `callGraph?`                                               | Stack-trace root-cause diagnosis with AST call neighbors (`ctxman diagnose`)   |
-| `find_experts`          | `path`, `target`, `repos?`, `limit?`, `halfLifeDays?`, `style?`                                             | Blame + recency + CODEOWNERS expert ranking (`ctxman who`)                     |
-| `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`, `repos?`                                         | Query persistent SQLite knowledge graph and `IncrementalAnalyzer` cache        |
+| Tool                    | Key Arguments                                                                                                               | Description                                                                    |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `analyze_codebase`      | `path`, `repos?`                                                                                                            | Repository token statistics and file breakdown                                 |
+| `generate_context`      | `path`, `template?`, `maxTokens?`, `repos?`                                                                                 | Template-driven LLM context                                                    |
+| `git_diff`              | `path`, `branch?`, `repos?`                                                                                                 | Validated `git diff <branch>`                                                  |
+| `search_code`           | `path`, `query`, `type?` (`regex`, `substring`, `ranked`, `semantic`, `hybrid`), `repos?`                                   | Line search or BM25 / hybrid RRF code-chunk search                             |
+| `list_methods`          | `path`, `file?`, `repos?`                                                                                                   | Extracted methods per file                                                     |
+| `get_symbol`            | `path`, `name`, `file?`, `redact?`, `repos?`                                                                                | Full source of a named function, method, or class                              |
+| `repo_map`              | `path`, `tokens?`, `focus?`, `repos?`                                                                                       | PageRank repository map (`ctxman map`)                                         |
+| `pr_context`            | `path`, `base?`, `head?`, `budget?`, `style?`, `repos?`                                                                     | Pull-request review bundle (`ctxman pr`)                                       |
+| `count_tokens`          | `path` or `text`, `model?`, `top?`, `repos?`                                                                                | Model-aware token count and context window fit (`ctxman count`)                |
+| `explain_history`       | `path`, `target`, `limit?`, `budget?`, `patches?`, `discussions?`, `analyzer?`, `analyzerDb?`, `repos?`                     | Git archaeology & institutional citations (`ctxman why`)                       |
+| `pack_context`          | `path`, `include?`, `exclude?`, `files?`, `includeRules?`, `remote?`, `branch?`, `style?`, `compress?`, `budget?`, `repos?` | Packed codebase document (`ctxman pack`)                                       |
+| `focus_context`         | `path`, `file`, `repos?`, `symbol?`, `depth?`, `direction?`, `callGraph?`, `style?`, `compress?`, `budget?`                 | Directional `N`-hop import & AST symbol call neighborhood (`ctxman focus`)     |
+| `check_policy`          | `path`, `repos?`, `format?`                                                                                                 | Effective `.ctxman/policy.json` validation & SARIF v2.1.0 (`ctxman policy`)    |
+| `audit_log`             | `path`, `since?`, `limit?`, `repos?`                                                                                        | SHA-256 export audit trail (`ctxman audit`)                                    |
+| `ask_codebase`          | `path`, `query`, `limit?`, `repos?`                                                                                         | Offline SQLite semantic search (`ctxman ask`)                                  |
+| `task_context`          | `path`, `task`, `repos?`, `budget?`, `format?`, `callGraph?`, `model?`                                                      | Automatic task context bundle with AST call & import neighbors (`ctxman task`) |
+| `diagnose_failure`      | `path`, `trace`, `repos?`, `budget?`, `format?`, `callGraph?`                                                               | Stack-trace root-cause diagnosis with AST call neighbors (`ctxman diagnose`)   |
+| `find_experts`          | `path`, `target`, `repos?`, `limit?`, `halfLifeDays?`, `style?`                                                             | Blame + recency + CODEOWNERS expert ranking (`ctxman who`)                     |
+| `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`, `repos?`                                                         | Query persistent SQLite knowledge graph and `IncrementalAnalyzer` cache        |
 
 ### `query_knowledge_graph` Example Usage
 
@@ -261,6 +263,8 @@ import {
   renderRepoMap,
   focusContext,
   packContext,
+  discoverProjectRules,
+  withRemoteRepo,
   buildPrContext,
   explainHistory,
   queryAnalyzerCitations,
@@ -287,6 +291,7 @@ import {
   loadPolicy,
   Policy,
   checkWorkspacePolicies,
+  buildSarifReport,
   readWorkspaceAuditLogs,
 
   // Core v3 Pipeline
@@ -325,14 +330,19 @@ const who = await findExperts('/path/to/repo', 'hybrid search RRF', {
 });
 console.log(who.experts);
 
-// 4. Task-Driven Context, PR Review & Failure Diagnosis
+// 4. Task-Driven Context, PR Review (Risk/Mermaid/Rules) & Failure Diagnosis
 const taskBundle = await buildTaskContext('/path/to/repo', 'add retry backoff', { budget: 32000 });
 const prBundle = await buildPrContext('/path/to/repo', {
   base: 'main',
   repos: ['../billing-api', '../checkout-web'],
   budget: 24000,
 });
+console.log(prBundle.riskScore, prBundle.confidenceScore, prBundle.ruleViolations);
 const diagReport = await diagnoseFailure('/path/to/repo', errorStackText, { budget: 24000 });
+
+// 5. Policy Validation & OASIS SARIF v2.1.0 Reporting
+const policySummary = checkWorkspacePolicies('/path/to/repo', ['../billing-api']);
+const sarifReport = buildSarifReport(policySummary);
 ```
 
 ## REST API (`ctxman serve`)
@@ -360,9 +370,9 @@ Every REST API v1 endpoint accepts optional `repo` / `repos` parameters (via rep
 - `GET /api/v1/pr` — Pull-request review bundle across one or more git repositories
 - `GET /api/v1/why?target=<spec>` — Git archaeology, ownership, coupling, and ADR/test lookup
 - `GET /api/v1/who?target=<spec>` — Blame + recency + CODEOWNERS expert ranking
-- `GET /api/v1/policy` — Validate and summarize `.ctxman/policy.json` across repositories
+- `GET /api/v1/policy` — Validate `.ctxman/policy.json` across repositories (`?format=sarif` for OASIS SARIF v2.1.0)
 - `GET /api/v1/audit` — Read SHA-256 export audit trail events across repositories
-- `POST /api/v1/pack` — Pack repository or workspace files into one LLM-ready document
+- `POST /api/v1/pack` — Pack repository or workspace files into one LLM-ready document (`includeRules`, `compress`, `budget`)
 - `POST /api/v1/focus` — Pack a target file or symbol with its `N`-hop import & AST call neighborhood
 - `POST /api/v1/task` — Build a task-driven context bundle (hybrid search + AST/import graph + repo map)
 - `POST /api/v1/diagnose` — Parse stack traces and failure logs into a root-cause bundle

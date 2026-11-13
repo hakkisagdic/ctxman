@@ -110,6 +110,9 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
       const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
       expect(text, `${rel} missing checkWorkspacePolicies`).toContain('checkWorkspacePolicies');
       expect(text, `${rel} missing readWorkspaceAuditLogs`).toContain('readWorkspaceAuditLogs');
+      expect(text, `${rel} missing buildSarifReport`).toContain('buildSarifReport');
+      expect(text, `${rel} missing discoverProjectRules`).toContain('discoverProjectRules');
+      expect(text, `${rel} missing withRemoteRepo`).toContain('withRemoteRepo');
       for (const toolName of [
         'analyze_codebase',
         'generate_context',
@@ -130,6 +133,11 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
       expect(text).toContain('ctxman why billing-api/src/invoice.js:createInvoice --repo');
       expect(text).toContain('ctxman pr --base main --repo');
       expect(text).toContain('ctxman policy check --repo');
+      expect(text).toContain('--preset kvkk-bddk');
+      expect(text).toContain('--format sarif');
+      expect(text).toContain('riskScore');
+      expect(text).toContain('--include-rules');
+      expect(text).toContain('--remote');
     }
   });
 
