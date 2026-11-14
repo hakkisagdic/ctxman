@@ -2458,9 +2458,7 @@ export function cloneRemoteRepo(
 ): RemoteRepoCloneResult;
 export function withRemoteRepo<T = unknown>(
   remoteSpec: string,
-  optionsOrFn:
-    | RemoteRepoOptions
-    | ((dir: string, meta: RemoteRepoCloneResult) => Promise<T> | T),
+  optionsOrFn: RemoteRepoOptions | ((dir: string, meta: RemoteRepoCloneResult) => Promise<T> | T),
   maybeFn?: (dir: string, meta: RemoteRepoCloneResult) => Promise<T> | T
 ): Promise<T>;
 

@@ -5,7 +5,7 @@ import path from 'path';
 import http from 'http';
 import { execFileSync, spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import { resolveRemoteGitUrl, cloneRemoteRepo, withRemoteRepo } from '../lib/utils/remote-repo.js';
+import { resolveRemoteGitUrl, withRemoteRepo } from '../lib/utils/remote-repo.js';
 import { APIServer } from '../lib/api/rest/server.js';
 
 const CLI = fileURLToPath(new URL('../bin/cli.js', import.meta.url));

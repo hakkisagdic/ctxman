@@ -1,15 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
-import { execFileSync } from 'child_process';
 import { buildPrContext } from '../lib/pr/pr-context.js';
-import {
-  analyzePrIntelligence,
-  evaluatePrRules,
-  calculatePrRiskAndConfidence,
-  buildPrMermaidDiagram,
-} from '../lib/pr/pr-intelligence.js';
+import { calculatePrRiskAndConfidence } from '../lib/pr/pr-intelligence.js';
 import { createPrRepo } from './fixtures/pr-repo.js';
 
 describe('P1-2: PR review risk/confidence score, scoped rules & Mermaid flowchart', () => {
