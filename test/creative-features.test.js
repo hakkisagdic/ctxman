@@ -19,6 +19,9 @@ import {
   analyzeUncoveredRisk,
   recommendModelRoute,
   classifyTaskComplexity,
+  verifyPatchGrounding,
+  findCircularDependencies,
+  checkLicenseCompliance,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -415,6 +418,78 @@ export function testSuite() {
       expect(drift.passed).toBe(false);
       expect(drift.staleDocs.length).toBe(1);
       expect(drift.staleDocs[0].docFile).toBe('docs/ARCH.md');
+    });
+  });
+
+  describe('F4-1: LLM Patch Grounding & Hallucination Verifier', () => {
+    it('detects hallucinated relative imports and non-existent exported symbols while passing grounded patches', () => {
+      const groundedPatch = [
+        '+++ b/lib/services/checkout.js',
+        "+import { validateOrder } from '../core/validator.js';",
+        '+export function runCheckout(order) { return validateOrder(order); }',
+      ].join('\n');
+      const ok = verifyPatchGrounding(tmpDir, groundedPatch);
+      expect(ok.grounded).toBe(true);
+      expect(ok.confidenceScore).toBe(100);
+      expect(ok.hallucinatedImports).toHaveLength(0);
+      expect(ok.hallucinatedSymbols).toHaveLength(0);
+
+      const badPatch = [
+        '+++ b/lib/services/checkout.js',
+        "+import { validateOrder, nonExistentHelper } from '../core/validator.js';",
+        "+import { ghostFn } from '../core/phantom-module.js';",
+        '+export function runCheckout(order) { return ghostCall(order); }',
+      ].join('\n');
+      const bad = verifyPatchGrounding(tmpDir, badPatch);
+      expect(bad.grounded).toBe(false);
+      expect(bad.hallucinatedImports.some((i) => i.specifier === '../core/phantom-module.js')).toBe(
+        true
+      );
+      expect(bad.hallucinatedSymbols.some((s) => s.symbol === 'nonExistentHelper')).toBe(true);
+      expect(bad.hallucinatedSymbols.some((s) => s.symbol === 'ghostCall')).toBe(true);
+    });
+  });
+
+  describe('F4-2: Circular Dependency Unwinder (Tarjan SCC)', () => {
+    it('detects import cycles and recommends the minimum-coupling edge to break each cycle', () => {
+      fs.mkdirSync(path.join(tmpDir, 'lib', 'cycle'), { recursive: true });
+      fs.writeFileSync(
+        path.join(tmpDir, 'lib', 'cycle', 'a.js'),
+        "import { stepB } from './b.js';\nexport function stepA() { return stepB(); }\n"
+      );
+      fs.writeFileSync(
+        path.join(tmpDir, 'lib', 'cycle', 'b.js'),
+        "import { stepA } from './a.js';\nexport function stepB() { return 42; }\n"
+      );
+
+      const report = findCircularDependencies(tmpDir);
+      expect(report.cycleCount).toBe(1);
+      expect(report.cycles[0].files).toEqual(['lib/cycle/a.js', 'lib/cycle/b.js']);
+      expect(report.cycles[0].recommendedBreakEdge).toBeDefined();
+      expect(report.mermaidDiagram).toContain('flowchart LR');
+    });
+  });
+
+  describe('F4-5: Enterprise SBOM & License Policy Gate', () => {
+    it('flags copyleft/denied licenses and passes permissive SPDX licenses', () => {
+      const clean = checkLicenseCompliance(tmpDir, {
+        packages: [
+          { name: 'commander', version: '12.0.0', license: 'MIT' },
+          { name: 'tiktoken', version: '1.0.15', license: 'MIT' },
+        ],
+      });
+      expect(clean.compliant).toBe(true);
+      expect(clean.violations).toHaveLength(0);
+
+      const copyleft = checkLicenseCompliance(tmpDir, {
+        packages: [
+          { name: 'commander', version: '12.0.0', license: 'MIT' },
+          { name: 'viral-lib', version: '2.1.0', license: 'AGPL-3.0-only' },
+        ],
+      });
+      expect(copyleft.compliant).toBe(false);
+      expect(copyleft.violations).toHaveLength(1);
+      expect(copyleft.violations[0].package).toBe('viral-lib');
     });
   });
 });

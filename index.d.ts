@@ -2598,3 +2598,19 @@ export function analyzeUncoveredRisk(
   lcovText?: string,
   changedFiles?: string[] | null
 ): Record<string, unknown>;
+
+export function findCircularDependencies(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function verifyPatchGrounding(
+  root: string,
+  patchOrCode: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function checkLicenseCompliance(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export const DEFAULT_ALLOWED_LICENSES: string[];
+export const DEFAULT_DENIED_LICENSES: string[];

@@ -84,12 +84,19 @@ import {
   ImpactError,
 } from './lib/impact/index.js';
 
-// Architecture Drift & Layer Violation Detector (`C-3`)
+// Architecture Drift & Layer Violation Detector (`C-3`) & Faz 3/4 Creative Features
 import { checkArchitectureDrift, loadArchitectureConfig } from './lib/architecture/index.js';
 import { findDeadSymbols } from './lib/architecture/dead-symbols.js';
 import { checkDocDrift } from './lib/architecture/doc-drift.js';
+import { findCircularDependencies } from './lib/architecture/circular-deps.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
+import { verifyPatchGrounding } from './lib/pr/patch-verifier.js';
+import {
+  checkLicenseCompliance,
+  DEFAULT_ALLOWED_LICENSES,
+  DEFAULT_DENIED_LICENSES,
+} from './lib/policy/license-gate.js';
 import {
   recommendModelRoute,
   classifyTaskComplexity,
@@ -244,14 +251,19 @@ export {
   formatBlastRadiusReport,
   ImpactError,
 
-  // Architecture Drift & Layer Violation Detector (`C-3`) & Taint Flow Tracker (`C-5`)
+  // Architecture Drift & Layer Violation Detector (`C-3`), Taint Flow Tracker (`C-5`) & Creative Features
   checkArchitectureDrift,
   loadArchitectureConfig,
   findDeadSymbols,
   checkDocDrift,
+  findCircularDependencies,
   splitPrIntoAtomicGroups,
   parseLcovReport,
   analyzeUncoveredRisk,
+  verifyPatchGrounding,
+  checkLicenseCompliance,
+  DEFAULT_ALLOWED_LICENSES,
+  DEFAULT_DENIED_LICENSES,
   recommendModelRoute,
   classifyTaskComplexity,
   MODEL_CATALOG,

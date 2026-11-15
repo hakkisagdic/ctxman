@@ -8,7 +8,7 @@
 > - **P0–P2 (Faz 1 — %100 Tamamlandı):** Rakip paritesi ve ticari altyapı (`iyzico`, KVKK/BDDK PII, kural keşfi, bilgi grafiği REST, PR zekası, uzak depo, SARIF).
 > - **C1–C5 (Faz 2 — %100 Tamamlandı):** Rakiplerin hiçbirinde bulunmayan ilk 5 yaratıcı farklılaştırıcı yetenek (`C-1`..`C-5` tamamı uygulandı).
 > - **F3-1..F3-5 (Faz 3 — %100 Tamamlandı):** İkinci 5 yaratıcı farklılaştırıcı yetenek (`F3-1`..`F3-5` tamamı uygulandı).
-> - **F4-1..F4-5 (Faz 4 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
+> - **F4-1..F4-5 (Faz 4 — En Değerli 3 Özellik Tamamlandı):** `F4-1` (`verifyPatchGrounding`), `F4-2` (`findCircularDependencies`) ve `F4-5` (`checkLicenseCompliance`) tamamlandı.
 
 ---
 
@@ -50,12 +50,12 @@
 
 ---
 
-## Faz 4: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+## Faz 4: 5 Yaratıcı Farklılaştırıcı Özellik (En Değerli 3'ü Tamamlandı)
 
-| Kod      | Yaratıcı Özellik Önerisi                                                                                                                               | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
-| :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
-| **F4-1** | **Ajan Halüsinasyon & Sembol Doğrulayıcı (LLM Patch Grounding Verifier)** — LLM'in ürettiği yamadaki import/fonksiyon çağrılarının varlığını denetleme |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
-| **F4-2** | **Döngüsel Bağımlılık Kırıcı (Circular Dependency Unwinder)** — Depodaki import döngülerini (SCC) bulup en düşük maliyetli kesim kenarını önerme       |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
-| **F4-3** | **Çoklu Depo API Sözleşme Uyumluluk Denetçisi (Cross-Repo Contract Checker)** — Servisler arası REST/MCP şema kırılmalarını statik yakalama            |      8       |      8       |    2.5     | **25.6** | [ ] Planlandı |
-| **F4-4** | **Git Bisect Odaklı Regresyon Bağlam Paketleyici (Regression Bisect Pack)** — İki commit arasındaki davranış farkını sembol düzeyinde özetleme         |      7       |      8       |    2.5     | **22.4** | [ ] Planlandı |
-| **F4-5** | **Kurumsal Lisans & Tedarik Zinciri Risk Tarayıcı (SBOM & License Gate)** — `package.json` bağımlılıklarını politika kapısıyla denetleme               |      8       |      7       |    2.5     | **22.4** | [ ] Planlandı |
+| Kod      | Yaratıcı Özellik                                                                                                                                               | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
+| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :----------------: |
+| **F4-1** | **Ajan Halüsinasyon & Sembol Doğrulayıcı (`verifyPatchGrounding` & `POST /api/v1/verify-patch`)** — Yamadaki import/fonksiyon çağrılarının varlığını denetleme |      9       |      9       |    2.0     | **40.5** | **[x] Tamamlandı** |
+| **F4-2** | **Döngüsel Bağımlılık Kırıcı (`findCircularDependencies` & `GET /api/v1/circular-deps`)** — Tarjan SCC ile import döngülerini bulup kesim kenarı önerme        |      8       |      9       |    2.0     | **36.0** | **[x] Tamamlandı** |
+| **F4-3** | **Çoklu Depo API Sözleşme Uyumluluk Denetçisi (Cross-Repo Contract Checker)** — Servisler arası REST/MCP şema kırılmalarını statik yakalama                    |      8       |      8       |    2.5     | **25.6** |   [ ] Planlandı    |
+| **F4-4** | **Git Bisect Odaklı Regresyon Bağlam Paketleyici (Regression Bisect Pack)** — İki commit arasındaki davranış farkını sembol düzeyinde özetleme                 |      7       |      8       |    2.5     | **22.4** |   [ ] Planlandı    |
+| **F4-5** | **Kurumsal Lisans & Tedarik Zinciri Risk Tarayıcı (`checkLicenseCompliance` & `GET /api/v1/license-gate`)** — CycloneDX SBOM ve SPDX lisans politikası kapısı  |      8       |      7       |    2.5     | **22.4** | **[x] Tamamlandı** |
