@@ -75,6 +75,8 @@ import {
   buildPromptCachePlan,
 } from './lib/pack/index.js';
 import { createPackManifest, packDeltaContext } from './lib/pack/delta.js';
+import { pruneContextToBudget } from './lib/pack/context-pruner.js';
+import { compileAgentRules } from './lib/pack/rule-compiler.js';
 
 // Pre-change Blast Radius & Symbol Contract Simulator (`ctxman impact`)
 import {
@@ -89,6 +91,9 @@ import { checkArchitectureDrift, loadArchitectureConfig } from './lib/architectu
 import { findDeadSymbols } from './lib/architecture/dead-symbols.js';
 import { checkDocDrift } from './lib/architecture/doc-drift.js';
 import { findCircularDependencies } from './lib/architecture/circular-deps.js';
+import { findSemanticClones } from './lib/architecture/semantic-clones.js';
+import { findQueryBottlenecks } from './lib/architecture/query-bottlenecks.js';
+import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
 import { verifyPatchGrounding } from './lib/pr/patch-verifier.js';
@@ -246,6 +251,8 @@ export {
   buildPromptCachePlan,
   createPackManifest,
   packDeltaContext,
+  pruneContextToBudget,
+  compileAgentRules,
 
   // Pre-change Blast Radius & Symbol Contract Simulator (`ctxman impact`)
   analyzeBlastRadius,
@@ -259,6 +266,9 @@ export {
   findDeadSymbols,
   checkDocDrift,
   findCircularDependencies,
+  findSemanticClones,
+  findQueryBottlenecks,
+  analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,
   analyzeUncoveredRisk,

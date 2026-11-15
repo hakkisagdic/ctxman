@@ -2625,3 +2625,23 @@ export function buildBisectContextPack(
   badRev?: string,
   options?: Record<string, unknown>
 ): Record<string, unknown>;
+export function pruneContextToBudget(
+  files?: Array<{ path: string; content: string; priority?: number }>,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function findSemanticClones(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function analyzeBusFactor(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function findQueryBottlenecks(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function compileAgentRules(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;

@@ -24,6 +24,11 @@ import {
   checkCrossRepoContracts,
   findCircularDependencies,
   checkLicenseCompliance,
+  pruneContextToBudget,
+  findSemanticClones,
+  analyzeBusFactor,
+  findQueryBottlenecks,
+  compileAgentRules,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -553,6 +558,139 @@ export function testSuite() {
         pack.topSuspects[1].suspicionScore
       );
       expect(pack.nextBisectCommit.sha).toBe('2222222');
+    });
+  });
+
+  describe('F5-1: Dynamic Context Pruner', () => {
+    it('prunes comments and low-entropy helper bodies before dropping high-priority files', () => {
+      const files = [
+        {
+          path: 'lib/core/low-priority.js',
+          priority: 1,
+          content: [
+            '/**',
+            ' * Very verbose JSDoc header that consumes tokens unnecessarily',
+            ' * across multiple lines in the context window.',
+            ' */',
+            '// Another comment line',
+            'function internalHelper(a, b) {',
+            '  const step1 = a + b;',
+            '  const step2 = step1 * 2;',
+            '  return step2 - 1;',
+            '}',
+            'export function publicApi(x) { return internalHelper(x, 1); }',
+          ].join('\n'),
+        },
+        {
+          path: 'lib/core/high-priority.js',
+          priority: 10,
+          content: 'export function criticalContract(orderId) { return Boolean(orderId); }',
+        },
+      ];
+
+      const pruned = pruneContextToBudget(files, { budget: 55 });
+      expect(pruned.prunedTokens).toBeLessThan(pruned.originalTokens);
+      expect(pruned.savedTokens).toBeGreaterThan(15);
+      expect(pruned.files.some((f) => f.path === 'lib/core/high-priority.js')).toBe(true);
+    });
+  });
+
+  describe('F5-2: AST Structural Clone & Duplicate Logic Detector', () => {
+    it('detects structurally identical methods across files even when variables are renamed', () => {
+      fs.writeFileSync(
+        path.join(tmpDir, 'lib', 'services', 'dupA.js'),
+        [
+          'export function computeDiscountA(price, rate) {',
+          '  if (!price || price <= 0) { return 0; }',
+          '  const raw = price * rate;',
+          '  const capped = raw > 100 ? 100 : raw;',
+          '  return price - capped;',
+          '}',
+        ].join('\n')
+      );
+      fs.writeFileSync(
+        path.join(tmpDir, 'lib', 'services', 'dupB.js'),
+        [
+          'export function calculateRebateB(amount, pct) {',
+          '  if (!amount || amount <= 0) { return 0; }',
+          '  const discount = amount * pct;',
+          '  const limit = discount > 100 ? 100 : discount;',
+          '  return amount - limit;',
+          '}',
+        ].join('\n')
+      );
+
+      const report = findSemanticClones(tmpDir, { minTokens: 10, similarityThreshold: 0.8 });
+      expect(report.cloneCount).toBeGreaterThanOrEqual(1);
+      expect(report.clones[0].similarity).toBeGreaterThanOrEqual(0.85);
+    });
+  });
+
+  describe('F5-3: Knowledge Silo & Bus-Factor Analyzer', () => {
+    it('identifies single-owner knowledge silos and computes repository bus factor', () => {
+      const report = analyzeBusFactor(tmpDir, {
+        siloThreshold: 0.8,
+        ownershipByFile: {
+          'lib/core/validator.js': [
+            { author: 'Alice', lines: 95 },
+            { author: 'Bob', lines: 5 },
+          ],
+          'lib/services/checkout.js': [
+            { author: 'Alice', lines: 50 },
+            { author: 'Bob', lines: 50 },
+          ],
+        },
+      });
+      expect(report.siloCount).toBe(1);
+      expect(report.silos[0].file).toBe('lib/core/validator.js');
+      expect(report.silos[0].primaryOwner).toBe('Alice');
+    });
+  });
+
+  describe('F5-4: N+1 & Unbounded Query Bottleneck Hunter', () => {
+    it('flags database or fetch queries inside loops and unbounded SELECT * queries', () => {
+      fs.writeFileSync(
+        path.join(tmpDir, 'lib', 'services', 'orders-repo.js'),
+        [
+          'export async function loadItems(db, ids) {',
+          '  const results = [];',
+          '  for (const id of ids) {',
+          "    const row = await db.query('SELECT * FROM orders');",
+          '    results.push(row);',
+          '  }',
+          '  return results;',
+          '}',
+        ].join('\n')
+      );
+
+      const report = findQueryBottlenecks(tmpDir);
+      expect(report.bottleneckCount).toBeGreaterThanOrEqual(2);
+      expect(report.bottlenecks.some((b) => b.ruleId === 'ctxman/perf/n-plus-one-query')).toBe(
+        true
+      );
+      expect(report.bottlenecks.some((b) => b.ruleId === 'ctxman/perf/unbounded-select-star')).toBe(
+        true
+      );
+    });
+  });
+
+  describe('F5-5: Cross-Agent Rule Compiler', () => {
+    it('compiles unified rules into CLAUDE.md, AGENTS.md, .cursorrules and copilot-instructions.md', () => {
+      const compiled = compileAgentRules(tmpDir, {
+        config: {
+          project: 'DemoApp',
+          codingStandards: ['Use ESM imports', 'Run vitest before commit'],
+          forbiddenPatterns: ['Never hardcode TCKN or API keys'],
+        },
+      });
+      expect(compiled.targets).toEqual([
+        'CLAUDE.md',
+        'AGENTS.md',
+        '.cursorrules',
+        '.github/copilot-instructions.md',
+      ]);
+      expect(compiled.artifacts['CLAUDE.md']).toContain('Use ESM imports');
+      expect(compiled.artifacts['.cursorrules']).toContain('Never hardcode TCKN');
     });
   });
 });
