@@ -59,6 +59,11 @@ import {
   auditTenantIsolation,
   generateAdrDraft,
   verifyAirgappedReadiness,
+  buildIncidentPostmortemPack,
+  auditPaymentIdempotency,
+  checkPromptTemplateDrift,
+  auditQueueConsumerResilience,
+  optimizeWorkspaceTaskGraph,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -1395,6 +1400,138 @@ export function testSuite() {
       expect(readiness.summary.cloudSdks).toBe(1);
       expect(readiness.summary.telemetryFlags).toBe(1);
       expect(readiness.readinessScore).toBeLessThan(60);
+    });
+  });
+
+  describe('F12-1: Incident Post-Mortem & Root-Cause Context Pack Builder', () => {
+    it('correlates error events and recent commits into a ranked root-cause post-mortem report', () => {
+      const pack = buildIncidentPostmortemPack({
+        incidentId: 'INC-2026-42',
+        title: 'Checkout 500 Spike',
+        severity: 'SEV-1',
+        detectedAt: '2026-11-15T09:00:00Z',
+        mitigatedAt: '2026-11-15T09:18:00Z',
+        resolvedAt: '2026-11-15T09:45:00Z',
+        errorEvents: [
+          {
+            timestamp: '2026-11-15T09:01:00Z',
+            service: 'billing-api',
+            message: 'TypeError: Cannot read properties of null',
+            file: 'lib/billing/charge.js',
+            line: 42,
+          },
+        ],
+        recentCommits: [
+          {
+            sha: 'aaa1111',
+            subject: 'docs: update readme',
+            files: ['README.md'],
+          },
+          {
+            sha: 'bbb2222',
+            subject: 'refactor: update charge payload handling',
+            files: ['lib/billing/charge.js'],
+          },
+        ],
+      });
+      expect(pack.metrics.timeToMitigateMinutes).toBe(18);
+      expect(pack.metrics.timeToResolveMinutes).toBe(45);
+      expect(pack.topSuspect.sha).toBe('bbb2222');
+      expect(pack.markdown).toContain('INC-2026-42');
+    });
+  });
+
+  describe('F12-2: API Idempotency & Double-Charge Risk Auditor', () => {
+    it('flags financial charge calls missing Idempotency-Key guards while passing guarded calls', () => {
+      const report = auditPaymentIdempotency({
+        files: [
+          {
+            path: 'lib/billing/unsafe-charge.js',
+            content: [
+              'export async function runUnsafe(gateway, amount) {',
+              '  return await gateway.createPayment({ amount });',
+              '}',
+            ].join('\n'),
+          },
+          {
+            path: 'lib/billing/safe-charge.js',
+            content: [
+              'export async function runSafe(gateway, amount, idempotencyKey) {',
+              '  return await gateway.createPayment({ amount, idempotencyKey });',
+              '}',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(report.safe).toBe(false);
+      expect(report.summary.violationCount).toBe(1);
+      expect(report.findings[0].file).toBe('lib/billing/unsafe-charge.js');
+    });
+  });
+
+  describe('F12-3: Prompt Template Regression & Variable Drift Checker', () => {
+    it('detects missing template variables, removed baseline variables, and missing output tags', () => {
+      const drift = checkPromptTemplateDrift({
+        baselineTemplate: 'Analyze {{repoName}} and {{legacyContext}} then output <summary>',
+        template: 'Analyze {{repoName}} and {{diffPatch}} then output <summary>',
+        providedVars: { repoName: 'ctxman', extraUnused: true },
+        requiredOutputTags: ['<summary>', '<risk_score>'],
+      });
+      expect(drift.inSync).toBe(false);
+      expect(drift.missingVars).toEqual(['diffPatch']);
+      expect(drift.unusedVars).toEqual(['extraUnused']);
+      expect(drift.removedBaselineVars).toEqual(['legacyContext']);
+      expect(drift.missingOutputTags).toEqual(['<risk_score>']);
+    });
+  });
+
+  describe('F12-4: Async Queue & Dead-Letter (DLQ) Resilience Auditor', () => {
+    it('flags queue consumers lacking error boundaries, DLQ routing, and retry backoff', () => {
+      const audit = auditQueueConsumerResilience({
+        files: [
+          {
+            path: 'lib/workers/invoice-worker.js',
+            content: [
+              'export function startWorker(queue) {',
+              '  queue.process(async (job) => {',
+              '    await sendInvoiceEmail(job.data);',
+              '  });',
+              '}',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(audit.resilient).toBe(false);
+      expect(audit.summary.findingCount).toBe(3);
+      expect(audit.summary.highCount).toBe(1);
+    });
+  });
+
+  describe('F12-5: Monorepo Task Pipeline & Affected-Package Optimizer', () => {
+    it('computes affected packages, skipped packages, and topological execution waves', () => {
+      const plan = optimizeWorkspaceTaskGraph({
+        packages: [
+          { name: '@demo/core', path: 'packages/core', dependsOn: [], avgDurationSec: 20 },
+          {
+            name: '@demo/billing',
+            path: 'packages/billing',
+            dependsOn: ['@demo/core'],
+            avgDurationSec: 40,
+          },
+          {
+            name: '@demo/marketing',
+            path: 'packages/marketing',
+            dependsOn: [],
+            avgDurationSec: 60,
+          },
+        ],
+        changedFiles: ['packages/core/src/index.js'],
+      });
+      expect(plan.directlyAffected).toEqual(['@demo/core']);
+      expect(plan.affectedPackages).toEqual(['@demo/billing', '@demo/core']);
+      expect(plan.skippedPackages).toEqual(['@demo/marketing']);
+      expect(plan.waves).toHaveLength(2);
+      expect(plan.summary.savedSeconds).toBe(60);
     });
   });
 });

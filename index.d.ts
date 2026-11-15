@@ -2726,3 +2726,17 @@ export function generateAdrDraft(options?: Record<string, unknown>): Record<stri
 export function verifyAirgappedReadiness(
   options?: Record<string, unknown>
 ): Record<string, unknown>;
+
+export function buildIncidentPostmortemPack(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function auditPaymentIdempotency(options?: Record<string, unknown>): Record<string, unknown>;
+export function checkPromptTemplateDrift(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function auditQueueConsumerResilience(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function optimizeWorkspaceTaskGraph(
+  options?: Record<string, unknown>
+): Record<string, unknown>;

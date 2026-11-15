@@ -123,6 +123,11 @@ import { analyzeAgentToolLoop } from './lib/task/tool-loop-guard.js';
 import { auditTenantIsolation } from './lib/security/tenant-isolation.js';
 import { generateAdrDraft } from './lib/architecture/adr-generator.js';
 import { verifyAirgappedReadiness } from './lib/security/airgap-verifier.js';
+import { buildIncidentPostmortemPack } from './lib/diagnose/incident-postmortem.js';
+import { auditPaymentIdempotency } from './lib/security/payment-idempotency.js';
+import { checkPromptTemplateDrift } from './lib/pack/prompt-drift.js';
+import { auditQueueConsumerResilience } from './lib/architecture/queue-resilience.js';
+import { optimizeWorkspaceTaskGraph } from './lib/workspace/task-optimizer.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -328,6 +333,11 @@ export {
   auditTenantIsolation,
   generateAdrDraft,
   verifyAirgappedReadiness,
+  buildIncidentPostmortemPack,
+  auditPaymentIdempotency,
+  checkPromptTemplateDrift,
+  auditQueueConsumerResilience,
+  optimizeWorkspaceTaskGraph,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,

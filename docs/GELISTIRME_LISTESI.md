@@ -1,7 +1,7 @@
 # Ctxman — Geliştirme Listesi (Rakip Matrisi Boşluk Kapatma ve Yaratıcı Farklılaştırıcı Yol Haritası)
 
 > **Son Güncelleme:** 15 Kasım 2026  
-> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–12 yaratıcı farklılaştırıcı özellikler.  
+> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–13 yaratıcı farklılaştırıcı özellikler.  
 > **Önceliklendirme Formülü:** $\text{Öncelik Skoru} = \frac{\text{Gelir Etkisi (1–10)} \times \text{Kullanıcı Değeri (1–10)}}{\text{Efor (1–5)}}$  
 > **Sınıflandırma:**
 >
@@ -16,7 +16,8 @@
 > - **F9-1..F9-5 (Faz 9 — %100 Tamamlandı):** Sekizinci 5 yaratıcı farklılaştırıcı yetenek (`F9-1`..`F9-5` tamamı uygulandı).
 > - **F10-1..F10-5 (Faz 10 — %100 Tamamlandı):** Dokuzuncu 5 yaratıcı farklılaştırıcı yetenek (`F10-1`..`F10-5` tamamı uygulandı).
 > - **F11-1..F11-5 (Faz 11 — %100 Tamamlandı):** Onuncu 5 yaratıcı farklılaştırıcı yetenek (`F11-1`..`F11-5` tamamı uygulandı).
-> - **F12-1..F12-5 (Faz 12 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
+> - **F12-1..F12-5 (Faz 12 — %100 Tamamlandı):** On birinci 5 yaratıcı farklılaştırıcı yetenek (`F12-1`..`F12-5` tamamı uygulandı).
+> - **F13-1..F13-5 (Faz 13 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
 
 ---
 
@@ -154,12 +155,24 @@
 
 ---
 
-## Faz 12: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+## Faz 12: 5 Yaratıcı Farklılaştırıcı Özellik (`F12-1`..`F12-5` — %100 Tamamlandı)
 
-| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                          | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
-| :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------: | :----------: | :--------: | :------: | :-----------: |
-| **F12-1** | **Olay Müdahale (Incident Post-Mortem) & Kök Neden Bağlam Paketi (`buildIncidentPostmortemPack`)** — Üretim hatası zaman çizelgesi, son dağıtımlar ve suçlu commitlerden kök neden raporu derleme |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
-| **F12-2** | **API İdempotensi & Çift Ödeme Risk Denetçisi (`auditPaymentIdempotency`)** — Finansal/ödeme uç noktalarında `Idempotency-Key` ve tekrar-koruma eksikliği tespiti                                 |      9       |      9       |    2.2     | **36.8** | [ ] Planlandı |
-| **F12-3** | **İstem Şablonu (Prompt Regression) Regresyon & Drift Denetçisi (`checkPromptTemplateDrift`)** — Sistem istemlerindeki değişken ve şema kırılmalarını statik yakalama                             |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
-| **F12-4** | **Asenkron Kuyruk & Dead-Letter (DLQ) Dayanıklılık Denetçisi (`auditQueueConsumerResilience`)** — Kuyruk tüketicilerinde eksik backoff/DLQ/ack kalıplarını bulma                                  |      8       |      8       |    2.2     | **29.1** | [ ] Planlandı |
-| **F12-5** | **Monorepo Önbellek & Görev Grafiği (Task Pipeline) Hızlandırıcı (`optimizeWorkspaceTaskGraph`)** — Değişen dosyalara göre minimum etkilenen paket/görev sırasını çıkarma                         |      8       |      8       |    2.5     | **25.6** | [ ] Planlandı |
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                          | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
+| :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------: | :----------: | :--------: | :------: | :----------------: |
+| **F12-1** | **Olay Müdahale (Incident Post-Mortem) & Kök Neden Bağlam Paketi (`buildIncidentPostmortemPack`)** — Üretim hatası zaman çizelgesi, son dağıtımlar ve suçlu commitlerden kök neden raporu derleme |      9       |      9       |    2.0     | **40.5** | **[x] Tamamlandı** |
+| **F12-2** | **API İdempotensi & Çift Ödeme Risk Denetçisi (`auditPaymentIdempotency`)** — Finansal/ödeme uç noktalarında `Idempotency-Key` ve tekrar-koruma eksikliği tespiti                                 |      9       |      9       |    2.2     | **36.8** | **[x] Tamamlandı** |
+| **F12-3** | **İstem Şablonu (Prompt Regression) Regresyon & Drift Denetçisi (`checkPromptTemplateDrift`)** — Sistem istemlerindeki değişken ve şema kırılmalarını statik yakalama                             |      8       |      9       |    2.0     | **36.0** | **[x] Tamamlandı** |
+| **F12-4** | **Asenkron Kuyruk & Dead-Letter (DLQ) Dayanıklılık Denetçisi (`auditQueueConsumerResilience`)** — Kuyruk tüketicilerinde eksik backoff/DLQ/ack kalıplarını bulma                                  |      8       |      8       |    2.2     | **29.1** | **[x] Tamamlandı** |
+| **F12-5** | **Monorepo Önbellek & Görev Grafiği (Task Pipeline) Hızlandırıcı (`optimizeWorkspaceTaskGraph`)** — Değişen dosyalara göre minimum etkilenen paket/görev sırasını çıkarma                         |      8       |      8       |    2.5     | **25.6** | **[x] Tamamlandı** |
+
+---
+
+## Faz 13: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                      | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
+| :-------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
+| **F13-1** | **Canlı Kanarya (Canary) Telemetri & Otomatik Geri Alma Karar Motoru (`evaluateCanaryRollout`)** — Kanarya sürümü hata/gecikme metriklerini taban sürümle karşılaştırıp rollback kararı verme |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
+| **F13-2** | **Kriptografik Bağlam İmzası & Zincirleme Kanıt Doğrulayıcı (`signAndVerifyContextPack`)** — Paketlenen bağlam ve denetim çıktılarını HMAC/SHA-256 zinciriyle imzalayıp kurcalamayı yakalama  |      9       |      8       |    2.0     | **36.0** | [ ] Planlandı |
+| **F13-3** | **Veritabanı İndeks Kapsama & Yavaş Sorgu Önerici (`recommendMissingIndexes`)** — SQL `WHERE`/`ORDER BY`/`JOIN` sütunlarını şema indeksleriyle eşleştirip eksik indeks DDL önerme             |      8       |      9       |    2.2     | **32.7** | [ ] Planlandı |
+| **F13-4** | **PR İnceleyici Yük Dengeleyici & Uzman Rotasyonu (`assignBalancedReviewers`)** — Uzmanlık skoru ile aktif inceleme yükünü birleştirip darboğaz yaratmayan hakem atama                        |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
+| **F13-5** | **Ajan Bellek Zehirlenmesi (Memory Poisoning) & RAG Bütünlük Denetçisi (`auditRagCorpusIntegrity`)** — RAG parçalarındaki çelişkili veya enjekte edilmiş sahte kuralları tarama               |      9       |      8       |    2.5     | **28.8** | [ ] Planlandı |
