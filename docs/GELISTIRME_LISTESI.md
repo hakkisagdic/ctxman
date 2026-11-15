@@ -1,7 +1,7 @@
 # Ctxman — Geliştirme Listesi (Rakip Matrisi Boşluk Kapatma ve Yaratıcı Farklılaştırıcı Yol Haritası)
 
 > **Son Güncelleme:** 15 Kasım 2026  
-> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–8 yaratıcı farklılaştırıcı özellikler.  
+> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–10 yaratıcı farklılaştırıcı özellikler.  
 > **Önceliklendirme Formülü:** $\text{Öncelik Skoru} = \frac{\text{Gelir Etkisi (1–10)} \times \text{Kullanıcı Değeri (1–10)}}{\text{Efor (1–5)}}$  
 > **Sınıflandırma:**
 >
@@ -13,7 +13,8 @@
 > - **F6-1..F6-5 (Faz 6 — %100 Tamamlandı):** Beşinci 5 yaratıcı farklılaştırıcı yetenek (`F6-1`..`F6-5` tamamı uygulandı).
 > - **F7-1..F7-5 (Faz 7 — %100 Tamamlandı):** Altıncı 5 yaratıcı farklılaştırıcı yetenek (`F7-1`..`F7-5` tamamı uygulandı).
 > - **F8-1..F8-5 (Faz 8 — %100 Tamamlandı):** Yedinci 5 yaratıcı farklılaştırıcı yetenek (`F8-1`..`F8-5` tamamı uygulandı).
-> - **F9-1..F9-5 (Faz 9 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
+> - **F9-1..F9-5 (Faz 9 — %100 Tamamlandı):** Sekizinci 5 yaratıcı farklılaştırıcı yetenek (`F9-1`..`F9-5` tamamı uygulandı).
+> - **F10-1..F10-5 (Faz 10 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
 
 ---
 
@@ -115,12 +116,24 @@
 
 ---
 
-## Faz 9: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+## Faz 9: 5 Yaratıcı Farklılaştırıcı Özellik (`F9-1`..`F9-5` — %100 Tamamlandı)
 
-| Kod      | Yaratıcı Özellik Önerisi                                                                                                                                    | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
-| :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
-| **F9-1** | **Veritabanı Göç (Migration) Geri Dönüş & Kilit Risk Denetçisi (`auditMigrationSafety`)** — SQL/ORM migration dosyalarında kilitli tablo/veri kaybı tespiti |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
-| **F9-2** | **Ajan Öz-Onarım (Self-Healing) Test Döngüsü Orkestratörü (`buildSelfHealingPrompt`)** — Kırılan test çıktısı ve AST farkından tek adımlık onarım istemi    |      9       |      9       |    2.2     | **36.8** | [ ] Planlandı |
-| **F9-3** | **Performans Bütçesi & Paket Boyutu Etkisi Tahmincisi (`estimateBundleImpact`)** — Yeni eklenen importların ağaca-sallama (tree-shaking) ve boyut analizi   |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
-| **F9-4** | **Kurumsal Denetim & Uyumluluk Kanıt Paketi Üretici (`generateComplianceEvidencePack`)** — BDDK/KVKK/SOC2 denetçileri için imzalı özet rapor derleyici      |      9       |      8       |    2.5     | **28.8** | [ ] Planlandı |
-| **F9-5** | **Çağrı Grafiği Tabanlı Kaos & Hata Enjeksiyon Noktası Önerici (`suggestChaosTargets`)** — Kritik dış bağımlılık sınırlarında kaos testi hedefleri bulma    |      7       |      8       |    2.0     | **28.0** | [ ] Planlandı |
+| Kod      | Yaratıcı Özellik Önerisi                                                                                                                                    | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
+| :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :----------------: |
+| **F9-1** | **Veritabanı Göç (Migration) Geri Dönüş & Kilit Risk Denetçisi (`auditMigrationSafety`)** — SQL/ORM migration dosyalarında kilitli tablo/veri kaybı tespiti |      9       |      9       |    2.0     | **40.5** | **[x] Tamamlandı** |
+| **F9-2** | **Ajan Öz-Onarım (Self-Healing) Test Döngüsü Orkestratörü (`buildSelfHealingPrompt`)** — Kırılan test çıktısı ve AST farkından tek adımlık onarım istemi    |      9       |      9       |    2.2     | **36.8** | **[x] Tamamlandı** |
+| **F9-3** | **Performans Bütçesi & Paket Boyutu Etkisi Tahmincisi (`estimateBundleImpact`)** — Yeni eklenen importların ağaca-sallama (tree-shaking) ve boyut analizi   |      8       |      8       |    2.0     | **32.0** | **[x] Tamamlandı** |
+| **F9-4** | **Kurumsal Denetim & Uyumluluk Kanıt Paketi Üretici (`generateComplianceEvidencePack`)** — BDDK/KVKK/SOC2 denetçileri için imzalı özet rapor derleyici      |      9       |      8       |    2.5     | **28.8** | **[x] Tamamlandı** |
+| **F9-5** | **Çağrı Grafiği Tabanlı Kaos & Hata Enjeksiyon Noktası Önerici (`suggestChaosTargets`)** — Kritik dış bağımlılık sınırlarında kaos testi hedefleri bulma    |      7       |      8       |    2.0     | **28.0** | **[x] Tamamlandı** |
+
+---
+
+## Faz 10: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                       | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
+| :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
+| **F10-1** | **Sıfır-Kesinti Özellik Emeklilik & Temizlik Yama Üretici (`planFeatureFlagRetirement`)** — Kalıcılaşmış bayrak dallarını otomatik sadeleştirme planı          |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
+| **F10-2** | **Çoklu Ajan Oturumu Bellek Özeti & Devir Paketi (`buildAgentHandoffPack`)** — Ajanlar arası görev devrinde sıkıştırılmış karar ve durum özeti üretme          |      9       |      9       |    2.2     | **36.8** | [ ] Planlandı |
+| **F10-3** | **API Geriye Dönük Sözleşme Tüketici Simülatörü (`simulateConsumerContractImpact`)** — Değişen yanıt alanlarının istemci yıkımlarını statik simüle etme        |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
+| **F10-4** | **Kurumsal Veri Sınıflandırma & Hassasiyet Etiketleyici (`classifyDataSensitivity`)** — Modülleri PII/Finansal/Gizli veri yoğunluğuna göre otomatik etiketleme |      9       |      8       |    2.5     | **28.8** | [ ] Planlandı |
+| **F10-5** | **Deterministik Derleme & Ortam Tekrarlanabilirlik Denetçisi (`auditBuildReproducibility`)** — Sabitlenmemiş sürümler ve yerel yol bağımlılıklarını yakalama   |      7       |      8       |    2.0     | **28.0** | [ ] Planlandı |

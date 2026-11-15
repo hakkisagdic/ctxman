@@ -108,6 +108,11 @@ import { detectFlakyTestPatterns } from './lib/pr/flaky-test-detector.js';
 import { scanHighEntropySecrets } from './lib/security/entropy-scanner.js';
 import { checkSchemaCodeParity } from './lib/architecture/schema-parity.js';
 import { planParallelAgentWorkspaces } from './lib/task/parallel-agent-planner.js';
+import { auditMigrationSafety } from './lib/architecture/migration-auditor.js';
+import { buildSelfHealingPrompt } from './lib/pr/self-healing-test.js';
+import { estimateBundleImpact } from './lib/architecture/bundle-impact.js';
+import { generateComplianceEvidencePack } from './lib/policy/compliance-evidence.js';
+import { suggestChaosTargets } from './lib/architecture/chaos-targets.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -298,6 +303,11 @@ export {
   scanHighEntropySecrets,
   checkSchemaCodeParity,
   planParallelAgentWorkspaces,
+  auditMigrationSafety,
+  buildSelfHealingPrompt,
+  estimateBundleImpact,
+  generateComplianceEvidencePack,
+  suggestChaosTargets,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,

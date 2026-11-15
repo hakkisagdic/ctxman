@@ -2696,3 +2696,11 @@ export function checkSchemaCodeParity(options?: Record<string, unknown>): Record
 export function planParallelAgentWorkspaces(
   options?: Record<string, unknown>
 ): Record<string, unknown>;
+
+export function auditMigrationSafety(options?: Record<string, unknown>): Record<string, unknown>;
+export function buildSelfHealingPrompt(options?: Record<string, unknown>): Record<string, unknown>;
+export function estimateBundleImpact(options?: Record<string, unknown>): Record<string, unknown>;
+export function generateComplianceEvidencePack(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function suggestChaosTargets(options?: Record<string, unknown>): Record<string, unknown>;

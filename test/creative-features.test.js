@@ -44,6 +44,11 @@ import {
   scanHighEntropySecrets,
   checkSchemaCodeParity,
   planParallelAgentWorkspaces,
+  auditMigrationSafety,
+  buildSelfHealingPrompt,
+  estimateBundleImpact,
+  generateComplianceEvidencePack,
+  suggestChaosTargets,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -1028,6 +1033,120 @@ export function testSuite() {
       expect(plan.waves[0].tasks.map((t) => t.id)).toEqual(['agent-1', 'agent-2']);
       expect(plan.waves[1].tasks.map((t) => t.id)).toEqual(['agent-3']);
       expect(plan.sharedReadOnlyFiles).toContain('lib/utils/logger.js');
+    });
+  });
+
+  describe('F9-1: Database Migration Safety & Lock Auditor', () => {
+    it('flags destructive DDL, NOT NULL without DEFAULT, non-concurrent indexes, and missing down rollback', () => {
+      const report = auditMigrationSafety({
+        files: [
+          {
+            path: 'migrations/004_alter_orders.sql',
+            content: [
+              'ALTER TABLE orders ADD COLUMN tenant_id VARCHAR(64) NOT NULL;',
+              'CREATE INDEX idx_orders_tenant ON orders(tenant_id);',
+              'DROP TABLE legacy_payments;',
+            ].join('\n'),
+          },
+          {
+            path: 'migrations/005_up_only.js',
+            content: 'export async function up(db) { await db.exec("SELECT 1"); }',
+          },
+        ],
+      });
+      expect(report.safe).toBe(false);
+      expect(report.summary.criticalCount).toBe(2);
+      expect(report.summary.highCount).toBe(1);
+      expect(report.summary.missingRollbackFiles).toContain('migrations/005_up_only.js');
+      expect(report.riskScore).toBeGreaterThanOrEqual(80);
+    });
+  });
+
+  describe('F9-2: Self-Healing Test Repair Prompt Builder', () => {
+    it('extracts failing test assertions, stack frames, and code context into a repair prompt', () => {
+      const repair = buildSelfHealingPrompt({
+        testOutput: [
+          ' FAIL  test/checkout.test.js > Checkout Suite > calculates VAT total',
+          'AssertionError: expected 100 to be 120',
+          ' ❯ lib/services/checkout.js:4:10',
+        ].join('\n'),
+        files: [
+          {
+            path: 'lib/services/checkout.js',
+            content: [
+              'export function calcTotal(net) {',
+              '  const vatRate = 0;',
+              '  const total = net * (1 + vatRate);',
+              '  return total;',
+              '}',
+            ].join('\n'),
+          },
+        ],
+        gitDiff: '-  const vatRate = 0.2;\n+  const vatRate = 0;',
+      });
+      expect(repair.summary.failureCount).toBe(1);
+      expect(repair.suspectLocations[0]).toEqual({ file: 'lib/services/checkout.js', line: 4 });
+      expect(repair.prompt).toContain('expected 100 to be 120');
+      expect(repair.prompt).toContain('lib/services/checkout.js:4');
+    });
+  });
+
+  describe('F9-3: Bundle Size & Tree-Shaking Impact Estimator', () => {
+    it('flags heavy non-tree-shakeable default/CommonJS imports and checks gzip budget', () => {
+      const impact = estimateBundleImpact({
+        gzipBudgetKb: 100,
+        files: [
+          {
+            path: 'src/ui/dashboard.js',
+            content: ['import _ from "lodash";', 'import moment from "moment";'].join('\n'),
+          },
+        ],
+      });
+      expect(impact.withinBudget).toBe(false);
+      expect(impact.totalEstimatedGzipKb).toBeGreaterThan(100);
+      expect(impact.summary.nonTreeShakeableCount).toBe(2);
+    });
+  });
+
+  describe('F9-4: Enterprise Compliance Evidence Pack Generator', () => {
+    it('generates a SHA-256 signed compliance evidence report for KVKK, BDDK, and SOC2', () => {
+      const pack = generateComplianceEvidencePack({
+        organization: 'FinTech TR A.S.',
+        policy: { compliancePreset: 'kvkk-bddk', redactPII: true, audit: { enabled: true } },
+        auditEvents: [{ id: 'evt-1', sha256: 'abc' }],
+        licenseReport: { compliant: true, violations: [] },
+        taintReport: { passed: true, flows: [] },
+      });
+      expect(pack.compliant).toBe(true);
+      expect(pack.controls).toHaveLength(4);
+      expect(pack.digestSha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(pack.markdown).toContain('COMPLIANT');
+    });
+  });
+
+  describe('F9-5: Call-Graph Chaos & Fault-Injection Target Recommender', () => {
+    it('ranks external HTTP, DB, and queue boundaries by dependency fan-in for chaos testing', () => {
+      const chaos = suggestChaosTargets({
+        files: [
+          {
+            path: 'lib/billing/gateway.js',
+            content: 'export async function charge(url) { return fetch(url); }',
+          },
+          {
+            path: 'lib/db/repo.js',
+            content: 'export async function load(db) { return db.query("SELECT 1"); }',
+          },
+        ],
+        edges: [
+          { from: 'lib/api/a.js', to: 'lib/billing/gateway.js' },
+          { from: 'lib/api/b.js', to: 'lib/billing/gateway.js' },
+          { from: 'lib/api/c.js', to: 'lib/billing/gateway.js' },
+        ],
+      });
+      expect(chaos.summary.totalTargets).toBe(2);
+      expect(chaos.targets[0].file).toBe('lib/billing/gateway.js');
+      expect(chaos.targets[0].fanIn).toBe(3);
+      expect(chaos.targets[0].priorityScore).toBeGreaterThan(chaos.targets[1].priorityScore);
     });
   });
 });
