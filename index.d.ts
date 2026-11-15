@@ -2531,3 +2531,21 @@ export function redactSecrets(
   options?: Record<string, unknown>
 ): { text: string; findings: string[]; counts: Record<string, number> };
 export function createStarterPolicy(preset?: string | null): Record<string, unknown>;
+
+export function classifyCacheTier(
+  entry: { path: string; modified?: number },
+  medianModified?: number
+): { tier: 1 | 2 | 3; tierName: 'static_core' | 'semi_stable' | 'volatile_tail' };
+export function orderEntriesForPromptCache<T extends { path: string }>(entries: T[]): T[];
+export function buildPromptCachePlan(params: Record<string, unknown>): Record<string, unknown>;
+export class ImpactError extends Error {
+  code: string;
+  constructor(code: string, message: string);
+}
+export function analyzeBlastRadius(
+  root: string,
+  target: string,
+  options?: { symbol?: string | null; depth?: number; includeReviewers?: boolean }
+): Record<string, unknown>;
+export function buildBlastMermaidDiagram(params: Record<string, unknown>): string;
+export function formatBlastRadiusReport(result: Record<string, unknown>): string;

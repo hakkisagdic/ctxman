@@ -66,7 +66,22 @@ import { explainHistory } from './lib/why/index.js';
 import { findExperts, WhoError } from './lib/who/index.js';
 
 // File contents in one document (`ctxman pack`)
-import { packContext, discoverProjectRules, formatProjectRulesSection } from './lib/pack/index.js';
+import {
+  packContext,
+  discoverProjectRules,
+  formatProjectRulesSection,
+  classifyCacheTier,
+  orderEntriesForPromptCache,
+  buildPromptCachePlan,
+} from './lib/pack/index.js';
+
+// Pre-change Blast Radius & Symbol Contract Simulator (`ctxman impact`)
+import {
+  analyzeBlastRadius,
+  buildBlastMermaidDiagram,
+  formatBlastRadiusReport,
+  ImpactError,
+} from './lib/impact/index.js';
 
 // Import/importer neighborhood context (`ctxman focus`)
 import { focusContext, describeFocus, FocusError } from './lib/focus/index.js';
@@ -197,10 +212,19 @@ export {
   findExperts,
   WhoError,
 
-  // Packed file contents & rules discovery
+  // Packed file contents, rules discovery & prompt cache optimizer
   packContext,
   discoverProjectRules,
   formatProjectRulesSection,
+  classifyCacheTier,
+  orderEntriesForPromptCache,
+  buildPromptCachePlan,
+
+  // Pre-change Blast Radius & Symbol Contract Simulator (`ctxman impact`)
+  analyzeBlastRadius,
+  buildBlastMermaidDiagram,
+  formatBlastRadiusReport,
+  ImpactError,
 
   // Focused neighborhood context (`ctxman focus`)
   focusContext,

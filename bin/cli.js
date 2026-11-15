@@ -109,6 +109,11 @@ async function main() {
     return;
   }
 
+  if (command === 'impact') {
+    runSubcommand('./cm-impact.js', args.slice(1));
+    return;
+  }
+
   if (command === 'task') {
     runSubcommand('./cm-task.js', args.slice(1));
     return;

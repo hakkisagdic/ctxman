@@ -44,6 +44,7 @@ Document:
       --header TEXT        Text at the top
       --instructions FILE  Append the text of FILE at the end, after the files
       --include-rules      Auto-discover and include AGENTS.md, CLAUDE.md, .cursorrules, Copilot rules
+      --cache-control      Optimize file ordering for Anthropic & OpenAI Prompt Caching
       --line-numbers       Number every line (original numbers, also with --compress)
       --compress           Keep signatures, replace function bodies with a one-line
                            placeholder (languages of the method analyzers)
@@ -124,6 +125,7 @@ const FLAG_OPTIONS = {
   '--tree': ['tree', true],
   '--no-tree': ['tree', false],
   '--include-rules': ['includeRules', true],
+  '--cache-control': ['cacheControl', true],
   '--line-numbers': ['lineNumbers', true],
   '--compress': ['compress', true],
   '--redact': ['redact', true],
@@ -150,7 +152,9 @@ function parseArgs(argv) {
     }
     const eq = arg.startsWith('--') ? arg.indexOf('=') : -1;
     const name = eq > 0 ? arg.slice(0, eq) : arg;
-    if (VALUE_OPTIONS[name]) {
+    if (name === '--cache-control' && eq > 0) {
+      options.cacheControl = arg.slice(eq + 1) || true;
+    } else if (VALUE_OPTIONS[name]) {
       let value;
       if (eq > 0) value = arg.slice(eq + 1);
       else if (i + 1 < argv.length) value = argv[++i];
@@ -266,6 +270,13 @@ function printSummary(result, extras) {
       .join(', ');
     lines.push(`  Redacted ${formatNumber(result.redactions.total)} secret(s): ${types}`);
   }
+  if (result.cachePlan) {
+    const cp = result.cachePlan;
+    lines.push(
+      `  Prompt Cache: ${(cp.cacheableRatio * 100).toFixed(1)}% static prefix (${formatNumber(cp.staticPrefixTokens)} tokens), ` +
+        `~${cp.estimatedSavings.anthropicSavingsPct}% Anthropic / ~${cp.estimatedSavings.openaiSavingsPct}% OpenAI 10-turn savings`
+    );
+  }
   if (result.skipped.length) {
     const reasons = {};
     for (const file of result.skipped) reasons[file.reason] = (reasons[file.reason] ?? 0) + 1;
@@ -342,6 +353,7 @@ async function main() {
       tree: args.tree,
       header: args.header,
       includeRules: Boolean(args.includeRules),
+      cacheControl: args.cacheControl ?? false,
       lineNumbers: args.lineNumbers,
       compress: args.compress,
       redact: args.redact,
