@@ -89,6 +89,11 @@ import {
   auditSecretRotationReadiness,
   estimatePrReviewCognitiveLoad,
   auditApiDeprecationHeaders,
+  auditRegexDosRisk,
+  auditMcpToolPermissions,
+  auditConnectionPoolExhaustion,
+  compareEnvironmentParity,
+  estimateSemanticCacheHitRate,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -2151,6 +2156,142 @@ export function testSuite() {
       expect(report.compliantCount).toBe(1);
       expect(report.violationsCount).toBe(1);
       expect(report.findings[0].missingHeaders).toContain('Sunset');
+    });
+  });
+
+  describe('F18-1: Regular Expression (ReDoS) & Catastrophic Backtracking Auditor', () => {
+    it('flags nested quantifiers, overlapping alternations, and unescaped dynamic RegExp calls', () => {
+      const report = auditRegexDosRisk({
+        files: [
+          {
+            path: 'lib/validators/input.js',
+            content: [
+              'const EVIL = /^([a-zA-Z0-9]+)+$/;',
+              'export function matchUser(req) {',
+              '  return new RegExp(req.query.filter).test(req.body.name);',
+              '}',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(report.status).toBe('redos-vulnerable');
+      expect(report.criticalCount).toBeGreaterThanOrEqual(1);
+      expect(report.findings.some((f) => f.type === 'nested-quantifier')).toBe(true);
+      expect(report.findings.some((f) => f.type === 'dynamic-unescaped-regexp')).toBe(true);
+    });
+  });
+
+  describe('F18-2: Agent MCP Tool Schema Security & Over-Permission Auditor', () => {
+    it('flags destructive MCP tools missing confirmation gates, sandbox roots, or strict schemas', () => {
+      const report = auditMcpToolPermissions({
+        tools: [
+          {
+            name: 'run_shell_command',
+            allowShell: true,
+            inputSchema: {
+              type: 'object',
+              properties: {
+                cwd: { type: 'string' },
+                command: { type: 'string' },
+              },
+            },
+          },
+          {
+            name: 'read_repo_map',
+            annotations: { readOnlyHint: true, sandboxed: true },
+            inputSchema: {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                path: { type: 'string', pattern: '^[a-zA-Z0-9_./-]+$' },
+              },
+            },
+          },
+        ],
+      });
+      expect(report.status).toBe('over-permissioned');
+      expect(report.findings.some((f) => f.type === 'missing-human-confirmation-gate')).toBe(true);
+      expect(report.findings.some((f) => f.type === 'unrestricted-path-parameter')).toBe(true);
+      expect(report.securityScore).toBeLessThan(60);
+    });
+  });
+
+  describe('F18-3: Database Connection Pool & Leak Risk Auditor', () => {
+    it('detects unreleased pool.connect() clients, per-request Pool instantiation, and unsafe pool limits', () => {
+      const report = auditConnectionPoolExhaustion({
+        poolConfig: { max: 250, idleTimeoutMillis: 0, connectionTimeoutMillis: 0 },
+        files: [
+          {
+            path: 'lib/db/orders.js',
+            content: [
+              'export async function queryOrder(pool, id) {',
+              '  const client = await pool.connect();',
+              '  const res = await client.query("SELECT * FROM orders WHERE id = $1", [id]);',
+              '  return res.rows[0];',
+              '}',
+              'export function handleRequest() {',
+              '  const tempPool = new Pool({ connectionString: process.env.DATABASE_URL });',
+              '  return tempPool;',
+              '}',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(report.status).toBe('exhaustion-risk');
+      expect(report.findings.some((f) => f.type === 'unreleased-connection-leak')).toBe(true);
+      expect(report.findings.some((f) => f.type === 'per-request-pool-instantiation')).toBe(true);
+      expect(report.findings.some((f) => f.type === 'unsafe-pool-max-limit')).toBe(true);
+    });
+  });
+
+  describe('F18-4: Multi-Environment (Dev/Staging/Prod) Configuration Parity & Drift Auditor', () => {
+    it('identifies missing environment keys and unsafe DEBUG/localhost settings in production', () => {
+      const report = compareEnvironmentParity({
+        environments: {
+          dev: {
+            DATABASE_URL: 'postgres://localhost:5432/dev',
+            IYZICO_API_KEY: 'sandbox-key',
+            REDIS_URL: 'redis://localhost:6379',
+            DEBUG: 'true',
+          },
+          staging: {
+            DATABASE_URL: 'postgres://staging-db:5432/app',
+            IYZICO_API_KEY: 'staging-key',
+            REDIS_URL: 'redis://staging-redis:6379',
+            DEBUG: 'false',
+          },
+          prod: {
+            DATABASE_URL: 'postgres://prod-db:5432/app',
+            REDIS_URL: 'redis://127.0.0.1:6379',
+            DEBUG: 'true',
+          },
+        },
+      });
+      expect(report.status).toBe('drift-detected');
+      expect(report.missingKeysByEnv.prod).toContain('IYZICO_API_KEY');
+      expect(report.findings.some((f) => f.type === 'unsafe-production-flag')).toBe(true);
+      expect(report.findings.some((f) => f.type === 'localhost-in-production')).toBe(true);
+    });
+  });
+
+  describe('F18-5: LLM Semantic Response Cache Hit-Rate & ROI Estimator', () => {
+    it('clusters semantically similar agent queries and estimates token and USD savings', () => {
+      const report = estimateSemanticCacheHitRate({
+        similarityThreshold: 0.6,
+        queries: [
+          'explain checkout validation error in validator.js',
+          'explain checkout validation error in lib/core/validator.js',
+          'please explain checkout validation error in validator.js',
+          'generate sarif report for kvkk policy',
+          'generate sarif report for kvkk compliance policy',
+        ],
+      });
+      expect(report.totalQueries).toBe(5);
+      expect(report.uniqueClustersCount).toBe(2);
+      expect(report.cacheHits).toBe(3);
+      expect(report.hitRatePct).toBe(60);
+      expect(report.savedInputTokens).toBeGreaterThan(0);
+      expect(report.estimatedSavedUsd).toBeGreaterThan(0);
     });
   });
 });

@@ -1,7 +1,7 @@
 # Ctxman — Geliştirme Listesi (Rakip Matrisi Boşluk Kapatma ve Yaratıcı Farklılaştırıcı Yol Haritası)
 
 > **Son Güncelleme:** 15 Kasım 2026  
-> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–18 yaratıcı farklılaştırıcı özellikler.  
+> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–19 yaratıcı farklılaştırıcı özellikler.  
 > **Önceliklendirme Formülü:** $\text{Öncelik Skoru} = \frac{\text{Gelir Etkisi (1–10)} \times \text{Kullanıcı Değeri (1–10)}}{\text{Efor (1–5)}}$  
 > **Sınıflandırma:**
 >
@@ -22,7 +22,8 @@
 > - **F15-1..F15-5 (Faz 15 — %100 Tamamlandı):** On dördüncü 5 yaratıcı farklılaştırıcı yetenek (`F15-1`..`F15-5` tamamı uygulandı).
 > - **F16-1..F16-5 (Faz 16 — %100 Tamamlandı):** On beşinci 5 yaratıcı farklılaştırıcı yetenek (`F16-1`..`F16-5` tamamı uygulandı).
 > - **F17-1..F17-5 (Faz 17 — %100 Tamamlandı):** On altıncı 5 yaratıcı farklılaştırıcı yetenek (`F17-1`..`F17-5` tamamı uygulandı).
-> - **F18-1..F18-5 (Faz 18 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
+> - **F18-1..F18-5 (Faz 18 — %100 Tamamlandı):** On yedinci 5 yaratıcı farklılaştırıcı yetenek (`F18-1`..`F18-5` tamamı uygulandı).
+> - **F19-1..F19-5 (Faz 19 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
 
 ---
 
@@ -232,12 +233,24 @@
 
 ---
 
-## Faz 18: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+## Faz 18: 5 Yaratıcı Farklılaştırıcı Özellik (`F18-1`..`F18-5` — %100 Tamamlandı)
 
-| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                                                 | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
-| :-------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
-| **F18-1** | **Düzenli İfade (ReDoS) & Felaket Geri-İzleme Denetçisi (`auditRegexDosRisk`)** — Kullanıcı girdisiyle çalışan karmaşık/iç içe nicelikli regex kalıplarında üstel geri-izleme (catastrophic backtracking) tespiti        |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
-| **F18-2** | **Ajan Araç/MCP Şema Güvenliği & Aşırı Yetki Denetçisi (`auditMcpToolPermissions`)** — MCP araç tanımlarında sınırsız dosya sistemi/kabuk erişimi ve eksik girdi doğrulama şemalarını yakalama                           |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
-| **F18-3** | **Veritabanı Bağlantı Havuzu (Connection Pool) & Sızıntı Risk Denetçisi (`auditConnectionPoolExhaustion`)** — Serbest bırakılmayan (`release()`/`finally` eksik) DB istemcilerini ve havuz sınırı uyumsuzluklarını bulma |      8       |      9       |    2.2     | **32.7** | [ ] Planlandı |
-| **F18-4** | **Çoklu Ortam (Dev/Staging/Prod) Konfigürasyon Parite & Sapma Denetçisi (`compareEnvironmentParity`)** — Ortamlar arası eksik özellik bayrağı, zaman aşımı ve kota parametre sapmalarını karşılaştırma                   |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
-| **F18-5** | **LLM Yanıt Önbellek (Semantic Response Cache) İsabet & Tasarruf Tahmincisi (`estimateSemanticCacheHitRate`)** — Tekrarlayan ajan sorgu kümelerini benzerlik eşiğine göre gruplayıp önbellek ROI tahmini üretme          |      8       |      8       |    2.2     | **29.1** | [ ] Planlandı |
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                                                 | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
+| :-------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :----------------: |
+| **F18-1** | **Düzenli İfade (ReDoS) & Felaket Geri-İzleme Denetçisi (`auditRegexDosRisk`)** — Kullanıcı girdisiyle çalışan karmaşık/iç içe nicelikli regex kalıplarında üstel geri-izleme (catastrophic backtracking) tespiti        |      9       |      9       |    2.0     | **40.5** | **[x] Tamamlandı** |
+| **F18-2** | **Ajan Araç/MCP Şema Güvenliği & Aşırı Yetki Denetçisi (`auditMcpToolPermissions`)** — MCP araç tanımlarında sınırsız dosya sistemi/kabuk erişimi ve eksik girdi doğrulama şemalarını yakalama                           |      9       |      9       |    2.0     | **40.5** | **[x] Tamamlandı** |
+| **F18-3** | **Veritabanı Bağlantı Havuzu (Connection Pool) & Sızıntı Risk Denetçisi (`auditConnectionPoolExhaustion`)** — Serbest bırakılmayan (`release()`/`finally` eksik) DB istemcilerini ve havuz sınırı uyumsuzluklarını bulma |      8       |      9       |    2.2     | **32.7** | **[x] Tamamlandı** |
+| **F18-4** | **Çoklu Ortam (Dev/Staging/Prod) Konfigürasyon Parite & Sapma Denetçisi (`compareEnvironmentParity`)** — Ortamlar arası eksik özellik bayrağı, zaman aşımı ve kota parametre sapmalarını karşılaştırma                   |      8       |      8       |    2.0     | **32.0** | **[x] Tamamlandı** |
+| **F18-5** | **LLM Yanıt Önbellek (Semantic Response Cache) İsabet & Tasarruf Tahmincisi (`estimateSemanticCacheHitRate`)** — Tekrarlayan ajan sorgu kümelerini benzerlik eşiğine göre gruplayıp önbellek ROI tahmini üretme          |      8       |      8       |    2.2     | **29.1** | **[x] Tamamlandı** |
+
+---
+
+## Faz 19: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                                                             | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
+| :-------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
+| **F19-1** | **Webhook İmza & Tekrar-Saldırısı (Replay Attack) Güvenlik Denetçisi (`auditWebhookSignatureSecurity`)** — Gelen ödeme/webhook işleyicilerinde `timingSafeEqual`, HMAC doğrulaması ve zaman damgası (replay) kontrolü denetimi       |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
+| **F19-2** | **Ajan Uzun-Bağlam "Ortada Kaybolma" (Lost-in-the-Middle) Yeniden Sıralayıcı (`rebalanceContextAttention`)** — Kritik mimari/sözleşme dosyalarını dikkat eğrisinin başı ve sonuna yerleştirip orta bölge kaybını önleme              |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
+| **F19-3** | **SSRF & Dış URL İzin Listesi (Egress Allowlist) Güvenlik Denetçisi (`auditSsrfEgressSafety`)** — Kullanıcı girdisiyle beslenen `fetch`/`axios` çağrılarında özel IP blokları (`169.254.169.254`, `10.0.0.0/8`) korumasını denetleme |      9       |      8       |    2.2     | **32.7** | [ ] Planlandı |
+| **F19-4** | **Git Monorepo CODEOWNERS Kapsama & Yetim Dizin Denetçisi (`auditCodeownersCoverage`)** — `CODEOWNERS` dosyasında sahibi tanımlanmamış veya geçersiz takıma atanmış dizin ve kritik modülleri tespit etme                            |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
+| **F19-5** | **Zaman Uyumsuz İş (Cron / Background Job) Çakışma & Tekil-Kilit Denetçisi (`auditCronJobIdempotency`)** — Çoklu kopya (multi-replica) çalışan cron/worker görevlerinde dağıtık kilit (distributed lock) eksikliğini bulma           |      8       |      8       |    2.2     | **29.1** | [ ] Planlandı |

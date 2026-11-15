@@ -2802,3 +2802,15 @@ export function estimatePrReviewCognitiveLoad(
 export function auditApiDeprecationHeaders(
   options?: Record<string, unknown>
 ): Record<string, unknown>;
+
+export function auditRegexDosRisk(options?: Record<string, unknown>): Record<string, unknown>;
+export function auditMcpToolPermissions(options?: Record<string, unknown>): Record<string, unknown>;
+export function auditConnectionPoolExhaustion(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function compareEnvironmentParity(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function estimateSemanticCacheHitRate(
+  options?: Record<string, unknown>
+): Record<string, unknown>;

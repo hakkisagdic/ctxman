@@ -153,6 +153,11 @@ import { detectHallucinatedPackages } from './lib/security/slopsquat-detector.js
 import { auditSecretRotationReadiness } from './lib/security/secret-rotation.js';
 import { estimatePrReviewCognitiveLoad } from './lib/pr/cognitive-load.js';
 import { auditApiDeprecationHeaders } from './lib/architecture/api-deprecation.js';
+import { auditRegexDosRisk } from './lib/security/redos-auditor.js';
+import { auditMcpToolPermissions } from './lib/security/mcp-permission-auditor.js';
+import { auditConnectionPoolExhaustion } from './lib/architecture/connection-pool-auditor.js';
+import { compareEnvironmentParity } from './lib/architecture/env-parity.js';
+import { estimateSemanticCacheHitRate } from './lib/count/semantic-cache-estimator.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -388,6 +393,11 @@ export {
   auditSecretRotationReadiness,
   estimatePrReviewCognitiveLoad,
   auditApiDeprecationHeaders,
+  auditRegexDosRisk,
+  auditMcpToolPermissions,
+  auditConnectionPoolExhaustion,
+  compareEnvironmentParity,
+  estimateSemanticCacheHitRate,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,
