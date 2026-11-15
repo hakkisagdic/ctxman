@@ -98,6 +98,11 @@ import { mapEventLineage } from './lib/architecture/event-lineage.js';
 import { generateTestScaffold } from './lib/pr/test-scaffold.js';
 import { analyzeSemverBreakage } from './lib/pr/semver-analyzer.js';
 import { sanitizePromptContext } from './lib/security/prompt-shield.js';
+import { findStaleFeatureFlags } from './lib/architecture/feature-flags.js';
+import { auditResiliencePatterns } from './lib/architecture/resilience-audit.js';
+import { checkI18nDrift } from './lib/architecture/i18n-drift.js';
+import { generateSemanticReleaseNotes } from './lib/pr/release-notes.js';
+import { decomposeTaskIntoSteps } from './lib/task/task-decomposer.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -278,6 +283,11 @@ export {
   generateTestScaffold,
   analyzeSemverBreakage,
   sanitizePromptContext,
+  findStaleFeatureFlags,
+  auditResiliencePatterns,
+  checkI18nDrift,
+  generateSemanticReleaseNotes,
+  decomposeTaskIntoSteps,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,

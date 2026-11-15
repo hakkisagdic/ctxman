@@ -34,6 +34,11 @@ import {
   analyzeSemverBreakage,
   sanitizePromptContext,
   mapEventLineage,
+  findStaleFeatureFlags,
+  generateSemanticReleaseNotes,
+  auditResiliencePatterns,
+  checkI18nDrift,
+  decomposeTaskIntoSteps,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -778,6 +783,107 @@ export function testSuite() {
       expect(lineage.totalTopics).toBe(3);
       expect(lineage.deadProducers.some((t) => t.topic === 'order.orphan_event')).toBe(true);
       expect(lineage.deadConsumers.some((t) => t.topic === 'payment.unproduced')).toBe(true);
+    });
+  });
+
+  describe('F7-1: Feature Flag Lifecycle & Stale Flag Hunter', () => {
+    it('identifies stale launched/deprecated feature flags and unregistered flags', () => {
+      fs.writeFileSync(
+        path.join(tmpDir, 'lib', 'services', 'flags-demo.js'),
+        [
+          'export function renderUi(flags) {',
+          "  if (isFeatureEnabled('legacy_checkout_v1')) { return 'old'; }",
+          "  if (flags.experimentalAiPack) { return 'ai'; }",
+          "  return 'default';",
+          '}',
+        ].join('\n')
+      );
+
+      const report = findStaleFeatureFlags(tmpDir, {
+        registry: {
+          legacy_checkout_v1: { status: 'launched', permanentValue: true },
+        },
+      });
+      expect(report.totalFlags).toBe(2);
+      expect(report.staleFlagCount).toBe(1);
+      expect(report.staleFlags[0].name).toBe('legacy_checkout_v1');
+      expect(report.unregisteredFlags.some((f) => f.name === 'experimentalAiPack')).toBe(true);
+    });
+  });
+
+  describe('F7-2: Semantic Release Notes & Changelog Generator', () => {
+    it('groups Conventional Commits into Breaking, Features, Fixes, and Security sections', () => {
+      const notes = generateSemanticReleaseNotes(tmpDir, {
+        version: 'v3.4.0',
+        commits: [
+          {
+            sha: 'a1b2c3d',
+            author: 'Alice',
+            subject: 'feat(pack)!: require explicit manifest version',
+          },
+          { sha: 'b2c3d4e', author: 'Bob', subject: 'fix(billing): handle iyzico webhook retry' },
+          {
+            sha: 'c3d4e5f',
+            author: 'Alice',
+            subject: 'sec(policy): mask kvkk tckn in sarif output',
+          },
+        ],
+      });
+      expect(notes.sections.breaking).toHaveLength(1);
+      expect(notes.sections.features).toHaveLength(1);
+      expect(notes.sections.fixes).toHaveLength(1);
+      expect(notes.sections.security).toHaveLength(1);
+      expect(notes.markdown).toContain('## v3.4.0');
+      expect(notes.markdown).toContain('Breaking Changes');
+    });
+  });
+
+  describe('F7-3: Outbound HTTP Resilience Auditor', () => {
+    it('flags outbound fetch calls without timeout or AbortSignal guards', () => {
+      fs.writeFileSync(
+        path.join(tmpDir, 'lib', 'services', 'webhook-client.js'),
+        [
+          'export async function sendWebhookUnsafe(url) {',
+          "  return await fetch(url, { method: 'POST' });",
+          '}',
+        ].join('\n')
+      );
+
+      const audit = auditResiliencePatterns(tmpDir);
+      expect(audit.passed).toBe(false);
+      expect(
+        audit.findings.some((f) => f.ruleId === 'ctxman/resilience/missing-http-timeout')
+      ).toBe(true);
+    });
+  });
+
+  describe('F7-4: Multi-Locale i18n Key Parity Checker', () => {
+    it('detects missing translation keys across nested locale dictionaries', () => {
+      const drift = checkI18nDrift(
+        {
+          en: { nav: { home: 'Home', pricing: 'Pricing' }, cta: 'Start' },
+          tr: { nav: { home: 'Ana Sayfa' } },
+        },
+        { baseLocale: 'en' }
+      );
+      expect(drift.inSync).toBe(false);
+      expect(drift.missingByLocale.tr).toEqual(['nav.pricing', 'cta']);
+    });
+  });
+
+  describe('F7-5: Agent Task Plan & Sub-Task Decomposer', () => {
+    it('decomposes a task into ordered foundation, service, wiring, and test phases', () => {
+      const plan = decomposeTaskIntoSteps(tmpDir, 'update validator and checkout service', {
+        targetFiles: [
+          'lib/core/validator.js',
+          'lib/services/checkout.js',
+          'index.js',
+          'test/validator.test.js',
+        ],
+      });
+      expect(plan.stepCount).toBe(4);
+      expect(plan.steps[0].phase).toBe('core_foundation_and_models');
+      expect(plan.steps[plan.steps.length - 1].phase).toBe('verification_tests');
     });
   });
 });

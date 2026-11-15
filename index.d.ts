@@ -2667,3 +2667,24 @@ export function mapEventLineage(
   root: string,
   options?: Record<string, unknown>
 ): Record<string, unknown>;
+export function findStaleFeatureFlags(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function generateSemanticReleaseNotes(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function auditResiliencePatterns(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function checkI18nDrift(
+  locales?: Record<string, Record<string, unknown>>,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function decomposeTaskIntoSteps(
+  root: string,
+  taskQuery: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
