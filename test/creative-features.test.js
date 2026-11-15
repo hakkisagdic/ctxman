@@ -14,13 +14,16 @@ import {
   packDeltaContext,
   analyzeTaintFlows,
   findDeadSymbols,
+  checkDocDrift,
+  splitPrIntoAtomicGroups,
+  analyzeUncoveredRisk,
   recommendModelRoute,
   classifyTaskComplexity,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
 
-describe('Creative Features (C-1..C-5 & F3-1..F3-2)', () => {
+describe('Creative Features (C-1..C-5 & F3-1..F3-5)', () => {
   let tmpDir;
 
   beforeEach(() => {
@@ -356,6 +359,62 @@ export function testSuite() {
       expect(route.recommended).toBeDefined();
       expect(route.recommended.cachedSessionUsd).toBeLessThan(route.recommended.uncachedSessionUsd);
       expect(route.recommended.savingsPct).toBeGreaterThan(20);
+    });
+  });
+
+  describe('F3-3: Atomic PR Splitter', () => {
+    it('partitions disconnected changed files into separate reviewable sub-PR groups', () => {
+      fs.mkdirSync(path.join(tmpDir, 'lib', '独立'), { recursive: true });
+      fs.writeFileSync(
+        path.join(tmpDir, 'lib', '独立', 'standalone.js'),
+        `export function ping() { return 'pong'; }\n`
+      );
+
+      const split = splitPrIntoAtomicGroups(tmpDir, [
+        'lib/core/validator.js',
+        'lib/services/checkout.js',
+        'test/validator.test.js',
+        'lib/独立/standalone.js',
+      ]);
+      expect(split.groupCount).toBe(2);
+      expect(split.groups.some((g) => g.files.includes('lib/独立/standalone.js'))).toBe(true);
+    });
+  });
+
+  describe('F3-4: LCOV-to-AST Uncovered Risk Mapper', () => {
+    it('intersects LCOV uncovered lines with AST methods to flag untested functions', () => {
+      const lcov = [
+        'SF:lib/core/validator.js',
+        'DA:1,1',
+        'DA:2,1',
+        'DA:3,0',
+        'DA:8,0',
+        'DA:9,0',
+        'end_of_record',
+      ].join('\n');
+
+      const risk = analyzeUncoveredRisk(tmpDir, lcov);
+      expect(risk.riskyMethodCount).toBeGreaterThanOrEqual(2);
+      expect(
+        risk.riskyMethods.some(
+          (m) => m.file === 'lib/core/validator.js' && m.method === 'normalizeCurrency'
+        )
+      ).toBe(true);
+    });
+  });
+
+  describe('F3-5: ADR & Runbook Documentation Drift Checker', () => {
+    it('flags markdown docs referencing modified code files or symbols when the doc was not updated', () => {
+      fs.mkdirSync(path.join(tmpDir, 'docs'), { recursive: true });
+      fs.writeFileSync(
+        path.join(tmpDir, 'docs', 'ARCH.md'),
+        `# Architecture\n\nOrder validation is handled by \`validateOrder\` in \`lib/core/validator.js\`.\n`
+      );
+
+      const drift = checkDocDrift(tmpDir, ['lib/core/validator.js']);
+      expect(drift.passed).toBe(false);
+      expect(drift.staleDocs.length).toBe(1);
+      expect(drift.staleDocs[0].docFile).toBe('docs/ARCH.md');
     });
   });
 });

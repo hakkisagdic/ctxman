@@ -87,6 +87,9 @@ import {
 // Architecture Drift & Layer Violation Detector (`C-3`)
 import { checkArchitectureDrift, loadArchitectureConfig } from './lib/architecture/index.js';
 import { findDeadSymbols } from './lib/architecture/dead-symbols.js';
+import { checkDocDrift } from './lib/architecture/doc-drift.js';
+import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
+import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
 import {
   recommendModelRoute,
   classifyTaskComplexity,
@@ -245,6 +248,10 @@ export {
   checkArchitectureDrift,
   loadArchitectureConfig,
   findDeadSymbols,
+  checkDocDrift,
+  splitPrIntoAtomicGroups,
+  parseLcovReport,
+  analyzeUncoveredRisk,
   recommendModelRoute,
   classifyTaskComplexity,
   MODEL_CATALOG,

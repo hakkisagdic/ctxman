@@ -1,15 +1,14 @@
 # Ctxman — Geliştirme Listesi (Rakip Matrisi Boşluk Kapatma ve Yaratıcı Farklılaştırıcı Yol Haritası)
 
 > **Son Güncelleme:** 15 Kasım 2026  
-> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–3 yaratıcı farklılaştırıcı özellikler.  
+> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–4 yaratıcı farklılaştırıcı özellikler.  
 > **Önceliklendirme Formülü:** $\text{Öncelik Skoru} = \frac{\text{Gelir Etkisi (1–10)} \times \text{Kullanıcı Değeri (1–10)}}{\text{Efor (1–5)}}$  
 > **Sınıflandırma:**
 >
-> - **P0:** Ürünün doğrudan satılabilir (monetizable) olması ve Türkiye/Global kurumsal satış kancası için şart olan kalemler.
-> - **P1:** Rakip paritesini (Greptile, CodeRabbit, Repomix, Sourcegraph) tamamlayan yüksek değerli kalemler.
-> - **P2:** Kurumsal CI/CD ve DevSecOps entegrasyonunu güçlendiren tamamlayıcı kalemler.
-> - **C1–C5 (Faz 2 Yaratıcı Özellikler — %100 Tamamlandı):** Rakiplerin hiçbirinde bulunmayan, Ctxman'i kategori lideri yapan yaratıcı farklılaştırıcı yetenekler (`C-1`..`C-5` tamamı uygulandı).
-> - **F3-1..F3-5 (Faz 3 Yaratıcı Özellik Önerileri — En Değerli İkisi `F3-1` & `F3-2` Uygulandı):** Faz 2 tamamlandıktan sonra önerilen 5 yeni yaratıcı yetenek; en yüksek skorlu ilk ikisi (`F3-1` ve `F3-2`) doğrudan uygulanmıştır.
+> - **P0–P2 (Faz 1 — %100 Tamamlandı):** Rakip paritesi ve ticari altyapı (`iyzico`, KVKK/BDDK PII, kural keşfi, bilgi grafiği REST, PR zekası, uzak depo, SARIF).
+> - **C1–C5 (Faz 2 — %100 Tamamlandı):** Rakiplerin hiçbirinde bulunmayan ilk 5 yaratıcı farklılaştırıcı yetenek (`C-1`..`C-5` tamamı uygulandı).
+> - **F3-1..F3-5 (Faz 3 — %100 Tamamlandı):** İkinci 5 yaratıcı farklılaştırıcı yetenek (`F3-1`..`F3-5` tamamı uygulandı).
+> - **F4-1..F4-5 (Faz 4 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
 
 ---
 
@@ -39,28 +38,24 @@
 
 ---
 
-## Faz 3: 5 Yeni Yaratıcı Özellik Önerisi (En Değerli İkisi `F3-1` & `F3-2` Uygulandı)
+## Faz 3: 5 Yaratıcı Farklılaştırıcı Özellik (`F3-1`..`F3-5` — %100 Tamamlandı)
 
-| Kod      | Yaratıcı Özellik Önerisi                                                                                                                          | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |           Durum            |
-| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------ | :----------: | :----------: | :--------: | :------: | :------------------------: |
-| **F3-1** | **Semantik Ölü Kod & Yetim Sembol Avcısı (Semantic Dead-Symbol Hunter)** — AST çağrı grafiği ve import grafiğiyle sıfır referanslı sembol tespiti |      8       |      9       |    2.0     | **36.0** | **[x] Tamamlandı (Top 1)** |
-| **F3-2** | **Çoklu Model Token & Maliyet Arbitraj Danışmanı (Multi-LLM Cost Router)** — Görev karmaşıklığına göre en ekonomik LLM ve bütçe önerisi           |      9       |      8       |    2.0     | **36.0** | **[x] Tamamlandı (Top 2)** |
-| **F3-3** | **Otomatik PR Bölücü (Atomic PR Splitter)** — Büyük PR'ları bağımlılık grafiğindeki bağlantılı bileşenlere göre bağımsız alt PR'lara ayırma       |      8       |      9       |    2.5     | **28.8** |       [ ] Planlandı        |
-| **F3-4** | **Canlı Test Kapsama Haritası & Riskli Satır Eşleştirici (LCOV-to-AST Risk Mapper)** — LCOV raporu ile PR değişen metodlarını kesiştirme          |      8       |      8       |    2.5     | **25.6** |       [ ] Planlandı        |
-| **F3-5** | **Kurumsal Bilgi Köprüsü Senkronizasyonu (ADR & Runbook Drift Checker)** — Kod değiştiğinde güncelliğini yitiren `docs/` ve ADR dosyalarını bulma |      7       |      8       |    2.5     | **22.4** |       [ ] Planlandı        |
-
----
-
-### [x] F3-1 (Uygulandı): Semantik Ölü Kod & Yetim Sembol Avcısı (`lib/architecture/dead-symbols.js`)
-
-- **Uygulanan Yetenekler:**
-  1. [`lib/architecture/dead-symbols.js`](../lib/architecture/dead-symbols.js) (`findDeadSymbols`): Depo import grafiği ve AST sembol çağrı grafiği (`buildRepoGraph`) üzerinde gelen import/çağrı sayısı sıfır olan yetim modülleri (`orphanModules`) ve hem dosya dışından hem dosya içinden hiç çağrılmayan ölü fonksiyonları (`deadSymbols`) tespit eder.
-  2. REST API (`GET /api/v1/dead-symbols`) ve programatik SDK (`import { findDeadSymbols } from 'ctxman'`) ile kullanıma sunulmuştur.
+| Kod      | Yaratıcı Özellik                                                                                                                                   | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
+| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :----------------: |
+| **F3-1** | **Semantik Ölü Kod & Yetim Sembol Avcısı (`findDeadSymbols`)** — AST çağrı grafiği ve import grafiğiyle sıfır referanslı sembol tespiti            |      8       |      9       |    2.0     | **36.0** | **[x] Tamamlandı** |
+| **F3-2** | **Çoklu Model Token & Maliyet Arbitraj Danışmanı (`recommendModelRoute`)** — Görev karmaşıklığına göre en ekonomik LLM ve bütçe önerisi            |      9       |      8       |    2.0     | **36.0** | **[x] Tamamlandı** |
+| **F3-3** | **Otomatik PR Bölücü (`splitPrIntoAtomicGroups`)** — Büyük PR'ları bağımlılık grafiğindeki bağlantılı bileşenlere göre bağımsız alt PR'lara ayırma |      8       |      9       |    2.5     | **28.8** | **[x] Tamamlandı** |
+| **F3-4** | **Canlı Test Kapsama Haritası & Riskli Satır Eşleştirici (`analyzeUncoveredRisk`)** — LCOV raporu ile AST metodlarını kesiştirme                   |      8       |      8       |    2.5     | **25.6** | **[x] Tamamlandı** |
+| **F3-5** | **Kurumsal Bilgi Köprüsü Senkronizasyonu (`checkDocDrift`)** — Kod değiştiğinde güncelliğini yitiren `docs/` ve ADR dosyalarını bulma              |      7       |      8       |    2.5     | **22.4** | **[x] Tamamlandı** |
 
 ---
 
-### [x] F3-2 (Uygulandı): Çoklu Model Token & Maliyet Arbitraj Danışmanı (`lib/count/cost-router.js`)
+## Faz 4: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
 
-- **Uygulanan Yetenekler:**
-  1. [`lib/count/cost-router.js`](../lib/count/cost-router.js) (`recommendModelRoute`, `classifyTaskComplexity`, `MODEL_CATALOG`): Görev açıklamasını ve girdi token sayısını analiz ederek görevi `fast`, `balanced` veya `reasoning` karmaşıklık katmanına ayırır; 7 büyük LLM modeli (DeepSeek V3, Gemini 2.5 Flash/Pro, GPT-4o/mini, Claude Haiku/Sonnet) için çok turlu ajan oturumunda önbelleksiz (`uncachedSessionUsd`) ve prompt-cache aktif (`cachedSessionUsd`) maliyetleri hesaplayıp en ekonomik modeli ve önerilen token bütçesini (`recommendedBudget`) döndürür.
-  2. REST API (`GET /api/v1/cost-router`) ve programatik SDK (`import { recommendModelRoute } from 'ctxman'`) ile kullanıma sunulmuştur.
+| Kod      | Yaratıcı Özellik Önerisi                                                                                                                               | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
+| :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
+| **F4-1** | **Ajan Halüsinasyon & Sembol Doğrulayıcı (LLM Patch Grounding Verifier)** — LLM'in ürettiği yamadaki import/fonksiyon çağrılarının varlığını denetleme |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
+| **F4-2** | **Döngüsel Bağımlılık Kırıcı (Circular Dependency Unwinder)** — Depodaki import döngülerini (SCC) bulup en düşük maliyetli kesim kenarını önerme       |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
+| **F4-3** | **Çoklu Depo API Sözleşme Uyumluluk Denetçisi (Cross-Repo Contract Checker)** — Servisler arası REST/MCP şema kırılmalarını statik yakalama            |      8       |      8       |    2.5     | **25.6** | [ ] Planlandı |
+| **F4-4** | **Git Bisect Odaklı Regresyon Bağlam Paketleyici (Regression Bisect Pack)** — İki commit arasındaki davranış farkını sembol düzeyinde özetleme         |      7       |      8       |    2.5     | **22.4** | [ ] Planlandı |
+| **F4-5** | **Kurumsal Lisans & Tedarik Zinciri Risk Tarayıcı (SBOM & License Gate)** — `package.json` bağımlılıklarını politika kapısıyla denetleme               |      8       |      7       |    2.5     | **22.4** | [ ] Planlandı |

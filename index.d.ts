@@ -2582,3 +2582,19 @@ export function classifyTaskComplexity(
   inputTokens?: number
 ): 'fast' | 'balanced' | 'reasoning';
 export const MODEL_CATALOG: Array<Record<string, unknown>>;
+
+export function checkDocDrift(root: string, changedFiles?: string[]): Record<string, unknown>;
+export function splitPrIntoAtomicGroups(
+  root: string,
+  changedFiles?: string[],
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function parseLcovReport(
+  lcovText?: string,
+  rootPath?: string | null
+): Map<string, Record<string, unknown>>;
+export function analyzeUncoveredRisk(
+  root: string,
+  lcovText?: string,
+  changedFiles?: string[] | null
+): Record<string, unknown>;
