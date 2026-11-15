@@ -1,14 +1,15 @@
 # Ctxman — Geliştirme Listesi (Rakip Matrisi Boşluk Kapatma ve Yaratıcı Farklılaştırıcı Yol Haritası)
 
 > **Son Güncelleme:** 15 Kasım 2026  
-> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–4 yaratıcı farklılaştırıcı özellikler.  
+> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–5 yaratıcı farklılaştırıcı özellikler.  
 > **Önceliklendirme Formülü:** $\text{Öncelik Skoru} = \frac{\text{Gelir Etkisi (1–10)} \times \text{Kullanıcı Değeri (1–10)}}{\text{Efor (1–5)}}$  
 > **Sınıflandırma:**
 >
 > - **P0–P2 (Faz 1 — %100 Tamamlandı):** Rakip paritesi ve ticari altyapı (`iyzico`, KVKK/BDDK PII, kural keşfi, bilgi grafiği REST, PR zekası, uzak depo, SARIF).
 > - **C1–C5 (Faz 2 — %100 Tamamlandı):** Rakiplerin hiçbirinde bulunmayan ilk 5 yaratıcı farklılaştırıcı yetenek (`C-1`..`C-5` tamamı uygulandı).
 > - **F3-1..F3-5 (Faz 3 — %100 Tamamlandı):** İkinci 5 yaratıcı farklılaştırıcı yetenek (`F3-1`..`F3-5` tamamı uygulandı).
-> - **F4-1..F4-5 (Faz 4 — En Değerli 3 Özellik Tamamlandı):** `F4-1` (`verifyPatchGrounding`), `F4-2` (`findCircularDependencies`) ve `F4-5` (`checkLicenseCompliance`) tamamlandı.
+> - **F4-1..F4-5 (Faz 4 — %100 Tamamlandı):** Üçüncü 5 yaratıcı farklılaştırıcı yetenek (`F4-1`..`F4-5` tamamı uygulandı).
+> - **F5-1..F5-5 (Faz 5 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
 
 ---
 
@@ -50,12 +51,24 @@
 
 ---
 
-## Faz 4: 5 Yaratıcı Farklılaştırıcı Özellik (En Değerli 3'ü Tamamlandı)
+## Faz 4: 5 Yaratıcı Farklılaştırıcı Özellik (`F4-1`..`F4-5` — %100 Tamamlandı)
 
 | Kod      | Yaratıcı Özellik                                                                                                                                               | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
 | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :----------------: |
 | **F4-1** | **Ajan Halüsinasyon & Sembol Doğrulayıcı (`verifyPatchGrounding` & `POST /api/v1/verify-patch`)** — Yamadaki import/fonksiyon çağrılarının varlığını denetleme |      9       |      9       |    2.0     | **40.5** | **[x] Tamamlandı** |
 | **F4-2** | **Döngüsel Bağımlılık Kırıcı (`findCircularDependencies` & `GET /api/v1/circular-deps`)** — Tarjan SCC ile import döngülerini bulup kesim kenarı önerme        |      8       |      9       |    2.0     | **36.0** | **[x] Tamamlandı** |
-| **F4-3** | **Çoklu Depo API Sözleşme Uyumluluk Denetçisi (Cross-Repo Contract Checker)** — Servisler arası REST/MCP şema kırılmalarını statik yakalama                    |      8       |      8       |    2.5     | **25.6** |   [ ] Planlandı    |
-| **F4-4** | **Git Bisect Odaklı Regresyon Bağlam Paketleyici (Regression Bisect Pack)** — İki commit arasındaki davranış farkını sembol düzeyinde özetleme                 |      7       |      8       |    2.5     | **22.4** |   [ ] Planlandı    |
+| **F4-3** | **Çoklu Depo API Sözleşme Uyumluluk Denetçisi (`checkCrossRepoContracts`)** — Servisler arası REST/sembol şema kırılmalarını statik yakalama                   |      8       |      8       |    2.5     | **25.6** | **[x] Tamamlandı** |
+| **F4-4** | **Git Bisect Odaklı Regresyon Bağlam Paketleyici (`buildBisectContextPack`)** — İki commit arasındaki aday suçlu commitleri graf merkeziliğiyle puanlama       |      7       |      8       |    2.5     | **22.4** | **[x] Tamamlandı** |
 | **F4-5** | **Kurumsal Lisans & Tedarik Zinciri Risk Tarayıcı (`checkLicenseCompliance` & `GET /api/v1/license-gate`)** — CycloneDX SBOM ve SPDX lisans politikası kapısı  |      8       |      7       |    2.5     | **22.4** | **[x] Tamamlandı** |
+
+---
+
+## Faz 5: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+
+| Kod      | Yaratıcı Özellik Önerisi                                                                                                                               | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
+| :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
+| **F5-1** | **Ajan Bağlam Bütçesi Otomatik Daraltıcı (Dynamic Context Pruner)** — Token sınırı dolduğunda düşük entropili blokları AST düzeyinde budama            |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
+| **F5-2** | **Semantik Klon & Kopya Mantık Dedektörü (AST Clone & Duplicate Logic Detector)** — Farklı dosyalardaki yapısal olarak eşdeğer metodları yakalama      |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
+| **F5-3** | **Kurumsal Bilgi Kaybı & Bus-Factor Risk Haritası (Knowledge Silo & Bus-Factor Analyzer)** — Tek kişiye bağımlı kritik modülleri tespit etme           |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
+| **F5-4** | **Veritabanı Şema & Sorgu Darboğazı Tespiti (N+1 & Unindexed Query Hunter)** — Döngü içi SQL/ORM çağrılarını statik AST analiziyle yakalama            |      8       |      8       |    2.5     | **25.6** | [ ] Planlandı |
+| **F5-5** | **Çok Dilli İstem & Kural Çevirici (Cross-Agent Rule Compiler)** — Tek bir `.ctxman/rules.json` tanımından `CLAUDE.md`, `.cursorrules`, Copilot üretme |      7       |      8       |    2.0     | **28.0** | [ ] Planlandı |

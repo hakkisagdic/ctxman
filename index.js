@@ -92,6 +92,8 @@ import { findCircularDependencies } from './lib/architecture/circular-deps.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
 import { verifyPatchGrounding } from './lib/pr/patch-verifier.js';
+import { buildBisectContextPack } from './lib/pr/bisect-pack.js';
+import { checkCrossRepoContracts } from './lib/workspace/contract-checker.js';
 import {
   checkLicenseCompliance,
   DEFAULT_ALLOWED_LICENSES,
@@ -261,6 +263,8 @@ export {
   parseLcovReport,
   analyzeUncoveredRisk,
   verifyPatchGrounding,
+  buildBisectContextPack,
+  checkCrossRepoContracts,
   checkLicenseCompliance,
   DEFAULT_ALLOWED_LICENSES,
   DEFAULT_DENIED_LICENSES,

@@ -20,6 +20,8 @@ import {
   recommendModelRoute,
   classifyTaskComplexity,
   verifyPatchGrounding,
+  buildBisectContextPack,
+  checkCrossRepoContracts,
   findCircularDependencies,
   checkLicenseCompliance,
   buildSarifReport,
@@ -490,6 +492,67 @@ export function testSuite() {
       expect(copyleft.compliant).toBe(false);
       expect(copyleft.violations).toHaveLength(1);
       expect(copyleft.violations[0].package).toBe('viral-lib');
+    });
+  });
+
+  describe('F4-3: Cross-Repo API & Symbol Contract Checker', () => {
+    it('detects broken consumer symbol imports and non-existent REST endpoints across repos', () => {
+      const consumerDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-consumer-'));
+      try {
+        fs.writeFileSync(
+          path.join(consumerDir, 'client.js'),
+          [
+            "import { validateOrder, removedLegacyFn } from 'demo-app';",
+            'export async function callProvider() {',
+            "  return fetch('/api/v1/non-existent-route');",
+            '}',
+          ].join('\n')
+        );
+
+        const report = checkCrossRepoContracts(tmpDir, [consumerDir], {
+          providerRoutes: ['/api/v1/orders'],
+        });
+        expect(report.compatible).toBe(false);
+        expect(
+          report.brokenContracts.some(
+            (b) => b.kind === 'missing_export' && b.symbol === 'removedLegacyFn'
+          )
+        ).toBe(true);
+        expect(
+          report.brokenContracts.some(
+            (b) => b.kind === 'missing_endpoint' && b.endpoint === '/api/v1/non-existent-route'
+          )
+        ).toBe(true);
+      } finally {
+        fs.rmSync(consumerDir, { recursive: true, force: true });
+      }
+    });
+  });
+
+  describe('F4-4: Git Bisect Regression Context Pack', () => {
+    it('ranks candidate regression commits by graph centrality and failing target match', () => {
+      const pack = buildBisectContextPack(tmpDir, 'v1.0.0', 'HEAD', {
+        target: 'validator.js',
+        commits: [
+          { sha: '1111111', subject: 'docs: update readme', files: ['README.md'] },
+          {
+            sha: '2222222',
+            subject: 'refactor: change validateOrder threshold',
+            files: ['lib/core/validator.js'],
+          },
+          {
+            sha: '3333333',
+            subject: 'chore: tweak checkout comments',
+            files: ['lib/services/checkout.js'],
+          },
+        ],
+      });
+      expect(pack.totalCommitsInRange).toBe(3);
+      expect(pack.topSuspects[0].sha).toBe('2222222');
+      expect(pack.topSuspects[0].suspicionScore).toBeGreaterThan(
+        pack.topSuspects[1].suspicionScore
+      );
+      expect(pack.nextBisectCommit.sha).toBe('2222222');
     });
   });
 });

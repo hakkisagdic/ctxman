@@ -2614,3 +2614,14 @@ export function checkLicenseCompliance(
 ): Record<string, unknown>;
 export const DEFAULT_ALLOWED_LICENSES: string[];
 export const DEFAULT_DENIED_LICENSES: string[];
+export function checkCrossRepoContracts(
+  providerRoot: string,
+  consumerRoots: string | string[],
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function buildBisectContextPack(
+  root: string,
+  goodRev: string,
+  badRev?: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
