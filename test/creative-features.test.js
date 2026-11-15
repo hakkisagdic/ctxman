@@ -74,6 +74,11 @@ import {
   generateRollbackRunbook,
   detectConcurrencyHazards,
   buildSlaImpactReport,
+  auditCryptoAgility,
+  evaluateMultiAgentConsensus,
+  generateShadowReplayPlan,
+  auditRightToBeForgotten,
+  analyzeColdStartBottlenecks,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -1783,6 +1788,121 @@ export function testSuite() {
       expect(sla.slaBreached).toBe(true);
       expect(sla.summary.impactedCustomerCount).toBe(1);
       expect(sla.totalPenaltyRiskUsd).toBe(5000);
+    });
+  });
+
+  describe('F15-1: Post-Quantum Cryptography (PQC) & Weak-Crypto Agility Auditor', () => {
+    it('flags MD5/SHA-1 hashes, ECB/DES ciphers, and quantum-vulnerable RSA/EC keygen', () => {
+      const report = auditCryptoAgility({
+        files: [
+          {
+            path: 'lib/crypto/legacy.js',
+            content: [
+              'const h = crypto.createHash("md5");',
+              'const c = crypto.createCipheriv("aes-128-ecb", k, iv);',
+              'const kp = crypto.generateKeyPairSync("rsa", { modulusLength: 2048 });',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(report.pqcReady).toBe(false);
+      expect(report.summary.criticalCount).toBe(1);
+      expect(report.summary.highCount).toBe(1);
+      expect(report.summary.mediumCount).toBe(1);
+      expect(report.agilityScore).toBeLessThan(50);
+    });
+  });
+
+  describe('F15-2: Multi-Agent Consensus & Patch Judge Evaluator', () => {
+    it('reconciles competing agent proposals using confidence, test pass, and grounding weights', () => {
+      const res = evaluateMultiAgentConsensus({
+        proposals: [
+          {
+            agentId: 'agent-alpha',
+            decision: 'approve',
+            confidence: 0.9,
+            testsPassed: true,
+            grounded: true,
+            riskDelta: -5,
+          },
+          {
+            agentId: 'agent-beta',
+            decision: 'approve',
+            confidence: 0.8,
+            testsPassed: true,
+            grounded: true,
+            riskDelta: 0,
+          },
+          {
+            agentId: 'agent-gamma',
+            decision: 'reject',
+            confidence: 0.4,
+            testsPassed: false,
+            grounded: false,
+            riskDelta: 20,
+          },
+        ],
+      });
+      expect(res.consensusReached).toBe(true);
+      expect(res.winningDecision).toBe('approve');
+      expect(res.winningProposal.agentId).toBe('agent-alpha');
+      expect(res.dissentingAgents).toEqual(['agent-gamma']);
+    });
+  });
+
+  describe('F15-3: Shadow Traffic & Regression Replay Plan Generator', () => {
+    it('assigns read-only-mirror to GET routes and dry-run-sandbox to mutation routes', () => {
+      const plan = generateShadowReplayPlan({
+        routes: [
+          { method: 'GET', path: '/api/v1/orders', riskTier: 'high' },
+          { method: 'POST', path: '/api/v1/charge', riskTier: 'high' },
+        ],
+      });
+      expect(plan.summary.totalRoutes).toBe(2);
+      expect(plan.summary.readOnlyMirrorCount).toBe(1);
+      expect(plan.summary.sandboxMutationCount).toBe(1);
+      expect(plan.replayTargets[0].redactHeaders).toContain('authorization');
+    });
+  });
+
+  describe('F15-4: KVKK / GDPR Right-to-be-Forgotten (RTBF) Data Erasure Auditor', () => {
+    it('identifies orphaned PII tables not erased during user account deletion', () => {
+      const audit = auditRightToBeForgotten({
+        piiStores: ['users', 'invoices', 'audit_sessions', 'marketing_leads'],
+        deletionHandlerCode: [
+          'async function eraseCustomer(db, userId) {',
+          '  await db.query("DELETE FROM users WHERE id = $1", [userId]);',
+          '  await db.query("UPDATE invoices SET tckn = NULL, anonymized_at = NOW() WHERE user_id = $1", [userId]);',
+          '}',
+        ].join('\n'),
+      });
+      expect(audit.compliant).toBe(false);
+      expect(audit.coveredStores).toEqual(['users', 'invoices']);
+      expect(audit.orphanedPiiStores).toEqual(['audit_sessions', 'marketing_leads']);
+      expect(audit.hasAuditTombstone).toBe(true);
+    });
+  });
+
+  describe('F15-5: Cold-Start & Module Boot Latency Bottleneck Analyzer', () => {
+    it('flags top-level synchronous I/O and eager heavy package imports', () => {
+      const report = analyzeColdStartBottlenecks({
+        files: [
+          {
+            path: 'lib/cli-entry.js',
+            content: [
+              'import puppeteer from "puppeteer";',
+              'const bootConfig = fs.readFileSync("./config.json", "utf8");',
+              'export function run() {',
+              '  const lazy = fs.readFileSync("./other.json", "utf8");',
+              '  return lazy;',
+              '}',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(report.fastBoot).toBe(false);
+      expect(report.summary.bottleneckCount).toBe(2);
+      expect(report.estimatedPenaltyMs).toBeGreaterThanOrEqual(240);
     });
   });
 });

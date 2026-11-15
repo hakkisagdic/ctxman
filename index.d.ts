@@ -2760,3 +2760,15 @@ export function detectConcurrencyHazards(
   options?: Record<string, unknown>
 ): Record<string, unknown>;
 export function buildSlaImpactReport(options?: Record<string, unknown>): Record<string, unknown>;
+
+export function auditCryptoAgility(options?: Record<string, unknown>): Record<string, unknown>;
+export function evaluateMultiAgentConsensus(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function generateShadowReplayPlan(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function auditRightToBeForgotten(options?: Record<string, unknown>): Record<string, unknown>;
+export function analyzeColdStartBottlenecks(
+  options?: Record<string, unknown>
+): Record<string, unknown>;

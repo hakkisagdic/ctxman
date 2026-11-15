@@ -138,6 +138,11 @@ import { auditEndpointAuthCoverage } from './lib/security/auth-coverage.js';
 import { generateRollbackRunbook } from './lib/pr/rollback-runbook.js';
 import { detectConcurrencyHazards } from './lib/architecture/concurrency-hazards.js';
 import { buildSlaImpactReport } from './lib/policy/sla-impact.js';
+import { auditCryptoAgility } from './lib/security/crypto-agility.js';
+import { evaluateMultiAgentConsensus } from './lib/task/agent-consensus.js';
+import { generateShadowReplayPlan } from './lib/pr/shadow-replay.js';
+import { auditRightToBeForgotten } from './lib/security/rtbf-auditor.js';
+import { analyzeColdStartBottlenecks } from './lib/architecture/cold-start.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -358,6 +363,11 @@ export {
   generateRollbackRunbook,
   detectConcurrencyHazards,
   buildSlaImpactReport,
+  auditCryptoAgility,
+  evaluateMultiAgentConsensus,
+  generateShadowReplayPlan,
+  auditRightToBeForgotten,
+  analyzeColdStartBottlenecks,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,

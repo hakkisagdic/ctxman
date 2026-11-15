@@ -1,7 +1,7 @@
 # Ctxman — Geliştirme Listesi (Rakip Matrisi Boşluk Kapatma ve Yaratıcı Farklılaştırıcı Yol Haritası)
 
 > **Son Güncelleme:** 15 Kasım 2026  
-> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–15 yaratıcı farklılaştırıcı özellikler.  
+> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–16 yaratıcı farklılaştırıcı özellikler.  
 > **Önceliklendirme Formülü:** $\text{Öncelik Skoru} = \frac{\text{Gelir Etkisi (1–10)} \times \text{Kullanıcı Değeri (1–10)}}{\text{Efor (1–5)}}$  
 > **Sınıflandırma:**
 >
@@ -19,7 +19,8 @@
 > - **F12-1..F12-5 (Faz 12 — %100 Tamamlandı):** On birinci 5 yaratıcı farklılaştırıcı yetenek (`F12-1`..`F12-5` tamamı uygulandı).
 > - **F13-1..F13-5 (Faz 13 — %100 Tamamlandı):** On ikinci 5 yaratıcı farklılaştırıcı yetenek (`F13-1`..`F13-5` tamamı uygulandı).
 > - **F14-1..F14-5 (Faz 14 — %100 Tamamlandı):** On üçüncü 5 yaratıcı farklılaştırıcı yetenek (`F14-1`..`F14-5` tamamı uygulandı).
-> - **F15-1..F15-5 (Faz 15 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
+> - **F15-1..F15-5 (Faz 15 — %100 Tamamlandı):** On dördüncü 5 yaratıcı farklılaştırıcı yetenek (`F15-1`..`F15-5` tamamı uygulandı).
+> - **F16-1..F16-5 (Faz 16 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
 
 ---
 
@@ -193,12 +194,24 @@
 
 ---
 
-## Faz 15: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+## Faz 15: 5 Yaratıcı Farklılaştırıcı Özellik (`F15-1`..`F15-5` — %100 Tamamlandı)
 
-| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                         | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
-| :-------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
-| **F15-1** | **Kuantum-Sonrası (Post-Quantum / PQC) & Zayıf Kriptografi Denetçisi (`auditCryptoAgility`)** — MD5/SHA-1/DES/ECB ve sabit RSA-1024/ECC kullanımlarını tarayıp PQC geçiş planı önerme            |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
-| **F15-2** | **Ajan Konsensüs & Çoklu-Model Hakem Değerlendirici (`evaluateMultiAgentConsensus`)** — Birden fazla ajan/modelin ürettiği yamaları veya inceleme kararlarını ağırlıklı oylamayla uzlaştırma     |      9       |      9       |    2.2     | **36.8** | [ ] Planlandı |
-| **F15-3** | **Gölge Trafik (Shadow Traffic) & Regresyon Tekrar-Oynatma Senaryo Üretici (`generateShadowReplayPlan`)** — Değişen API rotaları için üretim trafiği yansıtma ve fark karşılaştırma planı üretme |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
-| **F15-4** | **KVKK / GDPR Unutulma Hakkı (RTBF) & Veri Silme Soykütüğü Denetçisi (`auditRightToBeForgotten`)** — Kullanıcı silme akışlarında unutulan alt tabloları ve önbellek/log kalıntılarını yakalama   |      9       |      8       |    2.2     | **32.7** | [ ] Planlandı |
-| **F15-5** | **Soğuk Başlatma (Cold-Start) & Başlangıç Gecikmesi Darboğaz Analizörü (`analyzeColdStartBottlenecks`)** — Üst düzey senkron G/Ç ve ağır barrel import zincirlerini tespit etme                  |      8       |      8       |    2.2     | **29.1** | [ ] Planlandı |
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                         | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
+| :-------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :----------------: |
+| **F15-1** | **Kuantum-Sonrası (Post-Quantum / PQC) & Zayıf Kriptografi Denetçisi (`auditCryptoAgility`)** — MD5/SHA-1/DES/ECB ve sabit RSA-1024/ECC kullanımlarını tarayıp PQC geçiş planı önerme            |      9       |      9       |    2.0     | **40.5** | **[x] Tamamlandı** |
+| **F15-2** | **Ajan Konsensüs & Çoklu-Model Hakem Değerlendirici (`evaluateMultiAgentConsensus`)** — Birden fazla ajan/modelin ürettiği yamaları veya inceleme kararlarını ağırlıklı oylamayla uzlaştırma     |      9       |      9       |    2.2     | **36.8** | **[x] Tamamlandı** |
+| **F15-3** | **Gölge Trafik (Shadow Traffic) & Regresyon Tekrar-Oynatma Senaryo Üretici (`generateShadowReplayPlan`)** — Değişen API rotaları için üretim trafiği yansıtma ve fark karşılaştırma planı üretme |      8       |      9       |    2.0     | **36.0** | **[x] Tamamlandı** |
+| **F15-4** | **KVKK / GDPR Unutulma Hakkı (RTBF) & Veri Silme Soykütüğü Denetçisi (`auditRightToBeForgotten`)** — Kullanıcı silme akışlarında unutulan alt tabloları ve önbellek/log kalıntılarını yakalama   |      9       |      8       |    2.2     | **32.7** | **[x] Tamamlandı** |
+| **F15-5** | **Soğuk Başlatma (Cold-Start) & Başlangıç Gecikmesi Darboğaz Analizörü (`analyzeColdStartBottlenecks`)** — Üst düzey senkron G/Ç ve ağır barrel import zincirlerini tespit etme                  |      8       |      8       |    2.2     | **29.1** | **[x] Tamamlandı** |
+
+---
+
+## Faz 16: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                                   | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
+| :-------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
+| **F16-1** | **Tedarik Zinciri Typosquatting & Zararlı Paket Kalkanı (`auditDependencyTyposquatting`)** — `package.json` bağımlılıklarını popüler paketlere Levenshtein yakınlığı ve install-script riskine göre tarama |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
+| **F16-2** | **Ajan İstem Sıkıştırma & Semantik Kısaltma Motoru (`compressPromptSemantically`)** — Tekrarlayan kod kalıplarını ve boşlukları korunan sembol tablosuyla sıkıştırarak %35+ ek token tasarrufu sağlama     |      9       |      9       |    2.2     | **36.8** | [ ] Planlandı |
+| **F16-3** | **GrafQL Derinlik & Karmaşıklık DoS Denetçisi (`auditGraphqlQueryComplexity`)** — İç içe döngüsel GraphQL sorgularını ve derinlik sınırı eksik şemaları statik yakalama                                    |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
+| **F16-4** | **Mikroservis Dağıtık İzleme (OpenTelemetry / Trace Context) Süreklilik Denetçisi (`auditTraceContextPropagation`)** — Servisler arası çağrılarda `traceparent` / korelasyon başlığı kopukluklarını bulma  |      8       |      8       |    2.2     | **29.1** | [ ] Planlandı |
+| **F16-5** | **Yeşil Yazılım (GreenOps) & Karbon Ayak İzi Tahmincisi (`estimateCarbonFootprint`)** — LLM token kullanımı ve CI/CD iş yüklerinin enerji (Wh) ve $CO_2e$ emisyon etkisini raporlama                       |      7       |      8       |    2.0     | **28.0** | [ ] Planlandı |
