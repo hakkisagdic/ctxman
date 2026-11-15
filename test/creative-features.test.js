@@ -39,6 +39,11 @@ import {
   auditResiliencePatterns,
   checkI18nDrift,
   decomposeTaskIntoSteps,
+  analyzeTechDebtHotspots,
+  detectFlakyTestPatterns,
+  scanHighEntropySecrets,
+  checkSchemaCodeParity,
+  planParallelAgentWorkspaces,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -884,6 +889,145 @@ export function testSuite() {
       expect(plan.stepCount).toBe(4);
       expect(plan.steps[0].phase).toBe('core_foundation_and_models');
       expect(plan.steps[plan.steps.length - 1].phase).toBe('verification_tests');
+    });
+  });
+
+  describe('F8-1: Tech Debt & Complexity Hotspot Mapper', () => {
+    it('ranks high-churn, high-complexity files as critical/high refactoring hotspots', () => {
+      const report = analyzeTechDebtHotspots({
+        files: [
+          {
+            path: 'lib/services/legacy-billing.js',
+            churn: 12,
+            content: [
+              'export function settle(order, user, flags) {',
+              '  if (!order) return null;',
+              '  if (order.total > 1000 && user.vip) {',
+              '    for (const item of order.items) {',
+              '      if (item.taxable || flags.forceTax) {',
+              '        while (item.retries > 0) { item.retries--; }',
+              '      }',
+              '    }',
+              '  } else if (order.total < 0) {',
+              '    throw new Error("invalid");',
+              '  }',
+              '  return order.currency ? order.total : 0;',
+              '}',
+            ].join('\n'),
+          },
+          {
+            path: 'lib/core/constants.js',
+            churn: 1,
+            content: 'export const VERSION = "1.0.0";',
+          },
+        ],
+      });
+      expect(report.hotspots[0].file).toBe('lib/services/legacy-billing.js');
+      expect(report.hotspots[0].hotspotScore).toBeGreaterThan(report.hotspots[1].hotspotScore);
+      expect(['critical', 'high']).toContain(report.hotspots[0].severity);
+      expect(report.summary.totalFiles).toBe(2);
+    });
+  });
+
+  describe('F8-2: Flaky Test Pattern Detector', () => {
+    it('detects hardcoded sleeps, Math.random, and floating promises in test files', () => {
+      const report = detectFlakyTestPatterns({
+        files: [
+          {
+            path: 'test/flaky.test.js',
+            content: [
+              'let sharedCounter = 0;',
+              'it("waits for async job", async () => {',
+              '  setTimeout(() => {}, 500);',
+              '  const nonce = Math.random();',
+              '  expect(fetchData(nonce)).resolves.toBe(true);',
+              '});',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(report.summary.totalFindings).toBeGreaterThanOrEqual(4);
+      expect(report.summary.byPattern['hardcoded-sleep']).toBe(1);
+      expect(report.summary.byPattern['unseeded-random']).toBe(1);
+      expect(report.summary.byPattern['floating-promise']).toBe(1);
+      expect(report.summary.flakyRiskScore).toBeGreaterThanOrEqual(50);
+    });
+  });
+
+  describe('F8-3: High-Entropy Secret & Canary Token Scanner', () => {
+    it('flags canary tokens and high-entropy secret literals while ignoring normal strings', () => {
+      const scan = scanHighEntropySecrets({
+        files: [
+          {
+            path: 'lib/config/keys.js',
+            content: [
+              'export const CANARY = "canary_9f8a7b6c5d4e3f2a1b0c9d8e";',
+              'export const SECRET = "A9f$kL2#mP8@qR5!zX7^vB4&nM1*wQ3_yT6";',
+              'export const SAFE_PATH = "/usr/local/share/ctxman/config.json";',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(scan.clean).toBe(false);
+      expect(scan.summary.canaryCount).toBe(1);
+      expect(scan.summary.highEntropyCount).toBeGreaterThanOrEqual(1);
+      expect(scan.findings[0].tokenPreview).toContain('...');
+    });
+  });
+
+  describe('F8-4: GraphQL & OpenAPI Schema-Code Parity Checker', () => {
+    it('identifies unimplemented schema endpoints and undocumented code handlers', () => {
+      const parity = checkSchemaCodeParity({
+        openapiSpec: {
+          paths: {
+            '/api/v1/orders': { get: {}, post: {} },
+            '/api/v1/GhostRoute': { delete: {} },
+          },
+        },
+        graphqlSdl: 'type Query { health: String\n missingResolver: Int }',
+        files: [
+          {
+            path: 'lib/api/routes.js',
+            content: [
+              'app.get("/api/v1/orders", handler);',
+              'app.post("/api/v1/orders", handler);',
+              'app.get("/api/v1/internal-debug", handler);',
+              'const resolvers = { Query: { health: () => "ok" } };',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(parity.inSync).toBe(false);
+      expect(parity.matchedCount).toBe(3);
+      expect(parity.unimplementedInCode.some((u) => u.key === 'DELETE /api/v1/GhostRoute')).toBe(
+        true
+      );
+      expect(parity.unimplementedInCode.some((u) => u.key === 'Query.missingResolver')).toBe(true);
+      expect(parity.undocumentedInSchema.some((u) => u.key === 'GET /api/v1/internal-debug')).toBe(
+        true
+      );
+    });
+  });
+
+  describe('F8-5: Multi-Agent Conflict Prevention & Parallel Workspace Planner', () => {
+    it('schedules disjoint tasks in the same parallel wave and conflicting tasks in subsequent waves', () => {
+      const plan = planParallelAgentWorkspaces({
+        tasks: [
+          { id: 'agent-1', title: 'Update billing', files: ['lib/billing/index.js'] },
+          { id: 'agent-2', title: 'Update search', files: ['lib/search/bm25.js'] },
+          {
+            id: 'agent-3',
+            title: 'Billing invoice tweak',
+            files: ['lib/billing/index.js', 'lib/billing/invoice.js'],
+          },
+        ],
+        edges: [{ from: 'lib/billing/index.js', to: 'lib/utils/logger.js' }],
+      });
+      expect(plan.summary.totalWaves).toBe(2);
+      expect(plan.summary.maxParallelism).toBe(2);
+      expect(plan.waves[0].tasks.map((t) => t.id)).toEqual(['agent-1', 'agent-2']);
+      expect(plan.waves[1].tasks.map((t) => t.id)).toEqual(['agent-3']);
+      expect(plan.sharedReadOnlyFiles).toContain('lib/utils/logger.js');
     });
   });
 });

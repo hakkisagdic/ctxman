@@ -2688,3 +2688,11 @@ export function decomposeTaskIntoSteps(
   taskQuery: string,
   options?: Record<string, unknown>
 ): Record<string, unknown>;
+
+export function analyzeTechDebtHotspots(options?: Record<string, unknown>): Record<string, unknown>;
+export function detectFlakyTestPatterns(options?: Record<string, unknown>): Record<string, unknown>;
+export function scanHighEntropySecrets(options?: Record<string, unknown>): Record<string, unknown>;
+export function checkSchemaCodeParity(options?: Record<string, unknown>): Record<string, unknown>;
+export function planParallelAgentWorkspaces(
+  options?: Record<string, unknown>
+): Record<string, unknown>;

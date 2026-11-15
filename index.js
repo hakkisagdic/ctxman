@@ -86,7 +86,7 @@ import {
   ImpactError,
 } from './lib/impact/index.js';
 
-// Architecture Drift & Layer Violation Detector (`C-3`) & Faz 3/4 Creative Features
+// Architecture Drift & Layer Violation Detector (`C-3`) & Faz 3–8 Creative Features
 import { checkArchitectureDrift, loadArchitectureConfig } from './lib/architecture/index.js';
 import { findDeadSymbols } from './lib/architecture/dead-symbols.js';
 import { checkDocDrift } from './lib/architecture/doc-drift.js';
@@ -103,6 +103,11 @@ import { auditResiliencePatterns } from './lib/architecture/resilience-audit.js'
 import { checkI18nDrift } from './lib/architecture/i18n-drift.js';
 import { generateSemanticReleaseNotes } from './lib/pr/release-notes.js';
 import { decomposeTaskIntoSteps } from './lib/task/task-decomposer.js';
+import { analyzeTechDebtHotspots } from './lib/architecture/tech-debt-hotspots.js';
+import { detectFlakyTestPatterns } from './lib/pr/flaky-test-detector.js';
+import { scanHighEntropySecrets } from './lib/security/entropy-scanner.js';
+import { checkSchemaCodeParity } from './lib/architecture/schema-parity.js';
+import { planParallelAgentWorkspaces } from './lib/task/parallel-agent-planner.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -288,6 +293,11 @@ export {
   checkI18nDrift,
   generateSemanticReleaseNotes,
   decomposeTaskIntoSteps,
+  analyzeTechDebtHotspots,
+  detectFlakyTestPatterns,
+  scanHighEntropySecrets,
+  checkSchemaCodeParity,
+  planParallelAgentWorkspaces,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,

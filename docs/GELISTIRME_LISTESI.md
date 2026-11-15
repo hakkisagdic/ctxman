@@ -12,7 +12,8 @@
 > - **F5-1..F5-5 (Faz 5 — %100 Tamamlandı):** Dördüncü 5 yaratıcı farklılaştırıcı yetenek (`F5-1`..`F5-5` tamamı uygulandı).
 > - **F6-1..F6-5 (Faz 6 — %100 Tamamlandı):** Beşinci 5 yaratıcı farklılaştırıcı yetenek (`F6-1`..`F6-5` tamamı uygulandı).
 > - **F7-1..F7-5 (Faz 7 — %100 Tamamlandı):** Altıncı 5 yaratıcı farklılaştırıcı yetenek (`F7-1`..`F7-5` tamamı uygulandı).
-> - **F8-1..F8-5 (Faz 8 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
+> - **F8-1..F8-5 (Faz 8 — %100 Tamamlandı):** Yedinci 5 yaratıcı farklılaştırıcı yetenek (`F8-1`..`F8-5` tamamı uygulandı).
+> - **F9-1..F9-5 (Faz 9 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
 
 ---
 
@@ -102,12 +103,24 @@
 
 ---
 
-## Faz 8: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+## Faz 8: 5 Yaratıcı Farklılaştırıcı Özellik (`F8-1`..`F8-5` — %100 Tamamlandı)
 
-| Kod      | Yaratıcı Özellik Önerisi                                                                                                                                     | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
-| :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
-| **F8-1** | **Teknik Borç & Karmaşıklık Sıcak Nokta Haritası (`analyzeTechDebtHotspots`)** — Git değişim sıklığı (churn) ile metod karmaşıklığını çarpıp önceliklendirme |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
-| **F8-2** | **Kırılgan Test (Flaky Test) Deseni Dedektörü (`detectFlakyTestPatterns`)** — Testlerdeki sabit `setTimeout`, rastgele sayı ve sıraya bağımlı durum tespiti  |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
-| **F8-3** | **Yüksek Entropili Sır & Kanarya Token Tarayıcı (`scanHighEntropySecrets`)** — Shannon entropisiyle regex'ten kaçan özel API/kripto anahtarlarını yakalama   |      9       |      8       |    2.5     | **28.8** | [ ] Planlandı |
-| **F8-4** | **GraphQL & OpenAPI Şema-Kod Senkronizasyon Denetçisi (`checkSchemaCodeParity`)** — `.graphql`/`openapi.json` tanımları ile bağlı handler'ları eşleştirme    |      8       |      8       |    2.5     | **25.6** | [ ] Planlandı |
-| **F8-5** | **Çoklu Ajan Çakışma Önleyici & Dosya Kilit Planlayıcı (`planParallelAgentWorkspaces`)** — Paralel çalışan ajanlar için kesişmeyen dosya kümeleri atama      |      9       |      8       |    2.5     | **28.8** | [ ] Planlandı |
+| Kod      | Yaratıcı Özellik Önerisi                                                                                                                                     | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
+| :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :----------------: |
+| **F8-1** | **Teknik Borç & Karmaşıklık Sıcak Nokta Haritası (`analyzeTechDebtHotspots`)** — Git değişim sıklığı (churn) ile metod karmaşıklığını çarpıp önceliklendirme |      8       |      9       |    2.0     | **36.0** | **[x] Tamamlandı** |
+| **F8-2** | **Kırılgan Test (Flaky Test) Deseni Dedektörü (`detectFlakyTestPatterns`)** — Testlerdeki sabit `setTimeout`, rastgele sayı ve sıraya bağımlı durum tespiti  |      8       |      9       |    2.0     | **36.0** | **[x] Tamamlandı** |
+| **F8-3** | **Yüksek Entropili Sır & Kanarya Token Tarayıcı (`scanHighEntropySecrets`)** — Shannon entropisiyle regex'ten kaçan özel API/kripto anahtarlarını yakalama   |      9       |      8       |    2.5     | **28.8** | **[x] Tamamlandı** |
+| **F8-4** | **GraphQL & OpenAPI Şema-Kod Senkronizasyon Denetçisi (`checkSchemaCodeParity`)** — `.graphql`/`openapi.json` tanımları ile bağlı handler'ları eşleştirme    |      8       |      8       |    2.5     | **25.6** | **[x] Tamamlandı** |
+| **F8-5** | **Çoklu Ajan Çakışma Önleyici & Dosya Kilit Planlayıcı (`planParallelAgentWorkspaces`)** — Paralel çalışan ajanlar için kesişmeyen dosya kümeleri atama      |      9       |      8       |    2.5     | **28.8** | **[x] Tamamlandı** |
+
+---
+
+## Faz 9: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+
+| Kod      | Yaratıcı Özellik Önerisi                                                                                                                                    | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
+| :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
+| **F9-1** | **Veritabanı Göç (Migration) Geri Dönüş & Kilit Risk Denetçisi (`auditMigrationSafety`)** — SQL/ORM migration dosyalarında kilitli tablo/veri kaybı tespiti |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
+| **F9-2** | **Ajan Öz-Onarım (Self-Healing) Test Döngüsü Orkestratörü (`buildSelfHealingPrompt`)** — Kırılan test çıktısı ve AST farkından tek adımlık onarım istemi    |      9       |      9       |    2.2     | **36.8** | [ ] Planlandı |
+| **F9-3** | **Performans Bütçesi & Paket Boyutu Etkisi Tahmincisi (`estimateBundleImpact`)** — Yeni eklenen importların ağaca-sallama (tree-shaking) ve boyut analizi   |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
+| **F9-4** | **Kurumsal Denetim & Uyumluluk Kanıt Paketi Üretici (`generateComplianceEvidencePack`)** — BDDK/KVKK/SOC2 denetçileri için imzalı özet rapor derleyici      |      9       |      8       |    2.5     | **28.8** | [ ] Planlandı |
+| **F9-5** | **Çağrı Grafiği Tabanlı Kaos & Hata Enjeksiyon Noktası Önerici (`suggestChaosTargets`)** — Kritik dış bağımlılık sınırlarında kaos testi hedefleri bulma    |      7       |      8       |    2.0     | **28.0** | [ ] Planlandı |
