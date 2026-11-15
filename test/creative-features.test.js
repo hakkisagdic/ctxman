@@ -84,6 +84,11 @@ import {
   auditGraphqlQueryComplexity,
   auditTraceContextPropagation,
   estimateCarbonFootprint,
+  planZeroDowntimeSchemaMigration,
+  detectHallucinatedPackages,
+  auditSecretRotationReadiness,
+  estimatePrReviewCognitiveLoad,
+  auditApiDeprecationHeaders,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -2004,6 +2009,148 @@ export function testSuite() {
       expect(foot.savedEnergyWh).toBeGreaterThan(0);
       expect(foot.co2Grams).toBeGreaterThan(0);
       expect(foot.savedCo2Grams).toBeGreaterThan(0);
+    });
+  });
+
+  describe('F17-1: Zero-Downtime Expand-Contract Schema Migration Planner', () => {
+    it('transforms destructive RENAME/DROP/ALTER COLUMN SQL into a 3-phase Expand-Contract plan', () => {
+      const plan = planZeroDowntimeSchemaMigration({
+        migrations: [
+          {
+            path: 'migrations/010_rename_customer_col.sql',
+            sql: 'ALTER TABLE customers RENAME COLUMN phone TO mobile_phone; ALTER TABLE customers DROP COLUMN legacy_fax;',
+          },
+        ],
+      });
+      expect(plan.status).toBe('requires-expand-contract');
+      expect(plan.destructiveChangesCount).toBe(2);
+      expect(plan.threePhasePlan).toHaveLength(2);
+      expect(plan.threePhasePlan[0].phases.map((p) => p.stage)).toEqual([
+        'expand',
+        'migrate',
+        'contract',
+      ]);
+      expect(plan.threePhasePlan[0].phases[0].action).toContain('ADD COLUMN mobile_phone');
+    });
+  });
+
+  describe('F17-2: Agent Hallucinated Package & Slopsquatting Shield', () => {
+    it('detects undeclared external imports and AI slopsquatting package names', () => {
+      const res = detectHallucinatedPackages({
+        packageJson: {
+          name: 'demo-app',
+          dependencies: { commander: '^12.0.0' },
+        },
+        files: [
+          {
+            path: 'lib/agent-output.js',
+            content: [
+              'import fs from "node:fs";',
+              'import { Command } from "commander";',
+              'import { autoFix } from "ai-smart-utils-pro";',
+              'import { format } from "undeclared-date-helper";',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(res.status).toBe('hallucination-risk');
+      expect(res.undeclaredPackagesCount).toBe(2);
+      expect(res.undeclaredPackages).toEqual(['ai-smart-utils-pro', 'undeclared-date-helper']);
+      expect(
+        res.findings.some(
+          (f) => f.packageName === 'ai-smart-utils-pro' && f.severity === 'critical'
+        )
+      ).toBe(true);
+    });
+  });
+
+  describe('F17-3: Enterprise Secret Rotation & Dual-Key Readiness Auditor', () => {
+    it('flags expired secrets, single-key verification, and static module-load secret bindings', () => {
+      const report = auditSecretRotationReadiness({
+        maxAgeDays: 90,
+        secrets: [
+          { name: 'IYZICO_SECRET_KEY', ageDays: 145, supportsDualKey: false },
+          { name: 'SESSION_KEY', ageDays: 20, supportsDualKey: true },
+        ],
+        files: [
+          {
+            path: 'lib/auth/verify.js',
+            content: [
+              'const STATIC_KEY = process.env.WEBHOOK_SIGNING_SECRET;',
+              'export function verifyToken(token) {',
+              '  return jwt.verify(token, process.env.JWT_SECRET);',
+              '}',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(report.status).toBe('rotation-risk');
+      expect(report.findingsCount).toBeGreaterThanOrEqual(4);
+      expect(report.findings.some((f) => f.type === 'expired-secret')).toBe(true);
+      expect(report.findings.some((f) => f.type === 'single-key-verification')).toBe(true);
+      expect(report.findings.some((f) => f.type === 'static-secret-binding')).toBe(true);
+      expect(report.readinessScore).toBeLessThan(50);
+    });
+  });
+
+  describe('F17-4: PR Review Cognitive Load & Time Estimator', () => {
+    it('estimates review duration in minutes and flags high-cognitive-load multi-domain PRs', () => {
+      const report = estimatePrReviewCognitiveLoad({
+        maxRecommendedMinutes: 20,
+        changes: [
+          {
+            path: 'lib/security/auth-guard.js',
+            additions: 120,
+            deletions: 40,
+            patch: 'if (a && b) { for (const x of list) { if (x || c) { await check(); } } }',
+          },
+          {
+            path: 'lib/billing/invoice-engine.js',
+            additions: 110,
+            deletions: 30,
+            patch: 'switch (mode) { case 1: if (retry) { while (n > 0) {} } }',
+          },
+          {
+            path: 'lib/ui/checkout-modal.js',
+            additions: 90,
+            deletions: 20,
+            patch: 'if (isOpen ? a : b) { return true; }',
+          },
+        ],
+      });
+      expect(['high-cognitive-load', 'overload']).toContain(report.status);
+      expect(report.estimatedReviewMinutes).toBeGreaterThan(20);
+      expect(report.contextSwitches).toBe(2);
+      expect(report.criticalFilesCount).toBe(2);
+      expect(report.recommendSplit).toBe(true);
+    });
+  });
+
+  describe('F17-5: API Lifecycle & RFC 8594 Sunset/Deprecation Header Auditor', () => {
+    it('flags deprecated endpoints missing Deprecation, Sunset, or successor-version Link headers', () => {
+      const report = auditApiDeprecationHeaders({
+        endpoints: [
+          {
+            path: 'lib/api/v1.js',
+            method: 'GET',
+            route: '/api/v1/legacy-pack',
+            deprecated: true,
+            headers: { Deprecation: true },
+          },
+          {
+            path: 'lib/api/v1.js',
+            method: 'POST',
+            route: '/api/v1/compliant-route',
+            deprecated: true,
+            headers: { Deprecation: true, Sunset: true, LinkSuccessor: true },
+          },
+        ],
+      });
+      expect(report.status).toBe('missing-headers');
+      expect(report.deprecatedEndpointsCount).toBe(2);
+      expect(report.compliantCount).toBe(1);
+      expect(report.violationsCount).toBe(1);
+      expect(report.findings[0].missingHeaders).toContain('Sunset');
     });
   });
 });

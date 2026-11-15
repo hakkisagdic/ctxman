@@ -2786,3 +2786,19 @@ export function auditTraceContextPropagation(
   options?: Record<string, unknown>
 ): Record<string, unknown>;
 export function estimateCarbonFootprint(options?: Record<string, unknown>): Record<string, unknown>;
+
+export function planZeroDowntimeSchemaMigration(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function detectHallucinatedPackages(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function auditSecretRotationReadiness(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function estimatePrReviewCognitiveLoad(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function auditApiDeprecationHeaders(
+  options?: Record<string, unknown>
+): Record<string, unknown>;

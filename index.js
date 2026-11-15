@@ -86,7 +86,7 @@ import {
   ImpactError,
 } from './lib/impact/index.js';
 
-// Architecture Drift & Layer Violation Detector (`C-3`) & Faz 3–11 Creative Features
+// Architecture Drift & Layer Violation Detector (`C-3`) & Faz 3–17 Creative Features
 import { checkArchitectureDrift, loadArchitectureConfig } from './lib/architecture/index.js';
 import { findDeadSymbols } from './lib/architecture/dead-symbols.js';
 import { checkDocDrift } from './lib/architecture/doc-drift.js';
@@ -148,6 +148,11 @@ import { compressPromptSemantically } from './lib/pack/semantic-compressor.js';
 import { auditGraphqlQueryComplexity } from './lib/architecture/graphql-complexity.js';
 import { auditTraceContextPropagation } from './lib/architecture/trace-propagation.js';
 import { estimateCarbonFootprint } from './lib/count/carbon-estimator.js';
+import { planZeroDowntimeSchemaMigration } from './lib/architecture/expand-contract.js';
+import { detectHallucinatedPackages } from './lib/security/slopsquat-detector.js';
+import { auditSecretRotationReadiness } from './lib/security/secret-rotation.js';
+import { estimatePrReviewCognitiveLoad } from './lib/pr/cognitive-load.js';
+import { auditApiDeprecationHeaders } from './lib/architecture/api-deprecation.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -378,6 +383,11 @@ export {
   auditGraphqlQueryComplexity,
   auditTraceContextPropagation,
   estimateCarbonFootprint,
+  planZeroDowntimeSchemaMigration,
+  detectHallucinatedPackages,
+  auditSecretRotationReadiness,
+  estimatePrReviewCognitiveLoad,
+  auditApiDeprecationHeaders,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,

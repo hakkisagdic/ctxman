@@ -1,7 +1,7 @@
 # Ctxman — Geliştirme Listesi (Rakip Matrisi Boşluk Kapatma ve Yaratıcı Farklılaştırıcı Yol Haritası)
 
 > **Son Güncelleme:** 15 Kasım 2026  
-> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–17 yaratıcı farklılaştırıcı özellikler.  
+> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–18 yaratıcı farklılaştırıcı özellikler.  
 > **Önceliklendirme Formülü:** $\text{Öncelik Skoru} = \frac{\text{Gelir Etkisi (1–10)} \times \text{Kullanıcı Değeri (1–10)}}{\text{Efor (1–5)}}$  
 > **Sınıflandırma:**
 >
@@ -21,7 +21,8 @@
 > - **F14-1..F14-5 (Faz 14 — %100 Tamamlandı):** On üçüncü 5 yaratıcı farklılaştırıcı yetenek (`F14-1`..`F14-5` tamamı uygulandı).
 > - **F15-1..F15-5 (Faz 15 — %100 Tamamlandı):** On dördüncü 5 yaratıcı farklılaştırıcı yetenek (`F15-1`..`F15-5` tamamı uygulandı).
 > - **F16-1..F16-5 (Faz 16 — %100 Tamamlandı):** On beşinci 5 yaratıcı farklılaştırıcı yetenek (`F16-1`..`F16-5` tamamı uygulandı).
-> - **F17-1..F17-5 (Faz 17 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
+> - **F17-1..F17-5 (Faz 17 — %100 Tamamlandı):** On altıncı 5 yaratıcı farklılaştırıcı yetenek (`F17-1`..`F17-5` tamamı uygulandı).
+> - **F18-1..F18-5 (Faz 18 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
 
 ---
 
@@ -219,12 +220,24 @@
 
 ---
 
-## Faz 17: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+## Faz 17: 5 Yaratıcı Farklılaştırıcı Özellik (`F17-1`..`F17-5` — %100 Tamamlandı)
 
-| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                                        | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
-| :-------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
-| **F17-1** | **Sıfır-Kesinti Şema Genişlet-Daralt (Expand-Contract) Göç Planlayıcı (`planZeroDowntimeSchemaMigration`)** — Kırıcı sütun yeniden adlandırma/silme işlemlerini 3 aşamalı güvenli göç planına dönüştürme        |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
-| **F17-2** | **Ajan Halüsinasyonlu Paket & Hayalet İçe Aktarım (Slopsquatting) Kalkanı (`detectHallucinatedPackages`)** — Kaynak kodda import edilen ancak `package.json` içinde tanımlı olmayan dış paketleri yakalama      |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
-| **F17-3** | **Kurumsal Sır Rotasyonu (Secret Rotation) & Anahtar Yaşlanma Denetçisi (`auditSecretRotationReadiness`)** — Sabit anahtar referanslarını ve rotasyon (dual-key) desteği eksik doğrulayıcıları tespit etme      |      9       |      8       |    2.2     | **32.7** | [ ] Planlandı |
-| **F17-4** | **PR Bilişsel Yük (Cognitive Load) & İnceleme Süresi Tahmincisi (`estimatePrReviewCognitiveLoad`)** — Değişen dosya yayılımı, AST derinliği ve bağlam geçişlerine göre dakika cinsinden inceleme süresi tahmini |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
-| **F17-5** | **API Sürüm Yaşam Döngüsü & Sunset Başlığı Denetçisi (`auditApiDeprecationHeaders`)** — Kullanımdan kaldırılan (`v1`/deprecated) uç noktalarda RFC 8594 `Sunset` ve `Deprecation` başlığı kontrolü              |      8       |      8       |    2.2     | **29.1** | [ ] Planlandı |
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                                        | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
+| :-------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :----------------: |
+| **F17-1** | **Sıfır-Kesinti Şema Genişlet-Daralt (Expand-Contract) Göç Planlayıcı (`planZeroDowntimeSchemaMigration`)** — Kırıcı sütun yeniden adlandırma/silme işlemlerini 3 aşamalı güvenli göç planına dönüştürme        |      9       |      9       |    2.0     | **40.5** | **[x] Tamamlandı** |
+| **F17-2** | **Ajan Halüsinasyonlu Paket & Hayalet İçe Aktarım (Slopsquatting) Kalkanı (`detectHallucinatedPackages`)** — Kaynak kodda import edilen ancak `package.json` içinde tanımlı olmayan dış paketleri yakalama      |      9       |      9       |    2.0     | **40.5** | **[x] Tamamlandı** |
+| **F17-3** | **Kurumsal Sır Rotasyonu (Secret Rotation) & Anahtar Yaşlanma Denetçisi (`auditSecretRotationReadiness`)** — Sabit anahtar referanslarını ve rotasyon (dual-key) desteği eksik doğrulayıcıları tespit etme      |      9       |      8       |    2.2     | **32.7** | **[x] Tamamlandı** |
+| **F17-4** | **PR Bilişsel Yük (Cognitive Load) & İnceleme Süresi Tahmincisi (`estimatePrReviewCognitiveLoad`)** — Değişen dosya yayılımı, AST derinliği ve bağlam geçişlerine göre dakika cinsinden inceleme süresi tahmini |      8       |      8       |    2.0     | **32.0** | **[x] Tamamlandı** |
+| **F17-5** | **API Sürüm Yaşam Döngüsü & Sunset Başlığı Denetçisi (`auditApiDeprecationHeaders`)** — Kullanımdan kaldırılan (`v1`/deprecated) uç noktalarda RFC 8594 `Sunset` ve `Deprecation` başlığı kontrolü              |      8       |      8       |    2.2     | **29.1** | **[x] Tamamlandı** |
+
+---
+
+## Faz 18: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                                                 | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
+| :-------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
+| **F18-1** | **Düzenli İfade (ReDoS) & Felaket Geri-İzleme Denetçisi (`auditRegexDosRisk`)** — Kullanıcı girdisiyle çalışan karmaşık/iç içe nicelikli regex kalıplarında üstel geri-izleme (catastrophic backtracking) tespiti        |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
+| **F18-2** | **Ajan Araç/MCP Şema Güvenliği & Aşırı Yetki Denetçisi (`auditMcpToolPermissions`)** — MCP araç tanımlarında sınırsız dosya sistemi/kabuk erişimi ve eksik girdi doğrulama şemalarını yakalama                           |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
+| **F18-3** | **Veritabanı Bağlantı Havuzu (Connection Pool) & Sızıntı Risk Denetçisi (`auditConnectionPoolExhaustion`)** — Serbest bırakılmayan (`release()`/`finally` eksik) DB istemcilerini ve havuz sınırı uyumsuzluklarını bulma |      8       |      9       |    2.2     | **32.7** | [ ] Planlandı |
+| **F18-4** | **Çoklu Ortam (Dev/Staging/Prod) Konfigürasyon Parite & Sapma Denetçisi (`compareEnvironmentParity`)** — Ortamlar arası eksik özellik bayrağı, zaman aşımı ve kota parametre sapmalarını karşılaştırma                   |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
+| **F18-5** | **LLM Yanıt Önbellek (Semantic Response Cache) İsabet & Tasarruf Tahmincisi (`estimateSemanticCacheHitRate`)** — Tekrarlayan ajan sorgu kümelerini benzerlik eşiğine göre gruplayıp önbellek ROI tahmini üretme          |      8       |      8       |    2.2     | **29.1** | [ ] Planlandı |
