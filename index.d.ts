@@ -2549,3 +2549,25 @@ export function analyzeBlastRadius(
 ): Record<string, unknown>;
 export function buildBlastMermaidDiagram(params: Record<string, unknown>): string;
 export function formatBlastRadiusReport(result: Record<string, unknown>): string;
+
+export function checkArchitectureDrift(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function loadArchitectureConfig(
+  root: string,
+  customConfig?: Record<string, unknown>
+): Record<string, unknown>;
+export function createPackManifest(
+  packResult: Record<string, unknown>,
+  root?: string
+): Record<string, unknown>;
+export function packDeltaContext(
+  root: string,
+  previousManifest?: Record<string, unknown>,
+  options?: PackOptions
+): Promise<Record<string, unknown>>;
+export function analyzeTaintFlows(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;

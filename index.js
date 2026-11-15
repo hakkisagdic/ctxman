@@ -74,6 +74,7 @@ import {
   orderEntriesForPromptCache,
   buildPromptCachePlan,
 } from './lib/pack/index.js';
+import { createPackManifest, packDeltaContext } from './lib/pack/delta.js';
 
 // Pre-change Blast Radius & Symbol Contract Simulator (`ctxman impact`)
 import {
@@ -82,6 +83,12 @@ import {
   formatBlastRadiusReport,
   ImpactError,
 } from './lib/impact/index.js';
+
+// Architecture Drift & Layer Violation Detector (`C-3`)
+import { checkArchitectureDrift, loadArchitectureConfig } from './lib/architecture/index.js';
+
+// Sensitive Data Taint Path Tracker (`C-5`)
+import { analyzeTaintFlows } from './lib/security/taint.js';
 
 // Import/importer neighborhood context (`ctxman focus`)
 import { focusContext, describeFocus, FocusError } from './lib/focus/index.js';
@@ -212,19 +219,26 @@ export {
   findExperts,
   WhoError,
 
-  // Packed file contents, rules discovery & prompt cache optimizer
+  // Packed file contents, rules discovery, prompt cache optimizer & session delta pack
   packContext,
   discoverProjectRules,
   formatProjectRulesSection,
   classifyCacheTier,
   orderEntriesForPromptCache,
   buildPromptCachePlan,
+  createPackManifest,
+  packDeltaContext,
 
   // Pre-change Blast Radius & Symbol Contract Simulator (`ctxman impact`)
   analyzeBlastRadius,
   buildBlastMermaidDiagram,
   formatBlastRadiusReport,
   ImpactError,
+
+  // Architecture Drift & Layer Violation Detector (`C-3`) & Taint Flow Tracker (`C-5`)
+  checkArchitectureDrift,
+  loadArchitectureConfig,
+  analyzeTaintFlows,
 
   // Focused neighborhood context (`ctxman focus`)
   focusContext,

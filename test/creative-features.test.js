@@ -9,10 +9,15 @@ import {
   orderEntriesForPromptCache,
   buildPromptCachePlan,
   analyzeBlastRadius,
+  checkArchitectureDrift,
+  createPackManifest,
+  packDeltaContext,
+  analyzeTaintFlows,
+  buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
 
-describe('Creative Features (C-1 Prompt Cache Optimizer & C-2 Blast Radius Simulator)', () => {
+describe('Creative Features (C-1..C-5)', () => {
   let tmpDir;
 
   beforeEach(() => {
@@ -228,6 +233,93 @@ export function testSuite() {
       } finally {
         api.stop();
       }
+    });
+  });
+
+  describe('C-3: Architecture Drift & Layer Violation Detector', () => {
+    it('detects forbidden cross-layer imports from .ctxman/architecture.json and emits SARIF', () => {
+      fs.mkdirSync(path.join(tmpDir, '.ctxman'), { recursive: true });
+      fs.writeFileSync(
+        path.join(tmpDir, '.ctxman', 'architecture.json'),
+        JSON.stringify(
+          {
+            rules: [
+              {
+                id: 'NO-SERVICE-TO-CORE',
+                description: 'Services must not directly import core validator in this test rule',
+                from: ['lib/services/**'],
+                cannotImport: ['lib/core/**'],
+                severity: 'error',
+              },
+            ],
+          },
+          null,
+          2
+        )
+      );
+
+      const drift = checkArchitectureDrift(tmpDir);
+      expect(drift.passed).toBe(false);
+      expect(drift.violations.length).toBeGreaterThanOrEqual(1);
+      expect(drift.violations[0].ruleId).toBe('NO-SERVICE-TO-CORE');
+      expect(drift.violations[0].sourceFile).toBe('lib/services/checkout.js');
+      expect(drift.violations[0].targetFile).toBe('lib/core/validator.js');
+
+      const sarif = buildSarifReport({
+        rootPath: tmpDir,
+        architectureViolations: drift.violations,
+      });
+      expect(sarif.runs[0].results.some((r) => r.ruleId === 'ctxman/arch/NO-SERVICE-TO-CORE')).toBe(
+        true
+      );
+    });
+  });
+
+  describe('C-4: Session Delta Pack (Multi-Turn Token Diffing)', () => {
+    it('replaces unchanged files with [UNCHANGED] stubs and packs modified/added files in full', async () => {
+      const initialPack = await packContext(tmpDir);
+      const manifest = createPackManifest(initialPack, tmpDir);
+
+      // Modify only lib/services/checkout.js
+      fs.writeFileSync(
+        path.join(tmpDir, 'lib', 'services', 'checkout.js'),
+        `import { validateOrder } from '../core/validator.js';\nexport function processCheckout(order) { return validateOrder(order); }\n`
+      );
+
+      const delta = await packDeltaContext(tmpDir, manifest);
+      expect(delta.summary.unchangedCount).toBeGreaterThanOrEqual(3);
+      expect(delta.summary.modifiedCount).toBe(1);
+      expect(delta.savedTokens).toBeGreaterThan(0);
+      expect(delta.text).toContain('[UNCHANGED sha256=');
+      expect(delta.text).toContain('status="modified"');
+    });
+  });
+
+  describe('C-5: Sensitive Data Taint Path Tracker', () => {
+    it('flags unredacted sensitive PII/secret variables flowing into console or network sinks', () => {
+      fs.writeFileSync(
+        path.join(tmpDir, 'lib', 'services', 'leaky.js'),
+        `export function logCustomer(req) {
+  const customerTckn = req.body.tckn;
+  console.log('Processing TCKN:', customerTckn);
+}
+`
+      );
+
+      const taint = analyzeTaintFlows(tmpDir);
+      expect(taint.passed).toBe(false);
+      expect(taint.flows.length).toBe(1);
+      expect(taint.flows[0].file).toBe('lib/services/leaky.js');
+      expect(taint.flows[0].variable).toBe('customerTckn');
+      expect(taint.flows[0].sinkType).toBe('console_sink');
+
+      const sarif = buildSarifReport({
+        rootPath: tmpDir,
+        taintFlows: taint.flows,
+      });
+      expect(
+        sarif.runs[0].results.some((r) => r.ruleId === 'ctxman/taint/TAINT-UNREDACTED-SINK')
+      ).toBe(true);
     });
   });
 });
