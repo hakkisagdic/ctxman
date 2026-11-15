@@ -2716,3 +2716,13 @@ export function classifyDataSensitivity(options?: Record<string, unknown>): Reco
 export function auditBuildReproducibility(
   options?: Record<string, unknown>
 ): Record<string, unknown>;
+
+export function evaluateDeployFreezeGate(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function analyzeAgentToolLoop(options?: Record<string, unknown>): Record<string, unknown>;
+export function auditTenantIsolation(options?: Record<string, unknown>): Record<string, unknown>;
+export function generateAdrDraft(options?: Record<string, unknown>): Record<string, unknown>;
+export function verifyAirgappedReadiness(
+  options?: Record<string, unknown>
+): Record<string, unknown>;

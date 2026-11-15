@@ -54,6 +54,11 @@ import {
   simulateConsumerContractImpact,
   classifyDataSensitivity,
   auditBuildReproducibility,
+  evaluateDeployFreezeGate,
+  analyzeAgentToolLoop,
+  auditTenantIsolation,
+  generateAdrDraft,
+  verifyAirgappedReadiness,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -1268,6 +1273,128 @@ export function testSuite() {
       expect(audit.reproducible).toBe(false);
       expect(audit.summary.highCount).toBe(3);
       expect(audit.summary.mediumCount).toBe(1);
+    });
+  });
+
+  describe('F11-1: SLO / Error Budget & PR Risk Deployment Gate', () => {
+    it('freezes deployment when error budget is exhausted or active incident is critical unless hotfix has rollback', () => {
+      const frozen = evaluateDeployFreezeGate({
+        prRiskScore: 65,
+        errorBudgetRemainingPct: 0,
+        burnRate: 6,
+      });
+      expect(frozen.allowed).toBe(false);
+      expect(frozen.decision).toBe('freeze');
+      expect(frozen.reasons.length).toBeGreaterThanOrEqual(2);
+
+      const hotfixApproval = evaluateDeployFreezeGate({
+        prRiskScore: 30,
+        errorBudgetRemainingPct: 10,
+        activeIncidentSeverity: 'critical',
+        isHotfix: true,
+        hasRollbackPlan: true,
+      });
+      expect(hotfixApproval.decision).toBe('require_approval');
+      expect(hotfixApproval.requiredApprovers).toContain('incident-commander');
+
+      const allowed = evaluateDeployFreezeGate({
+        prRiskScore: 15,
+        errorBudgetRemainingPct: 95,
+        burnRate: 1,
+      });
+      expect(allowed.allowed).toBe(true);
+      expect(allowed.decision).toBe('allow');
+    });
+  });
+
+  describe('F11-2: Agent MCP Tool-Call Loop & Cost Guard', () => {
+    it('detects identical tool call loops, ping-pong oscillations, and error retry storms', () => {
+      const report = analyzeAgentToolLoop({
+        toolCalls: [
+          { tool: 'search_code', args: { q: 'auth' }, tokensUsed: 300 },
+          { tool: 'search_code', args: { q: 'auth' }, tokensUsed: 300 },
+          { tool: 'search_code', args: { q: 'auth' }, tokensUsed: 300 },
+          { tool: 'read_file', args: { path: 'a.js' }, tokensUsed: 200 },
+          { tool: 'edit_file', args: { path: 'a.js' }, tokensUsed: 200 },
+          { tool: 'read_file', args: { path: 'a.js' }, tokensUsed: 200 },
+          { tool: 'edit_file', args: { path: 'a.js' }, tokensUsed: 200 },
+        ],
+      });
+      expect(report.loopDetected).toBe(true);
+      expect(report.action).toBe('halt_and_replan');
+      expect(report.loops.some((l) => l.pattern === 'exact-repeat-loop')).toBe(true);
+      expect(report.loops.some((l) => l.pattern === 'ping-pong-oscillation')).toBe(true);
+      expect(report.wastedTokens).toBeGreaterThanOrEqual(1000);
+    });
+  });
+
+  describe('F11-3: Multi-Tenant Query Isolation Auditor', () => {
+    it('flags SQL and ORM queries missing tenant_id / org_id predicates while ignoring global or scoped queries', () => {
+      const audit = auditTenantIsolation({
+        files: [
+          {
+            path: 'lib/repos/invoices.js',
+            content: [
+              'export async function listAllLeaky(db, prisma) {',
+              '  await db.query("SELECT * FROM invoices WHERE status = \'paid\'");',
+              '  await db.query("DELETE FROM invoices WHERE id = 10");',
+              '  await prisma.customer.findMany({ where: { active: true } });',
+              '  await db.query("SELECT * FROM invoices WHERE tenant_id = $1");',
+              '  await db.query("SELECT * FROM migrations");',
+              '}',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(audit.isolated).toBe(false);
+      expect(audit.summary.violationCount).toBe(3);
+      expect(audit.summary.criticalCount).toBe(1);
+      expect(audit.summary.highCount).toBe(2);
+    });
+  });
+
+  describe('F11-4: Automated Architecture Decision Record (ADR) Draft Generator', () => {
+    it('generates an MADR-formatted Markdown ADR document with inferred architectural layers', () => {
+      const adr = generateAdrDraft({
+        id: 12,
+        title: 'Use SQLite Vector Store for Local Hybrid RAG',
+        status: 'Accepted',
+        changedFiles: ['lib/rag/stores/SqliteVectorStore.js', 'lib/search/hybrid.js'],
+        addedDependencies: ['node:sqlite'],
+      });
+      expect(adr.adrId).toBe('ADR-0012');
+      expect(adr.suggestedPath).toBe(
+        'docs/adr/0012-use-sqlite-vector-store-for-local-hybrid-rag.md'
+      );
+      expect(adr.affectedLayers).toEqual(['lib/rag', 'lib/search']);
+      expect(adr.markdown).toContain('# ADR-0012: Use SQLite Vector Store for Local Hybrid RAG');
+      expect(adr.markdown).toContain('node:sqlite');
+    });
+  });
+
+  describe('F11-5: Air-Gapped / Zero-Cloud Readiness Verifier', () => {
+    it('flags external SaaS URLs, cloud SDK dependencies, and enabled telemetry/autoUpdate flags', () => {
+      const readiness = verifyAirgappedReadiness({
+        files: [
+          {
+            path: 'lib/llm/client.js',
+            content: 'const endpoint = "https://api.openai.com/v1/embeddings";',
+          },
+        ],
+        packageJson: {
+          dependencies: {
+            openai: '^4.0.0',
+          },
+        },
+        config: {
+          autoUpdate: true,
+        },
+      });
+      expect(readiness.airgapReady).toBe(false);
+      expect(readiness.summary.externalUrls).toBe(1);
+      expect(readiness.summary.cloudSdks).toBe(1);
+      expect(readiness.summary.telemetryFlags).toBe(1);
+      expect(readiness.readinessScore).toBeLessThan(60);
     });
   });
 });

@@ -86,7 +86,7 @@ import {
   ImpactError,
 } from './lib/impact/index.js';
 
-// Architecture Drift & Layer Violation Detector (`C-3`) & Faz 3–8 Creative Features
+// Architecture Drift & Layer Violation Detector (`C-3`) & Faz 3–11 Creative Features
 import { checkArchitectureDrift, loadArchitectureConfig } from './lib/architecture/index.js';
 import { findDeadSymbols } from './lib/architecture/dead-symbols.js';
 import { checkDocDrift } from './lib/architecture/doc-drift.js';
@@ -118,6 +118,11 @@ import { buildAgentHandoffPack } from './lib/task/agent-handoff.js';
 import { simulateConsumerContractImpact } from './lib/workspace/consumer-simulator.js';
 import { classifyDataSensitivity } from './lib/security/data-sensitivity.js';
 import { auditBuildReproducibility } from './lib/architecture/build-reproducibility.js';
+import { evaluateDeployFreezeGate } from './lib/pr/deploy-gate.js';
+import { analyzeAgentToolLoop } from './lib/task/tool-loop-guard.js';
+import { auditTenantIsolation } from './lib/security/tenant-isolation.js';
+import { generateAdrDraft } from './lib/architecture/adr-generator.js';
+import { verifyAirgappedReadiness } from './lib/security/airgap-verifier.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -318,6 +323,11 @@ export {
   simulateConsumerContractImpact,
   classifyDataSensitivity,
   auditBuildReproducibility,
+  evaluateDeployFreezeGate,
+  analyzeAgentToolLoop,
+  auditTenantIsolation,
+  generateAdrDraft,
+  verifyAirgappedReadiness,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,
