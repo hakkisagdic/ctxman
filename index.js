@@ -113,6 +113,11 @@ import { buildSelfHealingPrompt } from './lib/pr/self-healing-test.js';
 import { estimateBundleImpact } from './lib/architecture/bundle-impact.js';
 import { generateComplianceEvidencePack } from './lib/policy/compliance-evidence.js';
 import { suggestChaosTargets } from './lib/architecture/chaos-targets.js';
+import { planFeatureFlagRetirement } from './lib/architecture/flag-retirement.js';
+import { buildAgentHandoffPack } from './lib/task/agent-handoff.js';
+import { simulateConsumerContractImpact } from './lib/workspace/consumer-simulator.js';
+import { classifyDataSensitivity } from './lib/security/data-sensitivity.js';
+import { auditBuildReproducibility } from './lib/architecture/build-reproducibility.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -308,6 +313,11 @@ export {
   estimateBundleImpact,
   generateComplianceEvidencePack,
   suggestChaosTargets,
+  planFeatureFlagRetirement,
+  buildAgentHandoffPack,
+  simulateConsumerContractImpact,
+  classifyDataSensitivity,
+  auditBuildReproducibility,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,

@@ -2704,3 +2704,15 @@ export function generateComplianceEvidencePack(
   options?: Record<string, unknown>
 ): Record<string, unknown>;
 export function suggestChaosTargets(options?: Record<string, unknown>): Record<string, unknown>;
+
+export function planFeatureFlagRetirement(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function buildAgentHandoffPack(options?: Record<string, unknown>): Record<string, unknown>;
+export function simulateConsumerContractImpact(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function classifyDataSensitivity(options?: Record<string, unknown>): Record<string, unknown>;
+export function auditBuildReproducibility(
+  options?: Record<string, unknown>
+): Record<string, unknown>;

@@ -49,6 +49,11 @@ import {
   estimateBundleImpact,
   generateComplianceEvidencePack,
   suggestChaosTargets,
+  planFeatureFlagRetirement,
+  buildAgentHandoffPack,
+  simulateConsumerContractImpact,
+  classifyDataSensitivity,
+  auditBuildReproducibility,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -1147,6 +1152,122 @@ export function testSuite() {
       expect(chaos.targets[0].file).toBe('lib/billing/gateway.js');
       expect(chaos.targets[0].fanIn).toBe(3);
       expect(chaos.targets[0].priorityScore).toBeGreaterThan(chaos.targets[1].priorityScore);
+    });
+  });
+
+  describe('F10-1: Zero-Downtime Feature Flag Retirement Planner', () => {
+    it('generates inline branch cleanup edits for retired feature flags', () => {
+      const plan = planFeatureFlagRetirement({
+        flagName: 'legacy_checkout_v1',
+        keepEnabledBranch: true,
+        files: [
+          {
+            path: 'lib/services/checkout.js',
+            content: [
+              'export function render(flags) {',
+              '  if (isFeatureEnabled("legacy_checkout_v1")) { return newFlow(); } else { return oldFlow(); }',
+              '  const label = flags.legacy_checkout_v1 ? "v2" : "v1";',
+              '  return label;',
+              '}',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(plan.summary.affectedFileCount).toBe(1);
+      expect(plan.summary.totalEdits).toBe(2);
+      expect(plan.cleanupEdits[0].simplifiedSnippet).toBe('return newFlow();');
+      expect(plan.cleanupEdits[1].simplifiedSnippet).toContain('"v2"');
+    });
+  });
+
+  describe('F10-2: Multi-Agent Session Handoff Pack Builder', () => {
+    it('creates a SHA-256 state digest and budget-bounded markdown handoff pack', () => {
+      const pack = buildAgentHandoffPack({
+        fromAgent: 'architect-agent',
+        toAgent: 'impl-agent',
+        goal: 'Complete Faz 10 features',
+        completedSteps: ['Implemented F10-1'],
+        pendingSteps: ['Verify tests and push'],
+        decisions: [{ decision: 'Use zero external deps', rationale: 'Keep CLI lightweight' }],
+        modifiedFiles: ['lib/architecture/flag-retirement.js'],
+        tokenBudget: 1000,
+      });
+      expect(pack.withinBudget).toBe(true);
+      expect(pack.stateDigestSha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(pack.markdown).toContain('architect-agent');
+      expect(pack.summary.completedCount).toBe(1);
+    });
+  });
+
+  describe('F10-3: Consumer Contract Breakage Simulator', () => {
+    it('detects downstream consumer property accesses broken by removed or renamed API fields', () => {
+      const sim = simulateConsumerContractImpact({
+        removedFields: ['legacyDiscount'],
+        renamedFields: { totalAmount: 'grandTotal' },
+        consumerFiles: [
+          {
+            path: 'apps/web/OrderCard.js',
+            content: [
+              'export function renderOrder(res) {',
+              '  const { totalAmount } = res.data;',
+              '  return res.data?.legacyDiscount + totalAmount;',
+              '}',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(sim.breaking).toBe(true);
+      expect(sim.summary.totalBreakages).toBe(2);
+      expect(
+        sim.impactedConsumers.some(
+          (c) => c.field === 'legacyDiscount' && c.changeType === 'removed'
+        )
+      ).toBe(true);
+      expect(
+        sim.impactedConsumers.some(
+          (c) => c.field === 'totalAmount' && c.replacementField === 'grandTotal'
+        )
+      ).toBe(true);
+    });
+  });
+
+  describe('F10-4: Enterprise Data Sensitivity Classifier', () => {
+    it('classifies files into RESTRICTED, CONFIDENTIAL, INTERNAL, and PUBLIC tiers', () => {
+      const res = classifyDataSensitivity({
+        files: [
+          {
+            path: 'lib/crypto/keys.js',
+            content: 'export const jwtSecret = process.env.JWT_SECRET;',
+          },
+          {
+            path: 'lib/billing/kvkk.js',
+            content: 'export function mask(tckn, iban) { return { tckn, iban }; }',
+          },
+          { path: 'lib/utils/math.js', content: 'export function sum(a, b) { return a + b; }' },
+        ],
+      });
+      expect(res.summary.byTier.RESTRICTED).toBe(1);
+      expect(res.summary.byTier.CONFIDENTIAL).toBe(1);
+      expect(res.summary.byTier.PUBLIC).toBe(1);
+    });
+  });
+
+  describe('F10-5: Deterministic Build & Reproducibility Auditor', () => {
+    it('flags missing lockfiles, floating dependency ranges, local file paths, and unpinned Docker tags', () => {
+      const audit = auditBuildReproducibility({
+        hasLockfile: false,
+        packageJson: {
+          name: 'demo',
+          dependencies: {
+            lodash: 'latest',
+            'local-pkg': 'file:../local-pkg',
+          },
+        },
+        dockerfileContent: 'FROM node:latest\nWORKDIR /app',
+      });
+      expect(audit.reproducible).toBe(false);
+      expect(audit.summary.highCount).toBe(3);
+      expect(audit.summary.mediumCount).toBe(1);
     });
   });
 });

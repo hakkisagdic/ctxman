@@ -1,7 +1,7 @@
 # Ctxman — Geliştirme Listesi (Rakip Matrisi Boşluk Kapatma ve Yaratıcı Farklılaştırıcı Yol Haritası)
 
 > **Son Güncelleme:** 15 Kasım 2026  
-> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–10 yaratıcı farklılaştırıcı özellikler.  
+> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–11 yaratıcı farklılaştırıcı özellikler.  
 > **Önceliklendirme Formülü:** $\text{Öncelik Skoru} = \frac{\text{Gelir Etkisi (1–10)} \times \text{Kullanıcı Değeri (1–10)}}{\text{Efor (1–5)}}$  
 > **Sınıflandırma:**
 >
@@ -14,7 +14,8 @@
 > - **F7-1..F7-5 (Faz 7 — %100 Tamamlandı):** Altıncı 5 yaratıcı farklılaştırıcı yetenek (`F7-1`..`F7-5` tamamı uygulandı).
 > - **F8-1..F8-5 (Faz 8 — %100 Tamamlandı):** Yedinci 5 yaratıcı farklılaştırıcı yetenek (`F8-1`..`F8-5` tamamı uygulandı).
 > - **F9-1..F9-5 (Faz 9 — %100 Tamamlandı):** Sekizinci 5 yaratıcı farklılaştırıcı yetenek (`F9-1`..`F9-5` tamamı uygulandı).
-> - **F10-1..F10-5 (Faz 10 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
+> - **F10-1..F10-5 (Faz 10 — %100 Tamamlandı):** Dokuzuncu 5 yaratıcı farklılaştırıcı yetenek (`F10-1`..`F10-5` tamamı uygulandı).
+> - **F11-1..F11-5 (Faz 11 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
 
 ---
 
@@ -128,12 +129,24 @@
 
 ---
 
-## Faz 10: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+## Faz 10: 5 Yaratıcı Farklılaştırıcı Özellik (`F10-1`..`F10-5` — %100 Tamamlandı)
 
-| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                       | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
-| :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
-| **F10-1** | **Sıfır-Kesinti Özellik Emeklilik & Temizlik Yama Üretici (`planFeatureFlagRetirement`)** — Kalıcılaşmış bayrak dallarını otomatik sadeleştirme planı          |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
-| **F10-2** | **Çoklu Ajan Oturumu Bellek Özeti & Devir Paketi (`buildAgentHandoffPack`)** — Ajanlar arası görev devrinde sıkıştırılmış karar ve durum özeti üretme          |      9       |      9       |    2.2     | **36.8** | [ ] Planlandı |
-| **F10-3** | **API Geriye Dönük Sözleşme Tüketici Simülatörü (`simulateConsumerContractImpact`)** — Değişen yanıt alanlarının istemci yıkımlarını statik simüle etme        |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
-| **F10-4** | **Kurumsal Veri Sınıflandırma & Hassasiyet Etiketleyici (`classifyDataSensitivity`)** — Modülleri PII/Finansal/Gizli veri yoğunluğuna göre otomatik etiketleme |      9       |      8       |    2.5     | **28.8** | [ ] Planlandı |
-| **F10-5** | **Deterministik Derleme & Ortam Tekrarlanabilirlik Denetçisi (`auditBuildReproducibility`)** — Sabitlenmemiş sürümler ve yerel yol bağımlılıklarını yakalama   |      7       |      8       |    2.0     | **28.0** | [ ] Planlandı |
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                       | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
+| :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :----------------: |
+| **F10-1** | **Sıfır-Kesinti Özellik Emeklilik & Temizlik Yama Üretici (`planFeatureFlagRetirement`)** — Kalıcılaşmış bayrak dallarını otomatik sadeleştirme planı          |      8       |      9       |    2.0     | **36.0** | **[x] Tamamlandı** |
+| **F10-2** | **Çoklu Ajan Oturumu Bellek Özeti & Devir Paketi (`buildAgentHandoffPack`)** — Ajanlar arası görev devrinde sıkıştırılmış karar ve durum özeti üretme          |      9       |      9       |    2.2     | **36.8** | **[x] Tamamlandı** |
+| **F10-3** | **API Geriye Dönük Sözleşme Tüketici Simülatörü (`simulateConsumerContractImpact`)** — Değişen yanıt alanlarının istemci yıkımlarını statik simüle etme        |      8       |      8       |    2.0     | **32.0** | **[x] Tamamlandı** |
+| **F10-4** | **Kurumsal Veri Sınıflandırma & Hassasiyet Etiketleyici (`classifyDataSensitivity`)** — Modülleri PII/Finansal/Gizli veri yoğunluğuna göre otomatik etiketleme |      9       |      8       |    2.5     | **28.8** | **[x] Tamamlandı** |
+| **F10-5** | **Deterministik Derleme & Ortam Tekrarlanabilirlik Denetçisi (`auditBuildReproducibility`)** — Sabitlenmemiş sürümler ve yerel yol bağımlılıklarını yakalama   |      7       |      8       |    2.0     | **28.0** | **[x] Tamamlandı** |
+
+---
+
+## Faz 11: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                              | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
+| :-------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
+| **F11-1** | **SLO / Hata Bütçesi Odaklı Dağıtım Kapısı (`evaluateDeployFreezeGate`)** — PR risk skoru ile servis hata bütçesini (error budget) birleştirip yayın kararı verme     |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
+| **F11-2** | **Ajan Araç Çağrısı (MCP Tool-Call) Maliyet & Döngü Koruması (`analyzeAgentToolLoop`)** — Tekrarlayan/sonsuz MCP araç çağrılarını yakalayıp önbellek önerme           |      9       |      9       |    2.2     | **36.8** | [ ] Planlandı |
+| **F11-3** | **Çoklu Kiracı (Multi-Tenant) Veri İzolasyonu Denetçisi (`auditTenantIsolation`)** — `tenant_id` / `org_id` filtresi eksik çok kiracılı sorguları yakalama            |      9       |      8       |    2.2     | **32.7** | [ ] Planlandı |
+| **F11-4** | **Mimari Karar Kaydı (ADR) Otomatik Taslak Üretici (`generateAdrDraft`)** — Büyük yapısal PR değişikliklerinden standart Markdown ADR belgesi üretme                  |      7       |      8       |    2.0     | **28.0** | [ ] Planlandı |
+| **F11-5** | **Regüle Ortam (Air-Gapped) Model & Tokenizer Uyumluluk Denetçisi (`verifyAirgappedReadiness`)** — Dış ağ çağrısı yapan kod ve bağımlılıkları sıfır-bulut için tarama |      8       |      8       |    2.5     | **25.6** | [ ] Planlandı |
