@@ -2740,3 +2740,11 @@ export function auditQueueConsumerResilience(
 export function optimizeWorkspaceTaskGraph(
   options?: Record<string, unknown>
 ): Record<string, unknown>;
+
+export function evaluateCanaryRollout(options?: Record<string, unknown>): Record<string, unknown>;
+export function signAndVerifyContextPack(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function recommendMissingIndexes(options?: Record<string, unknown>): Record<string, unknown>;
+export function assignBalancedReviewers(options?: Record<string, unknown>): Record<string, unknown>;
+export function auditRagCorpusIntegrity(options?: Record<string, unknown>): Record<string, unknown>;

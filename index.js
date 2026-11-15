@@ -128,6 +128,11 @@ import { auditPaymentIdempotency } from './lib/security/payment-idempotency.js';
 import { checkPromptTemplateDrift } from './lib/pack/prompt-drift.js';
 import { auditQueueConsumerResilience } from './lib/architecture/queue-resilience.js';
 import { optimizeWorkspaceTaskGraph } from './lib/workspace/task-optimizer.js';
+import { evaluateCanaryRollout } from './lib/pr/canary-evaluator.js';
+import { signAndVerifyContextPack } from './lib/policy/context-attestation.js';
+import { recommendMissingIndexes } from './lib/architecture/index-advisor.js';
+import { assignBalancedReviewers } from './lib/who/reviewer-balancer.js';
+import { auditRagCorpusIntegrity } from './lib/rag/corpus-integrity.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -338,6 +343,11 @@ export {
   checkPromptTemplateDrift,
   auditQueueConsumerResilience,
   optimizeWorkspaceTaskGraph,
+  evaluateCanaryRollout,
+  signAndVerifyContextPack,
+  recommendMissingIndexes,
+  assignBalancedReviewers,
+  auditRagCorpusIntegrity,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,

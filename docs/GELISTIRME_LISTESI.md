@@ -1,7 +1,7 @@
 # Ctxman — Geliştirme Listesi (Rakip Matrisi Boşluk Kapatma ve Yaratıcı Farklılaştırıcı Yol Haritası)
 
 > **Son Güncelleme:** 15 Kasım 2026  
-> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–13 yaratıcı farklılaştırıcı özellikler.  
+> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–14 yaratıcı farklılaştırıcı özellikler.  
 > **Önceliklendirme Formülü:** $\text{Öncelik Skoru} = \frac{\text{Gelir Etkisi (1–10)} \times \text{Kullanıcı Değeri (1–10)}}{\text{Efor (1–5)}}$  
 > **Sınıflandırma:**
 >
@@ -17,7 +17,8 @@
 > - **F10-1..F10-5 (Faz 10 — %100 Tamamlandı):** Dokuzuncu 5 yaratıcı farklılaştırıcı yetenek (`F10-1`..`F10-5` tamamı uygulandı).
 > - **F11-1..F11-5 (Faz 11 — %100 Tamamlandı):** Onuncu 5 yaratıcı farklılaştırıcı yetenek (`F11-1`..`F11-5` tamamı uygulandı).
 > - **F12-1..F12-5 (Faz 12 — %100 Tamamlandı):** On birinci 5 yaratıcı farklılaştırıcı yetenek (`F12-1`..`F12-5` tamamı uygulandı).
-> - **F13-1..F13-5 (Faz 13 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
+> - **F13-1..F13-5 (Faz 13 — %100 Tamamlandı):** On ikinci 5 yaratıcı farklılaştırıcı yetenek (`F13-1`..`F13-5` tamamı uygulandı).
+> - **F14-1..F14-5 (Faz 14 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
 
 ---
 
@@ -167,12 +168,24 @@
 
 ---
 
-## Faz 13: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+## Faz 13: 5 Yaratıcı Farklılaştırıcı Özellik (`F13-1`..`F13-5` — %100 Tamamlandı)
 
-| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                      | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
-| :-------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
-| **F13-1** | **Canlı Kanarya (Canary) Telemetri & Otomatik Geri Alma Karar Motoru (`evaluateCanaryRollout`)** — Kanarya sürümü hata/gecikme metriklerini taban sürümle karşılaştırıp rollback kararı verme |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
-| **F13-2** | **Kriptografik Bağlam İmzası & Zincirleme Kanıt Doğrulayıcı (`signAndVerifyContextPack`)** — Paketlenen bağlam ve denetim çıktılarını HMAC/SHA-256 zinciriyle imzalayıp kurcalamayı yakalama  |      9       |      8       |    2.0     | **36.0** | [ ] Planlandı |
-| **F13-3** | **Veritabanı İndeks Kapsama & Yavaş Sorgu Önerici (`recommendMissingIndexes`)** — SQL `WHERE`/`ORDER BY`/`JOIN` sütunlarını şema indeksleriyle eşleştirip eksik indeks DDL önerme             |      8       |      9       |    2.2     | **32.7** | [ ] Planlandı |
-| **F13-4** | **PR İnceleyici Yük Dengeleyici & Uzman Rotasyonu (`assignBalancedReviewers`)** — Uzmanlık skoru ile aktif inceleme yükünü birleştirip darboğaz yaratmayan hakem atama                        |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
-| **F13-5** | **Ajan Bellek Zehirlenmesi (Memory Poisoning) & RAG Bütünlük Denetçisi (`auditRagCorpusIntegrity`)** — RAG parçalarındaki çelişkili veya enjekte edilmiş sahte kuralları tarama               |      9       |      8       |    2.5     | **28.8** | [ ] Planlandı |
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                      | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
+| :-------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :----------------: |
+| **F13-1** | **Canlı Kanarya (Canary) Telemetri & Otomatik Geri Alma Karar Motoru (`evaluateCanaryRollout`)** — Kanarya sürümü hata/gecikme metriklerini taban sürümle karşılaştırıp rollback kararı verme |      9       |      9       |    2.0     | **40.5** | **[x] Tamamlandı** |
+| **F13-2** | **Kriptografik Bağlam İmzası & Zincirleme Kanıt Doğrulayıcı (`signAndVerifyContextPack`)** — Paketlenen bağlam ve denetim çıktılarını HMAC/SHA-256 zinciriyle imzalayıp kurcalamayı yakalama  |      9       |      8       |    2.0     | **36.0** | **[x] Tamamlandı** |
+| **F13-3** | **Veritabanı İndeks Kapsama & Yavaş Sorgu Önerici (`recommendMissingIndexes`)** — SQL `WHERE`/`ORDER BY`/`JOIN` sütunlarını şema indeksleriyle eşleştirip eksik indeks DDL önerme             |      8       |      9       |    2.2     | **32.7** | **[x] Tamamlandı** |
+| **F13-4** | **PR İnceleyici Yük Dengeleyici & Uzman Rotasyonu (`assignBalancedReviewers`)** — Uzmanlık skoru ile aktif inceleme yükünü birleştirip darboğaz yaratmayan hakem atama                        |      8       |      8       |    2.0     | **32.0** | **[x] Tamamlandı** |
+| **F13-5** | **Ajan Bellek Zehirlenmesi (Memory Poisoning) & RAG Bütünlük Denetçisi (`auditRagCorpusIntegrity`)** — RAG parçalarındaki çelişkili veya enjekte edilmiş sahte kuralları tarama               |      9       |      8       |    2.5     | **28.8** | **[x] Tamamlandı** |
+
+---
+
+## Faz 14: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                         | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
+| :-------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
+| **F14-1** | **FinOps & Bulut/LLM Maliyet Anomalisi Dedektörü (`detectFinopsCostAnomalies`)** — Model/servis bazlı günlük token ve fatura sıçramalarını yakalayıp bütçe koruma aksiyonu önerme                |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
+| **F14-2** | **Sıfır-Güven (Zero-Trust) Yetki & RBAC Kapsama Denetçisi (`auditEndpointAuthCoverage`)** — Kimlik doğrulama veya RBAC middleware koruması eksik API rotalarını yakalama                         |      9       |      9       |    2.2     | **36.8** | [ ] Planlandı |
+| **F14-3** | **Otomatik Geri Alma (Rollback) & Acil Müdahale Runbook Üretici (`generateRollbackRunbook`)** — PR içindeki veritabanı, bayrak ve servis değişikliklerinden adım adım geri alma kılavuzu derleme |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
+| **F14-4** | **Eşzamanlılık & Yarış Durumu (Race Condition / Lock) Risk Avcısı (`detectConcurrencyHazards`)** — Senkronize edilmemiş paylaşılan durum yazımlarını ve eksik kilitleri tespit etme              |      8       |      8       |    2.2     | **29.1** | [ ] Planlandı |
+| **F14-5** | **Müşteri SLA & Kırılma Bildirimi Etki Raporlayıcı (`buildSlaImpactReport`)** — Etkilenen uç noktaları kurumsal müşteri SLA sözleşmeleriyle eşleştirip bildirim taslağı üretme                   |      8       |      8       |    2.5     | **25.6** | [ ] Planlandı |
