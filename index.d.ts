@@ -2772,3 +2772,17 @@ export function auditRightToBeForgotten(options?: Record<string, unknown>): Reco
 export function analyzeColdStartBottlenecks(
   options?: Record<string, unknown>
 ): Record<string, unknown>;
+
+export function auditDependencyTyposquatting(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function compressPromptSemantically(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function auditGraphqlQueryComplexity(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function auditTraceContextPropagation(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function estimateCarbonFootprint(options?: Record<string, unknown>): Record<string, unknown>;

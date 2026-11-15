@@ -143,6 +143,11 @@ import { evaluateMultiAgentConsensus } from './lib/task/agent-consensus.js';
 import { generateShadowReplayPlan } from './lib/pr/shadow-replay.js';
 import { auditRightToBeForgotten } from './lib/security/rtbf-auditor.js';
 import { analyzeColdStartBottlenecks } from './lib/architecture/cold-start.js';
+import { auditDependencyTyposquatting } from './lib/security/typosquat-auditor.js';
+import { compressPromptSemantically } from './lib/pack/semantic-compressor.js';
+import { auditGraphqlQueryComplexity } from './lib/architecture/graphql-complexity.js';
+import { auditTraceContextPropagation } from './lib/architecture/trace-propagation.js';
+import { estimateCarbonFootprint } from './lib/count/carbon-estimator.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -368,6 +373,11 @@ export {
   generateShadowReplayPlan,
   auditRightToBeForgotten,
   analyzeColdStartBottlenecks,
+  auditDependencyTyposquatting,
+  compressPromptSemantically,
+  auditGraphqlQueryComplexity,
+  auditTraceContextPropagation,
+  estimateCarbonFootprint,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,

