@@ -2645,3 +2645,25 @@ export function compileAgentRules(
   root: string,
   options?: Record<string, unknown>
 ): Record<string, unknown>;
+export function checkEnvConfigDrift(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function generateTestScaffold(
+  root: string,
+  targetFile: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function analyzeSemverBreakage(
+  beforeSource: string,
+  afterSource: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function sanitizePromptContext(
+  text: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function mapEventLineage(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;

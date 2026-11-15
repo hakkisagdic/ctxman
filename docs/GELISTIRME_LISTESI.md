@@ -1,7 +1,7 @@
 # Ctxman — Geliştirme Listesi (Rakip Matrisi Boşluk Kapatma ve Yaratıcı Farklılaştırıcı Yol Haritası)
 
 > **Son Güncelleme:** 15 Kasım 2026  
-> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–6 yaratıcı farklılaştırıcı özellikler.  
+> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–7 yaratıcı farklılaştırıcı özellikler.  
 > **Önceliklendirme Formülü:** $\text{Öncelik Skoru} = \frac{\text{Gelir Etkisi (1–10)} \times \text{Kullanıcı Değeri (1–10)}}{\text{Efor (1–5)}}$  
 > **Sınıflandırma:**
 >
@@ -10,7 +10,8 @@
 > - **F3-1..F3-5 (Faz 3 — %100 Tamamlandı):** İkinci 5 yaratıcı farklılaştırıcı yetenek (`F3-1`..`F3-5` tamamı uygulandı).
 > - **F4-1..F4-5 (Faz 4 — %100 Tamamlandı):** Üçüncü 5 yaratıcı farklılaştırıcı yetenek (`F4-1`..`F4-5` tamamı uygulandı).
 > - **F5-1..F5-5 (Faz 5 — %100 Tamamlandı):** Dördüncü 5 yaratıcı farklılaştırıcı yetenek (`F5-1`..`F5-5` tamamı uygulandı).
-> - **F6-1..F6-5 (Faz 6 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
+> - **F6-1..F6-5 (Faz 6 — %100 Tamamlandı):** Beşinci 5 yaratıcı farklılaştırıcı yetenek (`F6-1`..`F6-5` tamamı uygulandı).
+> - **F7-1..F7-5 (Faz 7 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
 
 ---
 
@@ -76,12 +77,24 @@
 
 ---
 
-## Faz 6: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+## Faz 6: 5 Yaratıcı Farklılaştırıcı Özellik (`F6-1`..`F6-5` — %100 Tamamlandı)
 
-| Kod      | Yaratıcı Özellik Önerisi                                                                                                                                     | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
-| :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
-| **F6-1** | **Canlı Ortam Değişkeni & Konfigürasyon Sözleşme Denetçisi (Env & Config Drift Guard)** — `process.env.*` referanslarını `.env.example` ile eşleştirme       |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
-| **F6-2** | **Otomatik Sembolik Test İskeleti Üretici (AST Test Scaffold Generator)** — Kapsanmayan fonksiyon imzalarından hazır Vitest/Jest birim test şablonu üretme   |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
-| **F6-3** | **Geriye Dönük Uyumluluk & SemVer Kırılma Dedektörü (SemVer Breakage Analyzer)** — İki sürüm arasında silinen/değişen export imzalarından SemVer önerme      |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
-| **F6-4** | **İstem Enjeksiyonu & Zararlı Bağlam Kalkanı (Prompt Injection Sanitizer)** — Depo yorumları/dokümanlarındaki gizli jailbreak/prompt injection tespiti       |      9       |      8       |    2.5     | **28.8** | [ ] Planlandı |
-| **F6-5** | **Mikroservis Olay & Mesaj Şeması İzleyici (Event Topic Lineage Mapper)** — `emit`/`publish` ve `on`/`subscribe` kanallarını eşleştirip yetim olayları bulma |      7       |      8       |    2.5     | **22.4** | [ ] Planlandı |
+| Kod      | Yaratıcı Özellik                                                                                                                                       | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
+| :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :----------------: |
+| **F6-1** | **Canlı Ortam Değişkeni & Konfigürasyon Sözleşme Denetçisi (`checkEnvConfigDrift`)** — `process.env.*` referanslarını `.env.example` ile eşleştirme    |      8       |      9       |    2.0     | **36.0** | **[x] Tamamlandı** |
+| **F6-2** | **Otomatik Sembolik Test İskeleti Üretici (`generateTestScaffold`)** — Kapsanmayan fonksiyon imzalarından hazır Vitest/Jest birim test şablonu üretme  |      8       |      9       |    2.0     | **36.0** | **[x] Tamamlandı** |
+| **F6-3** | **Geriye Dönük Uyumluluk & SemVer Kırılma Dedektörü (`analyzeSemverBreakage`)** — İki sürüm arasında silinen/değişen export imzalarından SemVer önerme |      8       |      8       |    2.0     | **32.0** | **[x] Tamamlandı** |
+| **F6-4** | **İstem Enjeksiyonu & Zararlı Bağlam Kalkanı (`sanitizePromptContext`)** — Depo yorumları/dokümanlarındaki gizli jailbreak/prompt injection tespiti    |      9       |      8       |    2.5     | **28.8** | **[x] Tamamlandı** |
+| **F6-5** | **Mikroservis Olay & Mesaj Şeması İzleyici (`mapEventLineage`)** — `emit`/`publish` ve `on`/`subscribe` kanallarını eşleştirip yetim olayları bulma    |      7       |      8       |    2.5     | **22.4** | **[x] Tamamlandı** |
+
+---
+
+## Faz 7: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+
+| Kod      | Yaratıcı Özellik Önerisi                                                                                                                                        | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
+| :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
+| **F7-1** | **Özellik Bayrağı (Feature Flag) Yaşam Döngüsü & Bayat Bayrak Avcısı (`findStaleFeatureFlags`)** — Kalıcılaşmış ve temizlenmemiş feature flag dallarını bulma   |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
+| **F7-2** | **Otomatik Sürüm Notu & Müşteri Odaklı Changelog Üretici (`generateSemanticReleaseNotes`)** — Commit ve sembol grafiğinden kategorize sürüm notu derleme        |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
+| **F7-3** | **API Hız Sınırı & Dayanıklılık Denetçisi (`auditResiliencePatterns`)** — Timeout/retry tanımlanmamış dış HTTP/fetch çağrılarını statik yakalama                |      8       |      8       |    2.5     | **25.6** | [ ] Planlandı |
+| **F7-4** | **Çok Dilli Çeviri (i18n) Anahtar Tutarlılığı Denetçisi (`checkI18nDrift`)** — `website/` ve uygulama dilleri (`en`/`tr`) arasındaki eksik anahtarları bulma    |      7       |      8       |    2.0     | **28.0** | [ ] Planlandı |
+| **F7-5** | **Ajan Görev Planı & Alt-Görev Ayrıştırıcı (`decomposeTaskIntoSteps`)** — Doğal dil görevini etkilenen dosya katmanlarına göre sıralı uygulama adımlarına bölme |      9       |      9       |    2.5     | **32.4** | [ ] Planlandı |

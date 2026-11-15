@@ -93,6 +93,11 @@ import { checkDocDrift } from './lib/architecture/doc-drift.js';
 import { findCircularDependencies } from './lib/architecture/circular-deps.js';
 import { findSemanticClones } from './lib/architecture/semantic-clones.js';
 import { findQueryBottlenecks } from './lib/architecture/query-bottlenecks.js';
+import { checkEnvConfigDrift } from './lib/architecture/env-drift.js';
+import { mapEventLineage } from './lib/architecture/event-lineage.js';
+import { generateTestScaffold } from './lib/pr/test-scaffold.js';
+import { analyzeSemverBreakage } from './lib/pr/semver-analyzer.js';
+import { sanitizePromptContext } from './lib/security/prompt-shield.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -268,6 +273,11 @@ export {
   findCircularDependencies,
   findSemanticClones,
   findQueryBottlenecks,
+  checkEnvConfigDrift,
+  mapEventLineage,
+  generateTestScaffold,
+  analyzeSemverBreakage,
+  sanitizePromptContext,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,
