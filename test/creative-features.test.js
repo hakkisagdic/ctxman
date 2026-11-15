@@ -69,6 +69,11 @@ import {
   recommendMissingIndexes,
   assignBalancedReviewers,
   auditRagCorpusIntegrity,
+  detectFinopsCostAnomalies,
+  auditEndpointAuthCoverage,
+  generateRollbackRunbook,
+  detectConcurrencyHazards,
+  buildSlaImpactReport,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -1654,6 +1659,130 @@ export function testSuite() {
       expect(audit.clean).toBe(false);
       expect(audit.quarantinedChunkIds).toEqual(['chunk-2']);
       expect(audit.summary.findingCount).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  describe('F14-1: FinOps & LLM Token/Billing Cost Anomaly Detector', () => {
+    it('detects daily spend spikes and recommends prompt caching and model routing mitigations', () => {
+      const report = detectFinopsCostAnomalies({
+        dailyBudgetUsd: 50,
+        dailyRecords: [
+          {
+            date: '2026-11-13',
+            model: 'claude-3-5-sonnet',
+            costUsd: 12,
+            inputTokens: 100000,
+            cachedTokens: 80000,
+          },
+          {
+            date: '2026-11-14',
+            model: 'claude-3-5-sonnet',
+            costUsd: 14,
+            inputTokens: 110000,
+            cachedTokens: 85000,
+          },
+          {
+            date: '2026-11-15',
+            model: 'claude-3-opus',
+            costUsd: 85,
+            inputTokens: 250000,
+            cachedTokens: 10000,
+          },
+        ],
+      });
+      expect(report.anomalyDetected).toBe(true);
+      expect(report.summary.anomalyCount).toBe(1);
+      expect(report.anomalies[0].date).toBe('2026-11-15');
+      expect(report.mitigations.length).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  describe('F14-2: Zero-Trust Endpoint Auth & RBAC Coverage Auditor', () => {
+    it('flags unauthenticated routes while passing middleware-protected and public health routes', () => {
+      const audit = auditEndpointAuthCoverage({
+        files: [
+          {
+            path: 'lib/api/routes.js',
+            content: [
+              'app.get("/health", (req, res) => res.end("ok"));',
+              'app.post("/api/v1/payouts", requireAuth, requireRole("admin"), handlePayout);',
+              'app.delete("/api/v1/tenants/:id", handleDeleteTenant);',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(audit.compliant).toBe(false);
+      expect(audit.summary.unprotectedCount).toBe(1);
+      expect(audit.unprotectedRoutes[0].route).toBe('/api/v1/tenants/:id');
+      expect(audit.unprotectedRoutes[0].severity).toBe('critical');
+    });
+  });
+
+  describe('F14-3: Automated Rollback & Emergency Mitigation Runbook Generator', () => {
+    it('synthesizes ordered flag kill-switches, git revert, and reverse DB migration steps', () => {
+      const runbook = generateRollbackRunbook({
+        releaseVersion: 'v3.4.0',
+        previousStableTag: 'v3.3.0',
+        mergeCommitSha: '6e0143a',
+        featureFlags: ['new_checkout_flow'],
+        migrations: ['001_init.sql', '002_add_idx.sql'],
+        services: ['billing-api'],
+      });
+      expect(runbook.steps[0].phase).toBe('feature-flag-killswitch');
+      expect(runbook.steps[2].command).toContain('002_add_idx.sql');
+      expect(runbook.markdown).toContain('Emergency Rollback Runbook: v3.4.0 -> v3.3.0');
+    });
+  });
+
+  describe('F14-4: Concurrency & Race-Condition Hazard Detector', () => {
+    it('detects TOCTOU check-then-act balance updates without locks and unawaited mutex calls', () => {
+      const report = detectConcurrencyHazards({
+        files: [
+          {
+            path: 'lib/billing/wallet.js',
+            content: [
+              'export async function withdraw(db, mutex, userId, amount) {',
+              '  mutex.acquire();',
+              '  const row = await db.query("SELECT balance FROM wallets WHERE user_id = $1");',
+              '  if (row.balance >= amount) {',
+              '    await db.query("UPDATE wallets SET balance = balance - $1 WHERE user_id = $2");',
+              '  }',
+              '}',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(report.safe).toBe(false);
+      expect(report.summary.criticalCount).toBe(1);
+      expect(report.summary.highCount).toBe(1);
+    });
+  });
+
+  describe('F14-5: Enterprise Customer SLA & Breaking-Change Impact Reporter', () => {
+    it('computes SLA breaches and financial penalty exposure across enterprise contracts', () => {
+      const sla = buildSlaImpactReport({
+        affectedEndpoints: ['/api/v1/charge'],
+        estimatedDowntimeMinutes: 60,
+        contracts: [
+          {
+            customer: 'BankCorp TR',
+            tier: 'mission-critical',
+            endpoints: ['/api/v1/charge', '/api/v1/refund'],
+            maxMonthlyDowntimeMinutes: 15,
+            penaltyUsd: 5000,
+          },
+          {
+            customer: 'RetailApp',
+            tier: 'standard',
+            endpoints: ['/api/v1/catalog'],
+            maxMonthlyDowntimeMinutes: 45,
+            penaltyUsd: 500,
+          },
+        ],
+      });
+      expect(sla.slaBreached).toBe(true);
+      expect(sla.summary.impactedCustomerCount).toBe(1);
+      expect(sla.totalPenaltyRiskUsd).toBe(5000);
     });
   });
 });

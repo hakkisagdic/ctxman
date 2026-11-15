@@ -2748,3 +2748,15 @@ export function signAndVerifyContextPack(
 export function recommendMissingIndexes(options?: Record<string, unknown>): Record<string, unknown>;
 export function assignBalancedReviewers(options?: Record<string, unknown>): Record<string, unknown>;
 export function auditRagCorpusIntegrity(options?: Record<string, unknown>): Record<string, unknown>;
+
+export function detectFinopsCostAnomalies(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function auditEndpointAuthCoverage(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function generateRollbackRunbook(options?: Record<string, unknown>): Record<string, unknown>;
+export function detectConcurrencyHazards(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function buildSlaImpactReport(options?: Record<string, unknown>): Record<string, unknown>;

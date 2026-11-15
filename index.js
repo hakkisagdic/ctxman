@@ -133,6 +133,11 @@ import { signAndVerifyContextPack } from './lib/policy/context-attestation.js';
 import { recommendMissingIndexes } from './lib/architecture/index-advisor.js';
 import { assignBalancedReviewers } from './lib/who/reviewer-balancer.js';
 import { auditRagCorpusIntegrity } from './lib/rag/corpus-integrity.js';
+import { detectFinopsCostAnomalies } from './lib/billing/finops-anomaly.js';
+import { auditEndpointAuthCoverage } from './lib/security/auth-coverage.js';
+import { generateRollbackRunbook } from './lib/pr/rollback-runbook.js';
+import { detectConcurrencyHazards } from './lib/architecture/concurrency-hazards.js';
+import { buildSlaImpactReport } from './lib/policy/sla-impact.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -348,6 +353,11 @@ export {
   recommendMissingIndexes,
   assignBalancedReviewers,
   auditRagCorpusIntegrity,
+  detectFinopsCostAnomalies,
+  auditEndpointAuthCoverage,
+  generateRollbackRunbook,
+  detectConcurrencyHazards,
+  buildSlaImpactReport,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,
