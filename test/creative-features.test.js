@@ -13,11 +13,14 @@ import {
   createPackManifest,
   packDeltaContext,
   analyzeTaintFlows,
+  findDeadSymbols,
+  recommendModelRoute,
+  classifyTaskComplexity,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
 
-describe('Creative Features (C-1..C-5)', () => {
+describe('Creative Features (C-1..C-5 & F3-1..F3-2)', () => {
   let tmpDir;
 
   beforeEach(() => {
@@ -320,6 +323,39 @@ export function testSuite() {
       expect(
         sarif.runs[0].results.some((r) => r.ruleId === 'ctxman/taint/TAINT-UNREDACTED-SINK')
       ).toBe(true);
+    });
+  });
+
+  describe('F3-1: Semantic Dead-Symbol & Orphan Export Hunter', () => {
+    it('identifies unreferenced orphan modules and dead symbols in the repository graph', () => {
+      const dead = findDeadSymbols(tmpDir);
+      expect(dead.orphanModules.some((m) => m.file === 'lib/services/invoice.js')).toBe(true);
+      expect(
+        dead.deadSymbols.some(
+          (s) => s.file === 'lib/services/invoice.js' && s.name === 'issueInvoice'
+        )
+      ).toBe(true);
+    });
+  });
+
+  describe('F3-2: Multi-LLM Token & Cost Arbitrage Router', () => {
+    it('classifies task complexity and recommends the most cost-effective model with cache savings', () => {
+      expect(classifyTaskComplexity('fix typo in readme', 2000)).toBe('fast');
+      expect(
+        classifyTaskComplexity('audit security taint flow and architecture drift', 15000)
+      ).toBe('reasoning');
+
+      const route = recommendModelRoute({
+        task: 'audit security taint flow and architecture drift',
+        inputTokens: 20000,
+        outputTokens: 1500,
+        turns: 6,
+        cacheableRatio: 0.8,
+      });
+      expect(route.taskComplexity).toBe('reasoning');
+      expect(route.recommended).toBeDefined();
+      expect(route.recommended.cachedSessionUsd).toBeLessThan(route.recommended.uncachedSessionUsd);
+      expect(route.recommended.savingsPct).toBeGreaterThan(20);
     });
   });
 });

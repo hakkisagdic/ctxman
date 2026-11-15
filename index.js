@@ -86,6 +86,12 @@ import {
 
 // Architecture Drift & Layer Violation Detector (`C-3`)
 import { checkArchitectureDrift, loadArchitectureConfig } from './lib/architecture/index.js';
+import { findDeadSymbols } from './lib/architecture/dead-symbols.js';
+import {
+  recommendModelRoute,
+  classifyTaskComplexity,
+  MODEL_CATALOG,
+} from './lib/count/cost-router.js';
 
 // Sensitive Data Taint Path Tracker (`C-5`)
 import { analyzeTaintFlows } from './lib/security/taint.js';
@@ -238,6 +244,10 @@ export {
   // Architecture Drift & Layer Violation Detector (`C-3`) & Taint Flow Tracker (`C-5`)
   checkArchitectureDrift,
   loadArchitectureConfig,
+  findDeadSymbols,
+  recommendModelRoute,
+  classifyTaskComplexity,
+  MODEL_CATALOG,
   analyzeTaintFlows,
 
   // Focused neighborhood context (`ctxman focus`)

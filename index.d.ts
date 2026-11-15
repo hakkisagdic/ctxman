@@ -2571,3 +2571,14 @@ export function analyzeTaintFlows(
   root: string,
   options?: Record<string, unknown>
 ): Record<string, unknown>;
+
+export function findDeadSymbols(
+  root: string,
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function recommendModelRoute(params?: Record<string, unknown>): Record<string, unknown>;
+export function classifyTaskComplexity(
+  task?: string,
+  inputTokens?: number
+): 'fast' | 'balanced' | 'reasoning';
+export const MODEL_CATALOG: Array<Record<string, unknown>>;

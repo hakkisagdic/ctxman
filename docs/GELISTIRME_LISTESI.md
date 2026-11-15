@@ -9,7 +9,7 @@
 > - **P1:** Rakip paritesini (Greptile, CodeRabbit, Repomix, Sourcegraph) tamamlayan yüksek değerli kalemler.
 > - **P2:** Kurumsal CI/CD ve DevSecOps entegrasyonunu güçlendiren tamamlayıcı kalemler.
 > - **C1–C5 (Faz 2 Yaratıcı Özellikler — %100 Tamamlandı):** Rakiplerin hiçbirinde bulunmayan, Ctxman'i kategori lideri yapan yaratıcı farklılaştırıcı yetenekler (`C-1`..`C-5` tamamı uygulandı).
-> - **F3-1..F3-5 (Faz 3 Yeni Yaratıcı Özellik Önerileri):** Faz 2 tamamlandıktan sonra sonraki iterasyon için önerilen 5 yeni yaratıcı yetenek.
+> - **F3-1..F3-5 (Faz 3 Yaratıcı Özellik Önerileri — En Değerli İkisi `F3-1` & `F3-2` Uygulandı):** Faz 2 tamamlandıktan sonra önerilen 5 yeni yaratıcı yetenek; en yüksek skorlu ilk ikisi (`F3-1` ve `F3-2`) doğrudan uygulanmıştır.
 
 ---
 
@@ -29,8 +29,6 @@
 
 ## Faz 2: 5 Yaratıcı Farklılaştırıcı Özellik (`C-1`..`C-5` — %100 Tamamlandı)
 
-Rakip matrisindeki tüm boşluklar kapatıldıktan sonra Ctxman'i rakiplerinden (Repomix, Greptile, CodeRabbit, Sourcegraph, Kondukto) ayıran **5 yaratıcı özelliğin tamamı (`C-1`..`C-5`) uygulanıp doğrulanmıştır**:
-
 | Kod     | Yaratıcı Özellik                                                                                                                                | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
 | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :----------------: |
 | **C-1** | **Prompt Cache Optimizer & Deterministik Önek Sabitleme** (`ctxman pack --cache-control`, Anthropic `ephemeral` bloklar & OpenAI 1024-token)    |      9       |      10      |    2.0     | **45.0** | **[x] Tamamlandı** |
@@ -41,53 +39,28 @@ Rakip matrisindeki tüm boşluklar kapatıldıktan sonra Ctxman'i rakiplerinden 
 
 ---
 
-### [x] C-1 (Uygulandı): Prompt Cache Optimizer & Deterministik Önek Sabitleme (`lib/pack/cache-optimizer.js`)
+## Faz 3: 5 Yeni Yaratıcı Özellik Önerisi (En Değerli İkisi `F3-1` & `F3-2` Uygulandı)
 
-- **Neden Yaratıcı ve Değerli:** Çok turlu AI kodlama ajanları (Claude Code, Cursor, Cline, özel kurumsal ajanlar) her turda depo bağlamını yeniden gönderir. Paketlenen dosyaların sırası deterministik değilse veya sık değişen test/görev dosyaları üstte yer alırsa Anthropic (%90 indirimli `cache_control: { type: "ephemeral" }`) ve OpenAI (%50 indirimli 1024+ token otomatik önek önbelleği) her turda bozulur (cache miss).
-- **Uygulanan Yetenekler:**
-  1. [`lib/pack/cache-optimizer.js`](../lib/pack/cache-optimizer.js): Dosyaları deterministik olarak 3 kararlılık katmanına (`static_core`, `semi_stable`, `volatile_tail`) ayırır (`classifyCacheTier`, `orderEntriesForPromptCache`).
-  2. `buildPromptCachePlan`: Anthropic için en fazla 4 adet `cache_control: { type: "ephemeral" }` kesme noktası (`breakpoints`) ve `anthropic.systemBlocks` dizisi üretir; OpenAI için 1024-token/128-token hizalı önek uygunluğunu (`openai.alignedPrefixTokens`) ve `estimatedSavings` yüzdesini hesaplar.
-
----
-
-### [x] C-2 (Uygulandı): Değişiklik Öncesi Kırılma Etkisi Simülatörü — Blast Radius Analyzer (`lib/impact/index.js`)
-
-- **Uygulanan Yetenekler:**
-  1. [`lib/impact/index.js`](../lib/impact/index.js) (`analyzeBlastRadius`, `buildBlastMermaidDiagram`, `formatBlastRadiusReport`): 1-hop/2-hop bağımlıları, AST sembol çağrı noktalarını (`directCallers`), etkilenen test kümesini (`affectedTests` & `recommendedTestCommand`), önerilen inceleyicileri (`reviewers`), `blastScore` (0–100) ve Mermaid diyagramını üretir.
-  2. CLI (`ctxman impact <file[:symbol]> [--json]`) ve REST API (`GET /api/v1/impact`) üzerinden sunulmuştur.
+| Kod      | Yaratıcı Özellik Önerisi                                                                                                                          | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |           Durum            |
+| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------ | :----------: | :----------: | :--------: | :------: | :------------------------: |
+| **F3-1** | **Semantik Ölü Kod & Yetim Sembol Avcısı (Semantic Dead-Symbol Hunter)** — AST çağrı grafiği ve import grafiğiyle sıfır referanslı sembol tespiti |      8       |      9       |    2.0     | **36.0** | **[x] Tamamlandı (Top 1)** |
+| **F3-2** | **Çoklu Model Token & Maliyet Arbitraj Danışmanı (Multi-LLM Cost Router)** — Görev karmaşıklığına göre en ekonomik LLM ve bütçe önerisi           |      9       |      8       |    2.0     | **36.0** | **[x] Tamamlandı (Top 2)** |
+| **F3-3** | **Otomatik PR Bölücü (Atomic PR Splitter)** — Büyük PR'ları bağımlılık grafiğindeki bağlantılı bileşenlere göre bağımsız alt PR'lara ayırma       |      8       |      9       |    2.5     | **28.8** |       [ ] Planlandı        |
+| **F3-4** | **Canlı Test Kapsama Haritası & Riskli Satır Eşleştirici (LCOV-to-AST Risk Mapper)** — LCOV raporu ile PR değişen metodlarını kesiştirme          |      8       |      8       |    2.5     | **25.6** |       [ ] Planlandı        |
+| **F3-5** | **Kurumsal Bilgi Köprüsü Senkronizasyonu (ADR & Runbook Drift Checker)** — Kod değiştiğinde güncelliğini yitiren `docs/` ve ADR dosyalarını bulma |      7       |      8       |    2.5     | **22.4** |       [ ] Planlandı        |
 
 ---
 
-### [x] C-3 (Uygulandı): Mimari Sapma & Katman İhlali Dedektörü (`lib/architecture/index.js`)
+### [x] F3-1 (Uygulandı): Semantik Ölü Kod & Yetim Sembol Avcısı (`lib/architecture/dead-symbols.js`)
 
 - **Uygulanan Yetenekler:**
-  1. [`lib/architecture/index.js`](../lib/architecture/index.js) (`checkArchitectureDrift`, `loadArchitectureConfig`): `.ctxman/architecture.json` (veya varsayılan mimari kurallar) içindeki katman sınırlarını (`from` -> `cannotImport`) AST import ve çağrı kenarları üzerinde denetler.
-  2. [`lib/policy/sarif.js`](../lib/policy/sarif.js) (`architectureViolations` -> `ctxman/arch/*`) ve REST API (`GET /api/v1/architecture?format=sarif`) ile tam entegre edilmiştir.
+  1. [`lib/architecture/dead-symbols.js`](../lib/architecture/dead-symbols.js) (`findDeadSymbols`): Depo import grafiği ve AST sembol çağrı grafiği (`buildRepoGraph`) üzerinde gelen import/çağrı sayısı sıfır olan yetim modülleri (`orphanModules`) ve hem dosya dışından hem dosya içinden hiç çağrılmayan ölü fonksiyonları (`deadSymbols`) tespit eder.
+  2. REST API (`GET /api/v1/dead-symbols`) ve programatik SDK (`import { findDeadSymbols } from 'ctxman'`) ile kullanıma sunulmuştur.
 
 ---
 
-### [x] C-4 (Uygulandı): Ajan Oturumu Delta Bağlam Paketleme (`lib/pack/delta.js`)
+### [x] F3-2 (Uygulandı): Çoklu Model Token & Maliyet Arbitraj Danışmanı (`lib/count/cost-router.js`)
 
 - **Uygulanan Yetenekler:**
-  1. [`lib/pack/delta.js`](../lib/pack/delta.js) (`createPackManifest`, `packDeltaContext`): Önceki `packContext` çıktısının dosya bazlı SHA-256 özetini üretir; sonraki turda değişmeyen dosyalar için 1 satırlık `[UNCHANGED sha256=...]` referansı döndürürken yalnızca değişen (`modified`) veya yeni eklenen (`added`) dosyaların tam içeriğini paketler (`savedTokens`, `savingsPct`).
-  2. `POST /api/v1/pack` içinde `previousManifest` gövde alanı ile doğrudan desteklenir.
-
----
-
-### [x] C-5 (Uygulandı): Hassas Veri Akışı (Taint Path) İzleyici (`lib/security/taint.js`)
-
-- **Uygulanan Yetenekler:**
-  1. [`lib/security/taint.js`](../lib/security/taint.js) (`analyzeTaintFlows`): KVKK/BDDK kapsamındaki PII ve sır tanımlayıcılarının (`tckn`, `iban`, `cardNumber`, `password`, `apiKey`, `secretKey`) `redactSecrets` / `redactPII` çağrılmadan `console.*`, `logger.*`, `fetch`/`axios` veya `res.send` çıkışlarına akışını statik olarak izler.
-  2. [`lib/policy/sarif.js`](../lib/policy/sarif.js) (`taintFlows` -> `ctxman/taint/TAINT-UNREDACTED-SINK`) ve REST API (`GET /api/v1/taint?format=sarif`) ile entegre edilmiştir.
-
----
-
-## Faz 3: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
-
-| Kod      | Yaratıcı Özellik Önerisi                                                                                                                          | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
-| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------ | :----------: | :----------: | :--------: | :------: | :-----------: |
-| **F3-1** | **Semantik Ölü Kod & Yetim Sembol Avcısı (Semantic Dead-Symbol Hunter)** — AST çağrı grafiği ve git geçmişiyle sıfır referanslı sembol tespiti    |      8       |      9       |    2.0     | **36.0** | [ ] Planlandı |
-| **F3-2** | **Çoklu Model Token & Maliyet Arbitraj Danışmanı (Multi-LLM Cost Router)** — Görev karmaşıklığına göre en ekonomik LLM ve bütçe önerisi           |      9       |      8       |    2.0     | **36.0** | [ ] Planlandı |
-| **F3-3** | **Otomatik PR Bölücü (Atomic PR Splitter)** — Büyük PR'ları bağımlılık grafiğindeki bağlantılı bileşenlere göre bağımsız alt PR'lara ayırma       |      8       |      9       |    2.5     | **28.8** | [ ] Planlandı |
-| **F3-4** | **Canlı Test Kapsama Haritası & Riskli Satır Eşleştirici (LCOV-to-AST Risk Mapper)** — LCOV raporu ile PR değişen metodlarını kesiştirme          |      8       |      8       |    2.5     | **25.6** | [ ] Planlandı |
-| **F3-5** | **Kurumsal Bilgi Köprüsü Senkronizasyonu (ADR & Runbook Drift Checker)** — Kod değiştiğinde güncelliğini yitiren `docs/` ve ADR dosyalarını bulma |      7       |      8       |    2.5     | **22.4** | [ ] Planlandı |
+  1. [`lib/count/cost-router.js`](../lib/count/cost-router.js) (`recommendModelRoute`, `classifyTaskComplexity`, `MODEL_CATALOG`): Görev açıklamasını ve girdi token sayısını analiz ederek görevi `fast`, `balanced` veya `reasoning` karmaşıklık katmanına ayırır; 7 büyük LLM modeli (DeepSeek V3, Gemini 2.5 Flash/Pro, GPT-4o/mini, Claude Haiku/Sonnet) için çok turlu ajan oturumunda önbelleksiz (`uncachedSessionUsd`) ve prompt-cache aktif (`cachedSessionUsd`) maliyetleri hesaplayıp en ekonomik modeli ve önerilen token bütçesini (`recommendedBudget`) döndürür.
+  2. REST API (`GET /api/v1/cost-router`) ve programatik SDK (`import { recommendModelRoute } from 'ctxman'`) ile kullanıma sunulmuştur.
