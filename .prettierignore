@@ -32,9 +32,13 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# IDE files
+# IDE & local agent files
 .idea/
 .vscode/
+.kiro/
+.polyctl/
+agent-mail/
+semantic-review/
 *.swp
 *.swo
 
