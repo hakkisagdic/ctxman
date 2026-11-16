@@ -94,6 +94,11 @@ import {
   auditConnectionPoolExhaustion,
   compareEnvironmentParity,
   estimateSemanticCacheHitRate,
+  auditWebhookSignatureSecurity,
+  rebalanceContextAttention,
+  auditSsrfEgressSafety,
+  auditCodeownersCoverage,
+  auditCronJobIdempotency,
   buildSarifReport,
 } from '../index.js';
 import { APIServer } from '../lib/api/rest/server.js';
@@ -2292,6 +2297,103 @@ export function testSuite() {
       expect(report.hitRatePct).toBe(60);
       expect(report.savedInputTokens).toBeGreaterThan(0);
       expect(report.estimatedSavedUsd).toBeGreaterThan(0);
+    });
+  });
+
+  describe('F19-1: Webhook Signature & Replay-Attack Security Auditor', () => {
+    it('flags webhook handlers missing HMAC verification, timingSafeEqual, or replay timestamp checks', () => {
+      const report = auditWebhookSignatureSecurity({
+        files: [
+          {
+            path: 'lib/api/iyzico-webhook.js',
+            content: [
+              'export function handleWebhook(req, res) {',
+              '  const signature = req.headers["x-iyzi-signature"];',
+              '  if (signature === computed) { return res.end("ok"); }',
+              '}',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(report.status).toBe('webhook-vulnerable');
+      expect(report.webhookHandlersCount).toBe(1);
+      expect(report.findings.some((f) => f.type === 'missing-hmac-verification')).toBe(true);
+      expect(report.findings.some((f) => f.type === 'non-constant-time-comparison')).toBe(true);
+      expect(report.findings.some((f) => f.type === 'missing-replay-protection')).toBe(true);
+    });
+  });
+
+  describe('F19-2: Agent Long-Context Lost-in-the-Middle Attention Rebalancer', () => {
+    it('places high-importance contract and target files at primacy (start) and recency (end) zones', () => {
+      const res = rebalanceContextAttention({
+        items: [
+          { path: 'lib/utils/helper-a.js', importance: 0.2 },
+          { path: 'CLAUDE.md', importance: 0.9 },
+          { path: 'lib/utils/helper-b.js', importance: 0.1 },
+          { path: 'lib/billing/store.js', importance: 0.85, isTarget: true },
+          { path: 'lib/utils/helper-c.js', importance: 0.3 },
+        ],
+      });
+      expect(res.status).toBe('rebalanced');
+      expect(res.totalItems).toBe(5);
+      expect(res.primacyAnchors.length).toBeGreaterThanOrEqual(1);
+      expect(res.recencyAnchors.length).toBeGreaterThanOrEqual(1);
+      expect(res.rebalancedItems[0].path).toBe('lib/billing/store.js');
+      expect(res.rebalancedItems[res.rebalancedItems.length - 1].path).toBe('CLAUDE.md');
+    });
+  });
+
+  describe('F19-3: SSRF & Outbound URL Egress Allowlist Security Auditor', () => {
+    it('detects unvalidated user-controlled URLs in fetch/axios without private IP guards', () => {
+      const report = auditSsrfEgressSafety({
+        files: [
+          {
+            path: 'lib/services/webhook-dispatcher.js',
+            content: [
+              'export async function previewUrl(req) {',
+              '  return await fetch(req.body.targetUrl);',
+              '}',
+            ].join('\n'),
+          },
+        ],
+      });
+      expect(report.status).toBe('ssrf-risk');
+      expect(report.findingsCount).toBe(1);
+      expect(report.findings[0].type).toBe('unvalidated-ssrf-sink');
+    });
+  });
+
+  describe('F19-4: Git Monorepo CODEOWNERS Coverage & Orphan Directory Auditor', () => {
+    it('identifies unowned critical files and invalid owner handles in CODEOWNERS', () => {
+      const report = auditCodeownersCoverage({
+        codeownersContent: 'lib/ui/ @frontend-team\nlib/legacy/ @ghost-team\n',
+        validOwners: ['@frontend-team', '@sec-team'],
+        files: ['lib/ui/button.js', 'lib/security/auth.js', 'lib/billing/iyzico.js'],
+      });
+      expect(report.status).toBe('coverage-gaps');
+      expect(report.unownedFilesCount).toBe(2);
+      expect(report.criticalUnownedFiles).toEqual([
+        'lib/security/auth.js',
+        'lib/billing/iyzico.js',
+      ]);
+      expect(report.invalidOwnerRules).toHaveLength(1);
+    });
+  });
+
+  describe('F19-5: Background Cron / Scheduled Job Overlap & Distributed Lock Auditor', () => {
+    it('flags scheduled cron jobs missing distributed locks or execution timeouts', () => {
+      const report = auditCronJobIdempotency({
+        jobs: [{ name: 'nightly-invoice-sync', schedule: '0 2 * * *', distributedLock: false }],
+        files: [
+          {
+            path: 'lib/workers/billing-cron.js',
+            content: 'cron.schedule("*/5 * * * *", async () => { await settleInvoices(); });',
+          },
+        ],
+      });
+      expect(report.status).toBe('overlap-risk');
+      expect(report.auditedJobsCount).toBe(2);
+      expect(report.findings.some((f) => f.type === 'missing-distributed-lock')).toBe(true);
     });
   });
 });
