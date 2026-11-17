@@ -1,1 +1,7 @@
+p=$(git config --get hooks.privateScan 2>/dev/null) || p=""
+if [ -n "$p" ] && [ -x "$p" ]; then
+  _ps_tmp=$(mktemp "${TMPDIR:-/tmp}/prepush.XXXXXX") && cat > "$_ps_tmp" || exit 1
+  "$p" "$@" < "$_ps_tmp" || { rm -f "$_ps_tmp"; exit 1; }
+  exec < "$_ps_tmp"; rm -f "$_ps_tmp"
+fi
 npm test
