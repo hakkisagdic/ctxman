@@ -1,7 +1,7 @@
 # Ctxman — Geliştirme Listesi (Rakip Matrisi Boşluk Kapatma ve Yaratıcı Farklılaştırıcı Yol Haritası)
 
 > **Son Güncelleme:** 17 Kasım 2026  
-> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–19 yaratıcı farklılaştırıcı özellikler.  
+> **Kaynak:** [`docs/RAKIP_ANALIZI.md`](./RAKIP_ANALIZI.md) içindeki rakip parite maddeleri, [`docs/GELIR_MODELI.md`](./GELIR_MODELI.md) ticari gereksinimleri ve Faz 2–20 yaratıcı farklılaştırıcı özellikler.  
 > **Önceliklendirme Formülü:** $\text{Öncelik Skoru} = \frac{\text{Gelir Etkisi (1–10)} \times \text{Kullanıcı Değeri (1–10)}}{\text{Efor (1–5)}}$  
 > **Sınıflandırma:**
 >
@@ -23,9 +23,10 @@
 > - **F16-1..F16-5 (Faz 16 — kodda uygulandı):** On beşinci 5 yaratıcı farklılaştırıcı yetenek (`F16-1`..`F16-5` kodda uygulandı).
 > - **F17-1..F17-5 (Faz 17 — kodda uygulandı):** On altıncı 5 yaratıcı farklılaştırıcı yetenek (`F17-1`..`F17-5` kodda uygulandı).
 > - **F18-1..F18-5 (Faz 18 — kodda uygulandı):** On yedinci 5 yaratıcı farklılaştırıcı yetenek (`F18-1`..`F18-5` kodda uygulandı).
-> - **F19-1..F19-5 (Faz 19 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
+> - **F19-1..F19-5 (Faz 19 — kodda uygulandı):** On sekizinci 5 yaratıcı farklılaştırıcı yetenek (`F19-1`..`F19-5` kodda uygulandı; testleri sentetik örnek verilerle çalışır).
+> - **F20-1..F20-5 (Faz 20 — Sonraki İterasyon Önerileri):** Gelecek sürüm için önerilen 5 yeni yaratıcı özellik.
 
-Faz 1–18 kalemleri bu commit itibarıyla kodda uygulanmıştır ve yerel test takımı bunları kapsar. Tablodaki "[x] Kodda" işareti bu anlamdadır. GitHub Actions `CI` iş akışı depo ayarlarında elle kapatılmıştır (`disabled_manually`) ve 10 Kasım 2026'dan beri bu kalemleri doğrulamamıştır. Hiçbir faz için yüzde yüz tamamlandı denmez. Faz 19 uygulanmış değildir.
+Faz 1–19 kalemleri bu commit itibarıyla kodda uygulanmıştır ve yerel test takımı bunları kapsar. Tablodaki "[x] Kodda" işareti bu anlamdadır. GitHub Actions `CI` iş akışı depo ayarlarında elle kapatılmıştır (`disabled_manually`) ve 10 Kasım 2026'dan beri bu kalemleri doğrulamamıştır. Hiçbir faz için yüzde yüz tamamlandı denmez. Faz 20 uygulanmış değildir.
 
 ---
 
@@ -247,12 +248,24 @@ Faz 1–18 kalemleri bu commit itibarıyla kodda uygulanmıştır ve yerel test 
 
 ---
 
-## Faz 19: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+## Faz 19: 5 Yaratıcı Farklılaştırıcı Özellik (`F19-1`..`F19-5` — kodda uygulandı)
 
-| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                                                             | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
-| :-------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
-| **F19-1** | **Webhook İmza & Tekrar-Saldırısı (Replay Attack) Güvenlik Denetçisi (`auditWebhookSignatureSecurity`)** — Gelen ödeme/webhook işleyicilerinde `timingSafeEqual`, HMAC doğrulaması ve zaman damgası (replay) kontrolü denetimi       |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
-| **F19-2** | **Ajan Uzun-Bağlam "Ortada Kaybolma" (Lost-in-the-Middle) Yeniden Sıralayıcı (`rebalanceContextAttention`)** — Kritik mimari/sözleşme dosyalarını dikkat eğrisinin başı ve sonuna yerleştirip orta bölge kaybını önleme              |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
-| **F19-3** | **SSRF & Dış URL İzin Listesi (Egress Allowlist) Güvenlik Denetçisi (`auditSsrfEgressSafety`)** — Kullanıcı girdisiyle beslenen `fetch`/`axios` çağrılarında özel IP blokları (`169.254.169.254`, `10.0.0.0/8`) korumasını denetleme |      9       |      8       |    2.2     | **32.7** | [ ] Planlandı |
-| **F19-4** | **Git Monorepo CODEOWNERS Kapsama & Yetim Dizin Denetçisi (`auditCodeownersCoverage`)** — `CODEOWNERS` dosyasında sahibi tanımlanmamış veya geçersiz takıma atanmış dizin ve kritik modülleri tespit etme                            |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
-| **F19-5** | **Zaman Uyumsuz İş (Cron / Background Job) Çakışma & Tekil-Kilit Denetçisi (`auditCronJobIdempotency`)** — Çoklu kopya (multi-replica) çalışan cron/worker görevlerinde dağıtık kilit (distributed lock) eksikliğini bulma           |      8       |      8       |    2.2     | **29.1** | [ ] Planlandı |
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                                                             | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |       Durum        |
+| :-------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :----------------: |
+| **F19-1** | **Webhook İmza & Tekrar-Saldırısı (Replay Attack) Güvenlik Denetçisi (`auditWebhookSignatureSecurity`)** — Gelen ödeme/webhook işleyicilerinde `timingSafeEqual`, HMAC doğrulaması ve zaman damgası (replay) kontrolü denetimi       |      9       |      9       |    2.0     | **40.5** | **[x] Tamamlandı** |
+| **F19-2** | **Ajan Uzun-Bağlam "Ortada Kaybolma" (Lost-in-the-Middle) Yeniden Sıralayıcı (`rebalanceContextAttention`)** — Kritik mimari/sözleşme dosyalarını dikkat eğrisinin başı ve sonuna yerleştirip orta bölge kaybını önleme              |      9       |      9       |    2.0     | **40.5** | **[x] Tamamlandı** |
+| **F19-3** | **SSRF & Dış URL İzin Listesi (Egress Allowlist) Güvenlik Denetçisi (`auditSsrfEgressSafety`)** — Kullanıcı girdisiyle beslenen `fetch`/`axios` çağrılarında özel IP blokları (`169.254.169.254`, `10.0.0.0/8`) korumasını denetleme |      9       |      8       |    2.2     | **32.7** | **[x] Tamamlandı** |
+| **F19-4** | **Git Monorepo CODEOWNERS Kapsama & Yetim Dizin Denetçisi (`auditCodeownersCoverage`)** — `CODEOWNERS` dosyasında sahibi tanımlanmamış veya geçersiz takıma atanmış dizin ve kritik modülleri tespit etme                            |      8       |      8       |    2.0     | **32.0** | **[x] Tamamlandı** |
+| **F19-5** | **Zaman Uyumsuz İş (Cron / Background Job) Çakışma & Tekil-Kilit Denetçisi (`auditCronJobIdempotency`)** — Çoklu kopya (multi-replica) çalışan cron/worker görevlerinde dağıtık kilit (distributed lock) eksikliğini bulma           |      8       |      8       |    2.2     | **29.1** | **[x] Tamamlandı** |
+
+---
+
+## Faz 20: Sonraki İterasyon İçin 5 Yeni Yaratıcı Özellik Önerisi
+
+| Kod       | Yaratıcı Özellik Önerisi                                                                                                                                                                                                       | Gelir (1-10) | Değer (1-10) | Efor (1-5) |   Skor   |     Durum     |
+| :-------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: | :----------: | :--------: | :------: | :-----------: |
+| **F20-1** | **JWT & Oturum Token Güvenlik Yapılandırma Denetçisi (`auditJwtSecurityConfig`)** — `alg: "none"`, eksik `exp`/`aud`/`iss` doğrulaması, zayıf HMAC sırları ve HttpOnly/Secure eksik çerezleri yakalama                         |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
+| **F20-2** | **Ajan Üretimi Kod Kalitesi & Anti-Desen Denetçisi (`detectAiCodeSmells`)** — İçi boş `catch {}` blokları, `TODO: implement` yer tutucuları ve sahte sabit dönüşleri (`return true // mock`) otomatik yakalama                 |      9       |      9       |    2.0     | **40.5** | [ ] Planlandı |
+| **F20-3** | **Konteyner & Dockerfile En-Az-Yetki Güvenlik Denetçisi (`auditDockerfileHardening`)** — `USER root`, sabitlenmemiş `:latest` taban imajları ve `ENV`/`ARG` içine gömülü sırları tespit etme                                   |      8       |      9       |    2.2     | **32.7** | [ ] Planlandı |
+| **F20-4** | **API Sayfalama & Sınırsız Liste (Unbounded Response) DoS Denetçisi (`auditUnboundedPagination`)** — `LIMIT`/sayfalama üst sınırı olmayan liste uç noktalarını ve bellek taşması (OOM) risklerini bulma                        |      8       |      8       |    2.0     | **32.0** | [ ] Planlandı |
+| **F20-5** | **Kırılgan Bağımlılık & Bakımsız Paket (Bus-Factor / Abandonware) Risk Analizörü (`assessDependencyAbandonmentRisk`)** — Uzun süredir güncellenmeyen, tek bakıcılı veya arşivlenmiş dış bağımlılıkların risk skorunu hesaplama |      8       |      8       |    2.2     | **29.1** | [ ] Planlandı |

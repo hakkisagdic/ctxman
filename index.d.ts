@@ -2814,3 +2814,13 @@ export function compareEnvironmentParity(
 export function estimateSemanticCacheHitRate(
   options?: Record<string, unknown>
 ): Record<string, unknown>;
+
+export function auditWebhookSignatureSecurity(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function rebalanceContextAttention(
+  options?: Record<string, unknown>
+): Record<string, unknown>;
+export function auditSsrfEgressSafety(options?: Record<string, unknown>): Record<string, unknown>;
+export function auditCodeownersCoverage(options?: Record<string, unknown>): Record<string, unknown>;
+export function auditCronJobIdempotency(options?: Record<string, unknown>): Record<string, unknown>;

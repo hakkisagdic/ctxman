@@ -158,6 +158,11 @@ import { auditMcpToolPermissions } from './lib/security/mcp-permission-auditor.j
 import { auditConnectionPoolExhaustion } from './lib/architecture/connection-pool-auditor.js';
 import { compareEnvironmentParity } from './lib/architecture/env-parity.js';
 import { estimateSemanticCacheHitRate } from './lib/count/semantic-cache-estimator.js';
+import { auditWebhookSignatureSecurity } from './lib/security/webhook-security.js';
+import { rebalanceContextAttention } from './lib/pack/attention-rebalancer.js';
+import { auditSsrfEgressSafety } from './lib/security/ssrf-auditor.js';
+import { auditCodeownersCoverage } from './lib/who/codeowners-auditor.js';
+import { auditCronJobIdempotency } from './lib/architecture/cron-idempotency.js';
 import { analyzeBusFactor } from './lib/who/bus-factor.js';
 import { splitPrIntoAtomicGroups } from './lib/pr/pr-splitter.js';
 import { parseLcovReport, analyzeUncoveredRisk } from './lib/pr/coverage-risk.js';
@@ -398,6 +403,11 @@ export {
   auditConnectionPoolExhaustion,
   compareEnvironmentParity,
   estimateSemanticCacheHitRate,
+  auditWebhookSignatureSecurity,
+  rebalanceContextAttention,
+  auditSsrfEgressSafety,
+  auditCodeownersCoverage,
+  auditCronJobIdempotency,
   analyzeBusFactor,
   splitPrIntoAtomicGroups,
   parseLcovReport,
