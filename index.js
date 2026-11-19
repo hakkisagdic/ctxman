@@ -206,6 +206,9 @@ import { diagnoseFailure } from './lib/diagnose/index.js';
 // Institutional Memory Bridge (v3.2.0)
 import { queryAnalyzerCitations } from './lib/why/analyzer-bridge.js';
 
+// Work & session digests (`ctxman digest`)
+import { writeDigest, readDigest, listDigests } from './lib/context/digest.js';
+
 // Search, symbol lookup, token counting, RAG & export policy
 import { searchProject } from './lib/search/bm25.js';
 import { hybridSearch } from './lib/search/hybrid.js';
@@ -446,6 +449,11 @@ export {
 
   // Institutional Memory Bridge (v3.2.0)
   queryAnalyzerCitations,
+
+  // Work & session digests (`ctxman digest`)
+  writeDigest,
+  readDigest,
+  listDigests,
 
   // Search, symbols, counting, RAG & policy
   searchProject,

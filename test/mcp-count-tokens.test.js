@@ -4,7 +4,7 @@ import os from 'os';
 import path from 'path';
 import MCPServer from '../lib/api/mcp/server.js';
 
-describe('MCP count_tokens and 19-tool multi-repo workspace parity', () => {
+describe('MCP count_tokens and 20-tool multi-repo workspace parity', () => {
   let root;
   let siblingRoot;
 
@@ -34,12 +34,12 @@ describe('MCP count_tokens and 19-tool multi-repo workspace parity', () => {
   const callTool = (args, server = new MCPServer()) => callToolByName('count_tokens', args, server);
   const json = (result) => JSON.parse(result.content[0].text);
 
-  it('lists count_tokens with path, text, model, top, and repos, and exposes repos on all 19 MCP tools', async () => {
+  it('lists count_tokens with path, text, model, top, and repos, and exposes repos on all 20 MCP tools', async () => {
     const { tools } = await new MCPServer().server._requestHandlers.get('tools/list')(
       { method: 'tools/list', params: {} },
       {}
     );
-    expect(tools).toHaveLength(19);
+    expect(tools).toHaveLength(20);
     const tool = tools.find((t) => t.name === 'count_tokens');
     expect(Object.keys(tool.inputSchema.properties)).toEqual([
       'path',

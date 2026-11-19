@@ -165,7 +165,7 @@ claude mcp add --scope user --transport stdio ctxman -- /usr/local/bin/node /usr
 $ ctxman mcp uninstall --client claude-desktop
 ```
 
-## Tools (19)
+## Tools (20)
 
 | Tool                    | Arguments                                                                                                                                                             | Returns                                                                                                                                          |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -188,6 +188,7 @@ $ ctxman mcp uninstall --client claude-desktop
 | `diagnose_failure`      | `path`, `trace`, `repos?`, `budget?`, `format?`, `callGraph?`                                                                                                         | Stack-trace & failure root-cause bundle: implicated frames, methods, AST call & import 1-hop & git history                                       |
 | `find_experts`          | `path`, `target`, `repos?`, `limit?`, `halfLifeDays?`, `style?`                                                                                                       | Expert Finder ("Who knows about this?"): blame share, recency-decayed commits & CODEOWNERS (`ctxman who`)                                        |
 | `query_knowledge_graph` | `path`, `query?`, `file?`, `depth?`, `limit?`, `refresh?`, `repos?`                                                                                                   | File nodes, method declarations, and import/dependency edges from `.ctxman/self-knowledge/index.sqlite`                                          |
+| `digest_read`           | `ref`, `lines?`, `grep?`, `storeDir?`, `repos?`                                                                                                                       | Read a stored work digest by id or path inside the digest store with line-range or regex filtering (`ctxman digest read`)                        |
 
 `explain_history` takes `patches?` (each commit's diff), `discussions?` (GitHub/GitLab PR, MR and
 issue threads referenced in commit history), `analyzer?` / `analyzerDb?` (institutional memory
@@ -228,7 +229,13 @@ bootstrapping the graph when empty or when `refresh: true` is passed, and honour
 `.ctxman/policy.json` deny rules. When `repos` is provided, nodes and cross-repo import edges across all
 repositories are indexed and returned under `<alias>/<path>`.
 
-All 19 MCP tools (`analyze_codebase`, `generate_context`, `git_diff`, `search_code`, `list_methods`, `get_symbol`, `repo_map`, `pr_context`, `count_tokens`, `explain_history`, `pack_context`, `focus_context`, `check_policy`, `audit_log`, `ask_codebase`, `task_context`, `diagnose_failure`, `find_experts`, and `query_knowledge_graph`) accept an optional
+`digest_read` reads a stored digest by `ref` (digest id or a file path inside the digest store) from
+`storeDir`, `CTXMAN_DIGEST_DIR`, or `~/.ctxman/digests`, rejecting `..`, outside paths, and symlinks
+escaping the store. Optional `lines` selects a 1-based inclusive range (`"A-B"` or `"N"`), and `grep`
+compiles a JavaScript `RegExp` (falling back to literal matching on invalid syntax, capped at 200
+pattern chars and 500 matching lines); see [`ctxman digest`](digest.md).
+
+All 20 MCP tools (`analyze_codebase`, `generate_context`, `git_diff`, `search_code`, `list_methods`, `get_symbol`, `repo_map`, `pr_context`, `count_tokens`, `explain_history`, `pack_context`, `focus_context`, `check_policy`, `audit_log`, `ask_codebase`, `task_context`, `diagnose_failure`, `find_experts`, `query_knowledge_graph`, and `digest_read`) accept an optional
 `repos` array of repository directories to run across a multi-repository workspace, prefixing paths with `<alias>/<path>` and enforcing each repository's `.ctxman/policy.json` independently. When `--root` is active, every entry in
 `repos` (and `analyzerDb` on `explain_history`) must also resolve inside the sandbox root.
 

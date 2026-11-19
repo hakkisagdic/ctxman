@@ -235,7 +235,7 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
     }
   });
 
-  it('verifies MCPServer exposes all 19 tools with repos support and docs/commands/mcp.md documents every tool', async () => {
+  it('verifies MCPServer exposes all 20 tools with repos support and docs/commands/mcp.md documents every tool', async () => {
     const handlers = new Map();
     const mcp = new MCPServer();
     const fakeServer = {
@@ -249,7 +249,7 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
 
     const [listToolsHandler] = [...handlers.values()];
     const { tools } = await listToolsHandler({});
-    expect(tools).toHaveLength(19);
+    expect(tools).toHaveLength(20);
 
     const mcpDoc = fs.readFileSync(path.join(ROOT, 'docs/commands/mcp.md'), 'utf8');
     for (const tool of tools) {

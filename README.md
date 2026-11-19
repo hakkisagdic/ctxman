@@ -316,6 +316,22 @@ ctxman search getUserName --limit 5 --json
 backs the MCP `search_code` tool (`type: "ranked"`), and `get_symbol` returns a function's full
 source by name. Details: [docs/commands/search.md](docs/commands/search.md).
 
+### 🗂️ Work & Session Digests (`ctxman digest`)
+
+Store full work outputs locally (store mode `700`, files mode `600`, default `~/.ctxman/digests` or
+`CTXMAN_DIGEST_DIR`), print a compact summary (`done`/`result`/`open`/`needs`), and read targeted
+line ranges or regex matches without loading the whole file:
+
+```bash
+ctxman digest write --id task-1 --done "tests pass" < output.txt
+ctxman digest read task-1 --lines 120-130
+ctxman digest read task-1 --grep "ERROR"
+ctxman digest list
+```
+
+> **Note:** `digest write` stores text verbatim (no automatic redaction); avoid saving credentials or
+> private keys inside digests. Details: [docs/commands/digest.md](docs/commands/digest.md).
+
 ### 🔌 MCP Server Setup
 
 ```bash
@@ -328,7 +344,7 @@ ctxman mcp                                   # run the server (stdio)
 The installer merges into the client's configuration and keeps a `.bak` of the previous file.
 `--root` confines every tool to one directory. Tools: `analyze_codebase`, `generate_context`,
 `git_diff`, `search_code`, `list_methods`, `repo_map`, `pr_context`, `get_symbol`,
-`count_tokens`, `explain_history`, `pack_context`, `focus_context`, `check_policy`, `audit_log`, `ask_codebase`, `task_context`, `diagnose_failure`, `find_experts`, `query_knowledge_graph`.
+`count_tokens`, `explain_history`, `pack_context`, `focus_context`, `check_policy`, `audit_log`, `ask_codebase`, `task_context`, `diagnose_failure`, `find_experts`, `query_knowledge_graph`, `digest_read`.
 Details:
 [docs/commands/mcp.md](docs/commands/mcp.md).
 
