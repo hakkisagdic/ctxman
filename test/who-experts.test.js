@@ -149,7 +149,7 @@ describe('Expert Finder (`ctxman who` & MCP `find_experts`)', () => {
     }
   });
 
-  it('exposes all 19 MCP tools including find_experts, task_context, diagnose_failure, and query_knowledge_graph', async () => {
+  it('exposes all 20 MCP tools including find_experts, task_context, diagnose_failure, and query_knowledge_graph', async () => {
     const mcp = new MCPServer({ root: tmpRepo });
     const listHandler = mcp.server._requestHandlers.get('tools/list');
     const callHandler = mcp.server._requestHandlers.get('tools/call');
@@ -160,7 +160,8 @@ describe('Expert Finder (`ctxman who` & MCP `find_experts`)', () => {
     expect(names).toContain('task_context');
     expect(names).toContain('diagnose_failure');
     expect(names).toContain('query_knowledge_graph');
-    expect(names.length).toBe(19);
+    expect(names).toContain('digest_read');
+    expect(names.length).toBe(20);
 
     const called = await callHandler({
       method: 'tools/call',

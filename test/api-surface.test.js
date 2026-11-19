@@ -71,6 +71,9 @@ describe('Public API surface (index.js & index.d.ts)', () => {
       'Policy',
       'PolicyConfigError',
       'PolicyViolationError',
+      'writeDigest',
+      'readDigest',
+      'listDigests',
     ];
 
     for (const name of expectedClassesAndFunctions) {
