@@ -99,6 +99,11 @@ async function main() {
     return;
   }
 
+  if (command === 'digest') {
+    runSubcommand('./cm-digest.js', args.slice(1));
+    return;
+  }
+
   if (command === 'pack') {
     runSubcommand('./cm-pack.js', args.slice(1));
     return;
@@ -815,6 +820,8 @@ function printHelp() {
   );
   console.log('  who TARGET [options]     Find code & domain experts across git blame, history,');
   console.log('                           and CODEOWNERS (--repo DIR for multi-repo workspaces)');
+  console.log('  digest <write|read|list> Store and read compact work digests (--id, --lines,');
+  console.log('                           --grep, --store; ctxman digest --help for options)');
   console.log('  search QUERY [path]      Ranked (BM25) search over methods and code chunks');
   console.log('  count [path|-] [--model ID] [--repo DIR] [--api]');
   console.log('                           Count tokens for a model or multi-repo workspace');

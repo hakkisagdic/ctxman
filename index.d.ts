@@ -2824,3 +2824,79 @@ export function rebalanceContextAttention(
 export function auditSsrfEgressSafety(options?: Record<string, unknown>): Record<string, unknown>;
 export function auditCodeownersCoverage(options?: Record<string, unknown>): Record<string, unknown>;
 export function auditCronJobIdempotency(options?: Record<string, unknown>): Record<string, unknown>;
+
+// ============================================
+// Context Digests (`ctxman digest`)
+// ============================================
+
+export interface DigestSummaryFields {
+  done?: string;
+  result?: string;
+  open?: string;
+  needs?: string;
+}
+
+export interface WriteDigestOptions extends DigestSummaryFields {
+  id?: string;
+  text?: string;
+  fields?: DigestSummaryFields;
+  storeDir?: string;
+  env?: Record<string, string | undefined>;
+  force?: boolean;
+}
+
+export interface WriteDigestResult {
+  id: string;
+  path: string;
+  bytes: number;
+  lines: number;
+  summary: DigestSummaryFields;
+  output: string;
+}
+
+export interface ReadDigestOptions {
+  ref?: string;
+  lines?: string;
+  grep?: string;
+  storeDir?: string;
+  env?: Record<string, string | undefined>;
+}
+
+export interface DigestLineMatch {
+  line: number;
+  content: string;
+}
+
+export interface ReadDigestResult {
+  id: string;
+  path: string;
+  totalLines: number;
+  truncated: boolean;
+  matches: DigestLineMatch[];
+  text: string;
+}
+
+export interface DigestListItem {
+  id: string;
+  path: string;
+  lines: number;
+  bytes: number;
+  updatedAt: string;
+}
+
+export interface ListDigestsOptions {
+  storeDir?: string;
+  env?: Record<string, string | undefined>;
+}
+
+export function summarize(text: string, fields?: DigestSummaryFields): DigestSummaryFields;
+export function writeDigest(
+  idOrOptions: string | WriteDigestOptions,
+  maybeText?: string,
+  maybeOptions?: WriteDigestOptions | string
+): WriteDigestResult;
+export function readDigest(
+  refOrOptions: string | ReadDigestOptions,
+  maybeOptions?: ReadDigestOptions | string
+): ReadDigestResult;
+export function listDigests(options?: ListDigestsOptions | string): DigestListItem[];
