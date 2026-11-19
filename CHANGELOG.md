@@ -2,6 +2,14 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- **Work & Session Digests (`ctxman digest`, `lib/context/`, MCP `digest_read`)**:
+  - **EN**: Added offline, Node-builtin `ctxman digest` (`write`, `read`, `list`), programmatic exports (`writeDigest`, `readDigest`, `listDigests`) in `index.js` and `index.d.ts`, strict store isolation (`0700`/`0600` permissions, `..` and symlink escape rejection), 1-based `--lines` and capped JS regex `--grep`, and the `digest_read` MCP tool (20 MCP tools total).
+  - **TR**: Çevrimdışı, yalnızca Node yerleşikleriyle çalışan `ctxman digest` (`write`, `read`, `list`), `index.js` ve `index.d.ts` üzerinde `writeDigest`/`readDigest`/`listDigests` dışa aktarımları, sıkı depo sınır denetimi (`0700`/`0600` izinleri, `..` ve sembolik bağ kaçışı reddi), satır numaralı `--lines`/`--grep` okuma ve 20. MCP aracı `digest_read` eklendi.
+
 ## [3.3.0] - 2026-11-13
 
 ### Added

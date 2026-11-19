@@ -327,6 +327,22 @@ ctxman search getUserName --limit 5 --json
 `search_code` aracının (`type: "ranked"`) arkasındadır; `get_symbol` bir fonksiyonun tam kaynağını
 adıyla döndürür.
 
+### 🗂️ İş ve Oturum Özetleri (`ctxman digest`)
+
+Tam iş çıktılarını yerel depoda (`~/.ctxman/digests` veya `CTXMAN_DIGEST_DIR`; dizin izni `700`,
+dosya izni `600`) saklayın, kısa özet (`done`/`result`/`open`/`needs`) alın ve yalnızca gereken
+satır aralıklarını veya desen eşleşmelerini okuyun:
+
+```bash
+ctxman digest write --id gorev-1 --done "testler gecti" < cikti.txt
+ctxman digest read gorev-1 --lines 120-130
+ctxman digest read gorev-1 --grep "HATA"
+ctxman digest list
+```
+
+> **Uyarı:** `digest write` girdiyi olduğu gibi (maskeleme yapmadan) kaydeder; parola veya özel
+> anahtarları özetlere yazmayın. Ayrıntılar: [docs/commands/digest.md](docs/commands/digest.md).
+
 ### 🔌 MCP sunucusu kurulumu (`ctxman mcp`)
 
 ```bash
@@ -339,7 +355,7 @@ ctxman mcp                                   # sunucuyu çalıştırır (stdio)
 Kurulum, istemcinin yapılandırmasıyla birleştirir ve önceki dosyanın `.bak` yedeğini tutar.
 `--root`, tüm araçları tek bir dizinle sınırlar. Araçlar: `analyze_codebase`, `generate_context`,
 `git_diff`, `search_code`, `list_methods`, `repo_map`, `pr_context`, `get_symbol`, `count_tokens`,
-`explain_history`, `pack_context`, `check_policy`, `audit_log`, `ask_codebase`. Ayrıntılar:
+`explain_history`, `pack_context`, `check_policy`, `audit_log`, `ask_codebase`, `digest_read`. Ayrıntılar:
 [docs/commands/mcp.md](docs/commands/mcp.md).
 
 ### 🛡️ Dışa aktarma politikası ve denetim kaydı
