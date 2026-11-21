@@ -169,13 +169,21 @@ commit.
   (when populated), `<ownership>`, `<coupling>`, `<related>`, `<notes>`, `<tests>` and
   `<question>`; text is entity-escaped.
 - **JSON**: the collected data (`repos`, `target`, `repository`, `history`, `references`,
-  `discussions`, `institutionalCitations`, `ownership`, `coupling`, `related`, `notes`, `tests`,
-  `warnings`, `trimmed`, `question`).
+  `discussions`, `institutionalCitations`, `citations`, `ownership`, `coupling`, `related`, `notes`,
+  `tests`, `warnings`, `trimmed`, `question`), where `citations` holds uniform `Evidence` records
+  (commits, optional remote discussions/review comments, and custom `evidenceSources`, each with a
+  redacted excerpt capped at 800 characters and token count).
 
 ## Library and MCP
 
 ```js
-import { explainHistory, queryAnalyzerCitations } from 'ctxman';
+import {
+  explainHistory,
+  queryAnalyzerCitations,
+  normalizeEvidence,
+  runSources,
+  renderCitations,
+} from 'ctxman';
 
 const result = await explainHistory('/path/to/repo', 'src/cart.js:total', {
   limit: 10,
@@ -191,6 +199,8 @@ const result = await explainHistory('/path/to/repo', 'src/cart.js:total', {
   ask: 'Why do we round here?',
 });
 console.log(result.text);
+console.log(result.data.citations);
+console.log(renderCitations(result.data.citations));
 console.log(result.data.institutionalCitations);
 ```
 

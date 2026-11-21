@@ -6,6 +6,9 @@ All notable changes to the Ctxman will be documented in this file.
 
 ### Added
 
+- **Uniform Evidence Contract & Citations (`lib/evidence/`, `ctxman why --json`)**:
+  - **EN**: Added the uniform `Evidence` contract (`normalizeEvidence`, `EVIDENCE_KINDS`, secret-redacted excerpts capped at 800 characters, token counts), `runSources` connector runner (5 s per-source timeout, error isolation into `warnings[]`, injected export-policy filtering, deterministic ordering), `buildCitations`/`renderCitations`, and `citations[]` in `ctxman why --json` (`explainHistory`, `index.js`, `index.d.ts`) while keeping Markdown/XML outputs and existing JSON fields backward compatible.
+  - **TR**: Tek tip `Evidence` sözleşmesi (`normalizeEvidence`, `EVIDENCE_KINDS`, sır maskeli ve en çok 800 karakterlik `excerpt`, token hesabı), `runSources` bağlayıcı yürütücüsü (kaynak başına 5 sn zaman aşımı, `warnings[]` hata yalıtımı, dışa aktarma politikası süzgeci, deterministik sıralama), `buildCitations`/`renderCitations` ve `ctxman why --json` çıktısında geriye uyumlu `citations[]` alanı (`explainHistory`, `index.js`, `index.d.ts`) eklendi.
 - **Work & Session Digests (`ctxman digest`, `lib/context/`, MCP `digest_read`)**:
   - **EN**: Added offline, Node-builtin `ctxman digest` (`write`, `read`, `list`), programmatic exports (`writeDigest`, `readDigest`, `listDigests`) in `index.js` and `index.d.ts`, strict store isolation (`0700`/`0600` permissions, `..` and symlink escape rejection), 1-based `--lines` and capped JS regex `--grep`, and the `digest_read` MCP tool (20 MCP tools total).
   - **TR**: Çevrimdışı, yalnızca Node yerleşikleriyle çalışan `ctxman digest` (`write`, `read`, `list`), `index.js` ve `index.d.ts` üzerinde `writeDigest`/`readDigest`/`listDigests` dışa aktarımları, sıkı depo sınır denetimi (`0700`/`0600` izinleri, `..` ve sembolik bağ kaçışı reddi), satır numaralı `--lines`/`--grep` okuma ve 20. MCP aracı `digest_read` eklendi.

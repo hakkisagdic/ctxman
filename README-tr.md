@@ -312,9 +312,12 @@ ctxman why src/cart.js:total --ask "Burada neden yuvarlanıyor?" --budget 8k --c
 Kodu değiştiren commit'leri tam mesajlarıyla, referans verilen issue, PR ve ticket'ları (GitHub,
 GitLab ve Bitbucket için bağlantılı), ortak yazarları ve inceleyenleri, blame sahipliğini, onunla
 birlikte değişen dosyaları, ondan bahseden ADR, doküman, changelog kaydı ve yorumları, içindeki
-TODO'ları ve onu kullanan testleri toplar; sırlar maskelenir. Unblocked gibi platformlar bunu kendi
-sunucularında Slack, Jira ve Confluence ile yanıtlar; ctxman makinenizde, git'in ve reponun
-bildiklerini kapsar. Ayrıntılar: [docs/commands/why.md](docs/commands/why.md).
+TODO'ları ve onu kullanan testleri toplar; sırlar maskelenir (`--json` çıktısı ayrıca en çok 800
+karakterlik maskelenmiş alıntı ve token sayısıyla tek tip `Evidence` sözleşmesine uyan `citations[]`
+dizisini içerir; `normalizeEvidence`, `runSources` ve `renderCitations` programatik olarak dışa
+aktarılır). Unblocked gibi platformlar bunu kendi sunucularında Slack, Jira ve Confluence ile
+yanıtlar; ctxman makinenizde, git'in ve reponun bildiklerini kapsar. Ayrıntılar:
+[docs/commands/why.md](docs/commands/why.md).
 
 ### 🔎 Sıralı arama (`ctxman search`)
 
