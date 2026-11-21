@@ -1242,6 +1242,10 @@ export interface ExplainHistoryOptions {
   cwd?: string;
   /** Additional repositories for multi-repo history & cross-repo ADR/doc/test lookup */
   repos?: WorkspaceRepoInput[];
+  /** Optional additional EvidenceSource connectors merged into `data.citations` */
+  evidenceSources?: EvidenceSource[];
+  /** Per-source timeout in milliseconds for `evidenceSources` (default 5000) */
+  sourceTimeoutMs?: number;
 }
 
 export interface WhyCommit {
@@ -1331,6 +1335,9 @@ export interface ExplainHistoryData {
       body: string;
     }>;
   }>;
+  institutionalCitations?: AnalyzerCitation[];
+  /** Uniform Evidence citations (commits, discussions, review comments, and custom connectors) */
+  citations: Evidence[];
   ownership: {
     startLine: number | null;
     endLine: number | null;
@@ -2900,3 +2907,98 @@ export function readDigest(
   maybeOptions?: ReadDigestOptions | string
 ): ReadDigestResult;
 export function listDigests(options?: ListDigestsOptions | string): DigestListItem[];
+
+// ============================================
+// Uniform Evidence Contract (`lib/evidence`)
+// ============================================
+
+export type EvidenceKind =
+  'commit' | 'pr' | 'review-comment' | 'issue' | 'chat' | 'decision' | 'doc' | 'ci-log' | 'code';
+
+export interface Evidence {
+  id: string;
+  kind: EvidenceKind;
+  source: string;
+  url: string | null;
+  ref: string | null;
+  timestamp: string | null;
+  author?: string;
+  title?: string;
+  /** Redacted excerpt, capped at 800 characters */
+  excerpt: string;
+  score: number;
+  tokens: number;
+}
+
+export interface RawEvidenceInput {
+  id: string;
+  kind: EvidenceKind;
+  source: string;
+  url?: string | null;
+  ref?: string | null;
+  path?: string;
+  timestamp?: string | number | Date | null;
+  author?: string | null;
+  title?: string | null;
+  excerpt?: string | null;
+  score?: number;
+}
+
+export interface EvidenceSearchOptions {
+  paths?: string[];
+  symbols?: string[];
+  since?: string | null;
+  limit?: number;
+  signal?: AbortSignal;
+}
+
+export interface EvidenceSource {
+  id: string;
+  available?: (options?: { signal?: AbortSignal }) => boolean | Promise<boolean>;
+  search: (
+    query: string,
+    options: EvidenceSearchOptions
+  ) => RawEvidenceInput[] | Promise<RawEvidenceInput[]>;
+}
+
+export interface RunSourcesOptions {
+  paths?: string[];
+  symbols?: string[];
+  since?: string | null;
+  limit?: number;
+  timeoutMs?: number;
+  isDenied?: (pathOrRef: string) => boolean;
+  redactPII?: boolean;
+}
+
+export interface RunSourcesResult {
+  evidence: Evidence[];
+  warnings: string[];
+}
+
+export const EVIDENCE_KINDS: readonly EvidenceKind[];
+export const MAX_EXCERPT_CHARS: 800;
+export const DEFAULT_SOURCE_TIMEOUT_MS: 5000;
+
+export class EvidenceError extends Error {
+  code: string;
+  constructor(code: string, message: string);
+}
+
+export function normalizeEvidence(
+  raw: RawEvidenceInput,
+  options?: { redactPII?: boolean }
+): Evidence;
+
+export function runSources(
+  sources: EvidenceSource[],
+  query: string,
+  opts?: RunSourcesOptions
+): Promise<RunSourcesResult>;
+
+export function buildCitations(
+  items: RawEvidenceInput[],
+  options?: { isDenied?: (pathOrRef: string) => boolean; redactPII?: boolean }
+): Evidence[];
+
+export function renderCitations(citations: Evidence[]): string;
