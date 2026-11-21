@@ -199,8 +199,8 @@ const result = await explainHistory('/path/to/repo', 'src/cart.js:total', {
   ask: 'Why do we round here?',
 });
 console.log(result.text);
-console.log(result.data.citations);
-console.log(renderCitations(result.data.citations));
+const { citations } = result.data;
+process.stdout.write(`${renderCitations(citations)}\n`);
 console.log(result.data.institutionalCitations);
 ```
 
