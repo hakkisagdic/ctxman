@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Smoke test of a ctxman container image (used by .github/workflows/docker.yml):
+# Smoke test of a ctxman container image (manual use):
 #
 #   scripts/docker-smoke-test.sh ctxman:test
 #

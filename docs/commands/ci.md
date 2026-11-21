@@ -218,11 +218,6 @@ Add `--init` to `docker run` for long-running commands (`serve`, `watch`) so Ctr
 - Clipboard options (`--context-clipboard`) have no clipboard in a container; ctxman falls back to writing the file.
 - The interactive wizard (`ctxman` without options) needs a terminal: use `docker run -it`, or pass options such as `--cli` or `--save-report`.
 
-## Workflows in this repository
-
-- `.github/workflows/action-selftest.yml` runs the action from the checkout (`uses: ./`) on this repository on pull requests, pushes to `main` and manual runs: the whole repository with a generous budget, `lib/` against a model window, the pull request's changed files, and an exceeded budget that must fail.
-- `.github/workflows/docker.yml` builds the image and runs `scripts/docker-smoke-test.sh` (version, non-root user, exact counts, a report written into the mounted project, git on a project owned by another uid, an MCP `initialize` over stdio) on pull requests that touch the image. On `v*` tags it runs the same test, then pushes `linux/amd64` and `linux/arm64` images to `ghcr.io/<owner>/<repo>`; only this job has `packages: write`.
-
 ## Limits
 
 - `changed-since` needs `path` to be the repository root, since ctxman's git integration reads `.git` in the analyzed directory.
@@ -236,7 +231,7 @@ Starting in **v3.3.0**, `ctxman` provides native **OASIS SARIF v2.1.0** export (
 
 ### GitHub Actions: SARIF Code Scanning & PR Intelligence Gate
 
-See [`.github/workflows/ctxman-sarif-gate.yml`](../../.github/workflows/ctxman-sarif-gate.yml) for a complete workflow that:
+See [`examples/github-actions/ctxman-sarif-gate.yml`](../../examples/github-actions/ctxman-sarif-gate.yml) for a complete workflow that:
 
 1. Validates `.ctxman/policy.json` (including `--preset kvkk-bddk` or `soc2`) and outputs `ctxman-policy.sarif`.
 2. Uploads the SARIF v2.1.0 report to **GitHub Security / Code Scanning** (`github/codeql-action/upload-sarif@v3`).
