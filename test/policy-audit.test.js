@@ -15,6 +15,7 @@ import {
   parseSince,
   PolicyViolationError,
 } from '../lib/policy/index.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 const CLI = fileURLToPath(new URL('../bin/cli.js', import.meta.url));
 const SECRET_TEXT = 'const password = "hunter2-do-not-log";';
@@ -96,6 +97,7 @@ describe('audit log', () => {
     it('records the commit checked out in a git repository', () => {
       const git = (...args) =>
         spawnSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+          env: cleanGitEnv(),
           cwd: root,
           encoding: 'utf8',
         });

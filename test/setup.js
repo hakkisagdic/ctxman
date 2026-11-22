@@ -1,4 +1,8 @@
 import { vi } from 'vitest';
+import { scrubProcessGitEnv } from './helpers/git-env.js';
+
+// A git hook (pre-push) exports GIT_DIR and friends; scrub them so no test touches the real repository
+scrubProcessGitEnv();
 
 // Global mocks
 global.console = {

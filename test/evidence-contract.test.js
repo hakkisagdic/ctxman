@@ -17,6 +17,7 @@ import {
 import { explainHistory } from '../lib/why/index.js';
 import { readAuditLog, sha256 } from '../lib/policy/audit.js';
 import * as API from '../index.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 const CLI = fileURLToPath(new URL('../bin/cli.js', import.meta.url));
 
@@ -28,6 +29,7 @@ const SYNTH_STRIPE_KEY = ['sk', '_live_', '0123456789abcdefghij0123'].join('');
 function initTempGitRepo(dir) {
   const git = (...args) =>
     execFileSync('git', ['-c', 'commit.gpgsign=false', ...args], {
+      env: cleanGitEnv(),
       cwd: dir,
       encoding: 'utf-8',
       stdio: 'pipe',
@@ -854,6 +856,7 @@ describe('lib/evidence contract, sources, and citations', () => {
         );
         git('add', '-A');
         execFileSync('git', ['-c', 'commit.gpgsign=false', 'commit', '-qm', 'feat: add item'], {
+          env: cleanGitEnv(),
           cwd: auditRepo,
         });
 

@@ -14,6 +14,7 @@ import {
   resolveGitHubToken,
 } from '../lib/evidence/sources/github.js';
 import { createGitLabEvidenceSource } from '../lib/evidence/sources/gitlab.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 const CLI = fileURLToPath(new URL('../bin/cli.js', import.meta.url));
 const WHY_CLI = fileURLToPath(new URL('../bin/cm-why.js', import.meta.url));
@@ -46,7 +47,7 @@ function git(cwd, args, envExtra = {}) {
     cwd,
     encoding: 'utf-8',
     env: {
-      ...process.env,
+      ...cleanGitEnv(),
       GIT_AUTHOR_NAME: 'Alice',
       GIT_AUTHOR_EMAIL: 'alice@example.com',
       GIT_COMMITTER_NAME: 'Alice',

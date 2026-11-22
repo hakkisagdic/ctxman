@@ -8,6 +8,7 @@ import * as API from '../index.js';
 import MCPServer from '../lib/api/mcp/server.js';
 import { PolicyViolationError } from '../lib/policy/index.js';
 import TokenUtils from '../lib/utils/token-utils.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 const CLI = fileURLToPath(new URL('../bin/cli.js', import.meta.url));
 const BIN_DIR = fileURLToPath(new URL('../bin', import.meta.url));
@@ -40,7 +41,7 @@ function gitIn(dir, ...args) {
       cwd: dir,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, ...GIT_ISOLATED_ENV },
+      env: cleanGitEnv(GIT_ISOLATED_ENV),
     }
   );
 }

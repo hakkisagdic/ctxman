@@ -6,6 +6,7 @@ import { execFileSync } from 'node:child_process';
 import MCPServer from '../lib/api/mcp/server.js';
 import * as publicApi from '../index.js';
 import websiteConfig from '../website/.vitepress/config.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 
@@ -279,7 +280,7 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
     // Verify sandbox enforcement on analyzerDb when --root is active
     const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-mcp-why-root-'));
     try {
-      execFileSync('git', ['init'], { cwd: tmpRoot, stdio: 'ignore' });
+      execFileSync('git', ['init'], { env: cleanGitEnv(), cwd: tmpRoot, stdio: 'ignore' });
       const sandboxed = new MCPServer({ root: tmpRoot });
       const sandboxHandlers = [];
       sandboxed.server = {

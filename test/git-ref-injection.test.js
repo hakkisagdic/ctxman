@@ -7,6 +7,7 @@ import request from 'supertest';
 import { GitClient } from '../lib/integrations/git/GitClient.js';
 import { DiffAnalyzer } from '../lib/integrations/git/DiffAnalyzer.js';
 import { APIServer } from '../lib/api/rest/server.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 // Git refs reach GitClient from the REST API (?since=), the MCP git_diff tool and
 // --changed-since. They must never be interpreted by a shell or parsed as git options.
@@ -14,7 +15,8 @@ describe('git ref handling', () => {
   let repoDir;
   let marker;
 
-  const git = (...args) => execFileSync('git', args, { cwd: repoDir, encoding: 'utf-8' });
+  const git = (...args) =>
+    execFileSync('git', args, { env: cleanGitEnv(), cwd: repoDir, encoding: 'utf-8' });
 
   beforeAll(() => {
     repoDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-git-refs-'));

@@ -4,4 +4,6 @@ if [ -n "$p" ] && [ -x "$p" ]; then
   "$p" "$@" < "$_ps_tmp" || { rm -f "$_ps_tmp"; exit 1; }
   exec < "$_ps_tmp"; rm -f "$_ps_tmp"
 fi
+# git exports GIT_DIR and friends during a push; tests that create temporary repositories must not inherit them
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY
 npm test

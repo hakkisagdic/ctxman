@@ -6,6 +6,7 @@ import os from 'os';
 import path from 'path';
 import { explainHistory } from '../index.js';
 import { fetchDiscussions } from '../lib/why/discussions.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 const CLI = fileURLToPath(new URL('../bin/cli.js', import.meta.url));
 const AWS_KEY = 'AKIAIOSFODNN7EXAMPLE';
@@ -14,7 +15,7 @@ function git(cwd, args) {
   execFileSync('git', args, {
     cwd,
     env: {
-      ...process.env,
+      ...cleanGitEnv(),
       GIT_AUTHOR_NAME: 'Alice',
       GIT_AUTHOR_EMAIL: 'alice@example.com',
       GIT_COMMITTER_NAME: 'Alice',

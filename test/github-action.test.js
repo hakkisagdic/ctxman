@@ -23,6 +23,7 @@ import {
   renderSummary,
   writeOutputs,
 } from '../scripts/action/run.mjs';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 const RUN_SCRIPT = path.resolve('scripts/action/run.mjs');
 const INSTALL_SCRIPT = path.resolve('scripts/action/install.sh');
@@ -41,6 +42,7 @@ function parseOutputs(file) {
 
 function git(cwd, ...args) {
   return spawnSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+    env: cleanGitEnv(),
     cwd,
     encoding: 'utf8',
   });

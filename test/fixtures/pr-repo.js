@@ -8,6 +8,7 @@ import { execFileSync } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { cleanGitEnv } from '../helpers/git-env.js';
 
 export const FAKE_AWS_KEY = 'AKIAABCDEFGHIJKLMNOP';
 
@@ -143,6 +144,7 @@ export function createPrRepo() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-pr-'));
   const git = (...args) =>
     execFileSync('git', ['-c', 'user.name=Test Author', '-c', 'user.email=t@t', ...args], {
+      env: cleanGitEnv(),
       cwd: dir,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],

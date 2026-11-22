@@ -7,6 +7,7 @@ import { execFileSync, spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { resolveRemoteGitUrl, withRemoteRepo } from '../lib/utils/remote-repo.js';
 import { APIServer } from '../lib/api/rest/server.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 const BIN_DIR = fileURLToPath(new URL('../bin', import.meta.url));
 const GIT_ISOLATED_ENV = {
@@ -22,7 +23,7 @@ function gitIn(dir, ...args) {
       cwd: dir,
       encoding: 'utf8',
       stdio: 'pipe',
-      env: { ...process.env, ...GIT_ISOLATED_ENV },
+      env: cleanGitEnv(GIT_ISOLATED_ENV),
     }
   );
 }

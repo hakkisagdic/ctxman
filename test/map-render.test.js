@@ -6,6 +6,7 @@ import path from 'path';
 import TokenUtils from '../lib/utils/token-utils.js';
 import { renderRepoMap } from '../lib/map/index.js';
 import * as API from '../index.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 /** A small JavaScript project: lib/log.js is imported by everything */
 const FILES = {
@@ -255,6 +256,7 @@ describe('renderRepoMap with git history', () => {
   let root;
   const git = (...args) =>
     execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+      env: cleanGitEnv(),
       cwd: root,
       stdio: 'ignore',
     });

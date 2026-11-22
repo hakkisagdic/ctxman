@@ -8,6 +8,7 @@ import { explainHistory } from '../lib/why/index.js';
 import * as API from '../index.js';
 import TokenUtils from '../lib/utils/token-utils.js';
 import MCPServer from '../lib/api/mcp/server.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 const CLI = fileURLToPath(new URL('../bin/cli.js', import.meta.url));
 const AWS_KEY = 'AKIAABCDEFGHIJKLMNOP';
@@ -24,6 +25,7 @@ const AWS_KEY = 'AKIAABCDEFGHIJKLMNOP';
 function createShop(dir) {
   const git = (...args) =>
     execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+      env: cleanGitEnv(),
       cwd: dir,
       encoding: 'utf-8',
     });
@@ -174,7 +176,8 @@ describe('ctxman why', () => {
   let repo;
   let outside;
 
-  const git = (...args) => execFileSync('git', args, { cwd: repo, encoding: 'utf-8' });
+  const git = (...args) =>
+    execFileSync('git', args, { env: cleanGitEnv(), cwd: repo, encoding: 'utf-8' });
   const why = (target, options) => explainHistory(repo, target, options);
   const rejects = async (promise, code) => {
     const error = await promise.then(
@@ -806,7 +809,8 @@ describe('explainHistory under an export policy', () => {
 
   beforeAll(() => {
     dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-why-policy-'));
-    const git = (...args) => execFileSync('git', args, { cwd: dir, stdio: 'pipe' });
+    const git = (...args) =>
+      execFileSync('git', args, { env: cleanGitEnv(), cwd: dir, stdio: 'pipe' });
     const write = (file, text) => {
       fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
       fs.writeFileSync(path.join(dir, file), text);

@@ -5,6 +5,7 @@ import http from 'http';
 import os from 'os';
 import path from 'path';
 import { APIServer } from '../lib/api/rest/server.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 function request(port, method, urlPath, body) {
   return new Promise((resolve, reject) => {
@@ -96,7 +97,7 @@ describe('REST API multi-repository workspace support (repos)', () => {
       cwd,
       stdio: 'ignore',
       env: {
-        ...process.env,
+        ...cleanGitEnv(),
         GIT_AUTHOR_NAME: 'Test',
         GIT_AUTHOR_EMAIL: 'test@example.com',
         GIT_COMMITTER_NAME: 'Test',

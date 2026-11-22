@@ -5,11 +5,12 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { findExperts, loadCodeowners, matchCodeowners, WhoError } from '../lib/who/index.js';
 import MCPServer from '../lib/api/mcp/server.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 function git(cwd, args, env = {}) {
   return execFileSync('git', args, {
     cwd,
-    env: { ...process.env, ...env },
+    env: { ...cleanGitEnv(), ...env },
     encoding: 'utf8',
   });
 }

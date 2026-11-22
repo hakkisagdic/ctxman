@@ -5,6 +5,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import TokenCalculator from '../lib/analyzers/token-calculator.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 const BIN = fileURLToPath(new URL('../bin/', import.meta.url));
 
@@ -186,7 +187,8 @@ describe('TokenCalculator.analyze', () => {
 describe('ctxman --changed-since', () => {
   let repo;
 
-  const git = (...args) => spawnSync('git', args, { cwd: repo, encoding: 'utf-8' });
+  const git = (...args) =>
+    spawnSync('git', args, { env: cleanGitEnv(), cwd: repo, encoding: 'utf-8' });
 
   beforeEach(() => {
     repo = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-changed-'));

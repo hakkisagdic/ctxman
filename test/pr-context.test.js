@@ -17,6 +17,7 @@ import { isTestFile, testStem, sourceStem } from '../lib/pr/related-tests.js';
 import { PrGit, bufferToText } from '../lib/pr/pr-git.js';
 import * as API from '../index.js';
 import { createPrRepo, FAKE_AWS_KEY } from './fixtures/pr-repo.js';
+import { cleanGitEnv } from './helpers/git-env.js';
 
 describe('buildPrContext on a feature branch', () => {
   let repo;
@@ -638,7 +639,8 @@ describe('buildPrContext under an export policy', () => {
 
   beforeAll(() => {
     dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-pr-policy-'));
-    const git = (...args) => execFileSync('git', args, { cwd: dir, stdio: 'pipe' });
+    const git = (...args) =>
+      execFileSync('git', args, { env: cleanGitEnv(), cwd: dir, stdio: 'pipe' });
     const write = (file, text) => {
       fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
       fs.writeFileSync(path.join(dir, file), text);
