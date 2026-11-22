@@ -57,6 +57,7 @@ logs/
 .ctxman/metrics/
 .ctxman/snapshots/
 .ctxman/versions/
+.ctxman/evidence/
 .ctxman/repos.json
 dependency-context.json
 
