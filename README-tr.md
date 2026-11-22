@@ -316,7 +316,10 @@ yapılacak notlarını ve onu kullanan testleri toplar; sırlar maskelenir (`--j
 çok 800 karakterlik maskelenmiş alıntı ve token sayısıyla tek tip `Evidence` sözleşmesine uyan
 `citations[]` dizisini, Markdown/XML çıktıları ise `[n]` işaretçileriyle sonda `Sources:` /
 `<sources>` listesini ve politika denetim kaydını üretir; `normalizeEvidence`, `runSources` ve
-`renderCitations` programatik olarak dışa aktarılır). Unblocked gibi platformlar bunu kendi
+`renderCitations` programatik olarak dışa aktarılır; `--discussions` verildiğinde commit -> PR/MR ->
+satır içi inceleme yorumları ve kapanan issue'lar zincirini GitHub, GitHub Enterprise ve GitLab
+üzerinden `.ctxman/evidence/github.sqlite` içinde `ETag` önbelleğiyle toplar ve çevrimdışı/hız sınırı
+durumlarında önbellekten/kısmi yanıtla uyarı üretir). Unblocked gibi platformlar bunu kendi
 sunucularında Slack, Jira ve Confluence ile yanıtlar; ctxman makinenizde, git'in ve reponun
 bildiklerini kapsar. Ayrıntılar:
 [docs/commands/why.md](docs/commands/why.md).

@@ -304,7 +304,10 @@ mention it, to-do comments inside it and the tests that use it, with secrets red
 also emits uniform `citations[]` under the `Evidence` contract, capped at 800 redacted characters
 with token counts, while Markdown/XML emit `[n]` markers plus a trailing `Sources:` / `<sources>`
 list and optional policy audit logging; `normalizeEvidence`, `runSources` and `renderCitations` are
-exported programmatically). Platforms such as Unblocked answer this from Slack, Jira and Confluence
+exported programmatically; opting into `--discussions` also resolves commits -> PRs/MRs -> inline
+review comments and closed issues across github.com, GitHub Enterprise and GitLab, cached with
+`ETag` in `.ctxman/evidence/github.sqlite` with offline/rate-limit fallback warnings). Platforms such
+as Unblocked answer this from Slack, Jira and Confluence
 on their servers; ctxman covers what git and the repository know, on your machine. Details:
 [docs/commands/why.md](docs/commands/why.md).
 

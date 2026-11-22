@@ -85,11 +85,21 @@ Sections appear in this order; empty ones are left out.
    - ticket keys such as `ABC-34` (Jira, Linear, YouTrack style; `UTF-8`, `SHA-256`, `RFC-1234`
      and similar are ignored), CVE ids and URLs (credentials removed);
    - `Co-authored-by:` and `Reviewed-by:` trailers.
-4. **Discussions** (`--discussions`) — when opted in, fetches titles, states, labels,
-   descriptions and top comments for referenced GitHub issues/PRs (including GitHub Enterprise
-   `/api/v3`) or GitLab issues/MRs (including self-hosted `/api/v4`, ignoring system notes).
-   Uses `GITHUB_TOKEN` / `GH_TOKEN` or `GITLAB_TOKEN` / `GL_TOKEN` when present. Network
-   failures, missing tokens or rate limits emit a warning without failing the command.
+4. **Discussions & PR/MR Evidence** (`--discussions`) — when opted in, enriches referenced GitHub
+   issues/PRs and GitLab issues/MRs, and walks each target commit through GitHub
+   (`GET /repos/{owner}/{repo}/commits/{sha}/pulls` -> PR body, `/pulls/{n}/comments` inline diff
+   comments, `/pulls/{n}/reviews`, and closed issues referenced by closing keywords) or GitLab
+   (`repository/commits/{sha}/merge_requests` -> MR notes excluding system notes, and
+   `closes_issues`). Responses are cached locally in `.ctxman/evidence/github.sqlite` (`node:sqlite`)
+   using `ETag` / `If-None-Match` (when `--since` is set, entries fetched at or after `--since` are
+   reused without network; older entries are revalidated). Supports GitHub Enterprise (`/api/v3`) and
+   self-hosted GitLab (`/api/v4`). Tokens are read in order `GITHUB_TOKEN`, `GH_TOKEN`,
+   `gh auth token` (2 s timeout) for GitHub and `GITLAB_TOKEN`, `GL_TOKEN` for GitLab, and are never
+   cached, logged, or written to output. Missing tokens, unreachable hosts, or HTTP 403/429 rate
+   limits degrade gracefully with partial/cached citations and `warnings[]`. Note: remotes whose
+   hostname does not contain `github` or `gitlab` default to `provider: null` and require
+   `--provider github|gitlab` (or `CTXMAN_GIT_PROVIDER` / `CTXMAN_GITHUB_API_URL` /
+   `CTXMAN_GITLAB_API_URL`).
 5. **Institutional Memory Citations** (`--analyzer` / `--analyzer-db <path>`) — queries the
    `@plansmithai/analyzer` SQLite `documents` table (`.plansmith/analyzer.sqlite` by default when
    present) for commits, pull requests, issues, Slack threads, Linear issues, and Jira tickets
@@ -127,9 +137,11 @@ Sections appear in this order; empty ones are left out.
 | `--since DATE`         | Only commits after DATE (`2024-01-01`, `"6 months ago"`)                   |
 | `--rev REF`            | Explain the code as of REF instead of the working tree                     |
 | `--patches`            | Include each commit's diff of the target                                   |
-| `--discussions`        | Fetch referenced GitHub/GitLab issue, PR and MR discussions                |
+| `--discussions`        | Fetch referenced GitHub/GitLab issue, PR and MR discussions and evidence   |
+| `--provider PROVIDER`  | Override remote provider (`github` or `gitlab`) for custom hostnames       |
 | `--max-discussions N`  | Maximum remote discussions to fetch (default 10)                           |
 | `--max-comments N`     | Maximum comments fetched per discussion (default 5)                        |
+| `--source-timeout MS`  | Per-source timeout in ms for evidence connectors (default 5000)            |
 | `--analyzer`           | Query `.plansmith/analyzer.sqlite` for institutional memory citations      |
 | `--analyzer-db <path>` | Explicit path to `@plansmithai/analyzer` SQLite database file or directory |
 | `--coupling-window N`  | Commits of the file examined for co-changes (default 500, `0` turns off)   |
