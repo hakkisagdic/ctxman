@@ -47,9 +47,11 @@ Options:
       --analyzer-db <path>  Query @plansmithai/analyzer SQLite DB for institutional citations
       --analyzer            Enable analyzer citations from .plansmith/analyzer.sqlite
       --discussions         Fetch referenced GitHub/GitLab issue, PR and MR discussions
-                            (uses GITHUB_TOKEN/GH_TOKEN or GITLAB_TOKEN when set)
+                            (uses GITHUB_TOKEN/GH_TOKEN, gh auth token, or GITLAB_TOKEN)
+      --provider <name>     Remote provider override when hostname is generic (github|gitlab)
       --max-discussions <n> Maximum remote discussions to fetch (default: 10)
       --max-comments <n>    Maximum comments fetched per discussion (default: 5)
+      --source-timeout <ms> Per-source timeout for evidence connectors (default: 5000)
       --coupling-window <n> Commits of the file examined for co-changes (default: 500, 0 = off)
       --budget <tokens>     Keep the output within this many tokens (8000 or 8k); drops
                             patches, discussions, related text, tests, coupling details
@@ -80,8 +82,10 @@ const OPTIONS = {
   'analyzer-db': { type: 'string' },
   analyzer: { type: 'boolean' },
   discussions: { type: 'boolean' },
+  provider: { type: 'string' },
   'max-discussions': { type: 'string' },
   'max-comments': { type: 'string' },
+  'source-timeout': { type: 'string' },
   'coupling-window': { type: 'string' },
   budget: { type: 'string' },
   style: { type: 'string' },
@@ -194,10 +198,12 @@ async function main() {
       rev: values.rev,
       patches: values.patches,
       discussions: values.discussions,
+      provider: values.provider,
       analyzerDb: values['analyzer-db'],
       analyzer: values.analyzer,
       maxDiscussions: values['max-discussions'],
       maxComments: values['max-comments'],
+      sourceTimeoutMs: values['source-timeout'],
       couplingWindow: values['coupling-window'],
       budget: parseTokenCount(values.budget),
       style: values.json ? 'json' : values.style,

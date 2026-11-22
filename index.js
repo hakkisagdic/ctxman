@@ -216,6 +216,9 @@ import {
   runSources,
   buildCitations,
   renderCitations,
+  EvidenceHttpCache,
+  createGitHubEvidenceSource,
+  createGitLabEvidenceSource,
 } from './lib/evidence/index.js';
 
 // Work & session digests (`ctxman digest`)
@@ -471,6 +474,9 @@ export {
   runSources,
   buildCitations,
   renderCitations,
+  EvidenceHttpCache,
+  createGitHubEvidenceSource,
+  createGitLabEvidenceSource,
 
   // Work & session digests (`ctxman digest`)
   writeDigest,

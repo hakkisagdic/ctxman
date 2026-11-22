@@ -1246,6 +1246,14 @@ export interface ExplainHistoryOptions {
   evidenceSources?: EvidenceSource[];
   /** Per-source timeout in milliseconds for `evidenceSources` (default 5000) */
   sourceTimeoutMs?: number;
+  /** Override GitHub REST API base URL (or set `CTXMAN_GITHUB_API_URL`) */
+  githubApiBase?: string;
+  /** Override GitLab REST API base URL (or set `CTXMAN_GITLAB_API_URL`) */
+  gitlabApiBase?: string;
+  /** Explicit provider override (`'github'` or `'gitlab'`) when host is custom */
+  provider?: 'github' | 'gitlab';
+  /** Override SQLite evidence cache file path (default `.ctxman/evidence/github.sqlite`) */
+  evidenceCachePath?: string;
   /** Destination recorded in policy audit logs (`stdout`, `clipboard`, or file path) */
   destination?: string;
 }
@@ -2959,7 +2967,9 @@ export interface EvidenceSearchOptions {
   symbols?: string[];
   since?: string | null;
   limit?: number;
+  timeoutMs?: number;
   signal?: AbortSignal;
+  onWarning?: (message: string) => void;
 }
 
 export interface EvidenceSource {
@@ -3012,3 +3022,93 @@ export function buildCitations(
 ): Evidence[];
 
 export function renderCitations(citations: Evidence[]): string;
+
+export interface GitHubEvidenceSourceOptions {
+  root?: string;
+  remote?: {
+    provider?: 'github' | 'gitlab' | 'bitbucket' | null;
+    host: string;
+    repoPath: string;
+    webUrl?: string;
+  } | null;
+  commits?: string[];
+  apiBase?: string;
+  cache?: boolean;
+  cachePath?: string;
+  token?: string;
+  env?: NodeJS.ProcessEnv;
+  fetch?: typeof globalThis.fetch;
+  timeoutMs?: number;
+  maxCommits?: number;
+  maxPrs?: number;
+  maxComments?: number;
+  maxClosedIssues?: number;
+  maxPages?: number;
+  ghCli?: boolean;
+  resolveGhToken?: (context: { host?: string; env: NodeJS.ProcessEnv }) => Promise<string | null>;
+  onWarning?: (message: string) => void;
+}
+
+export interface GitLabEvidenceSourceOptions {
+  root?: string;
+  remote?: {
+    provider?: 'github' | 'gitlab' | 'bitbucket' | null;
+    host: string;
+    repoPath: string;
+    webUrl?: string;
+  } | null;
+  commits?: string[];
+  apiBase?: string;
+  cache?: boolean;
+  cachePath?: string;
+  token?: string;
+  env?: NodeJS.ProcessEnv;
+  fetch?: typeof globalThis.fetch;
+  timeoutMs?: number;
+  maxCommits?: number;
+  maxMrs?: number;
+  maxNotes?: number;
+  maxClosedIssues?: number;
+  maxPages?: number;
+  onWarning?: (message: string) => void;
+}
+
+export class EvidenceHttpCache {
+  constructor(dbPath: string, options?: { onWarning?: (message: string) => void });
+  open(): boolean;
+  get(
+    host: string,
+    repo: string,
+    url: string
+  ): {
+    etag: string | null;
+    lastModified: string | null;
+    fetchedAt: string;
+    nextUrl: string | null;
+    body: unknown;
+  } | null;
+  set(entry: {
+    host: string;
+    repo: string;
+    url: string;
+    etag?: string | null;
+    lastModified?: string | null;
+    fetchedAt: string;
+    nextUrl?: string | null;
+    body: unknown;
+  }): void;
+  touch(
+    host: string,
+    repo: string,
+    url: string,
+    fetchedAt: string,
+    etag: string | null,
+    lastModified: string | null,
+    nextUrl: string | null
+  ): void;
+  close(): void;
+}
+
+export function createGitHubEvidenceSource(options?: GitHubEvidenceSourceOptions): EvidenceSource;
+
+export function createGitLabEvidenceSource(options?: GitLabEvidenceSourceOptions): EvidenceSource;
