@@ -15,6 +15,7 @@ import {
   renderCitations,
 } from '../lib/evidence/index.js';
 import { explainHistory } from '../lib/why/index.js';
+import { readAuditLog, sha256 } from '../lib/policy/audit.js';
 import * as API from '../index.js';
 
 const CLI = fileURLToPath(new URL('../bin/cli.js', import.meta.url));
@@ -533,8 +534,8 @@ describe('lib/evidence contract, sources, and citations', () => {
       expect(deniedCli.status).toBe(3);
     });
 
-    it('maps remote discussions and comments to pr/issue/review-comment Evidence when opted in', async () => {
-      const mockFetch = async (url) => {
+    function createMockPrFetch() {
+      return async (url) => {
         if (url === 'https://api.github.com/repos/acme-test/widget/issues/11') {
           return {
             ok: true,
@@ -570,11 +571,13 @@ describe('lib/evidence contract, sources, and citations', () => {
         }
         return { ok: false, status: 404, headers: new Map(), json: async () => ({}) };
       };
+    }
 
+    it('maps remote discussions and comments to pr/issue/review-comment Evidence when opted in', async () => {
       const res = await explainHistory(repo, 'src/calc.js:compute', {
         style: 'json',
         discussions: true,
-        fetch: mockFetch,
+        fetch: createMockPrFetch(),
         env: {},
       });
       const parsed = JSON.parse(res.text);
@@ -603,12 +606,105 @@ describe('lib/evidence contract, sources, and citations', () => {
       expect(parsed.citations.length).toBeGreaterThan(0);
     });
 
-    it('keeps Markdown and XML outputs unchanged and uses omitted.evidence when JSON is budget-trimmed', async () => {
-      const md = await explainHistory(repo, 'src/calc.js:compute', { style: 'markdown' });
-      const xml = await explainHistory(repo, 'src/calc.js:compute', { style: 'xml' });
-      expect(md.text).not.toContain('Sources:');
-      expect(xml.text).not.toContain('<citations>');
+    it('emits [n] markers and trailing Sources/<sources> in Markdown and XML resolving to citations[]', async () => {
+      const mockFetch = createMockPrFetch();
+      const jsonRes = await explainHistory(repo, 'src/calc.js:compute', {
+        style: 'json',
+        discussions: true,
+        fetch: mockFetch,
+        env: {},
+      });
+      const mdRes = await explainHistory(repo, 'src/calc.js:compute', {
+        style: 'markdown',
+        discussions: true,
+        fetch: mockFetch,
+        env: {},
+        ask: 'Why round?',
+      });
+      const xmlRes = await explainHistory(repo, 'src/calc.js:compute', {
+        style: 'xml',
+        discussions: true,
+        fetch: mockFetch,
+        env: {},
+        ask: 'Why round?',
+      });
 
+      const parsed = JSON.parse(jsonRes.text);
+      expect(parsed.citations.length).toBe(4);
+
+      // Every finding in JSON carries citation + citationId pointing to citations[n - 1]
+      for (const commit of parsed.history.commits) {
+        expect(commit.citation).toBeGreaterThanOrEqual(1);
+        expect(commit.citation).toBeLessThanOrEqual(parsed.citations.length);
+        const entry = parsed.citations[commit.citation - 1];
+        expect(entry.id).toBe(commit.citationId);
+        expect(entry.ref).toBe(commit.sha);
+      }
+      for (const disc of parsed.discussions) {
+        expect(disc.citation).toBeGreaterThanOrEqual(1);
+        const discEntry = parsed.citations[disc.citation - 1];
+        expect(discEntry.id).toBe(disc.citationId);
+        expect(discEntry.kind).toBe('pr');
+        for (const comment of disc.comments) {
+          expect(comment.citation).toBeGreaterThanOrEqual(1);
+          const commentEntry = parsed.citations[comment.citation - 1];
+          expect(commentEntry.id).toBe(comment.citationId);
+          expect(commentEntry.kind).toBe('review-comment');
+        }
+      }
+
+      // Markdown: inline [n] markers on commits/discussions/comments + trailing Sources: before ## Question
+      const sourcesIdx = mdRes.text.indexOf('\nSources:\n');
+      const questionIdx = mdRes.text.indexOf('\n## Question\n');
+      expect(sourcesIdx).toBeGreaterThan(-1);
+      expect(questionIdx).toBeGreaterThan(sourcesIdx);
+
+      const inlineMd = mdRes.text.slice(0, sourcesIdx);
+      const sourcesMd = mdRes.text.slice(sourcesIdx, questionIdx);
+      const inlineMdNums = [
+        ...[...inlineMd.matchAll(/^### .+? \[(\d+)\]$/gm)].map((m) => Number(m[1])),
+        ...[...inlineMd.matchAll(/^- \*\*[^*]+\*\* .* \[(\d+)\]$/gm)].map((m) => Number(m[1])),
+      ];
+      const sourceLines = [...sourcesMd.matchAll(/^- \[(\d+)\] (.+)$/gm)];
+      expect(inlineMdNums.length).toBe(4);
+      expect(sourceLines.length).toBe(parsed.citations.length);
+
+      for (const n of inlineMdNums) {
+        expect(n).toBeGreaterThanOrEqual(1);
+        expect(n).toBeLessThanOrEqual(parsed.citations.length);
+      }
+      for (const match of sourceLines) {
+        const n = Number(match[1]);
+        const lineText = match[2];
+        const entry = parsed.citations[n - 1];
+        expect(entry).toBeDefined();
+        expect(lineText).toContain(`${entry.kind} (${entry.source})`);
+        expect(lineText).toContain(entry.url || entry.ref);
+      }
+
+      // XML: citation="[n]" on commit/discussion/comment and <sources><evidence marker="[n]"> before <question>
+      expect(xmlRes.text).toMatch(/<sources>[\s\S]*<\/sources>\n<question>/);
+      const xmlCitations = [...xmlRes.text.matchAll(/citation="\[(\d+)\]"/g)].map((m) =>
+        Number(m[1])
+      );
+      const xmlEvidence = [
+        ...xmlRes.text.matchAll(/<evidence[^>]*marker="\[(\d+)\]" id="([^"]+)"/g),
+      ];
+      expect(xmlCitations.length).toBe(4);
+      expect(xmlEvidence.length).toBe(parsed.citations.length);
+
+      for (const n of xmlCitations) {
+        expect(n).toBeGreaterThanOrEqual(1);
+        expect(n).toBeLessThanOrEqual(parsed.citations.length);
+      }
+      for (const match of xmlEvidence) {
+        const n = Number(match[1]);
+        const id = match[2];
+        expect(parsed.citations[n - 1].id).toBe(id);
+      }
+    });
+
+    it('uses omitted.evidence under budget trimming without leaving dangling [n] markers', async () => {
       const fullJson = await explainHistory(repo, 'src/calc.js:compute', { style: 'json' });
       const trimmedJson = await explainHistory(repo, 'src/calc.js:compute', {
         style: 'json',
@@ -618,6 +714,195 @@ describe('lib/evidence contract, sources, and citations', () => {
       expect(trimmedJson.tokens).toBeLessThanOrEqual(fullJson.tokens - 40);
       expect(parsedTrimmed.trimmed).not.toBeNull();
       expect(parsedTrimmed.trimmed.omitted.citations).toBeUndefined();
+      expect(parsedTrimmed.trimmed.omitted.evidence).toBeGreaterThan(0);
+
+      for (const commit of parsedTrimmed.history.commits) {
+        if (commit.citation !== undefined) {
+          expect(commit.citation).toBeLessThanOrEqual(parsedTrimmed.citations.length);
+          expect(parsedTrimmed.citations[commit.citation - 1].id).toBe(commit.citationId);
+        }
+      }
+
+      // Markdown & XML budget trimming that drops all evidence leaves zero dangling markers or Sources/<sources>
+      const fullMd = await explainHistory(repo, 'src/calc.js:compute', { style: 'markdown' });
+      const trimmedMd = await explainHistory(repo, 'src/calc.js:compute', {
+        style: 'markdown',
+        budget: fullMd.tokens - 20,
+      });
+      expect(trimmedMd.omitted.evidence).toBeGreaterThan(0);
+      const keptMdSources = [...trimmedMd.text.matchAll(/^- \[(\d+)\] /gm)].map((m) =>
+        Number(m[1])
+      );
+      const inlineMdMarkers = [...trimmedMd.text.matchAll(/^### .+? \[(\d+)\]$/gm)].map((m) =>
+        Number(m[1])
+      );
+      for (const n of inlineMdMarkers) {
+        expect(n).toBeLessThanOrEqual(keptMdSources.length);
+      }
+      if (keptMdSources.length === 0) {
+        expect(trimmedMd.text).not.toContain('\nSources:\n');
+      }
+
+      const fullXml = await explainHistory(repo, 'src/calc.js:compute', { style: 'xml' });
+      const trimmedXml = await explainHistory(repo, 'src/calc.js:compute', {
+        style: 'xml',
+        budget: fullXml.tokens - 40,
+      });
+      expect(trimmedXml.omitted.evidence).toBeGreaterThan(0);
+      const xmlEvidenceCount = [...trimmedXml.text.matchAll(/<evidence[^>]*marker="\[(\d+)\]"/g)]
+        .length;
+      const xmlAttrCitations = [...trimmedXml.text.matchAll(/citation="\[(\d+)\]"/g)].map((m) =>
+        Number(m[1])
+      );
+      for (const n of xmlAttrCitations) {
+        expect(n).toBeLessThanOrEqual(xmlEvidenceCount);
+      }
+      if (xmlEvidenceCount === 0) {
+        expect(trimmedXml.text).not.toContain('<sources>');
+      }
+    });
+
+    it('supports node bin/cli.js why <file> --json, preserves pre-existing keys, and resolves CLI Markdown/XML markers', () => {
+      const jsonProc = spawnSync(process.execPath, [CLI, 'why', 'src/calc.js', '--json'], {
+        cwd: repo,
+        encoding: 'utf-8',
+      });
+      expect(jsonProc.status).toBe(0);
+      const parsed = JSON.parse(jsonProc.stdout);
+
+      expect(Array.isArray(parsed.citations)).toBe(true);
+      expect(parsed.citations.length).toBeGreaterThan(0);
+      expect(Array.isArray(parsed.warnings)).toBe(true);
+
+      const expectedKeys = [
+        'generator',
+        'target',
+        'repository',
+        'history',
+        'references',
+        'discussions',
+        'institutionalCitations',
+        'citations',
+        'ownership',
+        'coupling',
+        'related',
+        'notes',
+        'tests',
+        'warnings',
+        'trimmed',
+        'question',
+      ];
+      for (const key of expectedKeys) {
+        expect(Object.hasOwn(parsed, key), `Missing JSON key: ${key}`).toBe(true);
+      }
+      expect(parsed.generator).toBe('ctxman why');
+      expect(typeof parsed.target).toBe('object');
+      expect(typeof parsed.repository).toBe('object');
+      expect(typeof parsed.history).toBe('object');
+      expect(typeof parsed.references).toBe('object');
+      expect(Array.isArray(parsed.discussions)).toBe(true);
+      expect(Array.isArray(parsed.institutionalCitations)).toBe(true);
+      expect(Array.isArray(parsed.related)).toBe(true);
+      expect(Array.isArray(parsed.notes)).toBe(true);
+      expect(Array.isArray(parsed.tests)).toBe(true);
+
+      const mdProc = spawnSync(process.execPath, [CLI, 'why', 'src/calc.js'], {
+        cwd: repo,
+        encoding: 'utf-8',
+      });
+      expect(mdProc.status).toBe(0);
+      expect(mdProc.stdout).toContain('\nSources:\n');
+      const mdHeadingMarkers = [...mdProc.stdout.matchAll(/^### \d+\..+? \[(\d+)\]$/gm)].map((m) =>
+        Number(m[1])
+      );
+      expect(mdHeadingMarkers.length).toBe(parsed.history.commits.length);
+      for (const n of mdHeadingMarkers) {
+        expect(parsed.citations[n - 1]).toBeDefined();
+      }
+
+      const xmlProc = spawnSync(process.execPath, [CLI, 'why', 'src/calc.js', '--style', 'xml'], {
+        cwd: repo,
+        encoding: 'utf-8',
+      });
+      expect(xmlProc.status).toBe(0);
+      expect(xmlProc.stdout).toContain('<sources>');
+      const xmlMarkers = [...xmlProc.stdout.matchAll(/citation="\[(\d+)\]"/g)].map((m) =>
+        Number(m[1])
+      );
+      expect(xmlMarkers.length).toBe(parsed.history.commits.length);
+      for (const n of xmlMarkers) {
+        expect(parsed.citations[n - 1]).toBeDefined();
+      }
+    });
+
+    it('records one audit event when policy audit is enabled and writes nothing when disabled', async () => {
+      const auditRepo = fs.realpathSync(
+        fs.mkdtempSync(path.join(os.tmpdir(), 'ctxman-evidence-audit-'))
+      );
+      try {
+        const git = initTempGitRepo(auditRepo);
+        fs.mkdirSync(path.join(auditRepo, '.ctxman'), { recursive: true });
+        fs.mkdirSync(path.join(auditRepo, 'src'), { recursive: true });
+        fs.writeFileSync(path.join(auditRepo, 'src', 'item.js'), 'export const v = 1;\n', 'utf-8');
+        const auditPath = path.join(auditRepo, '.ctxman', 'audit.log');
+        const policyPath = path.join(auditRepo, '.ctxman', 'policy.json');
+
+        fs.writeFileSync(
+          policyPath,
+          JSON.stringify({ version: 1, audit: { enabled: false } }),
+          'utf-8'
+        );
+        git('add', '-A');
+        execFileSync('git', ['-c', 'commit.gpgsign=false', 'commit', '-qm', 'feat: add item'], {
+          cwd: auditRepo,
+        });
+
+        await explainHistory(auditRepo, 'src/item.js', { style: 'json' });
+        const disabledCli = spawnSync(process.execPath, [CLI, 'why', 'src/item.js', '--json'], {
+          cwd: auditRepo,
+          encoding: 'utf-8',
+        });
+        expect(disabledCli.status).toBe(0);
+        expect(fs.existsSync(auditPath)).toBe(false);
+
+        fs.writeFileSync(
+          policyPath,
+          JSON.stringify({ version: 1, audit: { enabled: true, path: '.ctxman/audit.log' } }),
+          'utf-8'
+        );
+
+        const apiRes = await explainHistory(auditRepo, 'src/item.js', { style: 'json' });
+        expect(fs.existsSync(auditPath)).toBe(true);
+        const firstRead = readAuditLog([auditPath]);
+        expect(firstRead.events).toHaveLength(1);
+        expect(firstRead.events[0]).toMatchObject({
+          outcome: 'exported',
+          command: 'why',
+          root: auditRepo,
+          format: 'json',
+          destination: 'stdout',
+          totalTokens: apiRes.tokens,
+          sha256: sha256(apiRes.text),
+        });
+        expect(firstRead.events[0].files).toContain('src/item.js');
+
+        const cliRes = spawnSync(process.execPath, [CLI, 'why', 'src/item.js', '--json'], {
+          cwd: auditRepo,
+          encoding: 'utf-8',
+        });
+        expect(cliRes.status).toBe(0);
+        const secondRead = readAuditLog([auditPath]);
+        expect(secondRead.events).toHaveLength(2);
+        expect(secondRead.events[1]).toMatchObject({
+          outcome: 'exported',
+          command: 'why',
+          format: 'json',
+          destination: 'stdout',
+          sha256: sha256(cliRes.stdout),
+        });
+      } finally {
+        fs.rmSync(auditRepo, { recursive: true, force: true });
+      }
     });
   });
 });

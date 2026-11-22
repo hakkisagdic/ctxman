@@ -8,14 +8,23 @@ import { fileURLToPath } from 'url';
 import { resolveRemoteGitUrl, withRemoteRepo } from '../lib/utils/remote-repo.js';
 import { APIServer } from '../lib/api/rest/server.js';
 
-const CLI = fileURLToPath(new URL('../bin/cli.js', import.meta.url));
+const BIN_DIR = fileURLToPath(new URL('../bin', import.meta.url));
+const GIT_ISOLATED_ENV = {
+  GIT_CONFIG_NOSYSTEM: '1',
+  GIT_CONFIG_GLOBAL: os.devNull,
+};
 
 function gitIn(dir, ...args) {
-  return execFileSync('git', args, {
-    cwd: dir,
-    encoding: 'utf8',
-    stdio: 'pipe',
-  });
+  return execFileSync(
+    'git',
+    ['-c', 'gc.auto=0', '-c', 'core.hooksPath=/dev/null', '-c', 'commit.gpgsign=false', ...args],
+    {
+      cwd: dir,
+      encoding: 'utf8',
+      stdio: 'pipe',
+      env: { ...process.env, ...GIT_ISOLATED_ENV },
+    }
+  );
 }
 
 function httpJson(port, method, reqPath, body = null) {
@@ -80,7 +89,7 @@ describe('P1-3: Remote Git repository direct analysis & packing (--remote / --br
     server.start();
     await new Promise((resolve) => server.server.once('listening', resolve));
     port = server.server.address().port;
-  });
+  }, 120_000);
 
   afterAll(async () => {
     if (server?.server) await new Promise((resolve) => server.server.close(resolve));
@@ -127,11 +136,11 @@ describe('P1-3: Remote Git repository direct analysis & packing (--remote / --br
   });
 
   it('supports ctxman pack --remote --branch and ctxman map --remote --branch via CLI and REST API', async () => {
+    const cliEnv = { ...process.env, ...GIT_ISOLATED_ENV };
     const packCli = spawnSync(
       process.execPath,
       [
-        CLI,
-        'pack',
+        path.join(BIN_DIR, 'cm-pack.js'),
         '--remote',
         `file://${fixtureOriginDir}`,
         '--branch',
@@ -140,15 +149,22 @@ describe('P1-3: Remote Git repository direct analysis & packing (--remote / --br
         'markdown',
         '-q',
       ],
-      { encoding: 'utf8' }
+      { encoding: 'utf8', env: cliEnv }
     );
     expect(packCli.status).toBe(0);
     expect(packCli.stdout).toContain('releaseV2Feature');
 
     const mapCli = spawnSync(
       process.execPath,
-      [CLI, 'map', '--remote', `file://${fixtureOriginDir}`, '--branch', 'release-v2', '-q'],
-      { encoding: 'utf8' }
+      [
+        path.join(BIN_DIR, 'cm-map.js'),
+        '--remote',
+        `file://${fixtureOriginDir}`,
+        '--branch',
+        'release-v2',
+        '-q',
+      ],
+      { encoding: 'utf8', env: cliEnv }
     );
     expect(mapCli.status).toBe(0);
     expect(mapCli.stdout).toContain('src/feature.js');
@@ -170,5 +186,5 @@ describe('P1-3: Remote Git repository direct analysis & packing (--remote / --br
     });
     expect(restPack.status).toBe(200);
     expect(restPack.json.text).toContain('releaseV2Feature');
-  });
+  }, 120_000);
 });

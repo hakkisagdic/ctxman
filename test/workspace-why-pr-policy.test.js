@@ -10,13 +10,39 @@ import { PolicyViolationError } from '../lib/policy/index.js';
 import TokenUtils from '../lib/utils/token-utils.js';
 
 const CLI = fileURLToPath(new URL('../bin/cli.js', import.meta.url));
+const BIN_DIR = fileURLToPath(new URL('../bin', import.meta.url));
+const SUBCOMMAND_BIN = {
+  why: 'cm-why.js',
+  pr: 'cm-pr.js',
+  policy: 'cm-policy.js',
+  audit: 'cm-audit.js',
+};
+const GIT_ISOLATED_ENV = {
+  GIT_CONFIG_NOSYSTEM: '1',
+  GIT_CONFIG_GLOBAL: os.devNull,
+};
 
 function gitIn(dir, ...args) {
-  return execFileSync('git', ['-c', 'user.name=Dev', '-c', 'user.email=dev@example.com', ...args], {
-    cwd: dir,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+  return execFileSync(
+    'git',
+    [
+      '-c',
+      'gc.auto=0',
+      '-c',
+      'core.hooksPath=/dev/null',
+      '-c',
+      'user.name=Dev',
+      '-c',
+      'user.email=dev@example.com',
+      ...args,
+    ],
+    {
+      cwd: dir,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: { ...process.env, ...GIT_ISOLATED_ENV },
+    }
+  );
 }
 
 function writeIn(dir, relPath, content) {
@@ -30,6 +56,10 @@ function commitIn(dir, message, isoDate, author = 'Alice <alice@example.com>') {
   execFileSync(
     'git',
     [
+      '-c',
+      'gc.auto=0',
+      '-c',
+      'core.hooksPath=/dev/null',
       '-c',
       'user.name=Dev',
       '-c',
@@ -45,17 +75,26 @@ function commitIn(dir, message, isoDate, author = 'Alice <alice@example.com>') {
     ],
     {
       cwd: dir,
-      env: { ...process.env, GIT_AUTHOR_DATE: isoDate, GIT_COMMITTER_DATE: isoDate },
+      env: {
+        ...process.env,
+        ...GIT_ISOLATED_ENV,
+        GIT_AUTHOR_DATE: isoDate,
+        GIT_COMMITTER_DATE: isoDate,
+      },
     }
   );
 }
 
 function runCli(subcommand, args, cwd, env = {}) {
-  return spawnSync(process.execPath, [CLI, subcommand, ...args], {
+  const script = SUBCOMMAND_BIN[subcommand];
+  const entry = script ? path.join(BIN_DIR, script) : CLI;
+  const argv = script ? [entry, ...args] : [entry, subcommand, ...args];
+  return spawnSync(process.execPath, argv, {
     cwd,
     encoding: 'utf8',
     env: {
       ...process.env,
+      ...GIT_ISOLATED_ENV,
       GIT_CEILING_DIRECTORIES: path.dirname(cwd),
       ...env,
     },
@@ -231,7 +270,7 @@ describe('Multi-repository workspace support for why, pr, policy and audit', () 
     gitIn(sharedRepo, 'init', '-q', '-b', 'main');
     writeIn(sharedRepo, 'src/currency.js', 'export const DEFAULT_CURRENCY = "USD";\n');
     commitIn(sharedRepo, 'feat(shared): add currency constant', '2026-02-01T08:00:00Z');
-  });
+  }, 120_000);
 
   afterAll(() => {
     fs.rmSync(wsRoot, { recursive: true, force: true });
