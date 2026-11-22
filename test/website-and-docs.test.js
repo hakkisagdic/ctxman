@@ -69,7 +69,9 @@ describe('Website, ADR & Command Documentation Integrity (Serverless)', () => {
     const ciText = fs.readFileSync(path.join(ROOT, 'docs/commands/ci.md'), 'utf8');
     expect(ciText).toContain('ctxman policy check --format sarif');
     expect(ciText).toContain('ctxman-sarif-gate.yml');
-    expect(fs.existsSync(path.join(ROOT, '.github/workflows/ctxman-sarif-gate.yml'))).toBe(true);
+    expect(fs.existsSync(path.join(ROOT, 'examples/github-actions/ctxman-sarif-gate.yml'))).toBe(
+      true
+    );
     expect(
       fs.existsSync(path.join(ROOT, 'examples/gitlab-ci/ctxman-sarif-gate.gitlab-ci.yml'))
     ).toBe(true);

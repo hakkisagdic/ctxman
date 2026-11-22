@@ -1,7 +1,6 @@
 # ctxman
 
 [![CI](https://github.com/hakkisagdic/ctxman/actions/workflows/ci.yml/badge.svg)](https://github.com/hakkisagdic/ctxman/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/hakkisagdic/ctxman/actions/workflows/codeql.yml/badge.svg)](https://github.com/hakkisagdic/ctxman/actions/workflows/codeql.yml)
 [![npm version](https://badge.fury.io/js/ctxman.svg)](https://www.npmjs.com/package/ctxman)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/ctxman.svg)](https://nodejs.org)

@@ -32,5 +32,4 @@
 /.prettierrc @hakkisagdic
 
 # Security-sensitive files
-/.github/workflows/codeql.yml @hakkisagdic
 /.github/workflows/security* @hakkisagdic
