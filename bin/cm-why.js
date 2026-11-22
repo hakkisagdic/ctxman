@@ -181,6 +181,11 @@ async function main() {
     } else {
       root = findRepositoryRoot(cwd);
     }
+    const destination = values.output
+      ? path.resolve(cwd, values.output)
+      : values.copy
+        ? 'clipboard'
+        : 'stdout';
     result = await explainHistory(root, positionals[0], {
       cwd,
       repos: extraRepos,
@@ -198,6 +203,7 @@ async function main() {
       style: values.json ? 'json' : values.style,
       ask: values.ask,
       redact: !values['no-redact'],
+      destination,
     });
   } catch (error) {
     if (error instanceof WhyError) {

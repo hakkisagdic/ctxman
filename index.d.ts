@@ -1246,6 +1246,8 @@ export interface ExplainHistoryOptions {
   evidenceSources?: EvidenceSource[];
   /** Per-source timeout in milliseconds for `evidenceSources` (default 5000) */
   sourceTimeoutMs?: number;
+  /** Destination recorded in policy audit logs (`stdout`, `clipboard`, or file path) */
+  destination?: string;
 }
 
 export interface WhyCommit {
@@ -1263,6 +1265,10 @@ export interface WhyCommit {
   patch?: string;
   /** Oldest commit a shallow clone has: its parents were not fetched */
   shallowBoundary?: boolean;
+  /** 1-based index into `data.citations` */
+  citation?: number;
+  /** Matching `Evidence.id` in `data.citations` */
+  citationId?: string;
 }
 
 export interface WhyIssueReference {
@@ -1329,10 +1335,14 @@ export interface ExplainHistoryData {
     labels: string[];
     body: string;
     commits: string[];
+    citation?: number;
+    citationId?: string;
     comments: Array<{
       author: string;
       createdAt: string | null;
       body: string;
+      citation?: number;
+      citationId?: string;
     }>;
   }>;
   institutionalCitations?: AnalyzerCitation[];
