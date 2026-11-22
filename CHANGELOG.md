@@ -2,9 +2,13 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
-## [Unreleased]
+## [3.4.0] - 2026-11-22
 
 ### Added
+
+- **Analysis modules for impact, architecture, security, PR and task planning (phases 5-19, exported from `index.js` and `index.d.ts`)**:
+  - Added a prompt cache optimizer (`lib/pack/cache-optimizer.js`), a blast radius simulator (`ctxman impact`, `lib/impact`), architecture drift, delta pack and taint flow analysis, a semantic dead-symbol hunter, a multi-LLM cost router, an atomic PR splitter, an LCOV risk mapper, documentation drift detection, a patch verifier, a circular dependency unwinder, a license gate, a cross-repo contract checker and a bisect context pack.
+  - Added further analyzers under `lib/architecture`, `lib/security`, `lib/pr`, `lib/task`, `lib/who`, `lib/policy`, `lib/rag` and `lib/workspace`, including semantic clones, bus factor, environment drift, prompt shield, semver analyzer, entropy scanner, deploy gate, slopsquat and typosquat auditors, secret rotation, cognitive load and rollback runbook generation; several are also exposed as REST endpoints.
 
 - **GitHub & GitLab PR/MR Evidence Source with SQLite ETag Cache (`lib/evidence/sources/`, `ctxman why --discussions`)**:
   - **EN**: Added `createGitHubEvidenceSource` (`lib/evidence/sources/github.js`), `createGitLabEvidenceSource` (`lib/evidence/sources/gitlab.js`), and `EvidenceHttpCache` (`lib/evidence/sources/github-cache.js`, `node:sqlite` at `.ctxman/evidence/github.sqlite`, gitignored) to traverse commit -> PR/MR -> review comments (including inline diff comments) -> closed issues with `ETag`/`If-None-Match` revalidation, `--since` cache reuse, token lookup (`GITHUB_TOKEN` -> `GH_TOKEN` -> `gh auth token`; `GITLAB_TOKEN` -> `GL_TOKEN`, never cached or logged), GitHub Enterprise `/api/v3`, self-hosted GitLab `/api/v4` (`--provider`), and partial/offline degradation into `warnings[]`.
@@ -16,6 +20,17 @@ All notable changes to the Ctxman will be documented in this file.
 - **Work & Session Digests (`ctxman digest`, `lib/context/`, MCP `digest_read`)**:
   - **EN**: Added offline, Node-builtin `ctxman digest` (`write`, `read`, `list`), programmatic exports (`writeDigest`, `readDigest`, `listDigests`) in `index.js` and `index.d.ts`, strict store isolation (`0700`/`0600` permissions, `..` and symlink escape rejection), 1-based `--lines` and capped JS regex `--grep`, and the `digest_read` MCP tool (20 MCP tools total).
   - **TR**: Çevrimdışı, yalnızca Node yerleşikleriyle çalışan `ctxman digest` (`write`, `read`, `list`), `index.js` ve `index.d.ts` üzerinde `writeDigest`/`readDigest`/`listDigests` dışa aktarımları, sıkı depo sınır denetimi (`0700`/`0600` izinleri, `..` ve sembolik bağ kaçışı reddi), satır numaralı `--lines`/`--grep` okuma ve 20. MCP aracı `digest_read` eklendi.
+
+### Changed
+
+- Replaced unverified "complete" claims in the README and docs with statements backed by code and local tests.
+- CI now runs on pushes to `main` and on pull requests only, with a single test workflow.
+- The pre-push hook can run an optional private-value scan before the test suite.
+
+### Fixed
+
+- Tests no longer inherit the git environment (`GIT_DIR` and related variables) exported by git hooks, so a push can no longer point test repositories at the real repository.
+- Bumped `hono` and `@hono/node-server` in the lockfile to resolve reported advisories.
 
 ## [3.3.0] - 2026-11-13
 

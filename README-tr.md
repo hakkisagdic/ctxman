@@ -2,7 +2,7 @@
 
 **AI Geliştirme Platformu** - Plugin mimarisi, Git entegrasyonu, REST API ve watch modu ile 14+ programlama dilini destekleyen, method seviyesi filtreleme, otomatik LLM optimizasyonu ve gerçek zamanlı analiz sunan platform. AI destekli geliştirme iş akışları için mükemmel.
 
-**v3.3.0** - Kurumsal Uyumluluk (KVKK/BDDK), Faturalama (iyzico), PR Zekası ve Uzak Depo Sürümü 🚀
+**v3.4.0** - Kanıt Atıfları, GitHub ve GitLab Kanıt Kaynağı, Çalışma Özetleri ve Analiz Modülleri
 
 ## ☕ Bu Projeyi Destekleyin
 

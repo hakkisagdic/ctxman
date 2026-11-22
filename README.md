@@ -8,7 +8,7 @@
 
 **AI Development Platform** with plugin architecture, Git integration, REST API, and watch mode. Supporting 14+ programming languages with method-level filtering, automatic LLM optimization, and real-time analysis. Perfect for AI-assisted development workflows.
 
-**v3.3.0** - Enterprise Compliance, Billing, PR Intelligence & Remote Repo Release 🚀
+**v3.4.0** - Evidence Citations, GitHub & GitLab Evidence Source, Work Digests & Analysis Modules
 
 **Languages**: [English](README.md) | [Türkçe](README-tr.md)
 
