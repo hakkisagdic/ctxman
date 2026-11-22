@@ -314,9 +314,11 @@ GitLab ve Bitbucket için bağlantılı), ortak yazarları ve inceleyenleri, bla
 birlikte değişen dosyaları, ondan bahseden ADR, doküman, changelog kaydı ve yorumları, içindeki
 yapılacak notlarını ve onu kullanan testleri toplar; sırlar maskelenir (`--json` çıktısı ayrıca en
 çok 800 karakterlik maskelenmiş alıntı ve token sayısıyla tek tip `Evidence` sözleşmesine uyan
-`citations[]` dizisini içerir; `normalizeEvidence`, `runSources` ve `renderCitations` programatik
-olarak dışa aktarılır). Unblocked gibi platformlar bunu kendi sunucularında Slack, Jira ve
-Confluence ile yanıtlar; ctxman makinenizde, git'in ve reponun bildiklerini kapsar. Ayrıntılar:
+`citations[]` dizisini, Markdown/XML çıktıları ise `[n]` işaretçileriyle sonda `Sources:` /
+`<sources>` listesini ve politika denetim kaydını üretir; `normalizeEvidence`, `runSources` ve
+`renderCitations` programatik olarak dışa aktarılır). Unblocked gibi platformlar bunu kendi
+sunucularında Slack, Jira ve Confluence ile yanıtlar; ctxman makinenizde, git'in ve reponun
+bildiklerini kapsar. Ayrıntılar:
 [docs/commands/why.md](docs/commands/why.md).
 
 ### 🔎 Sıralı arama (`ctxman search`)

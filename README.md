@@ -303,9 +303,10 @@ tickets they reference (linked for GitHub, GitLab and Bitbucket), co-authors and
 ownership, files that usually change with it, ADRs, docs, changelog entries and comments that
 mention it, to-do comments inside it and the tests that use it, with secrets redacted (`--json`
 also emits uniform `citations[]` under the `Evidence` contract, capped at 800 redacted characters
-with token counts; `normalizeEvidence`, `runSources` and `renderCitations` are exported
-programmatically). Platforms such as Unblocked answer this from Slack, Jira and Confluence on their
-servers; ctxman covers what git and the repository know, on your machine. Details:
+with token counts, while Markdown/XML emit `[n]` markers plus a trailing `Sources:` / `<sources>`
+list and optional policy audit logging; `normalizeEvidence`, `runSources` and `renderCitations` are
+exported programmatically). Platforms such as Unblocked answer this from Slack, Jira and Confluence
+on their servers; ctxman covers what git and the repository know, on your machine. Details:
 [docs/commands/why.md](docs/commands/why.md).
 
 ### 🔎 Ranked Search and Symbols
