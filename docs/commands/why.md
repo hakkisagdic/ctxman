@@ -21,6 +21,8 @@ ctxman why billing-api/src/invoice.js:createInvoice --repo ../billing-api --repo
 ctxman why src/cart.js:Cart.total --ask "Why do we round here?" --copy
 ```
 
+> From a local checkout, run `node bin/cli.js why <target>` (the legacy `ctxman.js` script does not dispatch `why`).
+
 ## Targets
 
 Paths are relative to the current directory (or prefixed with `<alias>/` when `--repo` is passed)
@@ -110,7 +112,10 @@ Sections appear in this order; empty ones are left out.
 10. **Tests** — test files (`test/`, `__tests__/`, `*.test.*`, `*_test.go`, `test_*.py`,
     `FooTest.java`, ...) that mention the symbol or the file, or import the module; up to 10,
     with up to 5 matching lines each.
-11. **Question** — `--ask`, last, with an instruction to cite commits, references and paths and
+11. **Sources** — when evidence citations exist, a trailing `Sources:` list (Markdown) or
+    `<sources>` block (XML) resolving each inline `[n]` marker on commits, discussions, and
+    comments to its uniform `Evidence` record.
+12. **Question** — `--ask`, last, with an instruction to cite commits, references and paths and
     to say when the history does not explain something.
 
 ## Options
@@ -150,10 +155,11 @@ drops, in this order:
 1. patches,
 2. remote discussions,
 3. institutional citations,
-4. related text,
-5. tests,
-6. co-change details,
-7. older commits (the newest one stays),
+4. evidence citations,
+5. related text,
+6. tests,
+7. co-change details,
+8. older commits (the newest one stays),
 
 keeping as many items of the last section it touches as still fit. Only when that is not
 enough does it drop references, notes, blame authors, source lines and finally the last
@@ -162,20 +168,32 @@ commit.
 ## Styles
 
 - **Markdown** (default): the sections above (plus `Workspace repositories` when `--repo` is
-  used), with fenced source and diffs (the fence grows when the code contains backticks) and
-  commit/discussion bodies as quotes.
+  used), with fenced source and diffs (the fence grows when the code contains backticks),
+  commit/discussion bodies as quotes, `[n]` citation markers on cited findings, and a trailing
+  `Sources:` list.
 - **XML**: `<why_context>` with `<repositories>` (when multi-repo), `<target>`, `<history>` /
-  `<commit>`, `<references>`, `<discussions>` (when populated), `<institutional_citations>`
-  (when populated), `<ownership>`, `<coupling>`, `<related>`, `<notes>`, `<tests>` and
-  `<question>`; text is entity-escaped.
+  `<commit>` (with `citation="[n]"`), `<references>`, `<discussions>` (when populated, with
+  `citation="[n]"`), `<institutional_citations>` (when populated), `<ownership>`, `<coupling>`,
+  `<related>`, `<notes>`, `<tests>`, `<sources>` (when populated, `<evidence marker="[n]" ...>`)
+  and `<question>`; text is entity-escaped.
 - **JSON**: the collected data (`repos`, `target`, `repository`, `history`, `references`,
-  `discussions`, `institutionalCitations`, `ownership`, `coupling`, `related`, `notes`, `tests`,
-  `warnings`, `trimmed`, `question`).
+  `discussions`, `institutionalCitations`, `citations`, `ownership`, `coupling`, `related`, `notes`,
+  `tests`, `warnings`, `trimmed`, `question`), where `citations` holds uniform `Evidence` records
+  (commits, optional remote discussions/review comments, and custom `evidenceSources`, each with a
+  redacted excerpt capped at 800 characters and token count) and cited findings carry `citation`
+  and `citationId`. When `.ctxman/policy.json` enables `audit`, `ctxman why` records one export
+  event via `recordExport` (default off).
 
 ## Library and MCP
 
 ```js
-import { explainHistory, queryAnalyzerCitations } from 'ctxman';
+import {
+  explainHistory,
+  queryAnalyzerCitations,
+  normalizeEvidence,
+  runSources,
+  renderCitations,
+} from 'ctxman';
 
 const result = await explainHistory('/path/to/repo', 'src/cart.js:total', {
   limit: 10,
@@ -191,6 +209,8 @@ const result = await explainHistory('/path/to/repo', 'src/cart.js:total', {
   ask: 'Why do we round here?',
 });
 console.log(result.text);
+const { citations } = result.data;
+process.stdout.write(`${renderCitations(citations)}\n`);
 console.log(result.data.institutionalCitations);
 ```
 

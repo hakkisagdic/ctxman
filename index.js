@@ -206,6 +206,18 @@ import { diagnoseFailure } from './lib/diagnose/index.js';
 // Institutional Memory Bridge (v3.2.0)
 import { queryAnalyzerCitations } from './lib/why/analyzer-bridge.js';
 
+// Uniform Evidence contract & citations (`lib/evidence`)
+import {
+  EVIDENCE_KINDS,
+  MAX_EXCERPT_CHARS,
+  EvidenceError,
+  normalizeEvidence,
+  DEFAULT_SOURCE_TIMEOUT_MS,
+  runSources,
+  buildCitations,
+  renderCitations,
+} from './lib/evidence/index.js';
+
 // Work & session digests (`ctxman digest`)
 import { writeDigest, readDigest, listDigests } from './lib/context/digest.js';
 
@@ -449,6 +461,16 @@ export {
 
   // Institutional Memory Bridge (v3.2.0)
   queryAnalyzerCitations,
+
+  // Uniform Evidence contract & citations (`lib/evidence`)
+  EVIDENCE_KINDS,
+  MAX_EXCERPT_CHARS,
+  EvidenceError,
+  normalizeEvidence,
+  DEFAULT_SOURCE_TIMEOUT_MS,
+  runSources,
+  buildCitations,
+  renderCitations,
 
   // Work & session digests (`ctxman digest`)
   writeDigest,
