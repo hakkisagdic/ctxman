@@ -50,16 +50,17 @@ endpoint and the MCP `generate_context` tool) is checked against the policy and 
 
 Both apply at the same time, and the stricter value wins on every field:
 
-| Field                 | How the two files combine                                                                                 |
-| --------------------- | --------------------------------------------------------------------------------------------------------- |
-| `deny`                | union: a path denied by either file is denied (a project `!pattern` cannot re-allow an organisation deny) |
-| `requireRedaction`    | true when either file sets it                                                                             |
-| `redactPII`           | true when either file sets it                                                                             |
-| `compliancePreset`    | organisation preset wins if set, else project preset (`kvkk-bddk` or `soc2`)                              |
-| `maxExportTokens`     | the lower limit                                                                                           |
-| `allowedTargetModels` | a model must be allowed by every file that has the field                                                  |
-| `ignoreFiles`         | union                                                                                                     |
-| `audit`               | each file that enables auditing gets its own log (the same event is written to both)                      |
+| Field                  | How the two files combine                                                                                 |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| `deny`                 | union: a path denied by either file is denied (a project `!pattern` cannot re-allow an organisation deny) |
+| `requireRedaction`     | true when either file sets it                                                                             |
+| `redactPII`            | true when either file sets it                                                                             |
+| `compliancePreset`     | organisation preset wins if set, else project preset (`kvkk-bddk` or `soc2`)                              |
+| `maxExportTokens`      | the lower limit                                                                                           |
+| `allowedTargetModels`  | a model must be allowed by every file that has the field                                                  |
+| `ignoreFiles`          | union                                                                                                     |
+| `audit`                | each file that enables auditing gets its own log (the same event is written to both)                      |
+| `sources.chat.enabled` | stricter wins: `false` in either file overrides `true` (default `false`)                                  |
 
 If `CTXMAN_POLICY` names a file that does not exist, or either file is invalid, commands
 that export stop with exit code 2 instead of running without the policy.
@@ -130,22 +131,24 @@ ctxman policy check --repo ../billing-api --format sarif > workspace-policy.sari
   "maxExportTokens": 100000,
   "allowedTargetModels": ["claude-*", "gpt-5*"],
   "ignoreFiles": [".cursorignore", ".aiexclude"],
-  "audit": { "enabled": true, "path": ".ctxman/audit.log" }
+  "audit": { "enabled": true, "path": ".ctxman/audit.log" },
+  "sources": { "chat": { "enabled": false } }
 }
 ```
 
-| Field                 | Type                                | Default             | Meaning                                                                                                                                       |
-| --------------------- | ----------------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `version`             | `1`                                 | required            | Schema version.                                                                                                                               |
-| `compliancePreset`    | `"kvkk-bddk"`, `"soc2"` or `null`   | `null`              | Optional compliance preset identifier (`kvkk-bddk` or `soc2`).                                                                                |
-| `deny`                | array of patterns                   | `[]`                | Files that are never analysed or exported, even with `--no-redact`, `.contextinclude`, a template or a profile that would include them.       |
-| `requireRedaction`    | boolean                             | `false`             | Secret redaction must stay on: `--no-redact` is refused. Method source in `--save-report -m` reports is redacted too.                         |
-| `redactPII`           | boolean                             | `false`             | Mask regulated PII (`tc-kimlik`, `tr-iban`, `tr-phone`, `credit-card`, `email`) alongside secrets.                                            |
-| `maxExportTokens`     | positive integer or `null`          | `null` (no limit)   | Exports whose files add up to more tokens fail.                                                                                               |
-| `allowedTargetModels` | non-empty array of globs, or `null` | `null` (any model)  | `--target-model` (or a template's/profile's model) must match one glob; `*` = any characters, `?` = one, case-insensitive.                    |
-| `ignoreFiles`         | array of file names, or `["all"]`   | `[]`                | Other tools' ignore files to honour, see [below](#ai-tool-ignore-files).                                                                      |
-| `audit.enabled`       | boolean                             | `true` with `audit` | Write the audit log.                                                                                                                          |
-| `audit.path`          | path                                | `.ctxman/audit.log` | Relative to the project root and inside it. Only the organisation file may use an absolute path (e.g. a central `/var/log/ctxman/audit.log`). |
+| Field                  | Type                                | Default             | Meaning                                                                                                                                       |
+| ---------------------- | ----------------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `version`              | `1`                                 | required            | Schema version.                                                                                                                               |
+| `compliancePreset`     | `"kvkk-bddk"`, `"soc2"` or `null`   | `null`              | Optional compliance preset identifier (`kvkk-bddk` or `soc2`).                                                                                |
+| `deny`                 | array of patterns                   | `[]`                | Files that are never analysed or exported, even with `--no-redact`, `.contextinclude`, a template or a profile that would include them.       |
+| `requireRedaction`     | boolean                             | `false`             | Secret redaction must stay on: `--no-redact` is refused. Method source in `--save-report -m` reports is redacted too.                         |
+| `redactPII`            | boolean                             | `false`             | Mask regulated PII (`tc-kimlik`, `tr-iban`, `tr-phone`, `credit-card`, `email`) alongside secrets.                                            |
+| `maxExportTokens`      | positive integer or `null`          | `null` (no limit)   | Exports whose files add up to more tokens fail.                                                                                               |
+| `allowedTargetModels`  | non-empty array of globs, or `null` | `null` (any model)  | `--target-model` (or a template's/profile's model) must match one glob; `*` = any characters, `?` = one, case-insensitive.                    |
+| `ignoreFiles`          | array of file names, or `["all"]`   | `[]`                | Other tools' ignore files to honour, see [below](#ai-tool-ignore-files).                                                                      |
+| `audit.enabled`        | boolean                             | `true` with `audit` | Write the audit log.                                                                                                                          |
+| `audit.path`           | path                                | `.ctxman/audit.log` | Relative to the project root and inside it. Only the organisation file may use an absolute path (e.g. a central `/var/log/ctxman/audit.log`). |
+| `sources.chat.enabled` | boolean                             | `false`             | Allow `ctxman why --chats` to search local AI-assistant chats via `keyflip`. Organisation `false` overrides project `true`.                   |
 
 Unknown fields are errors, so a typo such as `"denny"` is caught. `ctxman policy check`
 lists every problem with the file and the field:
@@ -235,6 +238,8 @@ failure only prints a warning: it never fails the export.
 - Refused exports are logged with `"outcome": "refused"`, `"sha256": null` and the
   `violations`.
 - `gitHead` is `null` outside a git repository.
+- `privateSources` (e.g. `["chat"]`) is recorded when a private local evidence source is included;
+  conversation text is never written to the audit log.
 
 ### `ctxman audit`
 
