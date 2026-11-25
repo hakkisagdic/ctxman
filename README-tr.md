@@ -319,7 +319,9 @@ yapılacak notlarını ve onu kullanan testleri toplar; sırlar maskelenir (`--j
 `renderCitations` programatik olarak dışa aktarılır; `--discussions` verildiğinde commit -> PR/MR ->
 satır içi inceleme yorumları ve kapanan issue'lar zincirini GitHub, GitHub Enterprise ve GitLab
 üzerinden `.ctxman/evidence/github.sqlite` içinde `ETag` önbelleğiyle toplar ve çevrimdışı/hız sınırı
-durumlarında önbellekten/kısmi yanıtla uyarı üretir). Unblocked gibi platformlar bunu kendi
+durumlarında önbellekten/kısmi yanıtla uyarı üretir; `--chats` ise `.ctxman/policy.json` içinde
+`sources.chat.enabled: true` açık olduğunda `keyflip` CLI üzerinden yerel yapay zekâ sohbet
+alıntılarını ekler ve MCP/REST üzerinden asla açılmaz). Unblocked gibi platformlar bunu kendi
 sunucularında Slack, Jira ve Confluence ile yanıtlar; ctxman makinenizde, git'in ve reponun
 bildiklerini kapsar. Ayrıntılar:
 [docs/commands/why.md](docs/commands/why.md).

@@ -46,6 +46,8 @@ Options:
       --patches             Include each commit's diff of the target
       --analyzer-db <path>  Query @plansmithai/analyzer SQLite DB for institutional citations
       --analyzer            Enable analyzer citations from .plansmith/analyzer.sqlite
+      --chats               Search local AI-assistant chats via keyflip (default off;
+                            requires policy sources.chat.enabled: true)
       --discussions         Fetch referenced GitHub/GitLab issue, PR and MR discussions
                             (uses GITHUB_TOKEN/GH_TOKEN, gh auth token, or GITLAB_TOKEN)
       --provider <name>     Remote provider override when hostname is generic (github|gitlab)
@@ -81,6 +83,7 @@ const OPTIONS = {
   patches: { type: 'boolean' },
   'analyzer-db': { type: 'string' },
   analyzer: { type: 'boolean' },
+  chats: { type: 'boolean' },
   discussions: { type: 'boolean' },
   provider: { type: 'string' },
   'max-discussions': { type: 'string' },
@@ -125,12 +128,14 @@ function summarize(result) {
       ? ''
       : ` (lines ${target.startLine}-${target.endLine})`;
   const references = Object.values(data.references).reduce((sum, list) => sum + list.length, 0);
+  const chatCitations = data.citations?.filter((item) => item.kind === 'chat').length ?? 0;
   const parts = [
     plural(data.history.commits.length, 'commit'),
     plural(references, 'reference'),
     ...(data.institutionalCitations?.length
       ? [plural(data.institutionalCitations.length, 'institutional citation')]
       : []),
+    ...(chatCitations ? [plural(chatCitations, 'chat citation')] : []),
     ...(data.discussions?.length ? [plural(data.discussions.length, 'discussion')] : []),
     plural(data.ownership?.authors.length ?? 0, 'author'),
     plural(data.coupling?.files.length ?? 0, 'co-changed file'),
@@ -198,6 +203,7 @@ async function main() {
       rev: values.rev,
       patches: values.patches,
       discussions: values.discussions,
+      chats: values.chats,
       provider: values.provider,
       analyzerDb: values['analyzer-db'],
       analyzer: values.analyzer,

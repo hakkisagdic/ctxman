@@ -2,6 +2,14 @@
 
 All notable changes to the Ctxman will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- **Local Chat Evidence Source via `keyflip` (`lib/evidence/sources/chat.js`, `ctxman why --chats`)**:
+  - **EN**: Added opt-in `createChatEvidenceSource` (`id: 'chat'`) and `ctxman why --chats` (disabled by default in both CLI and export policy) to cite local AI-assistant conversations through `keyflip conv search --json --limit N --no-subagents` with client-side `hit.cwd` repository filtering, secret redaction before 800-character truncation, `sources.chat.enabled` policy schema validation (organisation `false` overrides project `true`), `privateSources: ["chat"]` audit logging without conversation text, and strict exclusion from MCP `explain_history` and REST `/api/v1/why`.
+  - **TR**: Yerel yapay zekâ sohbet geçmişini `keyflip conv search --json --limit N --no-subagents` üzerinden okuyup depo kökü (`hit.cwd`) süzgeci ve 800 karakter sınırı öncesi sır maskelemesiyle `kind: "chat"` alıntılarına dönüştüren `createChatEvidenceSource` ve varsayılan kapalı `ctxman why --chats` seçeneği eklendi; `.ctxman/policy.json` ve `CTXMAN_POLICY` için `sources.chat.enabled` (kurum `false` ayarı proje `true` ayarını ezer), denetim kaydında metinsiz `privateSources: ["chat"]` işareti ve MCP/REST uçlarından tam yalıtım sağlandı.
+
 ## [3.4.0] - 2026-11-22
 
 ### Added

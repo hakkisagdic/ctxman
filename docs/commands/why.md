@@ -5,15 +5,17 @@ of lines looks the way it does, and renders it as one document for an LLM (or a 
 commits that shaped it with their full messages, the issues, pull requests and tickets they
 reference (and optionally their GitHub or GitLab discussions with `--discussions`), institutional
 memory citations from `@plansmithai/analyzer` SQLite databases (`--analyzer` / `--analyzer-db`),
+optional local AI-assistant chat citations via `keyflip` (`--chats`),
 who wrote which lines, the files that change together with it, the docs, ADRs, changelog entries
 and comments that mention it, TODO-style notes inside it and the tests that reference it. By
 default everything comes from the local git history, `.plansmith/analyzer.sqlite` (when present),
 and the working tree with no network access; passing `--discussions` opts into fetching referenced
-issue/PR/MR context.
+issue/PR/MR context, and passing `--chats` opts into local `keyflip` chat search when allowed by policy.
 
 ```bash
 ctxman why src/cart.js:total                                       # a function or method (offline)
 ctxman why src/cart.js:total --discussions                         # enrich referenced GitHub/GitLab issues & PRs
+ctxman why src/cart.js:total --chats                               # include local AI-assistant chats via keyflip
 ctxman why src/cart.js:total --analyzer-db .plansmith/analyzer.sqlite # attach institutional memory citations
 ctxman why src/cart.js#L40-L72 --patches                           # a line range, with each commit's diff
 ctxman why lib/server.js --since "1 year ago"                      # a whole file, following renames
@@ -104,54 +106,63 @@ Sections appear in this order; empty ones are left out.
    `@plansmithai/analyzer` SQLite `documents` table (`.plansmith/analyzer.sqlite` by default when
    present) for commits, pull requests, issues, Slack threads, Linear issues, and Jira tickets
    referencing the target file, symbol, or commit SHAs, with secret redaction applied.
-6. **Ownership** — `git blame -w` of the current lines (honouring `.git-blame-ignore-revs`
+6. **Local Chats** (`--chats`) — disabled by default in both the CLI and `.ctxman/policy.json`.
+   When opted in and allowed by `sources.chat.enabled: true`, searches local AI-assistant
+   conversations exclusively through the `keyflip` CLI (`conv search ... --json --limit N --no-subagents`),
+   filters hits client-side to the repository root (`hit.cwd`), redacts secrets before capping
+   excerpts at 800 characters, and emits `kind: "chat"` citations (`ref: "<id>#<chunk>"`). When
+   `keyflip` is absent from `PATH`, `--chats` degrades silently to identical output without `--chats`.
+   Conversation text is never cached to disk, never logged in audit files, and never exposed via
+   MCP `explain_history` or REST `GET /api/v1/why`.
+7. **Ownership** — `git blame -w` of the current lines (honouring `.git-blame-ignore-revs`
    when the project has one): lines, share, commits and last change per author. Uncommitted
    lines count as `(uncommitted)`.
-7. **Co-change coupling** — files that changed in the same commits as the target file, with
+8. **Co-change coupling** — files that changed in the same commits as the target file, with
    how often and the confidence (co-changes / changes of the target). The last 500 non-merge
    commits of the file are examined (`--coupling-window`); commits touching more than 50 files
    (formatting runs, mass renames, vendored updates) are skipped as noise. The file's own
    former names are not listed; files that no longer exist are marked. Top 10.
-8. **Related text** — lines of tracked files that mention the symbol (or the file name when
+9. **Related text** — lines of tracked files that mention the symbol (or the file name when
    the target is a file or a range; `cart/index.js` for generic names like `index.js`):
    ADRs (files under `adr/` or `decisions/`, or named like `adr-0003.md`) first, then changelogs, other docs
    (Markdown, AsciiDoc, reStructuredText, text) and code comments, each with the nearest
    heading. Mentions in code that are not comments are left out. At most 3 per file, 20 in all.
-9. **Notes in the target** — `TODO`, `FIXME`, `HACK`, `XXX` and `NOTE` comments inside the
-   range, with the author in `TODO(alice):` form.
-10. **Tests** — test files (`test/`, `__tests__/`, `*.test.*`, `*_test.go`, `test_*.py`,
+10. **Notes in the target** — `TODO`, `FIXME`, `HACK`, `XXX` and `NOTE` comments inside the
+    range, with the author in `TODO(alice):` form.
+11. **Tests** — test files (`test/`, `__tests__/`, `*.test.*`, `*_test.go`, `test_*.py`,
     `FooTest.java`, ...) that mention the symbol or the file, or import the module; up to 10,
     with up to 5 matching lines each.
-11. **Sources** — when evidence citations exist, a trailing `Sources:` list (Markdown) or
+12. **Sources** — when evidence citations exist, a trailing `Sources:` list (Markdown) or
     `<sources>` block (XML) resolving each inline `[n]` marker on commits, discussions, and
     comments to its uniform `Evidence` record.
-12. **Question** — `--ask`, last, with an instruction to cite commits, references and paths and
+13. **Question** — `--ask`, last, with an instruction to cite commits, references and paths and
     to say when the history does not explain something.
 
 ## Options
 
-| Option                 | Description                                                                |
-| ---------------------- | -------------------------------------------------------------------------- |
-| `--repo DIR`           | Add a repository to a multi-repo workspace (repeatable)                    |
-| `-n, --limit N`        | Commits to include (default 20)                                            |
-| `--since DATE`         | Only commits after DATE (`2024-01-01`, `"6 months ago"`)                   |
-| `--rev REF`            | Explain the code as of REF instead of the working tree                     |
-| `--patches`            | Include each commit's diff of the target                                   |
-| `--discussions`        | Fetch referenced GitHub/GitLab issue, PR and MR discussions and evidence   |
-| `--provider PROVIDER`  | Override remote provider (`github` or `gitlab`) for custom hostnames       |
-| `--max-discussions N`  | Maximum remote discussions to fetch (default 10)                           |
-| `--max-comments N`     | Maximum comments fetched per discussion (default 5)                        |
-| `--source-timeout MS`  | Per-source timeout in ms for evidence connectors (default 5000)            |
-| `--analyzer`           | Query `.plansmith/analyzer.sqlite` for institutional memory citations      |
-| `--analyzer-db <path>` | Explicit path to `@plansmithai/analyzer` SQLite database file or directory |
-| `--coupling-window N`  | Commits of the file examined for co-changes (default 500, `0` turns off)   |
-| `--budget TOKENS`      | Keep the output within TOKENS (`8000`, `8k`)                               |
-| `--style STYLE`        | `markdown` (default), `xml` or `json`; `--json` is short for json          |
-| `--ask "QUESTION"`     | Append a question at the end                                               |
-| `-o, --output FILE`    | Write to FILE instead of stdout                                            |
-| `--copy`               | Copy to the clipboard instead of stdout (falls back to stdout)             |
-| `--no-redact`          | Do not mask secrets                                                        |
-| `-h, --help`           | Show the help                                                              |
+| Option                 | Description                                                                  |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| `--repo DIR`           | Add a repository to a multi-repo workspace (repeatable)                      |
+| `-n, --limit N`        | Commits to include (default 20)                                              |
+| `--since DATE`         | Only commits after DATE (`2024-01-01`, `"6 months ago"`)                     |
+| `--rev REF`            | Explain the code as of REF instead of the working tree                       |
+| `--patches`            | Include each commit's diff of the target                                     |
+| `--chats`              | Search local AI-assistant chats via `keyflip` (default off; requires policy) |
+| `--discussions`        | Fetch referenced GitHub/GitLab issue, PR and MR discussions and evidence     |
+| `--provider PROVIDER`  | Override remote provider (`github` or `gitlab`) for custom hostnames         |
+| `--max-discussions N`  | Maximum remote discussions to fetch (default 10)                             |
+| `--max-comments N`     | Maximum comments fetched per discussion (default 5)                          |
+| `--source-timeout MS`  | Per-source timeout in ms for evidence connectors (default 5000)              |
+| `--analyzer`           | Query `.plansmith/analyzer.sqlite` for institutional memory citations        |
+| `--analyzer-db <path>` | Explicit path to `@plansmithai/analyzer` SQLite database file or directory   |
+| `--coupling-window N`  | Commits of the file examined for co-changes (default 500, `0` turns off)     |
+| `--budget TOKENS`      | Keep the output within TOKENS (`8000`, `8k`)                                 |
+| `--style STYLE`        | `markdown` (default), `xml` or `json`; `--json` is short for json            |
+| `--ask "QUESTION"`     | Append a question at the end                                                 |
+| `-o, --output FILE`    | Write to FILE instead of stdout                                              |
+| `--copy`               | Copy to the clipboard instead of stdout (falls back to stdout)               |
+| `--no-redact`          | Do not mask secrets                                                          |
+| `-h, --help`           | Show the help                                                                |
 
 Exit codes: `0` success, `1` the target cannot be explained (not a git repository, file
 outside the repository or not tracked, symbol not found, unknown revision, budget too small),
@@ -202,6 +213,7 @@ commit.
 import {
   explainHistory,
   queryAnalyzerCitations,
+  createChatEvidenceSource,
   normalizeEvidence,
   runSources,
   renderCitations,
@@ -212,6 +224,7 @@ const result = await explainHistory('/path/to/repo', 'src/cart.js:total', {
   since: '1 year ago',
   patches: true,
   discussions: true,
+  chats: false, // opt in when policy allows sources.chat.enabled: true
   maxDiscussions: 5,
   analyzer: true,
   analyzerDb: '/path/to/repo/.plansmith/analyzer.sqlite',

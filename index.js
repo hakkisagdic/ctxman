@@ -219,6 +219,7 @@ import {
   EvidenceHttpCache,
   createGitHubEvidenceSource,
   createGitLabEvidenceSource,
+  createChatEvidenceSource,
 } from './lib/evidence/index.js';
 
 // Work & session digests (`ctxman digest`)
@@ -477,6 +478,7 @@ export {
   EvidenceHttpCache,
   createGitHubEvidenceSource,
   createGitLabEvidenceSource,
+  createChatEvidenceSource,
 
   // Work & session digests (`ctxman digest`)
   writeDigest,

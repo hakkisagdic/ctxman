@@ -119,6 +119,23 @@ describe('audit log', () => {
       expect(record.sha256).toBe(crypto.createHash('sha256').update('abc').digest('hex'));
     });
 
+    it('records privateSources marker when provided and omits it otherwise', () => {
+      const policy = writePolicy({ version: 1, audit: { enabled: true } });
+
+      const plain = recordExport(policy, { command: 'why', destination: 'stdout', text: 'ok' });
+      expect('privateSources' in plain).toBe(false);
+
+      const withChat = recordExport(policy, {
+        command: 'why',
+        destination: 'stdout',
+        privateSources: ['chat', 'chat', ' '],
+        text: 'ok',
+      });
+      expect(withChat.privateSources).toEqual(['chat']);
+      const lines = logLines();
+      expect(lines[1].privateSources).toEqual(['chat']);
+    });
+
     it('writes nothing while audit is off', () => {
       const policy = writePolicy({ version: 1, deny: ['x'] });
 

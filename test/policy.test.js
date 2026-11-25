@@ -162,6 +162,19 @@ describe('export policy', () => {
       [{ version: 1, audit: { file: 'x' } }, 'audit.file', 'not an audit field'],
       [{ version: 1, audit: { path: '../audit.log' } }, 'audit.path', 'inside the project'],
       [{ version: 1, audit: { path: '/var/log/a.log' } }, 'audit.path', 'must be relative'],
+      [{ version: 1, sources: true }, 'sources', 'must be an object'],
+      [{ version: 1, sources: { other: {} } }, 'sources.other', 'not a sources field'],
+      [{ version: 1, sources: { chat: true } }, 'sources.chat', 'must be an object'],
+      [
+        { version: 1, sources: { chat: { foo: 1 } } },
+        'sources.chat.foo',
+        'not a sources.chat field',
+      ],
+      [
+        { version: 1, sources: { chat: { enabled: 'yes' } } },
+        'sources.chat.enabled',
+        'true or false',
+      ],
     ])('rejects %j (%s)', (doc, field, message) => {
       writeProjectPolicy(doc);
 
@@ -251,6 +264,30 @@ describe('export policy', () => {
       const file = writeProjectPolicy({ version: 1, deny: ['x'] });
 
       expect(load({ CTXMAN_POLICY: file }).sources).toEqual([{ scope: 'organisation', file }]);
+    });
+
+    it('defaults sources.chat.enabled to false and lets stricter false win across org and project', () => {
+      expect(load().isSourceEnabled('chat')).toBe(false);
+      expect(load().evidenceSources).toEqual({ chat: { enabled: false } });
+
+      writeProjectPolicy({ version: 1 });
+      expect(load().isSourceEnabled('chat')).toBe(false);
+
+      writeProjectPolicy({ version: 1, sources: { chat: { enabled: true } } });
+      expect(load().isSourceEnabled('chat')).toBe(true);
+      expect(load().toJSON().evidenceSources).toEqual({ chat: { enabled: true } });
+
+      const orgFalse = writeOrgPolicy({ version: 1, sources: { chat: { enabled: false } } });
+      expect(load({ CTXMAN_POLICY: orgFalse }).isSourceEnabled('chat')).toBe(false);
+
+      const orgTrue = writeOrgPolicy({ version: 1, sources: { chat: { enabled: true } } });
+      expect(load({ CTXMAN_POLICY: orgTrue }).isSourceEnabled('chat')).toBe(true);
+
+      writeProjectPolicy({ version: 1, sources: { chat: { enabled: false } } });
+      expect(load({ CTXMAN_POLICY: orgTrue }).isSourceEnabled('chat')).toBe(false);
+
+      writeProjectPolicy({ version: 1 });
+      expect(load({ CTXMAN_POLICY: orgTrue }).isSourceEnabled('chat')).toBe(true);
     });
   });
 
