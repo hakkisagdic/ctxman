@@ -321,7 +321,9 @@ satır içi inceleme yorumları ve kapanan issue'lar zincirini GitHub, GitHub En
 üzerinden `.ctxman/evidence/github.sqlite` içinde `ETag` önbelleğiyle toplar ve çevrimdışı/hız sınırı
 durumlarında önbellekten/kısmi yanıtla uyarı üretir; `--chats` ise `.ctxman/policy.json` içinde
 `sources.chat.enabled: true` açık olduğunda `keyflip` CLI üzerinden yerel yapay zekâ sohbet
-alıntılarını ekler ve MCP/REST üzerinden asla açılmaz). Unblocked gibi platformlar bunu kendi
+alıntılarını `linkChatToCode` ile dosya, sembol ve commit'lere bağlayarak ekler (varsayılan
+yalnızca güçlü bağlantılar; 24 saatlik zaman yakınlığı eşleşmeleri için `--chats-weak`;
+MCP/REST üzerinden asla açılmaz). Unblocked gibi platformlar bunu kendi
 sunucularında Slack, Jira ve Confluence ile yanıtlar; ctxman makinenizde, git'in ve reponun
 bildiklerini kapsar. Ayrıntılar:
 [docs/commands/why.md](docs/commands/why.md).

@@ -308,7 +308,9 @@ exported programmatically; opting into `--discussions` also resolves commits -> 
 review comments and closed issues across github.com, GitHub Enterprise and GitLab, cached with
 `ETag` in `.ctxman/evidence/github.sqlite` with offline/rate-limit fallback warnings; passing
 `--chats` opts into local AI-assistant chat citations via `keyflip` when `sources.chat.enabled`
-is `true` in `.ctxman/policy.json`, never exposed via MCP/REST). Platforms such
+is `true` in `.ctxman/policy.json`, linked to files, symbols and commits via `linkChatToCode`
+(strong links only by default; pass `--chats-weak` to include 24 h time-proximity matches; never
+exposed via MCP/REST). Platforms such
 as Unblocked answer this from Slack, Jira and Confluence
 on their servers; ctxman covers what git and the repository know, on your machine. Details:
 [docs/commands/why.md](docs/commands/why.md).
