@@ -306,7 +306,9 @@ with token counts, while Markdown/XML emit `[n]` markers plus a trailing `Source
 list and optional policy audit logging; `normalizeEvidence`, `runSources` and `renderCitations` are
 exported programmatically; opting into `--discussions` also resolves commits -> PRs/MRs -> inline
 review comments and closed issues across github.com, GitHub Enterprise and GitLab, cached with
-`ETag` in `.ctxman/evidence/github.sqlite` with offline/rate-limit fallback warnings). Platforms such
+`ETag` in `.ctxman/evidence/github.sqlite` with offline/rate-limit fallback warnings; passing
+`--chats` opts into local AI-assistant chat citations via `keyflip` when `sources.chat.enabled`
+is `true` in `.ctxman/policy.json`, never exposed via MCP/REST). Platforms such
 as Unblocked answer this from Slack, Jira and Confluence
 on their servers; ctxman covers what git and the repository know, on your machine. Details:
 [docs/commands/why.md](docs/commands/why.md).
