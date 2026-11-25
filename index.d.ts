@@ -1211,6 +1211,8 @@ export interface ExplainHistoryOptions {
   discussions?: boolean;
   /** Search local AI-assistant chats via keyflip (default false; requires policy) */
   chats?: boolean;
+  /** Include time-only chat matches within 24 h of a commit (implies chats; default false) */
+  chatsWeak?: boolean;
   /** Maximum remote discussions fetched (default 10) */
   maxDiscussions?: number;
   /** Maximum comments fetched per discussion (default 5) */
@@ -2937,6 +2939,14 @@ export function listDigests(options?: ListDigestsOptions | string): DigestListIt
 export type EvidenceKind =
   'commit' | 'pr' | 'review-comment' | 'issue' | 'chat' | 'decision' | 'doc' | 'ci-log' | 'code';
 
+export type EvidenceLinkType = 'path' | 'symbol' | 'sha' | 'time';
+
+export interface EvidenceLink {
+  type: EvidenceLinkType;
+  value: string;
+  confidence: number;
+}
+
 export interface Evidence {
   id: string;
   kind: EvidenceKind;
@@ -2950,6 +2960,7 @@ export interface Evidence {
   excerpt: string;
   score: number;
   tokens: number;
+  links?: EvidenceLink[];
 }
 
 export interface RawEvidenceInput {
@@ -2964,6 +2975,7 @@ export interface RawEvidenceInput {
   title?: string | null;
   excerpt?: string | null;
   score?: number;
+  links?: EvidenceLink[];
 }
 
 export interface EvidenceSearchOptions {
@@ -3126,7 +3138,38 @@ export interface ChatEvidenceSourceOptions {
   limit?: number;
   maxBuffer?: number;
   redactPII?: boolean;
+  link?: (
+    parts: RawEvidenceInput[],
+    context: { root: string; query: string; paths?: string[]; symbols?: string[] }
+  ) => RawEvidenceInput[] | Promise<RawEvidenceInput[]>;
   onWarning?: (message: string) => void;
 }
 
 export function createChatEvidenceSource(options?: ChatEvidenceSourceOptions): EvidenceSource;
+
+export interface LinkChatToCodeOptions {
+  repoRoot?: string;
+  files?: Iterable<string> | Map<string, unknown>;
+  symbols?: Array<
+    | string
+    | {
+        name?: string;
+        parent?: string;
+        file?: string;
+        kind?: string;
+        startLine?: number;
+        entry?: { relativePath?: string };
+        unit?: { name: string; parent?: string; kind?: string; startLine?: number };
+      }
+  >;
+  commits?: Array<
+    string | { sha: string; shortSha?: string; date?: string; timestamp?: string | number | Date }
+  >;
+  gitCatFile?: (sha: string) => boolean | Promise<boolean>;
+  env?: NodeJS.ProcessEnv;
+}
+
+export function linkChatToCode<T extends Record<string, unknown>>(
+  parts: T[],
+  options?: LinkChatToCodeOptions
+): Promise<Array<T & { links: EvidenceLink[] }>>;

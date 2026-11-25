@@ -106,11 +106,14 @@ Sections appear in this order; empty ones are left out.
    `@plansmithai/analyzer` SQLite `documents` table (`.plansmith/analyzer.sqlite` by default when
    present) for commits, pull requests, issues, Slack threads, Linear issues, and Jira tickets
    referencing the target file, symbol, or commit SHAs, with secret redaction applied.
-6. **Local Chats** (`--chats`) — disabled by default in both the CLI and `.ctxman/policy.json`.
+6. **Local Chats** (`--chats`, `--chats-weak`) — disabled by default in both the CLI and `.ctxman/policy.json`.
    When opted in and allowed by `sources.chat.enabled: true`, searches local AI-assistant
    conversations exclusively through the `keyflip` CLI (`conv search ... --json --limit N --no-subagents`),
    filters hits client-side to the repository root (`hit.cwd`), redacts secrets before capping
-   excerpts at 800 characters, and emits `kind: "chat"` citations (`ref: "<id>#<chunk>"`). When
+   excerpts at 800 characters, and emits `kind: "chat"` citations (`ref: "<id>#<chunk>"`) with
+   attached `links[]` (`path`, `symbol`, `sha`, `time`) from `linkChatToCode`. By default `--chats`
+   keeps only parts with strong links (`path`, `symbol`, `sha`) to the target; `--chats-weak`
+   implies `--chats` and also retains time-only matches within 24 hours of a commit. When
    `keyflip` is absent from `PATH`, `--chats` degrades silently to identical output without `--chats`.
    Conversation text is never cached to disk, never logged in audit files, and never exposed via
    MCP `explain_history` or REST `GET /api/v1/why`.
@@ -127,8 +130,9 @@ Sections appear in this order; empty ones are left out.
    ADRs (files under `adr/` or `decisions/`, or named like `adr-0003.md`) first, then changelogs, other docs
    (Markdown, AsciiDoc, reStructuredText, text) and code comments, each with the nearest
    heading. Mentions in code that are not comments are left out. At most 3 per file, 20 in all.
-10. **Notes in the target** — `TODO`, `FIXME`, `HACK`, `XXX` and `NOTE` comments inside the
-    range, with the author in `TODO(alice):` form.
+10. **Notes in the target** — task-marker comments (the usual upper-case markers and `NOTE`)
+    inside the range, with an optional author in parentheses after the marker (e.g.
+    `marker(alice):`).
 11. **Tests** — test files (`test/`, `__tests__/`, `*.test.*`, `*_test.go`, `test_*.py`,
     `FooTest.java`, ...) that mention the symbol or the file, or import the module; up to 10,
     with up to 5 matching lines each.
@@ -148,6 +152,7 @@ Sections appear in this order; empty ones are left out.
 | `--rev REF`            | Explain the code as of REF instead of the working tree                       |
 | `--patches`            | Include each commit's diff of the target                                     |
 | `--chats`              | Search local AI-assistant chats via `keyflip` (default off; requires policy) |
+| `--chats-weak`         | Include time-only chat matches within 24 h of a commit (implies `--chats`)   |
 | `--discussions`        | Fetch referenced GitHub/GitLab issue, PR and MR discussions and evidence     |
 | `--provider PROVIDER`  | Override remote provider (`github` or `gitlab`) for custom hostnames         |
 | `--max-discussions N`  | Maximum remote discussions to fetch (default 10)                             |
@@ -214,6 +219,7 @@ import {
   explainHistory,
   queryAnalyzerCitations,
   createChatEvidenceSource,
+  linkChatToCode,
   normalizeEvidence,
   runSources,
   renderCitations,
@@ -225,6 +231,7 @@ const result = await explainHistory('/path/to/repo', 'src/cart.js:total', {
   patches: true,
   discussions: true,
   chats: false, // opt in when policy allows sources.chat.enabled: true
+  chatsWeak: false, // opt in to include 24 h time-proximity matches
   maxDiscussions: 5,
   analyzer: true,
   analyzerDb: '/path/to/repo/.plansmith/analyzer.sqlite',

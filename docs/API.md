@@ -637,6 +637,23 @@ The API does not implement rate limiting by default. For production use, conside
 2. Using the `--auth-token` option
 3. Implementing rate limiting at the infrastructure level
 
+## Chat Evidence & Linking (CLI-only)
+
+The programmatic library exports `createChatEvidenceSource` and `linkChatToCode` (`lib/evidence/chat-linker.js`) to link normalized chat evidence parts to repository files (`path`), indexed symbols (`symbol`), verified commits (`sha`), and 24-hour commit proximity (`time`):
+
+```javascript
+import { createChatEvidenceSource, linkChatToCode } from 'ctxman';
+
+const linked = await linkChatToCode(parts, {
+  repoRoot: '/path/to/repo',
+  files: ['src/cart.js'],
+  symbols: [{ name: 'total', file: 'src/cart.js' }],
+  commits: [{ sha: 'abc1234...', date: '2026-11-15T10:00:00Z' }],
+});
+```
+
+Local chat evidence is strictly CLI-only (`ctxman why --chats` / `--chats-weak` with policy `sources.chat.enabled: true`) and is always disabled on REST `/api/v1/why` and MCP `explain_history`.
+
 ## WebSocket Support
 
 WebSocket support for real-time updates is planned for a future release. Currently, use polling or watch mode CLI for real-time analysis.

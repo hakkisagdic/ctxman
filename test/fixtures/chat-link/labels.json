@@ -1,0 +1,28 @@
+{
+  "chat:part-01#0": [{ "type": "path", "value": "src/billing/invoice.js" }],
+  "chat:part-02#0": [{ "type": "path", "value": "src/billing/invoice.js" }],
+  "chat:part-03#0": [{ "type": "path", "value": "lib/why/index.js" }],
+  "chat:part-04#0": [{ "type": "path", "value": "src/billing/util.js" }],
+  "chat:part-05#0": [{ "type": "path", "value": "src/shipping/util.js" }],
+  "chat:part-06#0": [],
+  "chat:part-07#0": [],
+  "chat:part-08#0": [],
+  "chat:part-09#0": [{ "type": "symbol", "value": "calculateInvoiceTotal" }],
+  "chat:part-10#0": [{ "type": "symbol", "value": "InvoiceLedger.recordEntry" }],
+  "chat:part-11#0": [{ "type": "symbol", "value": "applyTaxCap" }],
+  "chat:part-12#0": [
+    { "type": "path", "value": "src/shipping/router.js" },
+    { "type": "symbol", "value": "selectCarrierRoute" }
+  ],
+  "chat:part-13#0": [],
+  "chat:part-14#0": [{ "type": "sha", "value": "{{c3.sha}}" }],
+  "chat:part-15#0": [
+    { "type": "path", "value": "src/billing/invoice.js" },
+    { "type": "sha", "value": "{{c1.sha}}" }
+  ],
+  "chat:part-16#0": [],
+  "chat:part-17#0": [{ "type": "time", "value": "{{c5.sha}}" }],
+  "chat:part-18#0": [{ "type": "time", "value": "{{c5.sha}}" }],
+  "chat:part-19#0": [],
+  "chat:part-20#0": []
+}
