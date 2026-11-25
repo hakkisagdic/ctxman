@@ -1209,6 +1209,8 @@ export interface ExplainHistoryOptions {
   patches?: boolean;
   /** Fetch referenced GitHub/GitLab issue, PR and MR discussions (default false) */
   discussions?: boolean;
+  /** Search local AI-assistant chats via keyflip (default false; requires policy) */
+  chats?: boolean;
   /** Maximum remote discussions fetched (default 10) */
   maxDiscussions?: number;
   /** Maximum comments fetched per discussion (default 5) */
@@ -1895,9 +1897,11 @@ export class Policy {
   allowedModels: string[] | null;
   ignoreFiles: string[];
   audit: { enabled: boolean; path: string };
+  evidenceSources: { chat: { enabled: boolean } };
   sources: Array<{ scope: string; file: string }>;
   isDenied(relativePath: string): boolean;
   isAuditLog(relativePath: string): boolean;
+  isSourceEnabled(name: string): boolean;
   toJSON(): Record<string, unknown>;
 }
 
@@ -3112,3 +3116,17 @@ export class EvidenceHttpCache {
 export function createGitHubEvidenceSource(options?: GitHubEvidenceSourceOptions): EvidenceSource;
 
 export function createGitLabEvidenceSource(options?: GitLabEvidenceSourceOptions): EvidenceSource;
+
+export interface ChatEvidenceSourceOptions {
+  root?: string;
+  bin?: string;
+  timeoutMs?: number;
+  execFile?: (...args: unknown[]) => unknown;
+  env?: NodeJS.ProcessEnv;
+  limit?: number;
+  maxBuffer?: number;
+  redactPII?: boolean;
+  onWarning?: (message: string) => void;
+}
+
+export function createChatEvidenceSource(options?: ChatEvidenceSourceOptions): EvidenceSource;
