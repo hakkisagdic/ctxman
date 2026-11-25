@@ -130,9 +130,9 @@ const args = process.argv.slice(2);
 const markerFile = ${JSON.stringify(markerFile || '')};
 ${markerBlock}if (args[0] === 'conv' && args[1] === 'capabilities') {
   process.stdout.write(JSON.stringify({ schemaVersion: 1, capabilities: ['search'] }) + '\\n');
-  process.exit(0);
+} else {
+  process.stdout.write(fs.readFileSync(${JSON.stringify(payloadPath)}, 'utf8'));
 }
-process.stdout.write(fs.readFileSync(${JSON.stringify(payloadPath)}, 'utf8'));
 `;
   fs.writeFileSync(scriptPath, script, { mode: 0o755 });
   return scriptPath;

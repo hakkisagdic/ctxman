@@ -130,8 +130,9 @@ Sections appear in this order; empty ones are left out.
    ADRs (files under `adr/` or `decisions/`, or named like `adr-0003.md`) first, then changelogs, other docs
    (Markdown, AsciiDoc, reStructuredText, text) and code comments, each with the nearest
    heading. Mentions in code that are not comments are left out. At most 3 per file, 20 in all.
-10. **Notes in the target** — `TODO`, `FIXME`, `HACK`, `XXX` and `NOTE` comments inside the
-    range, with the author in `TODO(alice):` form.
+10. **Notes in the target** — task-marker comments (the usual upper-case markers and `NOTE`)
+    inside the range, with an optional author in parentheses after the marker (e.g.
+    `marker(alice):`).
 11. **Tests** — test files (`test/`, `__tests__/`, `*.test.*`, `*_test.go`, `test_*.py`,
     `FooTest.java`, ...) that mention the symbol or the file, or import the module; up to 10,
     with up to 5 matching lines each.
