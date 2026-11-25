@@ -105,3 +105,6 @@ agent-mail/*.md
 .polyctl/lanes/
 .kiro/settings/mcp.json
 .mcp.json
+.polyctl/project-key
+.polyctl/ledger/*.lock
+.polyctl/mail/
