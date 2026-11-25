@@ -220,6 +220,7 @@ import {
   createGitHubEvidenceSource,
   createGitLabEvidenceSource,
   createChatEvidenceSource,
+  linkChatToCode,
 } from './lib/evidence/index.js';
 
 // Work & session digests (`ctxman digest`)
@@ -479,6 +480,7 @@ export {
   createGitHubEvidenceSource,
   createGitLabEvidenceSource,
   createChatEvidenceSource,
+  linkChatToCode,
 
   // Work & session digests (`ctxman digest`)
   writeDigest,
