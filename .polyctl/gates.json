@@ -1,0 +1,34 @@
+{
+  "gates": {
+    "lint": {
+      "run": "npm run lint",
+      "expect": "exit_zero",
+      "timeout": 600,
+      "inputs": ["**"]
+    },
+    "test": {
+      "run": "npm run test",
+      "expect": "exit_zero",
+      "timeout": 2400,
+      "serialise": true,
+      "inputs": ["**"]
+    },
+    "desktop-app-test": {
+      "run": "cd desktop-app && npm run test",
+      "expect": "exit_zero",
+      "timeout": 2400,
+      "serialise": true,
+      "inputs": ["desktop-app/**"]
+    },
+    "diff-check": {
+      "run": "git diff --check",
+      "expect": "exit_zero",
+      "timeout": 60
+    }
+  },
+  "profiles": {
+    "quick": ["lint", "diff-check"],
+    "full": ["lint", "test", "desktop-app-test", "diff-check"]
+  },
+  "default_profile": "quick"
+}
