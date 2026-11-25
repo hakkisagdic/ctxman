@@ -1,0 +1,222 @@
+[
+  {
+    "id": "chat:part-01#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-01#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "assistant",
+    "title": "Invoice integer cents",
+    "excerpt": "Updated src/billing/invoice.js to preserve integer cents across lines.",
+    "score": 0.9
+  },
+  {
+    "id": "chat:part-02#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-02#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "user",
+    "title": "Ledger schema check",
+    "excerpt": "Check invoice.js before changing the ledger schema.",
+    "score": 0.85
+  },
+  {
+    "id": "chat:part-03#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-03#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "assistant",
+    "title": "Windows stack trace",
+    "excerpt": "On Windows the trace pointed to lib\\why\\index.js during evaluation.",
+    "score": 0.88
+  },
+  {
+    "id": "chat:part-04#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-04#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "assistant",
+    "title": "Billing rounding helper",
+    "excerpt": "Keep rounding inside src/billing/util.js rather than shipping.",
+    "score": 0.87
+  },
+  {
+    "id": "chat:part-05#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-05#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "user",
+    "title": "Shipping weight formatter",
+    "excerpt": "Parcel formatting belongs in src/shipping/util.js.",
+    "score": 0.86
+  },
+  {
+    "id": "chat:part-06#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-06#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "user",
+    "title": "Ambiguous basename note",
+    "excerpt": "We discussed util.js briefly without specifying which folder.",
+    "score": 0.7
+  },
+  {
+    "id": "chat:part-07#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-07#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "assistant",
+    "title": "Removed legacy module",
+    "excerpt": "Older rate logic lived in src/legacy/deprecated.js before cleanup.",
+    "score": 0.65
+  },
+  {
+    "id": "chat:part-08#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-08#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "user",
+    "title": "Nonexistent path mention",
+    "excerpt": "Maybe there is a helper in src/billing/ghost.js somewhere.",
+    "score": 0.6
+  },
+  {
+    "id": "chat:part-09#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-09#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "assistant",
+    "title": "Summing line items",
+    "excerpt": "Look at calculateInvoiceTotal when summing line items.",
+    "score": 0.91
+  },
+  {
+    "id": "chat:part-10#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-10#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "assistant",
+    "title": "Recording ledger entries",
+    "excerpt": "The InvoiceLedger.recordEntry method stores each cent amount.",
+    "score": 0.89
+  },
+  {
+    "id": "chat:part-11#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-11#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "user",
+    "title": "Ceiling enforcement",
+    "excerpt": "We enforce the ceiling via `applyTaxCap`() on subtotal.",
+    "score": 0.84
+  },
+  {
+    "id": "chat:part-12#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-12#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "assistant",
+    "title": "Carrier routing decision",
+    "excerpt": "Dispatch uses selectCarrierRoute inside src/shipping/router.js.",
+    "score": 0.92
+  },
+  {
+    "id": "chat:part-13#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-13#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "user",
+    "title": "Missing discount helper",
+    "excerpt": "Do not call computeImaginaryDiscount() because it does not exist.",
+    "score": 0.5
+  },
+  {
+    "id": "chat:part-14#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-14#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "assistant",
+    "title": "Tax cap commit",
+    "excerpt": "Commit {{c3.shortSha}} introduced the ceiling rule.",
+    "score": 0.83
+  },
+  {
+    "id": "chat:part-15#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-15#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "assistant",
+    "title": "Initial setup reference",
+    "excerpt": "Initial setup in {{c1.sha}} touched src/billing/invoice.js.",
+    "score": 0.93
+  },
+  {
+    "id": "chat:part-16#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-16#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "user",
+    "title": "Unknown hex identifiers",
+    "excerpt": "Seen deadbee and 0123456789abcdef0123456789abcdef01234567 in debug output.",
+    "score": 0.45
+  },
+  {
+    "id": "chat:part-17#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-17#0",
+    "timestamp": "2026-10-20T15:00:00Z",
+    "author": "user",
+    "title": "Afternoon planning note",
+    "excerpt": "Afternoon planning note about carrier zones and latency.",
+    "score": 0.55
+  },
+  {
+    "id": "chat:part-18#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-18#0",
+    "timestamp": "2026-10-21T11:59:00Z",
+    "author": "assistant",
+    "title": "Late review note",
+    "excerpt": "Late review note right before the twenty-four hour mark.",
+    "score": 0.52
+  },
+  {
+    "id": "chat:part-19#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-19#0",
+    "timestamp": "2026-10-21T12:01:00Z",
+    "author": "assistant",
+    "title": "Post-cutoff note",
+    "excerpt": "Follow-up note right after the twenty-four hour cutoff.",
+    "score": 0.51
+  },
+  {
+    "id": "chat:part-20#0",
+    "kind": "chat",
+    "source": "keyflip",
+    "ref": "part-20#0",
+    "timestamp": "2026-11-10T10:00:00Z",
+    "author": "user",
+    "title": "General queue discussion",
+    "excerpt": "General architecture discussion about queue throughput and backups.",
+    "score": 0.4
+  }
+]
