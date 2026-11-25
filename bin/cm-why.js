@@ -48,6 +48,8 @@ Options:
       --analyzer            Enable analyzer citations from .plansmith/analyzer.sqlite
       --chats               Search local AI-assistant chats via keyflip (default off;
                             requires policy sources.chat.enabled: true)
+      --chats-weak          Include time-only chat matches within 24 h of a commit
+                            (implies --chats; requires policy sources.chat.enabled: true)
       --discussions         Fetch referenced GitHub/GitLab issue, PR and MR discussions
                             (uses GITHUB_TOKEN/GH_TOKEN, gh auth token, or GITLAB_TOKEN)
       --provider <name>     Remote provider override when hostname is generic (github|gitlab)
@@ -84,6 +86,7 @@ const OPTIONS = {
   'analyzer-db': { type: 'string' },
   analyzer: { type: 'boolean' },
   chats: { type: 'boolean' },
+  'chats-weak': { type: 'boolean' },
   discussions: { type: 'boolean' },
   provider: { type: 'string' },
   'max-discussions': { type: 'string' },
@@ -204,6 +207,7 @@ async function main() {
       patches: values.patches,
       discussions: values.discussions,
       chats: values.chats,
+      chatsWeak: values['chats-weak'],
       provider: values.provider,
       analyzerDb: values['analyzer-db'],
       analyzer: values.analyzer,
